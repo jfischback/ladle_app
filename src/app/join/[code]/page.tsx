@@ -9,7 +9,7 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
   const { code } = await params;
   const me = await currentAccount();
   const db = await getDb();
-  const [inv] = await db.select().from(householdInvites).where(and(eq(householdInvites.code, code), isNull(householdInvites.usedAt), gt(householdInvites.expiresAt, new Date())));
+  const [inv] = await db.select().from(householdInvites).where(and(eq(householdInvites.code, code), eq(householdInvites.kind, "join"), isNull(householdInvites.usedAt), gt(householdInvites.expiresAt, new Date())));
   const [from] = inv ? await db.select({ name: users.name, email: users.email }).from(users).where(eq(users.id, inv.createdBy)) : [];
   const who = from ? from.name || (from.email === GUEST_EMAIL ? "someone" : from.email) : "someone";
   return (

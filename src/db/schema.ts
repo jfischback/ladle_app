@@ -27,6 +27,8 @@ export const householdInvites = pgTable("household_invites", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   usedBy: uuid("used_by"),
   usedAt: timestamp("used_at", { withTimezone: true }),
+  // "join": share this household. "family": create a new account with its own household (for invite-only sign-up).
+  kind: text("kind").$type<"join" | "family">().notNull().default("join"),
 });
 
 export const settings = pgTable("settings", {

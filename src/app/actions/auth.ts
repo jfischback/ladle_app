@@ -8,6 +8,7 @@ import { claimSharedDataIfFirst, signIn, signOut } from "@/auth";
 import { getDb } from "@/db";
 import { users } from "@/db/schema";
 import { TOO_MANY, clientAddress, under } from "@/lib/rate-limit";
+import { INVITE_ONLY_MESSAGE, mayCreateAccount, markFamilyInviteUsed } from "@/lib/signup-policy";
 
 export type FormState = { error?: string } | undefined;
 
@@ -21,6 +22,11 @@ export async function signup(_: FormState, form: FormData): Promise<FormState> {
   const parsed = SignupSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   if (!(await under("signupPerAddress", await clientAddress()))) return { error: TOO_MANY };
+  // Invite-only mode: a "new family" invite, a "join my household" link, or the very first account.
+  const next = String(form.get("next") ?? "");
+  const familyInvite = String(form.get("invite") ?? "");
+  const joinCode = next.match(/^\/join\/([A-Za-z0-9_-]+)$/)?.[1];
+  if (!(await mayCreateAccount({ familyInvite, joinCode }))) return { error: INVITE_ONLY_MESSAGE };
   const db = await getDb();
   const { email, password, name } = parsed.data;
   const [existing] = await db.select().from(users).where(eq(users.email, email));
@@ -28,8 +34,8 @@ export async function signup(_: FormState, form: FormData): Promise<FormState> {
   const [row] = await db.insert(users).values({ email, name: name || null, passwordHash: await bcrypt.hash(password, 10) }).returning();
   // The first account keeps everything set up while login was off; everyone else starts fresh.
   const claimed = await claimSharedDataIfFirst(row.id);
+  if (familyInvite) await markFamilyInviteUsed(familyInvite, row.id);
   // Joining someone's household from an invite link: go back to it after signing up.
-  const next = String(form.get("next") ?? "");
   const redirectTo = /^\/join\/[A-Za-z0-9_-]+$/.test(next) ? next : claimed ? "/" : "/setup";
   await signIn("credentials", { email, password, redirectTo });
 }

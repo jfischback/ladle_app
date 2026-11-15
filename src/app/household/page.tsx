@@ -15,7 +15,7 @@ export default async function HouseholdPage() {
         .where(and(or(eq(users.householdId, me.householdId), eq(users.id, me.householdId)), ne(users.email, GUEST_EMAIL)))
     : [];
   const invites = loginRequired
-    ? await db.select({ code: householdInvites.code, expiresAt: householdInvites.expiresAt }).from(householdInvites)
+    ? await db.select({ code: householdInvites.code, expiresAt: householdInvites.expiresAt, kind: householdInvites.kind }).from(householdInvites)
         .where(and(eq(householdInvites.householdId, me.householdId), isNull(householdInvites.usedAt), gt(householdInvites.expiresAt, new Date())))
     : [];
   return (
@@ -32,7 +32,7 @@ export default async function HouseholdPage() {
         <HouseholdClient
           me={me.accountId}
           members={members.map((m) => ({ id: m.id, label: m.name || m.email, email: m.email, owner: m.owner || !m.householdId }))}
-          invites={invites.map((i) => ({ code: i.code, expires: i.expiresAt.toISOString() }))}
+          invites={invites.map((i) => ({ code: i.code, expires: i.expiresAt.toISOString(), kind: i.kind }))}
           canLeave={!me.isOwner}
         />
       )}
