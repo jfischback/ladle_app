@@ -12,6 +12,7 @@ import { FoodArt } from "@/components/FoodArt";
 import { IngredientList } from "./IngredientList";
 import { CookMode } from "./CookMode";
 import { RecipeNotes } from "./RecipeNotes";
+import { ShareRecipe } from "./ShareRecipe";
 import { estimateCost, estimateNutrition, estimateSodium, trustworthy } from "@/lib/nutrition";
 
 export default async function RecipePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cook?: string }> }) {
@@ -113,7 +114,10 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
       )}
 
       <section>
-        <h2 className="mb-3 text-2xl font-semibold">Ingredients</h2>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-2xl font-semibold">Ingredients</h2>
+          <ShareRecipe recipe={{ id: r.id, name: r.name, servings: r.servings, totalMinutes: r.totalMinutes, ingredients: r.ingredients, steps: r.steps, creditName: r.creditName, creditUrl: r.creditUrl }} />
+        </div>
         {r.ingredients.length ? <IngredientList recipeId={r.id} ingredients={r.ingredients} servings={r.servings} /> : <p className="text-muted">No ingredients yet.</p>}
       </section>
 
