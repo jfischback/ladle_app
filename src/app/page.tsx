@@ -13,6 +13,7 @@ import { extrasTotal } from "@/lib/extras";
 import { krogerEnabled } from "@/lib/kroger";
 import { ruleProblems } from "@/lib/diet";
 import { storeBrand } from "@/lib/stores";
+import { pickyTips } from "@/lib/picky";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { AthleteWeekCard } from "@/components/AthleteWeekCard";
 
@@ -54,6 +55,11 @@ export default async function HomePage() {
   const approved = plan?.status === "approved";
   const dinners = plan?.days.filter((d) => d.recipeId).length ?? 0;
   const athletes = plan ? await athleteWeeks(userId, plan, settings) : [];
+  // Picky eaters: a tip for each dinner with something they won't eat.
+  const pickyFor = (d: { recipeId: string | null; date: string; leftoverOf?: string | null }) => {
+    const r = d.recipeId && !d.leftoverOf ? recipes.find((x) => x.id === d.recipeId) : null;
+    return r && settings.pickyEaters.length ? pickyTips(r, settings.pickyEaters, Number(d.date.slice(8))).map((t) => t.tip) : [];
+  };
 
   return (
     <div className="space-y-6">
@@ -79,7 +85,7 @@ export default async function HomePage() {
       ))}
 
       {toRate.map(({ plan: p, d, i }) => (
-        <RatePrompt key={`${p.id}-${i}`} planId={p.id} dayIndex={i} recipeName={d.recipeName ?? ""} label={`How did everyone like ${dayName(d.date)}'s ${d.recipeName}?`} />
+        <RatePrompt key={`${p.id}-${i}`} planId={p.id} dayIndex={i} recipeName={d.recipeName ?? ""} kids={settings.pickyEaters.map((k) => ({ id: k.id, name: k.name }))} label={`How did everyone like ${dayName(d.date)}'s ${d.recipeName}?`} />
       ))}
 
       {plan?.summary && plan.plannerSource !== "basic" && <WhyThisWeek summary={plan.summary} />}
@@ -105,6 +111,7 @@ export default async function HomePage() {
                   isToday={d.date === todayStr}
                   locked={approved}
                   recipes={recipeInfo}
+                  picky={pickyFor(d)}
                   plates={settings.tightBudget ? Math.max(1, settings.adults + settings.kids * 0.7) : undefined}
                 />
               </li>

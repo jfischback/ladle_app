@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { lookupStores, saveSettings } from "@/app/actions/settings";
 import { addRecipePack } from "@/app/actions/recipes";
+import { SAFE_FOOD_IDEAS, WONT_EAT_IDEAS, type PickyEater } from "@/lib/picky";
 import { DAY_NAMES, MOTIVATIONS, type Motivation, type Settings } from "@/lib/settings";
 import { FOOD_RULES, FOOD_RULE_GROUPS, parseDislikes, type FoodRule } from "@/lib/diet";
 import type { StoreLocation } from "@/lib/kroger";
@@ -94,6 +95,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
                 </select>
               </div>
             )}
+            <PickySection s={s} set={set} />
             <LunchSection s={s} set={set} />
           </div>
         )}
@@ -326,6 +328,58 @@ function Counter({ label, value, min, max, onChange }: { label: string; value: n
         <button type="button" aria-label={`More ${label.toLowerCase()}`} className="btn-secondary h-11 w-11 p-0 text-2xl" disabled={value >= max} onClick={() => onChange(value + 1)}>+</button>
       </div>
     </div>
+  );
+}
+
+/** Picky eaters: their own won't-eat list and safe foods. Not food rules: dinners can still have these, with tips. */
+function PickySection({ s, set }: { s: Settings; set: <K extends keyof Settings>(k: K, v: Settings[K]) => void }) {
+  const list = s.pickyEaters ?? [];
+  const update = (id: string, patch: Partial<PickyEater>) => set("pickyEaters", list.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  const add = () => set("pickyEaters", [...list, { id: Math.random().toString(36).slice(2, 10), name: "", wontEat: [], safeFoods: [] }]);
+  return (
+    <section className="space-y-3 rounded-3xl border-2 border-line p-4">
+      <div>
+        <h3 className="text-lg font-semibold">🧒 Picky eaters</h3>
+        <p className="text-sm text-muted">Not allergies, just &ldquo;won&apos;t touch it.&rdquo; We still plan family dinners, with tips like &ldquo;set aside a plain portion for Ava before the sauce,&rdquo; and we learn which dinners they actually eat.</p>
+      </div>
+      {list.map((p) => (
+        <div key={p.id} className="space-y-3 rounded-2xl bg-cream/70 p-3">
+          <div className="flex items-end gap-2">
+            <label className="min-w-0 flex-1">
+              <span className="label">Name</span>
+              <input className="field" maxLength={40} value={p.name} placeholder="e.g. Ava" onChange={(e) => update(p.id, { name: e.target.value })} />
+            </label>
+            <button type="button" className="btn-quiet min-h-11 px-3 text-sm" onClick={() => set("pickyEaters", list.filter((x) => x.id !== p.id))}>Remove</button>
+          </div>
+          <ChipPicker label="Won't eat" ideas={WONT_EAT_IDEAS} value={p.wontEat} onChange={(v) => update(p.id, { wontEat: v })} tone="warm" />
+          <ChipPicker label="Always eats (safe foods)" ideas={SAFE_FOOD_IDEAS} value={p.safeFoods} onChange={(v) => update(p.id, { safeFoods: v })} tone="olive" />
+        </div>
+      ))}
+      <button type="button" className="btn-secondary min-h-10 px-4 text-sm" onClick={add}>+ Add a picky eater</button>
+    </section>
+  );
+}
+
+function ChipPicker({ label, ideas, value, onChange, tone }: { label: string; ideas: string[]; value: string[]; onChange: (v: string[]) => void; tone: "warm" | "olive" }) {
+  const [text, setText] = useState("");
+  const all = [...new Set([...ideas, ...value])];
+  const on = (w: string) => value.includes(w);
+  const toggle = (w: string) => onChange(on(w) ? value.filter((x) => x !== w) : [...value, w]);
+  const addTyped = () => { const w = text.trim().toLowerCase(); if (w.length >= 2 && !on(w)) onChange([...value, w]); setText(""); };
+  return (
+    <fieldset>
+      <legend className="label">{label}</legend>
+      <div className="flex flex-wrap gap-1.5">
+        {all.map((w) => (
+          <button key={w} type="button" aria-pressed={on(w)} onClick={() => toggle(w)}
+            className={`rounded-full border-2 px-3 py-1 text-sm font-bold transition-colors ${on(w) ? (tone === "warm" ? "border-terracotta bg-terracotta text-cream" : "border-olive bg-olive text-cream") : "border-line bg-card text-ink"}`}>{w}</button>
+        ))}
+      </div>
+      <div className="mt-2 flex gap-2">
+        <input className="field min-h-10 py-1" placeholder="Add your own" value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTyped(); } }} />
+        <button type="button" className="btn-secondary min-h-10 shrink-0 px-3 text-sm" onClick={addTyped}>Add</button>
+      </div>
+    </fieldset>
   );
 }
 

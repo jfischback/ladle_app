@@ -1,5 +1,6 @@
 import type { FoodRule } from "./diet";
 import type { Athlete } from "./athletes";
+import type { PickyEater } from "./picky";
 import type { ExtraCategory, ExtrasRule, Staple } from "./types";
 
 export const MOTIVATIONS = {
@@ -18,6 +19,7 @@ export type Settings = {
   adults: number;
   kids: number;
   hasBaby: boolean;
+  pickyEaters: PickyEater[]; // kids (or grown-ups) with their own won't-eat list and safe foods
   babyAgeMonths: number | null;
   // Q2 Store
   zip: string;
@@ -73,6 +75,7 @@ export const DEFAULT_SETTINGS: Settings = {
   adults: 2,
   kids: 0,
   hasBaby: false,
+  pickyEaters: [],
   babyAgeMonths: null,
   zip: "",
   storeLocationId: null,

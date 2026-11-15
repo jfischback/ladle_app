@@ -41,8 +41,8 @@ export function PlanButton({ label, big }: { label: string; big?: boolean }) {
   );
 }
 
-export function DayCard({ planId, index, day, isToday, locked, recipes, plates }: {
-  planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number;
+export function DayCard({ planId, index, day, isToday, locked, recipes, plates, picky = [] }: {
+  planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number; picky?: string[];
 }) {
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
@@ -100,6 +100,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates }
             {swapButton}
           </div>
           <WhyLine reason={reason} sale={day.saleItems} className="-mt-2 px-5 pb-5" />
+          <PickyLines tips={picky} className="-mt-3 px-5 pb-5" />
           <LunchLine day={day} className="-mt-3 px-5 pb-5" />
         </div>
       ) : (
@@ -121,6 +122,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates }
           {swapButton}
         </div>
         <WhyLine reason={reason} sale={day.saleItems} className="px-3 pb-3" />
+        <PickyLines tips={picky} className="px-3 pb-3" />
         <LunchLine day={day} className="px-3 pb-3" />
         </div>
       )}
@@ -162,6 +164,16 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates }
 /** Marks a new recipe from a followed cook. */
 function NewBadge({ label, className = "" }: { label: string; className?: string }) {
   return <span className={`inline-flex items-center rounded-full bg-ochre-soft px-2 py-0.5 text-xs font-extrabold text-ochre-dark ${className}`}>{label}</span>;
+}
+
+/** Picky-eater tips for a dinner: set a plain portion aside, or a safe side. */
+function PickyLines({ tips, className = "" }: { tips: string[]; className?: string }) {
+  if (!tips.length) return null;
+  return (
+    <ul className={`space-y-1 ${className}`}>
+      {tips.map((t) => <li key={t} className="flex gap-2 rounded-2xl bg-blush/70 px-3 py-1.5 text-sm"><span aria-hidden="true">🧒</span><span>{t}</span></li>)}
+    </ul>
+  );
 }
 
 const perPlate = (n: number) => "$" + n.toFixed(2);
@@ -451,16 +463,30 @@ export function StartOverButton({ planId, approved }: { planId: string; approved
   );
 }
 
-export function RatePrompt({ planId, dayIndex, label, recipeName }: { planId: string; dayIndex: number; label: string; recipeName: string }) {
+export function RatePrompt({ planId, dayIndex, label, recipeName, kids = [] }: { planId: string; dayIndex: number; label: string; recipeName: string; kids?: { id: string; name: string }[] }) {
   const [pending, start] = useTransition();
+  const [votes, setVotes] = useState<Record<string, number>>({});
+  const vote = (id: string, v: number) => setVotes((x) => ({ ...x, [id]: x[id] === v ? 0 : v }));
+  const picked = () => Object.fromEntries(Object.entries(votes).filter(([, v]) => v !== 0));
   return (
     <div className={`card flex flex-wrap items-center gap-4 p-4 ${pending ? "opacity-60" : ""}`}>
       <FoodArt name={recipeName} className="h-16 w-16" rounded="rounded-full" />
       <div className="min-w-0 flex-1">
         <p className="font-bold">{label}</p>
+        {kids.length > 0 && (
+          <div className="my-2 space-y-1">
+            {kids.map((k) => (
+              <div key={k.id} className="flex items-center gap-2 text-sm">
+                <span className="min-w-0 flex-1">Did <b>{k.name || "your picky eater"}</b> eat it?</span>
+                <button type="button" aria-pressed={votes[k.id] === 1} aria-label={`${k.name} ate it`} onClick={() => vote(k.id, 1)} className={`h-9 w-11 rounded-full border-2 text-lg ${votes[k.id] === 1 ? "border-olive bg-olive-soft" : "border-line"}`}>👍</button>
+                <button type="button" aria-pressed={votes[k.id] === -1} aria-label={`${k.name} didn't eat it`} onClick={() => vote(k.id, -1)} className={`h-9 w-11 rounded-full border-2 text-lg ${votes[k.id] === -1 ? "border-terracotta bg-blush" : "border-line"}`}>👎</button>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-1">
-          <StarPicker value={null} label={label} onPick={(n) => start(() => rateCookedDinner(planId, dayIndex, n))} />
-          <button className="btn-quiet mb-5 min-h-10 px-3 text-sm" onClick={() => start(() => rateCookedDinner(planId, dayIndex, null))}>Skip</button>
+          <StarPicker value={null} label={label} onPick={(n) => start(() => rateCookedDinner(planId, dayIndex, n, picked()))} />
+          <button className="btn-quiet mb-5 min-h-10 px-3 text-sm" onClick={() => start(() => rateCookedDinner(planId, dayIndex, null, picked()))}>{Object.keys(picked()).length ? "Save" : "Skip"}</button>
         </div>
       </div>
     </div>

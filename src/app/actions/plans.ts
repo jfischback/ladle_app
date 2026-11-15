@@ -344,7 +344,7 @@ export async function startOver(planId: string) {
 }
 
 /** Rating prompt after each cook. stars = null means "skip". */
-export async function rateCookedDinner(planId: string, dayIndex: number, stars: number | null) {
+export async function rateCookedDinner(planId: string, dayIndex: number, stars: number | null, kidVotes: Record<string, number> = {}) {
   const userId = await requireUserId();
   const plan = await getPlan(userId, planId);
   const day = plan?.days[dayIndex];
@@ -355,6 +355,12 @@ export async function rateCookedDinner(planId: string, dayIndex: number, stars: 
       .update(recipes)
       .set({ rating: stars, updatedAt: new Date() })
       .where(and(eq(recipes.id, day.recipeId), eq(recipes.ownerId, userId)));
+  }
+  // "Did the kids eat it?": remembered per picky eater, so the planner learns what works.
+  const votes = Object.entries(kidVotes).filter(([k, v]) => /^[a-z0-9]{1,20}$/i.test(k) && (v === 1 || v === -1));
+  if (votes.length) {
+    const [r] = await db.select({ kidVotes: recipes.kidVotes }).from(recipes).where(and(eq(recipes.id, day.recipeId), eq(recipes.ownerId, userId)));
+    if (r) await db.update(recipes).set({ kidVotes: { ...(r.kidVotes ?? {}), ...Object.fromEntries(votes) } }).where(and(eq(recipes.id, day.recipeId), eq(recipes.ownerId, userId)));
   }
   plan.days[dayIndex] = { ...day, ratedAt: new Date().toISOString() };
   await db.update(plans).set({ days: plan.days }).where(eq(plans.id, planId));

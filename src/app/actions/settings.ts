@@ -20,6 +20,12 @@ const SettingsSchema = z.object({
   adults: int(1, 12),
   kids: int(0, 12),
   hasBaby: z.boolean(),
+  pickyEaters: z.array(z.object({
+    id: z.string().min(1).max(20),
+    name: z.string().trim().max(40),
+    wontEat: z.array(z.string().trim().min(2).max(40)).max(20),
+    safeFoods: z.array(z.string().trim().min(2).max(40)).max(20),
+  })).max(10),
   babyAgeMonths: int(0, 36).nullable(),
   zip: z.string().trim().max(10),
   storeLocationId: z.string().nullable(),
