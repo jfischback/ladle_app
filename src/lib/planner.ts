@@ -58,7 +58,7 @@ Rules:
 - Plan around what's on sale: an item counts as on sale only if it is at least saleThresholdPct percent off regular price. Lean on recipes that use sale items.
 - Weigh choices by the household's ranked priorities: "save money" leans on sale items and cheaper dinners; "eat healthier" leans on protein and vegetables; "try new things" leans on recipes not cooked recently or never cooked.
 - If favorQuickWeeknights is true, prefer quicker recipes (shorter totalMinutes, "quick" tag) Monday through Thursday.
-- Budget: keep the week's estimated total near weeklyBudget. If budgetMode is "hard", the total must not go over it. If "target", it may go slightly over when that keeps a good week.
+- Budget: weeklyBudget covers the dinners plus the household's weekly staples (staplesCost, already known). Keep the dinners' estimated total near weeklyBudget minus staplesCost. If budgetMode is "hard", the total must not go over it. If "target", it may go slightly over when that keeps a good week.
 - If a recipe has a prepAhead note, avoid putting it on the first day of the week (there is no day before to prep).
 - Costs: estimate what the ingredients for each dinner cost for this household's size. When an ingredient is in storePrices, use that real shelf price at their Fry's (sale prices are already applied there); otherwise estimate typical Phoenix-area Fry's prices. Pantry staples they likely have count as zero. These are labeled estimates in the app, so be reasonable rather than precise.
 - When a reason mentions a sale, name the item and the discount, e.g. "Chicken thighs are 35% off".
@@ -73,6 +73,7 @@ export async function planWeek(input: {
   recentPlans: Plan[];
   saleItems: SaleItem[];
   storePrices?: StorePrice[];
+  staplesCost?: number;
   newRecipes?: NewRecipeOption[];
 }): Promise<PlanResult> {
   const { settings, weekStart } = input;
@@ -107,6 +108,7 @@ export async function planWeek(input: {
     priorities: settings.motivation.map((m) => MOTIVATIONS[m]),
     dinnersPerWeek: settings.dinnersPerWeek,
     weeklyBudget: settings.weeklyBudget,
+    staplesCost: Math.round(input.staplesCost ?? 0),
     budgetMode: settings.budgetMode,
     favorQuickWeeknights: settings.favorQuickWeeknights,
     saleThresholdPct: settings.saleThresholdPct,

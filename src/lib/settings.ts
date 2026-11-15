@@ -1,4 +1,5 @@
 import type { FoodRule } from "./diet";
+import type { Staple } from "./types";
 
 export const MOTIVATIONS = {
   save_money: "Save money",
@@ -31,6 +32,7 @@ export type Settings = {
   cookDays: number[]; // 0 = Sunday … 6 = Saturday: the nights we plan a dinner for
   foodRules: FoodRule[]; // allergies, diets, "no bones"
   dislikes: string[]; // foods the family won't eat, e.g. ["mushroom", "olive"]
+  staples: Staple[]; // weekly staples, added to every grocery list
   noRepeatWeeks: number;
   favorQuickWeeknights: boolean;
   newRecipesPerWeek: number; // 0-2 new dinners from followed cooks, picked by the planner
@@ -61,6 +63,7 @@ export const DEFAULT_SETTINGS: Settings = {
   cookDays: [0, 1, 2, 3, 4],
   foodRules: [],
   dislikes: [],
+  staples: [],
   noRepeatWeeks: 3,
   favorQuickWeeknights: true,
   newRecipesPerWeek: 1,

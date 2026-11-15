@@ -7,7 +7,7 @@ import type { Ingredient } from "./types";
  */
 export type FoodRule =
   | "no-bones" | "no-nuts" | "no-peanuts" | "no-dairy" | "no-gluten" | "no-eggs" | "no-shellfish" | "no-fish" | "no-soy"
-  | "vegetarian" | "pescatarian" | "no-pork" | "no-beef" | "not-spicy";
+  | "vegetarian" | "pescatarian" | "no-seafood" | "no-pork" | "no-beef" | "not-spicy";
 
 type RuleDef = { label: string; group: "allergy" | "diet" | "texture"; icon: string; hits: RegExp; except?: RegExp; also?: FoodRule[] };
 
@@ -61,6 +61,11 @@ export const FOOD_RULES: Record<FoodRule, RuleDef> = {
     label: "Pescatarian", group: "diet", icon: "🐠",
     hits: new RegExp(`${MEAT.source}|\\b(chicken|beef|bone) (broth|stock|bouillon|base)\\b`),
     except: /vegetarian|plant-based|vegan|meatless|veggie (burger|sausage)/,
+  },
+  "no-seafood": {
+    label: "No seafood", group: "diet", icon: "🦞",
+    hits: new RegExp(`${FISH.source}|${SHELLFISH.source}|seafood|clam juice|oyster sauce|fish stock`),
+    except: /fish-free|vegan worcestershire|vegetarian oyster sauce/,
   },
   "no-pork": {
     label: "No pork", group: "diet", icon: "🐖",
@@ -133,6 +138,7 @@ function problemLabel(key: FoodRule): string {
     case "no-soy": return "Has soy";
     case "vegetarian": return "Not vegetarian";
     case "pescatarian": return "Has meat";
+    case "no-seafood": return "Has seafood";
     case "no-pork": return "Has pork";
     case "no-beef": return "Has beef";
     case "not-spicy": return "Spicy";
