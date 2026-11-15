@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireUserId } from "@/auth";
 import { getSettings } from "@/lib/data";
 import { krogerEnabled } from "@/lib/kroger";
@@ -10,6 +11,11 @@ export default async function SetupPage() {
   return (
     <>
       <SetupWizard initial={data} isEdit={complete} krogerEnabled={krogerEnabled()} />
+      {complete && (
+        <p className="mt-6 text-center">
+          <Link href="/whats-new" className="font-bold text-olive-dark underline">✨ What&apos;s new in Ladle</Link>
+        </p>
+      )}
       {complete && (!claudeEnabled() || !krogerEnabled()) && (
         // Behind-the-scenes status, kept off the everyday screens.
         <p className="mx-auto mt-8 max-w-xl text-center text-xs text-muted">
