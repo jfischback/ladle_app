@@ -43,21 +43,44 @@ export function mergeDuplicates(list: GroceryList): GroceryList {
   };
 }
 
+// Units that never take an "s".
+const NO_PLURAL = /^(oz|lb|lbs|tsp|tbsp|ct|dozen|g|kg|ml|l|fl oz|large|medium|small|whole|fresh|ripe)$/;
+
+/** "slices" -> "slice", "loaves" -> "loaf", "bunches" -> "bunch", "berries" -> "berry", "cups" -> "cup". */
+export function singular(word: string): string {
+  if (NO_PLURAL.test(word)) return word === "lbs" ? "lb" : word;
+  if (/ves$/.test(word)) return word.replace(/ves$/, "f");
+  if (/ies$/.test(word)) return word.replace(/ies$/, "y");
+  if (/(ch|sh|x|ss)es$/.test(word)) return word.replace(/es$/, "");
+  return word.replace(/s$/, "");
+}
+
+/** "slice" -> "slices", "loaf" -> "loaves", "bunch" -> "bunches", "berry" -> "berries". */
+export function plural(word: string): string {
+  if (!word || NO_PLURAL.test(word)) return word;
+  const irregular: Record<string, string> = { loaf: "loaves", leaf: "leaves", half: "halves", knife: "knives", shelf: "shelves" };
+  if (irregular[word]) return irregular[word];
+  if (/[^aeiou]y$/.test(word)) return word.replace(/y$/, "ies");
+  if (/(ch|sh|x|s)$/.test(word)) return `${word}es`;
+  return `${word}s`;
+}
+
 /** Add up amounts with the same unit: "1 gallon + 1/2 cup + 1 gallon" -> "2 gallons + 1/2 cup", "4 + 3 + 2" -> "9". */
 export function addQuantities(parts: string[]): string {
-  const sums = new Map<string, { n: number; label: string }>();
+  const sums = new Map<string, number>(); // unit (singular) -> total
   const other: string[] = [];
   for (const p of parts.flatMap((q) => q.split(/\s*\+\s*/)).map((q) => q.trim()).filter(Boolean)) {
     const m = p.match(/^(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)\s*(.*)$/);
     const n = m ? parseAmount(m[1]) : null;
     if (!m || n == null || /\(/.test(m[2])) { other.push(p); continue; } // "1 (15 oz) can" stays as written
-    const unit = m[2].toLowerCase();
-    const key = unit.replace(/(es|s)$/, ""); // "cups" and "cup" add up
-    const e = sums.get(key) ?? { n: 0, label: unit.replace(/(es|s)$/, "") };
-    e.n += n;
-    sums.set(key, e);
+    const unit = m[2].toLowerCase().split(/\s+/).map((w, i, all) => (i === all.length - 1 ? singular(w) : w)).join(" ");
+    sums.set(unit, (sums.get(unit) ?? 0) + n);
   }
-  const added = [...sums.values()].map(({ n, label }) => [niceAmount(n), label && n > 1 && !/^(oz|lb|tsp|tbsp|ct|dozen)$/.test(label) ? `${label}s` : label].filter(Boolean).join(" "));
+  const added = [...sums.entries()].map(([unit, n]) => {
+    const words = unit.split(" ");
+    if (n > 1 && unit) words[words.length - 1] = plural(words[words.length - 1]);
+    return [niceAmount(n), words.join(" ")].filter(Boolean).join(" ");
+  });
   return [...added, ...other].join(" + ");
 }
 

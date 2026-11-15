@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { addQuantities, itemKey, mergeDuplicates } from "@/lib/grocery-merge";
+import { addQuantities, itemKey, mergeDuplicates, plural, singular } from "@/lib/grocery-merge";
 import type { GroceryList } from "@/lib/types";
 
 const line = (item: string, quantity: string, note = "", forRecipes: string[] = []) => ({ item, quantity, note, forRecipes });
@@ -45,4 +45,13 @@ test("amounts add up by unit", () => {
   assert.equal(addQuantities(["1 cup", "2 cups"]), "3 cups");
   assert.equal(addQuantities(["1 (15 oz) can", "1 (15 oz) can"]), "1 (15 oz) can + 1 (15 oz) can");
   assert.equal(addQuantities(["1 lb", "1/2 lb"]), "1 1/2 lb");
+});
+
+test("plurals read right", () => {
+  assert.equal(addQuantities(["1 loaf", "1 loaf", "6 slices"]), "2 loaves + 6 slices");
+  assert.equal(addQuantities(["1 bunch", "1 bunch"]), "2 bunches");
+  assert.equal(addQuantities(["1 box", "2 boxes"]), "3 boxes");
+  assert.equal(addQuantities(["8 oz", "8 oz"]), "16 oz");
+  assert.equal(addQuantities(["2 large", "1 large"]), "3 large");
+  for (const w of ["slice", "loaf", "bunch", "berry", "cup", "box", "leaf", "glass"]) assert.equal(singular(plural(w)), w, w);
 });

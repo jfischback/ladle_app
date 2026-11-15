@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { approvePlan, planUpcomingWeek, rateCookedDinner, startOver, swapDay } from "./actions/plans";
 import { answerPantryCheck } from "./actions/pantry";
+import { groceryText } from "@/lib/grocery-text";
 import { PANTRY_SECTIONS } from "@/lib/pantry";
 import { StarPicker } from "@/components/Stars";
 import { FoodArt } from "@/components/FoodArt";
@@ -342,6 +343,7 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
   const list = plan.groceryList;
   const key = `ladle-grocery-${plan.id}`;
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [shared, setShared] = useState(false);
   useEffect(() => {
     try {
       const saved = localStorage.getItem(key);
@@ -356,17 +358,35 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
       return next;
     });
   const buying = list.sections.filter((s) => s.name !== PANTRY_SECTIONS.HAVE_IT);
+  // Text the list (what's still to get) to someone, or print it.
+  const shareList = async () => {
+    const text = groceryText(list, { title: `Grocery list, week of ${new Date(`${plan.weekOf}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`, isChecked: (s, i, item) => !!checked[`${s}-${i}-${item}`] });
+    try {
+      if (navigator.share) await navigator.share({ title: "Grocery list", text });
+      else { await navigator.clipboard.writeText(text); setShared(true); setTimeout(() => setShared(false), 2500); }
+    } catch { /* closed the share sheet */ }
+  };
+  const printList = () => {
+    document.documentElement.classList.add("printing-grocery");
+    const done = () => { document.documentElement.classList.remove("printing-grocery"); window.removeEventListener("afterprint", done); };
+    window.addEventListener("afterprint", done);
+    window.print();
+  };
   const total = buying.reduce((n, s) => n + s.items.length, 0);
   const done = Object.values(checked).filter(Boolean).length;
 
   return (
-    <section className="card p-5" aria-labelledby="grocery-title">
+    <section id="grocery-print" className="card p-5" aria-labelledby="grocery-title">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h2 id="grocery-title" className="flex items-center gap-2 text-2xl font-semibold"><span aria-hidden="true">🛒</span> Grocery list</h2>
         <span className="tag bg-olive-soft text-olive-dark">{done} of {total} got</span>
       </div>
+      <div className="no-print mb-4 flex flex-wrap gap-2">
+        <button type="button" className="btn-secondary min-h-10 px-4 text-sm" onClick={shareList}>{shared ? "✓ Copied" : "📤 Text the list"}</button>
+        <button type="button" className="btn-quiet min-h-10 px-4 text-sm" onClick={printList}>🖨️ Print</button>
+      </div>
       {plan.status === "approved" && (
-        <Link href={`/cart?plan=${plan.id}`} className="btn-warm mb-4 w-full sm:w-auto">
+        <Link href={`/cart?plan=${plan.id}`} className="no-print btn-warm mb-4 w-full sm:w-auto">
           <span aria-hidden="true">🛒</span> {plan.cart?.sentAt ? `${store} cart sent · review` : `Send to my ${store} cart`}
         </Link>
       )}
@@ -431,7 +451,7 @@ function PantryCheck({ planId, items }: { planId: string; items: { item: string;
       <h3 className="flex items-center gap-2 font-bold text-ochre-dark"><span aria-hidden="true">❓</span> Pantry check: do you have these?</h3>
       <p className="mb-2 text-sm text-muted">They last a while, so you may already have them. We&apos;ll remember your answers, so this list gets shorter every week.</p>
       {items.length > 2 && (
-        <button className="btn-secondary mb-2 min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(() => answerPantryCheck(planId, null, true))}>
+        <button className="no-print btn-secondary mb-2 min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(() => answerPantryCheck(planId, null, true))}>
           ✓ I have all {items.length}
         </button>
       )}
@@ -439,7 +459,7 @@ function PantryCheck({ planId, items }: { planId: string; items: { item: string;
         {items.map((it) => (
           <li key={it.item} className="flex flex-wrap items-center gap-2">
             <span className="min-w-0 flex-1"><span className="font-semibold">{it.item}</span>{it.quantity && <span className="text-muted"> · {it.quantity}</span>}</span>
-            <span className="flex shrink-0 gap-1.5">
+            <span className="no-print flex shrink-0 gap-1.5">
               <button className="btn-primary min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(() => answerPantryCheck(planId, it.item, true))}>Have it</button>
               <button className="btn-secondary min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(() => answerPantryCheck(planId, it.item, false))}>Need it</button>
             </span>
