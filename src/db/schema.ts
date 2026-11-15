@@ -91,6 +91,7 @@ export const plans = pgTable(
     breakfastDeal: jsonb("breakfast_deal").$type<SaleItem>(), // this week's breakfast-meat deal, if any
     extras: jsonb("extras").$type<ExtraLine[]>(), // snacks, sweets, drinks and baby items picked for this week
     cart: jsonb("cart").$type<CartState>(), // the grocery list matched to Fry's products, and when it was sent
+    groceryChecked: jsonb("grocery_checked").$type<Record<string, boolean>>(), // grocery list ticks, shared by everyone in the household
     summary: text("summary"),
     plannerSource: text("planner_source").notNull(), // claude | basic
     estimatedTotal: real("estimated_total"),
