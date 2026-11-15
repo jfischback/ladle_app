@@ -16,9 +16,24 @@ import { and, isNull } from "drizzle-orm";
 // Planning, approving and importing can take a while (the AI, store prices): give them a minute.
 export const maxDuration = 60;
 
-export default async function RecipesPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+// Filter chips: what each one keeps.
+const FILTERS: { key: string; label: string; keep: (r: Recipe) => boolean }[] = [
+  { key: "quick", label: "⏱ 30 min or less", keep: (r) => (r.totalMinutes != null && r.totalMinutes <= 30) || r.tags.includes("quick") },
+  { key: "favorites", label: "⭐ Favorites", keep: (r) => (r.rating ?? 0) >= 4 },
+  { key: "budget", label: "💵 Budget", keep: (r) => r.tags.includes("budget") },
+  { key: "kid-friendly", label: "🧒 Kid favorites", keep: (r) => r.tags.includes("kid-friendly") },
+  { key: "vegetarian", label: "🥦 Vegetarian", keep: (r) => r.tags.includes("vegetarian") },
+  { key: "low-carb", label: "🥑 Low-carb", keep: (r) => r.tags.includes("low-carb") },
+  { key: "freezer", label: "🧊 Freezer", keep: (r) => r.tags.includes("freezer") || r.tags.includes("make-ahead") },
+  { key: "slow-cooker", label: "🥘 Slow cooker", keep: (r) => r.tags.includes("slow-cooker") },
+];
+
+export default async function RecipesPage({ searchParams }: { searchParams: Promise<{ tab?: string; q?: string; f?: string }> }) {
   const userId = await requireUserId();
-  const t = (await searchParams).tab;
+  const sp = await searchParams;
+  const t = sp.tab;
+  const q = (sp.q ?? "").trim().slice(0, 60);
+  const filter = FILTERS.find((x) => x.key === sp.f) ?? null;
   const tab = t === "browse" ? "browse" : t === "cooks" ? "cooks" : t === "lunch" ? "lunch" : t === "breakfast" ? "breakfast" : "mine";
   const [mine, lunches, breakfasts, browse, { data: settings }] = await Promise.all([myRecipes(userId), myRecipes(userId, "lunch"), myRecipes(userId, "breakfast"), browseStarters(userId), getSettings(userId)]);
   // How many starters are in each recipe pack.
@@ -27,7 +42,25 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
   const packCounts: Record<string, number> = {};
   for (const r of starterTags) for (const t of r.tags) packCounts[t] = (packCounts[t] ?? 0) + 1;
   const problemsOf = (r: Recipe) => ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway);
-  const list = tab === "mine" ? mine : tab === "lunch" ? lunches : tab === "breakfast" ? breakfasts : browse;
+  const all = tab === "mine" ? mine : tab === "lunch" ? lunches : tab === "breakfast" ? breakfasts : browse;
+  // Search by name, protein or ingredient; then the chosen filter chip.
+  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const list = all.filter((r) => {
+    if (filter && !filter.keep(r)) return false;
+    if (!words.length) return true;
+    const text = [r.name, r.protein ?? "", ...r.ingredients.map((i) => i.item)].join(" ").toLowerCase();
+    return words.every((w) => text.includes(w));
+  });
+  const linkWith = (patch: { f?: string | null; q?: string | null }) => {
+    const p = new URLSearchParams();
+    if (tab !== "mine") p.set("tab", tab);
+    const nq = patch.q === undefined ? q : patch.q;
+    const nf = patch.f === undefined ? filter?.key : patch.f;
+    if (nq) p.set("q", nq);
+    if (nf) p.set("f", nf);
+    const s = p.toString();
+    return `/recipes${s ? `?${s}` : ""}`;
+  };
 
   return (
     <div>
@@ -57,7 +90,39 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
         </form>
       )}
 
-      {tab === "cooks" ? null : list.length === 0 ? (
+      {tab !== "cooks" && all.length > 6 && (
+        <div className="mb-4 space-y-2">
+          <form action="/recipes" className="flex gap-2" role="search">
+            {tab !== "mine" && <input type="hidden" name="tab" value={tab} />}
+            {filter && <input type="hidden" name="f" value={filter.key} />}
+            <input name="q" defaultValue={q} placeholder="Search: chicken, tacos, rice…" aria-label="Search recipes" className="field" />
+            <button className="btn-secondary shrink-0">Search</button>
+          </form>
+          <div className="flex flex-wrap gap-1.5">
+            {FILTERS.filter((x) => all.some(x.keep)).map((x) => {
+              const on = filter?.key === x.key;
+              return (
+                <Link key={x.key} href={linkWith({ f: on ? null : x.key })} aria-pressed={on} className={`rounded-full border-2 px-3 py-1 text-sm font-bold ${on ? "border-olive bg-olive text-cream" : "border-line bg-card text-ink hover:border-olive/50"}`}>
+                  {x.label}
+                </Link>
+              );
+            })}
+          </div>
+          {(q || filter) && (
+            <p className="text-sm text-muted">
+              {list.length} of {all.length} recipes{q ? ` matching “${q}”` : ""}{filter ? ` · ${filter.label.replace(/^\S+ /, "")}` : ""} ·{" "}
+              <Link href={linkWith({ f: null, q: null })} className="font-bold text-olive-dark underline">Clear</Link>
+            </p>
+          )}
+        </div>
+      )}
+
+      {tab === "cooks" ? null : list.length === 0 && (q || filter) ? (
+        <div className="card p-8 text-center">
+          <p className="font-display text-2xl font-semibold">Nothing matches</p>
+          <p className="mt-1 text-muted">Try another word, or <Link href={linkWith({ f: null, q: null })} className="font-bold text-olive-dark underline">clear the search</Link>.</p>
+        </div>
+      ) : list.length === 0 ? (
         <div className="card flex flex-col items-center gap-3 p-8 text-center">
           <FoodArt kind={tab === "mine" ? "pot" : "nightoff"} className="h-24 w-24" rounded="rounded-full" />
           {tab === "mine" || tab === "lunch" || tab === "breakfast" ? (

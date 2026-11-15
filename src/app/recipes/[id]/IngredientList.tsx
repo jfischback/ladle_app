@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { setServingsFactor } from "./servings-store";
 import type { Ingredient } from "@/lib/types";
 import { scaleIngredient } from "@/lib/scaling";
 
 /** Tap ingredients off as you gather them; change the servings and every amount follows. */
-export function IngredientList({ ingredients, servings }: { ingredients: Ingredient[]; servings?: number | null }) {
+export function IngredientList({ recipeId, ingredients, servings }: { recipeId: string; ingredients: Ingredient[]; servings?: number | null }) {
   const [got, setGot] = useState<Set<number>>(new Set());
   const base = servings && servings > 0 ? servings : null;
   const [makes, setMakes] = useState(base ?? 0);
   const factor = base ? makes / base : 1;
+  // Cooking mode uses the same servings.
+  useEffect(() => setServingsFactor(recipeId, factor), [recipeId, factor]);
   const toggle = (n: number) => setGot((prev) => { const next = new Set(prev); if (next.has(n)) next.delete(n); else next.add(n); return next; });
   return (
     <div className="space-y-2">

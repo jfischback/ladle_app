@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Ingredient } from "@/lib/types";
+import { scaleIngredient } from "@/lib/scaling";
+import { useServingsFactor } from "./servings-store";
 
 /** Minutes mentioned in a step ("simmer 15 minutes", "bake 20 to 25 minutes"): the longer number, for a timer. */
 export function stepMinutes(step: string): number | null {
@@ -18,7 +20,8 @@ const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, 
  * Cooking mode: one step at a time in big type, big buttons for messy hands, the screen kept awake,
  * and a one-tap timer when a step says how long.
  */
-export function CookMode({ name, steps, ingredients }: { name: string; steps: string[]; ingredients: Ingredient[] }) {
+export function CookMode({ recipeId, name, steps, ingredients }: { recipeId: string; name: string; steps: string[]; ingredients: Ingredient[] }) {
+  const factor = useServingsFactor(recipeId);
   const [open, setOpen] = useState(false);
   const [at, setAt] = useState(0);
   const [showIngredients, setShowIngredients] = useState(false);
@@ -92,7 +95,7 @@ export function CookMode({ name, steps, ingredients }: { name: string; steps: st
             <button type="button" className="mt-6 text-sm font-bold text-olive-dark underline" onClick={() => setShowIngredients((v) => !v)}>{showIngredients ? "Hide ingredients" : "Show ingredients"}</button>
             {showIngredients && (
               <ul className="mt-2 space-y-1 text-lg">
-                {ingredients.map((i, n) => <li key={n}><b>{[i.amount, i.unit].filter(Boolean).join(" ")}</b> {i.item}</li>)}
+                {ingredients.map((raw, n) => { const i = scaleIngredient(raw, factor); return <li key={n}><b>{[i.amount, i.unit].filter(Boolean).join(" ")}</b> {i.item}</li>; })}
               </ul>
             )}
           </div>

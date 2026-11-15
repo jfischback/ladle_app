@@ -86,13 +86,13 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
 
       <section>
         <h2 className="mb-3 text-2xl font-semibold">Ingredients</h2>
-        {r.ingredients.length ? <IngredientList ingredients={r.ingredients} servings={r.servings} /> : <p className="text-muted">No ingredients yet.</p>}
+        {r.ingredients.length ? <IngredientList recipeId={r.id} ingredients={r.ingredients} servings={r.servings} /> : <p className="text-muted">No ingredients yet.</p>}
       </section>
 
       <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-2xl font-semibold">Let&apos;s cook</h2>
-          <CookMode name={r.name} steps={r.steps} ingredients={r.ingredients} />
+          <CookMode recipeId={r.id} name={r.name} steps={r.steps} ingredients={r.ingredients} />
         </div>
         {!r.steps.length && r.creditUrl ? (
           <a href={r.creditUrl} target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 p-4 font-bold text-olive-dark hover:shadow-lift">
