@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUserId } from "@/auth";
-import { browseStarters, getSettings, myRecipes } from "@/lib/data";
+import { browseStarters, getSettings, myPantry, myRecipes } from "@/lib/data";
+import { parseOnHand, rankByOnHand, type OnHandMatch } from "@/lib/on-hand";
 import { ruleProblems } from "@/lib/diet";
 import { addAllStarters, addStarter } from "@/app/actions/recipes";
 import { Stars } from "@/components/Stars";
@@ -28,12 +29,15 @@ const FILTERS: { key: string; label: string; keep: (r: Recipe) => boolean }[] = 
   { key: "slow-cooker", label: "🥘 Slow cooker", keep: (r) => r.tags.includes("slow-cooker") },
 ];
 
-export default async function RecipesPage({ searchParams }: { searchParams: Promise<{ tab?: string; q?: string; f?: string }> }) {
+export default async function RecipesPage({ searchParams }: { searchParams: Promise<{ tab?: string; q?: string; f?: string; have?: string }> }) {
   const userId = await requireUserId();
   const sp = await searchParams;
   const t = sp.tab;
   const q = (sp.q ?? "").trim().slice(0, 60);
   const filter = FILTERS.find((x) => x.key === sp.f) ?? null;
+  // "Use what I have": what they typed plus what the Pantry page says is on hand.
+  const haveMode = sp.f === "have";
+  const typedHave = (sp.have ?? "").slice(0, 300);
   const tab = t === "browse" ? "browse" : t === "cooks" ? "cooks" : t === "lunch" ? "lunch" : t === "breakfast" ? "breakfast" : "mine";
   const [mine, lunches, breakfasts, browse, { data: settings }] = await Promise.all([myRecipes(userId), myRecipes(userId, "lunch"), myRecipes(userId, "breakfast"), browseStarters(userId), getSettings(userId)]);
   // How many starters are in each recipe pack.
@@ -51,6 +55,11 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
     const text = [r.name, r.protein ?? "", ...r.ingredients.map((i) => i.item)].join(" ").toLowerCase();
     return words.every((w) => text.includes(w));
   });
+  const pantryOnHand = haveMode ? (await myPantry(userId)).filter((p) => p.status !== "out").map((p) => p.name) : [];
+  const onHand = [...parseOnHand(typedHave), ...pantryOnHand];
+  const ranked = haveMode ? rankByOnHand(list, parseOnHand(typedHave), pantryOnHand) : [];
+  const matchOf = new Map<string, OnHandMatch>(ranked.map((x) => [x.r.id, x.m]));
+  const shown = haveMode ? ranked.map((x) => x.r) : list;
   const linkWith = (patch: { f?: string | null; q?: string | null }) => {
     const p = new URLSearchParams();
     if (tab !== "mine") p.set("tab", tab);
@@ -58,6 +67,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
     const nf = patch.f === undefined ? filter?.key : patch.f;
     if (nq) p.set("q", nq);
     if (nf) p.set("f", nf);
+    if (nf === "have" && typedHave) p.set("have", typedHave);
     const s = p.toString();
     return `/recipes${s ? `?${s}` : ""}`;
   };
@@ -94,11 +104,15 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
         <div className="mb-4 space-y-2">
           <form action="/recipes" className="flex gap-2" role="search">
             {tab !== "mine" && <input type="hidden" name="tab" value={tab} />}
-            {filter && <input type="hidden" name="f" value={filter.key} />}
+            {(filter || haveMode) && <input type="hidden" name="f" value={haveMode ? "have" : filter!.key} />}
+            {haveMode && typedHave && <input type="hidden" name="have" value={typedHave} />}
             <input name="q" defaultValue={q} placeholder="Search: chicken, tacos, rice…" aria-label="Search recipes" className="field" />
             <button className="btn-secondary shrink-0">Search</button>
           </form>
           <div className="flex flex-wrap gap-1.5">
+            <Link href={linkWith({ f: haveMode ? null : "have" })} aria-pressed={haveMode} className={`rounded-full border-2 px-3 py-1 text-sm font-bold ${haveMode ? "border-terracotta bg-terracotta text-cream" : "border-terracotta/40 bg-card text-terracotta-dark hover:border-terracotta"}`}>
+              🥫 Use what I have
+            </Link>
             {FILTERS.filter((x) => all.some(x.keep)).map((x) => {
               const on = filter?.key === x.key;
               return (
@@ -108,21 +122,37 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
               );
             })}
           </div>
-          {(q || filter) && (
+          {haveMode && (
+            <form action="/recipes" className="card space-y-2 p-4">
+              {tab !== "mine" && <input type="hidden" name="tab" value={tab} />}
+              <input type="hidden" name="f" value="have" />
+              {q && <input type="hidden" name="q" value={q} />}
+              <label htmlFor="have" className="font-bold">What do you have to use up?</label>
+              <div className="flex gap-2">
+                <input id="have" name="have" defaultValue={typedHave} placeholder="chicken, rice, broccoli…" className="field" />
+                <button className="btn-primary shrink-0">Find dinners</button>
+              </div>
+              <p className="text-sm text-muted">
+                {pantryOnHand.length > 0 ? <>Also counting the {pantryOnHand.length} things on hand in your <Link href="/pantry" className="font-bold text-olive-dark underline">Pantry</Link>. </> : <>Tip: things you mark in your <Link href="/pantry" className="font-bold text-olive-dark underline">Pantry</Link> count too. </>}
+                Dinners that use up the most come first.
+              </p>
+            </form>
+          )}
+          {(q || filter || haveMode) && (
             <p className="text-sm text-muted">
-              {list.length} of {all.length} recipes{q ? ` matching “${q}”` : ""}{filter ? ` · ${filter.label.replace(/^\S+ /, "")}` : ""} ·{" "}
+              {shown.length} of {all.length} recipes{q ? ` matching “${q}”` : ""}{filter ? ` · ${filter.label.replace(/^\S+ /, "")}` : ""}{haveMode ? " · use what I have" : ""} ·{" "}
               <Link href={linkWith({ f: null, q: null })} className="font-bold text-olive-dark underline">Clear</Link>
             </p>
           )}
         </div>
       )}
 
-      {tab === "cooks" ? null : list.length === 0 && (q || filter) ? (
+      {tab === "cooks" ? null : haveMode && onHand.length === 0 ? null : shown.length === 0 && (q || filter || haveMode) ? (
         <div className="card p-8 text-center">
           <p className="font-display text-2xl font-semibold">Nothing matches</p>
-          <p className="mt-1 text-muted">Try another word, or <Link href={linkWith({ f: null, q: null })} className="font-bold text-olive-dark underline">clear the search</Link>.</p>
+          <p className="mt-1 text-muted">{haveMode ? "None of these recipes use what you listed. " : ""}Try another word, or <Link href={linkWith({ f: null, q: null })} className="font-bold text-olive-dark underline">clear the search</Link>.</p>
         </div>
-      ) : list.length === 0 ? (
+      ) : shown.length === 0 ? (
         <div className="card flex flex-col items-center gap-3 p-8 text-center">
           <FoodArt kind={tab === "mine" ? "pot" : "nightoff"} className="h-24 w-24" rounded="rounded-full" />
           {tab === "mine" || tab === "lunch" || tab === "breakfast" ? (
@@ -140,9 +170,9 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
         </div>
       ) : (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {list.map((r) => (
+          {shown.map((r) => (
             <li key={r.id}>
-              <RecipeCard r={r} browse={tab === "browse"} problems={problemsOf(r)} />
+              <RecipeCard r={r} browse={tab === "browse"} problems={problemsOf(r)} match={matchOf.get(r.id)} />
             </li>
           ))}
         </ul>
@@ -159,7 +189,7 @@ function Tab({ href, active, children }: { href: string; active: boolean; childr
   );
 }
 
-function RecipeCard({ r, browse, problems }: { r: Recipe; browse: boolean; problems: string[] }) {
+function RecipeCard({ r, browse, problems, match }: { r: Recipe; browse: boolean; problems: string[]; match?: OnHandMatch }) {
   return (
     <div className="card group relative flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lift">
       <FoodArt name={r.name} protein={r.protein} className="h-24 w-full sm:h-28" rounded="rounded-none" />
@@ -176,6 +206,18 @@ function RecipeCard({ r, browse, problems }: { r: Recipe; browse: boolean; probl
             </span>
           )}
         </div>
+        {match && (
+          <p className="text-xs leading-snug">
+            {match.need.length === 0 ? (
+              <b className="text-olive-dark">✓ You have everything</b>
+            ) : (
+              <>
+                <b className="text-olive-dark">Have {match.have} of {match.total}</b>
+                <span className="text-muted"> · need {match.need.slice(0, 3).join(", ")}{match.need.length > 3 ? ` +${match.need.length - 3} more` : ""}</span>
+              </>
+            )}
+          </p>
+        )}
         <div className="mt-auto flex items-center justify-between pt-1">
           {browse ? (
             <span className="text-xs text-muted">{r.ingredients.length} items</span>
