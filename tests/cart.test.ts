@@ -47,3 +47,11 @@ test("a product that breaks a food rule is never picked, and is marked", async (
   assert.equal(none.chosen, null, "nothing safe: nothing picked");
   assert.equal(pickOptions("crackers", products).chosen, 0, "no rules: as before");
 });
+
+test("aisle labels survive odd shapes", async () => {
+  const { aisleLabel } = await import("@/lib/kroger");
+  assert.equal(aisleLabel([{ number: 7 }]), "Aisle 7");
+  assert.equal(aisleLabel([{ number: "0" }, { number: "14" }]), "Aisle 14");
+  assert.equal(aisleLabel({ number: "3" }), null);
+  assert.equal(aisleLabel([null, "x"]), null);
+});

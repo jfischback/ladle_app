@@ -31,10 +31,10 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
   const cost = estimateCost(r);
   const cookNow = sp.cook === "1";
   // Dinners open sized for the family (times the batches tonight cooks: a double batch for a leftovers night).
-  const batches = Math.min(3, Math.max(1, Number(sp.batches) || 1));
+  const batches = Math.min(3, Math.max(1, Math.round(Number(sp.batches)) || 1));
   // The same rounding as the grocery list: to the nearest half recipe, rounded up.
   const familyServings = r.meal === "dinner" && r.servings ? Math.round(r.servings * Math.max(0.5, Math.ceil(((dinnerServings(settings) * batches) / r.servings) * 2) / 2)) : null;
-  const sizedWhy = familyServings ? (batches > 1 ? `Sized for your family, times ${batches} for the leftovers night, like your grocery list.` : "Sized for your family, like your grocery list.") : null;
+  const sizedWhy = familyServings ? (batches > 1 ? `Sized for your family, times ${batches} for the leftovers night.` : "Sized for your family. Cooking extra for tomorrow's lunch? Add those servings.") : null;
 
   return (
     <article className="space-y-6">

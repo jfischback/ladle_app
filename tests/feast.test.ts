@@ -159,3 +159,15 @@ test("Christmas: a glazed ham sized for the table, warmed not thawed", async () 
   assert.equal(out[1].recipeName, "Christmas leftovers");
   assert.match(out[1].reason, /^Ham sandwiches/);
 });
+
+test("review fixes: Christmas dinner is on Dec 25 even when the federal holiday moves", async () => {
+  const { feastHolidayOn, CHRISTMAS } = await import("@/lib/feast");
+  const { holidayOn } = await import("@/lib/holidays");
+  assert.equal(holidayOn("2027-12-25"), null, "2027: observed on Friday the 24th");
+  assert.equal(feastHolidayOn("2027-12-25", holidayOn("2027-12-25")), "Christmas Day");
+  assert.equal(feastHolidayOn("2027-12-24", holidayOn("2027-12-24")), null);
+  assert.equal(feastHolidayOn("2026-11-26", holidayOn("2026-11-26")), "Thanksgiving");
+  assert.ok(!CHRISTMAS.flatMap((d) => d.steps).some((s) => /turkey/i.test(s)), "nothing about turkey at Christmas");
+  const out = withFeast([{ date: "2026-12-25", recipeId: "a", recipeName: "a", estimatedCost: 1, reason: "", saleItems: [], alternatives: [] }, { date: "2026-12-26", recipeId: "a", recipeName: "a", estimatedCost: 0, reason: "", saleItems: [], alternatives: [], leftoverOf: "2026-12-25" }], 0, { holiday: "Christmas Day", guests: 6, dishes: ["potatoes", "rolls"], frozen: false });
+  assert.equal(out[1].reason, "Plates of everything from the feast");
+});

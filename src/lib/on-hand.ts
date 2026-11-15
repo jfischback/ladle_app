@@ -17,7 +17,8 @@ export function parseOnHand(text: string): string[] {
 // "butter" isn't peanut butter, "potatoes" aren't sweet potatoes, "rice" isn't cauliflower rice.
 const OTHER_THING = new Set("peanut almond cashew apple coconut sesame cream cottage chicken beef pork turkey bone powder powdered garlic onion broth stock bouillon sauce paste extract juice soup seasoning salt cauliflower vinegar noodle wine sweet".split(" "));
 // Cuts and shapes come after the thing itself ("chicken thighs", "broccoli florets").
-const CUTS = new Set("thigh breast tender tenderloin wing drumstick leg fillet filet cutlet strip floret chunk cube slice piece half quarter wedge stalk clove sprig leaf head bunch".split(" "));
+// (Words as coreWords leaves them: "halves" -> "halve", "leaves" -> "leave".)
+const CUTS = new Set("thigh breast tender tenderloin wing drumstick leg fillet filet cutlet strip floret chunk cube slice piece half halve quarter wedge stalk clove sprig leaf leave head bunch chop link".split(" "));
 
 const GENERIC = new Set(["cheese"]);
 
@@ -37,7 +38,7 @@ function covered(item: string, onHand: string[]): boolean {
     if (itemWords.some((w) => OTHER_THING.has(w) && !typed.includes(w))) return false;
     // The thing itself has to be what's on hand: "corn" isn't corn tortillas, "tortillas" are.
     // ("cheddar" covers "cheddar cheese": the kind of cheese is the thing.)
-    if (thing && !typed.includes(thing) && !(GENERIC.has(thing) && typed.length > 0 && itemWords.includes(typed[typed.length - 1]))) return false;
+    if (thing && !typed.includes(thing) && !(GENERIC.has(thing) && typed.length > 0 && !OTHER_THING.has(typed[typed.length - 1]) && itemWords.includes(typed[typed.length - 1]))) return false;
     return sameThing(item, h) || (typed.length > 0 && typed.every((w) => set.has(w)));
   });
 }

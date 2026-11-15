@@ -3,19 +3,20 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { removeFeast, setFeast } from "@/app/actions/feast";
-import { feastIcon, feastLabel, feastMenu, feastTimeline, mainFor } from "@/lib/feast";
+import { feastHolidayOn, feastIcon, feastLabel, feastMenu, feastTimeline, mainFor } from "@/lib/feast";
 import type { PlanDay } from "@/lib/types";
 import { dayName, shortDate } from "@/lib/week";
 
 /** Pick the guests and dishes for a holiday dinner (Thanksgiving). */
 export function FeastPlanner({ planId, index, day, defaultGuests, onDone }: { planId: string; index: number; day: PlanDay; defaultGuests: number; onDone?: () => void }) {
-  const menu = feastMenu(day.holiday ?? "") ?? [];
+  const holiday = day.feast?.holiday ?? feastHolidayOn(day.date, day.holiday) ?? "";
+  const menu = feastMenu(holiday) ?? [];
   const [guests, setGuests] = useState(day.feast?.guests ?? Math.max(2, defaultGuests));
   const [dishes, setDishes] = useState<string[]>(day.feast?.dishes ?? menu.filter((d) => d.default).map((d) => d.key));
   const [frozen, setFrozen] = useState(day.feast?.frozen ?? true);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
-  const main = mainFor({ holiday: day.holiday ?? "", guests, dishes, frozen });
+  const main = mainFor({ holiday, guests, dishes, frozen });
   const mainKey = menu.find((d) => d.main)?.key;
   const save = () =>
     start(async () => {
@@ -53,7 +54,7 @@ export function FeastPlanner({ planId, index, day, defaultGuests, onDone }: { pl
       )}
       {error && <p role="alert" className="text-sm font-bold text-terracotta-dark">{error}</p>}
       <div className="flex flex-wrap gap-2">
-        <button type="button" className="btn-primary" disabled={pending || !dishes.length} onClick={save}>{pending ? "Saving…" : day.feast ? "Save changes" : `Plan ${feastLabel(day.holiday ?? "")} dinner`}</button>
+        <button type="button" className="btn-primary" disabled={pending || !dishes.length} onClick={save}>{pending ? "Saving…" : day.feast ? "Save changes" : `Plan ${feastLabel(holiday)} dinner`}</button>
         {day.feast && (
           <button type="button" className="btn-quiet" disabled={pending} onClick={() => start(async () => { await removeFeast(planId, index); onDone?.(); })}>Take it off the plan</button>
         )}

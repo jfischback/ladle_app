@@ -92,6 +92,8 @@ export function weekEvents(
 }
 
 /** A holiday dinner's countdown: thaw in the morning, the day-before cooking in the evening, the turkey, then dinner (at 3 PM). */
+const hrs = (h: number) => { const m = Math.round(h * 60); return `${Math.floor(m / 60)} hr${m % 60 ? ` ${m % 60} min` : ""}`; };
+
 function feastEvents(planId: string, d: PlanDay, origin: string, index: number, when: { boughtOn?: string; today?: string }): CalEvent[] {
   const feast = d.feast!;
   const url = `${origin}/feast/${planId}/${index}`;
@@ -106,9 +108,9 @@ function feastEvents(planId: string, d: PlanDay, origin: string, index: number, 
     out.push({ uid: `${planId}-${step.date}-${thaw ? "thaw" : "ahead"}@ladle`, date: step.date, startMinutes: thaw ? 9 * 60 : 19 * 60, minutes: thaw ? 15 : 90, title: thaw ? (/cold water/.test(step.what) ? `${icon} Turkey: no time to thaw in the fridge` : `${icon} Move the ${main?.two ? "turkeys" : "turkey"} to the fridge`) : `${icon} Get ahead for ${label}`, notes: step.what, url });
   }
   if (main) {
-    const rest = main.noun === "ham" ? 10 / 60 : 0.5;
+    const rest = main.noun === "ham" ? 25 / 60 : 0.5; // ham: 15 minutes to glaze, then 10 to rest
     const minutes = Math.round((main.roastHours + rest) * 60); // in the oven, then resting
-    const notes = main.noun === "ham" ? `Warm about ${main.roastHours} hours to 140°F, glaze, then rest 10 minutes.` : `Roast about ${main.roastHours} hours to 165°F (thickest part, not touching the bone), then rest 30 minutes.`;
+    const notes = main.noun === "ham" ? `Warm about ${hrs(main.roastHours)} to 140°F, glaze 10 to 15 minutes at 400°F, then rest 10 minutes.` : `Roast about ${hrs(main.roastHours)} to 165°F (thickest part, not touching the bone), then rest 30 minutes.`;
     out.push({ uid: `${planId}-${d.date}-${main.noun}@ladle`, date: d.date, startMinutes: dinnerAt - minutes, minutes, title: `${icon} ${main.noun === "ham" ? "Ham" : "Turkey"} in the oven`, notes, url });
   }
   out.push({ uid: `${planId}-${d.date}-dinner@ladle`, date: d.date, startMinutes: dinnerAt, minutes: 120, title: `${icon} ${label} dinner for ${feast.guests}`, notes: `Recipes and countdown: ${url}`, url });

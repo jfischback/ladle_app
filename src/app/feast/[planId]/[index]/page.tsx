@@ -27,7 +27,7 @@ export default async function FeastPage({ params }: { params: Promise<{ planId: 
         <h1 className="text-4xl font-semibold">{feastIcon(feast.holiday)} {feastLabel(feast.holiday)} for {feast.guests}</h1>
         {main && (
           <p className="mt-1 text-lg text-muted">
-            {main.two ? `Two ${main.lb} lb ${main.noun}s` : `A ${main.lb} lb ${main.kind}`}: {main.noun === "ham" ? "about ¾ lb a person" : "about 1¼ lb a person"}, so there are leftovers for sandwiches.
+            {main.two ? `Two ${main.lb} lb ${main.noun}s` : `A ${main.lb} lb ${main.kind}`}: {main.noun === "ham" ? "about ½ to ¾ lb a person" : "about 1¼ lb a person"}, so there are leftovers for sandwiches.
           </p>
         )}
       </div>

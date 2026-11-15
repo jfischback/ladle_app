@@ -7,7 +7,7 @@ import { answerPantryCheck } from "./actions/pantry";
 import { addGroceryItem, removeGroceryItem, setGroceryChecks } from "./actions/grocery";
 import { tickKey } from "@/lib/grocery-checks";
 import { FeastCard, FeastPlanner } from "@/components/FeastCard";
-import { feastIcon, feastLabel } from "@/lib/feast";
+import { feastHolidayOn, feastIcon, feastLabel } from "@/lib/feast";
 import { ADDED_SECTION } from "@/lib/grocery-add";
 import { useRouter } from "next/navigation";
 import { groceryText } from "@/lib/grocery-text";
@@ -132,7 +132,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
           <div className="flex items-start justify-between gap-3 p-5">
             <div className="min-w-0">
               {day.recipeId ? (
-                <Link href={`/recipes/${day.recipeId}`} className="font-display text-2xl font-semibold leading-snug hover:underline">{day.recipeName}</Link>
+                <Link href={`/recipes/${day.recipeId}${(day.batches ?? 1) > 1 && !day.leftoverOf ? `?batches=${day.batches}` : ""}`} className="font-display text-2xl font-semibold leading-snug hover:underline">{day.recipeName}</Link>
               ) : (
                 <p className="font-display text-2xl font-semibold">{dinnerName ?? "Night off tonight!"}</p>
               )}
@@ -159,7 +159,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
               {day.fromCook && <NewBadge className="ml-1.5 align-middle" label="✨ New" />}
             </p>
             {day.recipeId ? (
-              <Link href={`/recipes/${day.recipeId}`} className="block font-bold leading-snug hover:underline">{day.recipeName}</Link>
+              <Link href={`/recipes/${day.recipeId}${(day.batches ?? 1) > 1 && !day.leftoverOf ? `?batches=${day.batches}` : ""}`} className="block font-bold leading-snug hover:underline">{day.recipeName}</Link>
             ) : (
               <p className="font-bold text-olive-dark">{dinnerName ?? "Night off"}</p>
             )}
@@ -209,7 +209,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
           {feasting ? (
             <FeastPlanner planId={planId} index={index} day={day} defaultGuests={feastGuests} onDone={() => setFeasting(false)} />
           ) : (
-            <button type="button" className="btn-warm w-full sm:w-auto" onClick={() => setFeasting(true)}>{feastIcon(day.holiday ?? "")} Plan {feastLabel(day.holiday ?? "")} dinner instead</button>
+            <button type="button" className="btn-warm w-full sm:w-auto" onClick={() => setFeasting(true)}>{feastIcon(feastHolidayOn(day.date, day.holiday) ?? "")} Plan {feastLabel(feastHolidayOn(day.date, day.holiday) ?? "")} dinner instead</button>
           )}
         </div>
       )}

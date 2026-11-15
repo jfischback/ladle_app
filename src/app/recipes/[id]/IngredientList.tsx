@@ -10,7 +10,7 @@ export function IngredientList({ recipeId, ingredients, servings, familyServings
   const [got, setGot] = useState<Set<number>>(new Set());
   const base = servings && servings > 0 ? servings : null;
   // Start at what the family eats (what the grocery list bought for), not what the recipe was written for.
-  const start = base && familyServings ? Math.min(24, Math.max(1, familyServings)) : base;
+  const start = base && familyServings ? Math.min(48, Math.max(1, familyServings)) : base;
   const [makes, setMakes] = useState(start ?? 0);
   const factor = base ? makes / base : 1;
   // Cooking mode uses the same servings.
@@ -23,7 +23,7 @@ export function IngredientList({ recipeId, ingredients, servings, familyServings
           <span className="font-semibold">Makes</span>
           <button type="button" aria-label="Fewer servings" className="btn-secondary h-9 min-h-9 w-9 px-0" disabled={makes <= 1} onClick={() => setMakes((m) => Math.max(1, m - 1))}>−</button>
           <span className="w-8 text-center text-lg font-bold" aria-live="polite">{makes}</span>
-          <button type="button" aria-label="More servings" className="btn-secondary h-9 min-h-9 w-9 px-0" disabled={makes >= 24} onClick={() => setMakes((m) => Math.min(24, m + 1))}>+</button>
+          <button type="button" aria-label="More servings" className="btn-secondary h-9 min-h-9 w-9 px-0" disabled={makes >= 48} onClick={() => setMakes((m) => Math.min(48, m + 1))}>+</button>
           <span className="text-muted">servings</span>
           {makes !== base && <button type="button" className="btn-quiet min-h-9 px-2 text-sm" onClick={() => setMakes(base)}>As written ({base})</button>}
           {start !== base && makes !== start && <button type="button" className="btn-quiet min-h-9 px-2 text-sm" onClick={() => setMakes(start!)}>For us ({start})</button>}

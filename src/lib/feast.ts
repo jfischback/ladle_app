@@ -94,7 +94,7 @@ export const THANKSGIVING: FeastDish[] = [
   {
     key: "rolls", name: "Dinner Rolls", servings: 12, default: true,
     ingredients: [i("12", "", "dinner rolls"), i("2", "tbsp", "butter, melted")],
-    steps: ["Warm the rolls in a 350°F oven for 8 to 10 minutes while the turkey rests. Brush with melted butter."],
+    steps: ["Warm the rolls in a 350°F oven for 8 to 10 minutes while the main dish rests. Brush with melted butter."],
   },
   {
     key: "pumpkin-pie", name: "Easy Pumpkin Pie", servings: 8, default: true, whole: true,
@@ -155,6 +155,14 @@ export const CHRISTMAS: FeastDish[] = [
 export const FEAST_HOLIDAYS = ["Thanksgiving", "Christmas Day"] as const;
 export const feastMenu = (holiday: string): FeastDish[] | null => (holiday === "Thanksgiving" ? THANKSGIVING : holiday === "Christmas Day" ? CHRISTMAS : null);
 /** "Christmas Day" -> "Christmas": how the dinner is named ("Christmas dinner", "Christmas leftovers"). */
+/**
+ * The holiday feast on a date, if any. Christmas dinner is on December 25 itself, even in years when the
+ * federal holiday is observed on the 24th or 26th; Thanksgiving is always its Thursday.
+ */
+export function feastHolidayOn(date: string, federal: string | null | undefined): string | null {
+  if (date.slice(5) === "12-25") return "Christmas Day";
+  return federal === "Thanksgiving" ? "Thanksgiving" : null;
+}
 export const feastLabel = (holiday: string) => holiday.replace(/ Day$/, "");
 export const feastIcon = (holiday: string) => (/christmas/i.test(holiday) ? "🎄" : "🦃");
 
@@ -264,7 +272,7 @@ export function feastDishes(feast: Feast): (FeastDish & { scaled: Ingredient[]; 
       const times = d.main ? 1 : feastTimes(d, feast.guests);
       const big = d.main === "ham" ? { ...h, base: 9, item: "spiral-cut ham" } : { ...t, base: 14, item: "whole turkey" };
       const scaled = d.ingredients.map((ing) => {
-        if (d.main && ing.item === big.item) return { amount: big.two ? "2" : "1", unit: `(${big.lb} lb)`, item: big.kind };
+        if (d.main && ing.item === big.item) return { amount: big.two ? "2" : "1", unit: `(${big.lb} lb)`, item: big.two ? plural(big.kind) : big.kind };
         // The rest (butter and aromatics, or the glaze) is for a 14 lb bird or a 9 lb ham.
         const one = d.main ? scaleTo(ing, Math.max(0.5, Math.round((big.lb / big.base) * 2) / 2) * (big.two ? 2 : 1)) : scaleTo(ing, times);
         return { ...one, unit: agree(one.amount, one.unit) };
@@ -291,6 +299,10 @@ function fixLeftoverLunches(days: PlanDay[]): PlanDay[] {
     return { ...d, lunch: { ...l, kind: "open", recipeId: null, name: "Lunch: your pick", reason: "The dinner these leftovers came from changed" } };
   });
 }
+const leftoverReason = (feast: Feast) => {
+  const noun = mainFor(feast)?.noun;
+  return noun === "ham" ? "Ham sandwiches and plates of everything" : noun === "turkey" ? "Turkey sandwiches and plates of everything" : "Plates of everything from the feast";
+};
 const feastName = (days: PlanDay[]) => days.find((d) => d.feast)?.feast?.holiday ?? "Holiday";
 
 /** Put the feast on its day. The dinner that was planned there makes way, and its leftovers nights become feast leftovers. */
@@ -305,7 +317,7 @@ export function withFeast(days: PlanDay[], index: number, feast: Feast): PlanDay
         recipeId: null, recipeName: `${feastLabel(feast.holiday)} dinner`, estimatedCost: null, reason: `${feastLabel(feast.holiday)} dinner for ${feast.guests}`, saleItems: [], leftoverOf: null, batches: undefined, fromCook: null,
       };
     }
-    if (d.leftoverOf === day.date) return { ...d, recipeId: null, recipeName: `${feastLabel(feast.holiday)} leftovers`, estimatedCost: 0, reason: `${mainFor(feast)?.noun === "ham" ? "Ham" : "Turkey"} sandwiches and plates of everything` };
+    if (d.leftoverOf === day.date) return { ...d, recipeId: null, recipeName: `${feastLabel(feast.holiday)} leftovers`, estimatedCost: 0, reason: leftoverReason(feast) };
     return d;
   });
   return fixLeftoverLunches(dropOrphanBatches(next));

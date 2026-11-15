@@ -33,7 +33,7 @@ jobs:
       - name: Start the app
         run: |
           PGLITE_DIR="$RUNNER_TEMP/db" nohup npx next start -p 3000 > "$RUNNER_TEMP/app.log" 2>&1 &
-          for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:3000/setup && exit 0; sleep 2; done
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:3000/setup && exit 0; sleep 2; done
           cat "$RUNNER_TEMP/app.log"; exit 1
       - run: npm run smoke
         env:

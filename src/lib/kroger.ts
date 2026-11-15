@@ -70,16 +70,19 @@ export type KrogerProduct = {
   aisle?: string | null;
 };
 
-type AisleLocation = { number?: string; description?: string };
+type AisleLocation = { number?: unknown; description?: unknown };
 
-/** "Aisle 12" from Kroger's aisle locations; null when there's nothing useful. */
-export function aisleLabel(locations: AisleLocation[] | undefined): string | null {
-  const a = locations?.find((l) => l.number || l.description);
-  if (!a) return null;
-  if (a.number && /^\d{1,3}$/.test(a.number.trim()) && Number(a.number) > 0) return `Aisle ${Number(a.number)}`;
-  const d = (a.description ?? "").trim();
-  if (!d || d.length > 30) return null;
-  return d.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+/** "Aisle 12" from Kroger's aisle locations; null when there's nothing useful (whatever shape it comes in). */
+export function aisleLabel(locations: unknown): string | null {
+  if (!Array.isArray(locations)) return null;
+  for (const l of locations as AisleLocation[]) {
+    if (!l || typeof l !== "object") continue;
+    const n = String(l.number ?? "").trim();
+    if (/^\d{1,3}$/.test(n) && Number(n) > 0) return `Aisle ${Number(n)}`;
+    const d = String(l.description ?? "").trim();
+    if (d && d.length <= 30 && !/^aisle 0+$/i.test(d)) return d.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  return null;
 }
 
 /** Search products at one store, with that store's prices. Needs the product.compact scope. */
