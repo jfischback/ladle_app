@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, jsonb, integer, real, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, jsonb, integer, real, index, boolean, uniqueIndex } from "drizzle-orm/pg-core";
 import type { Settings } from "@/lib/settings";
 import type { Ingredient, PlanDay, GroceryList, SaleItem, SaleCheck } from "@/lib/types";
 
@@ -40,6 +40,9 @@ export const recipes = pgTable(
     rating: integer("rating"), // 1-5, set by the user
     ease: integer("ease"), // 1-5
     prepAhead: text("prep_ahead"), // e.g. "Marinate the steak overnight"
+    // A new recipe from a followed cook that the planner put in a draft week. It joins the
+    // user's list when they approve that week; until then it stays out of My Recipes.
+    trial: boolean("trial").notNull().default(false),
     creditName: text("credit_name"), // "Inspired by [name]"
     creditUrl: text("credit_url"),
     sourceDocUrl: text("source_doc_url"),
@@ -75,7 +78,54 @@ export const plans = pgTable(
   (t) => [index("plans_user_week_idx").on(t.userId, t.weekOf)],
 );
 
+/** A food creator the user follows, e.g. Pinch of Yum. New recipes are read from their feed or sitemap. */
+export const cooks = pgTable(
+  "cooks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    name: text("name").notNull(),
+    siteUrl: text("site_url").notNull(),
+    feedUrl: text("feed_url").notNull(),
+    feedKind: text("feed_kind").$type<"rss" | "atom" | "sitemap">().notNull(),
+    lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
+    lastError: text("last_error"),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("cooks_user_idx").on(t.userId)],
+);
+
+/** A recipe spotted on a followed cook's site. Only facts (title, ingredients, time) are kept until it's saved. */
+export const foundRecipes = pgTable(
+  "found_recipes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    cookId: uuid("cook_id")
+      .notNull()
+      .references(() => cooks.id),
+    url: text("url").notNull(),
+    title: text("title").notNull(),
+    imageUrl: text("image_url"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    ingredients: jsonb("ingredients").$type<Ingredient[]>().notNull().default([]),
+    totalMinutes: integer("total_minutes"),
+    servings: integer("servings"),
+    status: text("status").notNull().default("new"), // new | saved | dismissed
+    recipeId: uuid("recipe_id"), // the user's copy once saved or planned
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("found_user_url_idx").on(t.userId, t.url)],
+);
+
 export type User = typeof users.$inferSelect;
 export type Recipe = typeof recipes.$inferSelect;
 export type NewRecipe = typeof recipes.$inferInsert;
 export type Plan = typeof plans.$inferSelect;
+export type Cook = typeof cooks.$inferSelect;
+export type FoundRecipe = typeof foundRecipes.$inferSelect;

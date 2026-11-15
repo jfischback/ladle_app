@@ -98,6 +98,10 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
             <Counter label="Dinners cooked per week" value={s.dinnersPerWeek} min={1} max={7} onChange={(v) => set("dinnersPerWeek", v)} />
             <Counter label="Weeks before a dinner can repeat" value={s.noRepeatWeeks} min={0} max={12} onChange={(v) => set("noRepeatWeeks", v)} />
             <YesNo label="Favor quick meals on weeknights?" value={s.favorQuickWeeknights} onChange={(v) => set("favorQuickWeeknights", v)} />
+            <div>
+              <Counter label="New recipes to try each week" value={s.newRecipesPerWeek ?? 1} min={0} max={2} onChange={(v) => set("newRecipesPerWeek", v)} />
+              <p className="mt-1 text-sm text-muted">From the cooks you follow, picked when their ingredients are on sale. 0 sticks to your saved recipes.</p>
+            </div>
             <p className="text-sm text-muted">Breakfast and lunch aren&apos;t planned yet, just dinners.</p>
           </div>
         )}

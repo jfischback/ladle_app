@@ -1,7 +1,7 @@
 import "server-only";
 import { and, desc, eq, isNull, isNotNull, inArray } from "drizzle-orm";
 import { getDb } from "@/db";
-import { plans, recipes, settings as settingsTable } from "@/db/schema";
+import { cooks, foundRecipes, plans, recipes, settings as settingsTable } from "@/db/schema";
 import { DEFAULT_SETTINGS, type Settings } from "./settings";
 
 export async function getSettings(userId: string): Promise<{ data: Settings; complete: boolean }> {
@@ -15,7 +15,7 @@ export async function myRecipes(userId: string, meal = "dinner") {
   return db
     .select()
     .from(recipes)
-    .where(and(eq(recipes.ownerId, userId), eq(recipes.meal, meal), isNull(recipes.archivedAt)))
+    .where(and(eq(recipes.ownerId, userId), eq(recipes.meal, meal), isNull(recipes.archivedAt), eq(recipes.trial, false)))
     .orderBy(recipes.name);
 }
 
@@ -62,4 +62,27 @@ export async function getPlan(userId: string, id: string) {
   const db = await getDb();
   const [p] = await db.select().from(plans).where(and(eq(plans.id, id), eq(plans.userId, userId)));
   return p ?? null;
+}
+
+export async function myCooks(userId: string) {
+  const db = await getDb();
+  return db.select().from(cooks).where(and(eq(cooks.userId, userId), isNull(cooks.archivedAt))).orderBy(cooks.name);
+}
+
+/** New dinners from followed cooks, newest first, one per title. */
+export async function cookShelf(userId: string, limit = 60) {
+  const db = await getDb();
+  const rows = await db
+    .select({ found: foundRecipes, cookName: cooks.name })
+    .from(foundRecipes)
+    .innerJoin(cooks, eq(cooks.id, foundRecipes.cookId))
+    .where(and(eq(foundRecipes.userId, userId), eq(foundRecipes.status, "new"), isNull(cooks.archivedAt)))
+    .orderBy(desc(foundRecipes.publishedAt), desc(foundRecipes.createdAt));
+  const seen = new Set<string>();
+  return rows.filter((r) => {
+    const key = `${r.cookName}|${r.found.title.toLowerCase()}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, limit);
 }

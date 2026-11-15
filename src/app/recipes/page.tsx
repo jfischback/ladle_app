@@ -6,10 +6,12 @@ import { Stars } from "@/components/Stars";
 import type { Recipe } from "@/db/schema";
 import { formatMinutes } from "@/lib/format";
 import { FoodArt } from "@/components/FoodArt";
+import { CooksTab } from "./CooksTab";
 
 export default async function RecipesPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const userId = await requireUserId();
-  const tab = (await searchParams).tab === "browse" ? "browse" : "mine";
+  const t = (await searchParams).tab;
+  const tab = t === "browse" ? "browse" : t === "cooks" ? "cooks" : "mine";
   const [mine, browse] = await Promise.all([myRecipes(userId), browseStarters(userId)]);
   const list = tab === "mine" ? mine : browse;
 
@@ -23,10 +25,13 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
         <Link href="/recipes/new" className="btn-warm">+ Add your own</Link>
       </div>
 
-      <div role="tablist" className="mb-5 inline-flex gap-1 rounded-full bg-oat p-1">
-        <Tab href="/recipes" active={tab === "mine"}>My Recipes ({mine.length})</Tab>
-        <Tab href="/recipes?tab=browse" active={tab === "browse"}>Browse ({browse.length})</Tab>
+      <div role="tablist" className="mb-5 inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-oat p-1">
+        <Tab href="/recipes" active={tab === "mine"}>Mine ({mine.length})</Tab>
+        <Tab href="/recipes?tab=cooks" active={tab === "cooks"}>✨ Your cooks</Tab>
+        {(browse.length > 0 || tab === "browse") && <Tab href="/recipes?tab=browse" active={tab === "browse"}>Starters ({browse.length})</Tab>}
       </div>
+
+      {tab === "cooks" && <CooksTab userId={userId} />}
 
       {tab === "browse" && browse.length > 0 && (
         <form action={addAllStarters} className="mb-4">
@@ -34,7 +39,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
         </form>
       )}
 
-      {list.length === 0 ? (
+      {tab === "cooks" ? null : list.length === 0 ? (
         <div className="card flex flex-col items-center gap-3 p-8 text-center">
           <FoodArt kind={tab === "mine" ? "pot" : "nightoff"} className="h-24 w-24" rounded="rounded-full" />
           {tab === "mine" ? (
@@ -65,7 +70,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
 
 function Tab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link role="tab" aria-selected={active} href={href} className={`rounded-full px-4 py-2 font-bold transition-colors ${active ? "bg-card text-terracotta-dark shadow-soft" : "text-olive-dark hover:text-ink"}`}>
+    <Link role="tab" aria-selected={active} href={href} className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 font-bold transition-colors ${active ? "bg-card text-terracotta-dark shadow-soft" : "text-olive-dark hover:text-ink"}`}>
       {children}
     </Link>
   );

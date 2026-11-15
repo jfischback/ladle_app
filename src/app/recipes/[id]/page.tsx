@@ -39,6 +39,13 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
+      {r.trial && (
+        <div className="flex items-start gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft">
+          <span className="text-2xl" aria-hidden="true">✨</span>
+          <p><span className="font-bold">New from {r.creditName ?? "one of your cooks"}.</span> It&apos;s in this week&apos;s plan. Approve the week and it joins your recipes for good.</p>
+        </div>
+      )}
+
       {mine ? (
         <div className="card flex flex-wrap items-center justify-between gap-3 p-4">
           <RecipeRating id={r.id} rating={r.rating} />
@@ -64,7 +71,12 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
 
       <section>
         <h2 className="mb-3 text-2xl font-semibold">Let&apos;s cook</h2>
-        {r.steps.length ? (
+        {!r.steps.length && r.creditUrl ? (
+          <a href={r.creditUrl} target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 p-4 font-bold text-olive-dark hover:shadow-lift">
+            <span>See the steps on {r.creditName ?? "the original site"}</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+        ) : r.steps.length ? (
           <ol className="space-y-3">
             {r.steps.map((s, n) => (
               <li key={n} className="card flex gap-4 p-4">

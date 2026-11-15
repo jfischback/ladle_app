@@ -1,13 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq, isNull, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne } from "drizzle-orm";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
-import { plans, recipes } from "@/db/schema";
+import { cooks, foundRecipes, plans, recipes } from "@/db/schema";
 import { activePlans, getPlan, getSettings, myRecipes, recipesByIds } from "@/lib/data";
+import { adoptFoundRecipe, refreshCooks } from "@/lib/cooks";
 import { buildGroceryList } from "@/lib/grocery";
-import { planWeek, sumCosts } from "@/lib/planner";
+import { FOUND_PREFIX, planWeek, sumCosts, type NewRecipeOption } from "@/lib/planner";
 import { recipeSales, scanSales, type SaleScan } from "@/lib/sales";
 import type { SaleCheck, SaleItem } from "@/lib/types";
 import { addDays, upcomingWeekStart, weekDates } from "@/lib/week";
@@ -48,18 +49,45 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     : scan.status === "off" ? { status: "off", reason: scan.reason, at }
     : { status: "failed", message: scan.message, at };
   const sales = scan.status === "ok" ? scan.sales : [];
+  const newRecipes = settings.newRecipesPerWeek > 0 ? await newRecipeOptions(userId, sales) : [];
 
   let result;
   try {
     result = await planWeek({
       settings, weekStart, recipes: recipeList, recentPlans: recent,
-      saleItems: sales, storePrices: scan.status === "ok" ? scan.prices : [],
+      saleItems: sales, storePrices: scan.status === "ok" ? scan.prices : [], newRecipes,
     });
   } catch (e) {
     return { error: `The planner hit a problem: ${(e as Error).message}` };
   }
 
+  // New recipes the planner picked become the user's own (in "trial" until the week is approved).
   const db = await getDb();
+  await Promise.all(
+    result.days.map(async (d, i) => {
+      if (!d.recipeId?.startsWith(FOUND_PREFIX)) return;
+      const foundId = d.recipeId.slice(FOUND_PREFIX.length);
+      const [row] = await db
+        .select({ found: foundRecipes, cookName: cooks.name })
+        .from(foundRecipes)
+        .innerJoin(cooks, eq(cooks.id, foundRecipes.cookId))
+        .where(and(eq(foundRecipes.id, foundId), eq(foundRecipes.userId, userId)));
+      try {
+        if (!row) throw new Error("gone");
+        const recipeId = await adoptFoundRecipe(userId, row.found, { name: row.cookName }, true);
+        const [r] = await recipesByIds(userId, [recipeId]);
+        result.days[i] = { ...d, recipeId, recipeName: r?.name ?? d.recipeName };
+      } catch {
+        // Couldn't bring it in: fall back to the first alternative from their own recipes, or a night off.
+        const alt = d.alternatives[0];
+        result.days[i] = alt
+          ? { ...d, recipeId: alt.recipeId, recipeName: alt.recipeName, reason: "One of your recipes", fromCook: null, alternatives: d.alternatives.slice(1) }
+          : { ...d, recipeId: null, recipeName: null, reason: "No-cook night", fromCook: null, saleItems: [], alternatives: [] };
+      }
+    }),
+  );
+  result.estimatedTotal = sumCosts(result.days);
+
   await archiveOthersForWeek(userId, weekStart);
   await db.insert(plans).values({
     userId,
@@ -83,7 +111,7 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
   if (!day) return { error: "Day not found." };
 
   if (recipeId === null) {
-    plan.days[dayIndex] = { ...day, recipeId: null, recipeName: null, estimatedCost: null, reason: "No-cook night", saleItems: [] };
+    plan.days[dayIndex] = { ...day, recipeId: null, recipeName: null, estimatedCost: null, reason: "No-cook night", saleItems: [], fromCook: null };
   } else {
     const [recipe] = await recipesByIds(userId, [recipeId]);
     if (!recipe) return { error: "Recipe not found." };
@@ -99,6 +127,7 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
       estimatedCost: alt?.estimatedCost ?? null,
       reason: alt?.reason ?? "Your pick",
       saleItems: recipeSales(recipe, plan.saleItems.filter((x): x is SaleItem => typeof x !== "string")),
+      fromCook: recipe.trial ? recipe.creditName : null,
       alternatives: [...previous, ...day.alternatives.filter((a) => a.recipeId !== recipeId)].slice(0, 3),
     };
   }
@@ -131,8 +160,38 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
     .update(plans)
     .set({ status: "approved", approvedAt: new Date(), groceryList })
     .where(eq(plans.id, planId));
+  // New recipes in an approved week join My Recipes for good.
+  const trialIds = chosen.filter((r) => r.trial).map((r) => r.id);
+  if (trialIds.length) {
+    await db.update(recipes).set({ trial: false, updatedAt: new Date() }).where(and(inArray(recipes.id, trialIds), eq(recipes.ownerId, userId)));
+    await db.update(foundRecipes).set({ status: "saved" }).where(and(inArray(foundRecipes.recipeId, trialIds), eq(foundRecipes.userId, userId)));
+    revalidatePath("/recipes");
+  }
   revalidatePath("/");
   revalidatePath("/history");
+}
+
+/**
+ * Candidates for "something new this week": unseen dinners from followed cooks that list their ingredients,
+ * best sale matches first, then newest. Checks the cooks for new posts first (quickly; at most once a day).
+ */
+async function newRecipeOptions(userId: string, sales: SaleItem[]): Promise<NewRecipeOption[]> {
+  await refreshCooks(userId, { budgetMs: 8000, minHours: 24 }).catch(() => {});
+  const db = await getDb();
+  const rows = await db
+    .select({ found: foundRecipes, cookName: cooks.name })
+    .from(foundRecipes)
+    .innerJoin(cooks, eq(cooks.id, foundRecipes.cookId))
+    .where(and(eq(foundRecipes.userId, userId), eq(foundRecipes.status, "new"), isNull(cooks.archivedAt)))
+    .orderBy(desc(foundRecipes.publishedAt))
+    .limit(60);
+  const seen = new Set<string>();
+  return rows
+    .filter(({ found }) => found.ingredients.length >= 3 && !seen.has(found.title.toLowerCase()) && seen.add(found.title.toLowerCase()))
+    .map(({ found, cookName }, i) => ({ opt: { foundId: found.id, title: found.title, cookName, ingredients: found.ingredients, totalMinutes: found.totalMinutes }, rank: i }))
+    .sort((a, b) => recipeSales(b.opt, sales).length - recipeSales(a.opt, sales).length || a.rank - b.rank)
+    .slice(0, 8)
+    .map((x) => x.opt);
 }
 
 /** Archive this week's plan so the user can plan again. Nothing is deleted. */
