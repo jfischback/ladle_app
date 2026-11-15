@@ -6,6 +6,7 @@ import type { GroceryList, SaleItem } from "./types";
 import { ingredientTerm } from "./sales";
 import { rulesSummary } from "./diet";
 import { askClaude, claudeEnabled } from "./claude";
+import { scaleIngredient } from "./scaling";
 
 const GrocerySchema = z.object({
   sections: z.array(
@@ -27,7 +28,7 @@ const SYSTEM = `You build the grocery list inside Ladle, a meal-planning app. Yo
 
 Rules:
 - Combine the same ingredient across dinners into one line with a total quantity. Convert to sensible store units (e.g. "2 lb", "1 bunch", "1 can (15 oz)").
-- Scale each recipe from its listed servings to the household size (adults count 1, kids 0.5 to 1 by age, a baby 0). If servings is unknown, assume the recipe already feeds the household.
+- Each recipe has makeTimes: how many times to buy its ingredients as written. It already covers the household's size, double batches for leftovers nights, leftover lunches and bigger athlete portions. Multiply each recipe's ingredients by its makeTimes; don't scale again.
 - Only list ingredients from the recipes. Do not add extra items.
 - Common pantry staples (salt, pepper, cooking oil, basic dried spices) go in a "Pantry - check first" section, since the household may already have them.
 - If preferPremiumOnSale is true, add the note "premium if on sale" to items where brand quality matters (olive oil, cheese, meat). The cheap version only wins when it is at least premiumDeeperPoints percentage points deeper on sale.
@@ -36,12 +37,12 @@ Rules:
 - foodRules are strict (allergies, diets). If a product could hide a problem (e.g. broth with gluten, sauces with soy or dairy), add a short note like "check label: gluten-free".
 - If an item matches one of saleItems (same ingredient), make its note "On sale $X.XX (N% off)" using that sale's salePrice and pctOff, plus the product name when it helps pick the right one.
 - weeklyStaples are added to the list separately. Don't list them again; if the dinners need more than the staple amount, list only the extra with the note "plus your weekly staple".
-- cookExtra lists dinners to cook with extra portions for the next day's lunch. Scale those dinners' ingredients up for the extra people.
+- cookExtra holds the cook's notes for the week (double batches, extra for lunch). They're already counted in makeTimes.
 - Some recipes are lunches (meal "lunch"); include their ingredients too.
 - Keep notes short; use an empty string when there is nothing to say.`;
 
-export async function buildGroceryList(recipes: Recipe[], settings: Settings, sales: SaleItem[] = [], extraNotes: string[] = []): Promise<GroceryList> {
-  if (!claudeEnabled()) return { ...basicGroceryList(recipes, sales), notes: extraNotes };
+export async function buildGroceryList(recipes: Recipe[], settings: Settings, sales: SaleItem[] = [], extraNotes: string[] = [], makeTimes: Map<string, number> = new Map()): Promise<GroceryList> {
+  if (!claudeEnabled()) return { ...basicGroceryList(recipes, sales, makeTimes), notes: extraNotes };
   const pkg = {
     household: {
       adults: settings.adults,
@@ -51,7 +52,7 @@ export async function buildGroceryList(recipes: Recipe[], settings: Settings, sa
     preferPremiumOnSale: settings.preferPremiumOnSale,
     premiumDeeperPoints: settings.premiumDeeperPoints,
     limitFreezer: settings.limitFreezer,
-    dinners: recipes.map((r) => ({ name: r.name, meal: r.meal, servings: r.servings, ingredients: r.ingredients })),
+    dinners: recipes.map((r) => ({ name: r.name, meal: r.meal, servings: r.servings, makeTimes: makeTimes.get(r.id) ?? 1, ingredients: r.ingredients })),
     saleItems: sales,
     cookExtra: extraNotes,
     foodRules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway) || "none",
@@ -66,11 +67,14 @@ export function saleNote(s: SaleItem): string {
   return `On sale $${s.salePrice.toFixed(2)} (${s.pctOff}% off)`;
 }
 
-export function basicGroceryList(recipes: Recipe[], sales: SaleItem[] = []): GroceryList {
+export function basicGroceryList(recipes: Recipe[], sales: SaleItem[] = [], makeTimes: Map<string, number> = new Map()): GroceryList {
   const saleByTerm = new Map(sales.map((s) => [s.item, s]));
   const map = new Map<string, { item: string; quantities: string[]; forRecipes: Set<string> }>();
   for (const r of recipes) {
-    for (const ing of r.ingredients) {
+    // Scale to the week: the household, double batches, leftover lunches.
+    const times = makeTimes.get(r.id) ?? 1;
+    for (const raw of r.ingredients) {
+      const ing = scaleIngredient(raw, times);
       const key = ing.item.toLowerCase().trim();
       if (!key) continue;
       const entry = map.get(key) ?? { item: ing.item, quantities: [], forRecipes: new Set() };

@@ -95,7 +95,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
               ) : (
                 <p className="font-display text-2xl font-semibold">Night off tonight!</p>
               )}
-              <Details cookTime={day.leftoverOf ? null : cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} leftover={!!day.leftoverOf} plates={plates} />
+              <Details cookTime={day.leftoverOf ? null : cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} leftover={!!day.leftoverOf} plates={plates ? plates * (day.batches ?? 1) : undefined} />
             </div>
             {swapButton}
           </div>
@@ -117,7 +117,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
             ) : (
               <p className="font-bold text-olive-dark">Night off</p>
             )}
-            <Details cookTime={day.leftoverOf ? null : cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} leftover={!!day.leftoverOf} plates={plates} />
+            <Details cookTime={day.leftoverOf ? null : cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} leftover={!!day.leftoverOf} plates={plates ? plates * (day.batches ?? 1) : undefined} />
           </div>
           {swapButton}
         </div>

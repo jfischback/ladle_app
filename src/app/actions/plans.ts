@@ -19,8 +19,10 @@ import { applyPantry, pantrySearchTerm, sameThing } from "@/lib/pantry";
 import { fuelGroceries, fuelTerms, portionNotes } from "@/lib/athletes";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { canCook } from "@/lib/prep";
+import { leftoverKind } from "@/lib/leftovers";
+import { recipeMultipliers } from "@/lib/scaling";
 import { healthGroceryNotes, healthNeeds } from "@/lib/health";
-import { budgetNotes, cookOnceEatTwice, dinnerCost, enforceCap, fillCosts } from "@/lib/budget";
+import { budgetNotes, cookOnceEatTwice, dinnerCost, enforceCap, fillCosts, rebalanceBatches } from "@/lib/budget";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
 import { addDays, upcomingWeekStart, weekDates } from "@/lib/week";
@@ -170,7 +172,7 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
   const { data: settings } = await getSettings(userId);
   const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
   if (recipeId === null) {
-    plan.days[dayIndex] = { ...day, recipeId: null, recipeName: null, estimatedCost: null, reason: "No-cook night", saleItems: [], fromCook: null, leftoverOf: null };
+    plan.days[dayIndex] = { ...day, recipeId: null, recipeName: null, estimatedCost: null, reason: "No-cook night", saleItems: [], fromCook: null, leftoverOf: null, batches: undefined };
   } else {
     const [recipe] = await recipesByIds(userId, [recipeId]);
     if (!recipe) return { error: "Recipe not found." };
@@ -187,16 +189,18 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
       estimatedCost: alt?.estimatedCost ?? dinnerCost(recipe, settings, sales).total,
       reason: alt?.reason ?? "Your pick",
       leftoverOf: null,
+      batches: undefined, // priced as one batch here; rebalanced below if it feeds a leftovers night
       saleItems: recipeSales(recipe, plan.saleItems.filter((x): x is SaleItem => typeof x !== "string")),
       fromCook: recipe.trial ? recipe.creditName : null,
       alternatives: [...previous, ...day.alternatives.filter((a) => a.recipeId !== recipeId)].slice(0, 3),
     };
   }
-  // A leftovers night follows the dinner it came from (or becomes a night off).
+  // A leftovers night follows the dinner it came from: the new dinner if it reheats well, otherwise a night off.
   const now = plan.days[dayIndex];
-  plan.days = plan.days.map((d) => (d.leftoverOf === day.date
-    ? now.recipeId ? { ...d, recipeId: now.recipeId, recipeName: now.recipeName } : { ...d, recipeId: null, recipeName: null, reason: "No-cook night", leftoverOf: null }
-    : d));
+  plan.days = plan.days.map((d) => (d.leftoverOf === day.date && now.recipeId ? { ...d, recipeId: now.recipeId, recipeName: now.recipeName } : d));
+  const cookIds = [...new Set(plan.days.filter((d) => d.recipeId && !d.leftoverOf).map((d) => d.recipeId!))];
+  const cooked = new Map((await recipesByIds(userId, cookIds)).map((r) => [r.id, r]));
+  plan.days = rebalanceBatches(plan.days, (id) => { const r = cooked.get(id); return !!r && leftoverKind(r) === "ok"; });
   // Lunches depend on the night before, so re-plan them after any dinner change.
   plan.days = await withLunches(userId, plan.days, settings, sales);
   const db = await getDb();
@@ -239,7 +243,14 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   try {
     const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
     const athletes = await athleteWeeks(userId, plan, settings);
-    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days, settings), ...healthGroceryNotes(healthNeeds(settings.athletes)), ...portionNotes(athletes)]);
+    // How many times to make each recipe: household size, double batches, leftover lunches, athletes' extra portions.
+    const extraPortions = athletes.reduce((n, w) => {
+      const dinners = w.days.flatMap((d) => d.meals.filter((m) => m.meal === "Dinner" && !m.estimated));
+      return n + (dinners.length ? dinners.reduce((a, m) => a + m.portion, 0) / dinners.length - 1 : 0);
+    }, 0);
+    const servingsById = new Map(chosen.map((r) => [r.id, r.servings]));
+    const makeTimes = recipeMultipliers(plan.days, (id) => servingsById.get(id) ?? null, settings, extraPortions);
+    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days, settings), ...healthGroceryNotes(healthNeeds(settings.athletes)), ...portionNotes(athletes)], makeTimes);
     // Weekly staples get their own section, with this week's sale prices where we found them.
     const snap = new Map((plan.staples ?? []).map((l) => [stapleTerm(l.item), l]));
     const items = settings.staples.filter((x) => x.active).map((x) => {
