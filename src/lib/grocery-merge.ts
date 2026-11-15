@@ -77,6 +77,12 @@ export function addQuantities(parts: string[]): string {
     const unit = m[2].toLowerCase().split(/\s+/).map((w, i, all) => (i === all.length - 1 ? singular(w) : w)).join(" ");
     sums.set(unit, (sums.get(unit) ?? 0) + n);
   }
+  // "3 dozen + 17 1/2" (eggs from staples and from recipes): count it all in dozens, rounded up to a half dozen.
+  if (sums.has("dozen") && sums.has("")) {
+    const each = sums.get("dozen")! * 12 + Math.ceil(sums.get("")!);
+    sums.delete("");
+    sums.set("dozen", Math.ceil(each / 6) / 2);
+  }
   const added = [...sums.entries()].map(([unit, n]) => {
     const words = unit.split(" ");
     if (n > 1 && unit) words[words.length - 1] = plural(words[words.length - 1]);

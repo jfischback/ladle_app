@@ -32,3 +32,10 @@ test("the basic list is sorted into sections in store order", () => {
   const list = basicGroceryList([r]);
   assert.deepEqual(list.sections.map((s) => s.name), ["Produce", "Meat & Seafood", "Dairy & Eggs", "Bakery & Bread"]);
 });
+
+test("the basic list adds up the same item from two recipes", () => {
+  const mk = (id: string, amount: string) => ({ id, name: id, servings: 4, ingredients: [{ amount, unit: "cup", item: "shredded cheese" }] }) as unknown as Recipe;
+  const list = basicGroceryList([mk("Tacos", "1/2"), mk("Omelet", "1/4")]);
+  const cheese = list.sections.flatMap((s) => s.items).find((i) => i.item === "shredded cheese")!;
+  assert.equal(cheese.quantity, "3/4 cup");
+});
