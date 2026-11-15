@@ -55,6 +55,11 @@ function shortName(item: string): string {
   return keep.join(" ").replace(/\s+/g, " ");
 }
 
+/** How many of the things typed in (to use up) a recipe uses. */
+export function usesUp(ingredients: Ingredient[], typed: string[]): number {
+  return typed.filter((t) => ingredients.some((i) => covered(i.item.trim(), [t]))).length;
+}
+
 export type OnHandMatch = { have: number; total: number; need: string[] };
 
 /** How much of a recipe can be made from what's on hand, and what's still needed (staples like salt don't count). */
