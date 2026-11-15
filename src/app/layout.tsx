@@ -15,9 +15,16 @@ export const metadata: Metadata = {
   description: "Plan the week around what's on sale, then approve the cart.",
 };
 
+// Every page shows today's plan and live data, so build it fresh on each visit (never frozen at build time).
+export const dynamic = "force-dynamic";
+
+// On Vercel the built-in local database can't save anything, so a real Postgres database must be connected.
+const databaseMissing = !!process.env.VERCEL && !process.env.DATABASE_URL && !process.env.POSTGRES_URL;
+
 export const viewport: Viewport = { themeColor: "#F8F4EC", width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  if (databaseMissing) return <SetupNeeded />;
   const signedIn = loginRequired ? !!(await auth())?.user : true;
   return (
     <html lang="en" className={`${nunito.variable} ${fraunces.variable}`}>
@@ -44,6 +51,27 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
         <main className={`mx-auto max-w-3xl px-4 pt-5 sm:pt-8 ${signedIn ? "pb-32 sm:pb-12" : "pb-12"}`}>{children}</main>
         {signedIn && <TabBar />}
+      </body>
+    </html>
+  );
+}
+
+function SetupNeeded() {
+  return (
+    <html lang="en" className={`${nunito.variable} ${fraunces.variable}`}>
+      <body className="min-h-screen">
+        <main className="mx-auto max-w-xl px-4 py-12">
+          <div className="card space-y-4 p-6">
+            <Wordmark className="h-10 w-auto" />
+            <h1 className="text-3xl font-semibold">One setup step left</h1>
+            <p className="text-lg">Ladle needs a database to save your recipes and plans, and none is connected to this site yet.</p>
+            <ol className="list-decimal space-y-2 pl-6 text-lg">
+              <li>In Vercel, open this project and go to <b>Storage</b>.</li>
+              <li>Create or connect a <b>Neon Postgres</b> database. That adds <code>DATABASE_URL</code> for you.</li>
+              <li>Go to <b>Deployments</b> and redeploy the latest one.</li>
+            </ol>
+          </div>
+        </main>
       </body>
     </html>
   );
