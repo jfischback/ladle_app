@@ -2,9 +2,16 @@
 
 import { useState, useTransition } from "react";
 import { saveAthletes } from "../actions/athletes";
-import { GOALS, newAthlete, portionFor, suggestTargets, type Athlete, type AthleteGoal } from "@/lib/athletes";
+import { PHASES, SPORTS, newAthlete, portionFor, suggestTargets, type Athlete, type Phase, type Sport } from "@/lib/athletes";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const EVENT_HINT: Record<string, string> = {
+  lift: "We carb up the night before and plan easy meet-day food.",
+  race: "We carb-load the 3 days before and plan a race-day breakfast.",
+  weighin: "We go lighter the 3 days before, then plan a refuel after weigh-in.",
+  show: "Peak week stays plain and lean. Follow your coach's plan.",
+  game: "Carbs the night before, and a game-day eating plan.",
+};
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export function AthletesEditor({ initial }: { initial: Athlete[] }) {
@@ -42,8 +49,14 @@ export function AthletesEditor({ initial }: { initial: Athlete[] }) {
 }
 
 function AthleteCard({ a, onChange, onRemove }: { a: Athlete; onChange: (p: Partial<Athlete>) => void; onRemove: () => void }) {
-  const suggest = (goal: AthleteGoal, weight: number | null) => (weight ? suggestTargets(goal, weight) : {});
+  // Any change to type, phase, age, miles or weight re-suggests the numbers (when we know the weight).
+  const change = (p: Partial<Athlete>) => {
+    const next = { ...a, ...p };
+    const w = next.weightLb;
+    onChange({ ...p, ...(w && w >= 60 && w <= 600 ? suggestTargets(next, w) : {}) });
+  };
   const portion = portionFor(a);
+  const sport = SPORTS[a.sport];
   return (
     <section className="card space-y-4 p-5">
       <div className="flex items-end gap-2">
@@ -55,30 +68,59 @@ function AthleteCard({ a, onChange, onRemove }: { a: Athlete; onChange: (p: Part
       </div>
 
       <fieldset>
-        <legend className="label">Goal</legend>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {(Object.keys(GOALS) as AthleteGoal[]).map((g) => {
-            const on = a.goal === g;
+        <legend className="label">What kind of athlete?</legend>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {(Object.keys(SPORTS) as Sport[]).map((k) => {
+            const on = a.sport === k;
             return (
-              <button key={g} type="button" aria-pressed={on} onClick={() => onChange({ goal: g, ...suggest(g, a.weightLb) })}
-                className={`flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition-colors ${on ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive/50"}`}>
-                <span className="text-2xl" aria-hidden="true">{GOALS[g].icon}</span>
-                <span><span className="block font-bold">{GOALS[g].label}</span><span className="text-sm text-muted">{GOALS[g].blurb}</span></span>
+              <button key={k} type="button" aria-pressed={on} onClick={() => change({ sport: k, mealsPerDay: SPORTS[k].meals })}
+                className={`flex flex-col items-start gap-0.5 rounded-2xl border-2 p-3 text-left transition-colors ${on ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive/50"}`}>
+                <span className="text-2xl" aria-hidden="true">{SPORTS[k].icon}</span>
+                <span className="font-bold leading-tight">{SPORTS[k].label}</span>
+                <span className="text-xs text-muted">{SPORTS[k].blurb}</span>
               </button>
             );
           })}
         </div>
       </fieldset>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <fieldset>
+        <legend className="label">Right now they&apos;re…</legend>
+        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-oat p-1">
+          {(Object.keys(PHASES) as Phase[]).map((k) => {
+            const on = a.phase === k;
+            return (
+              <button key={k} type="button" aria-pressed={on} onClick={() => change({ phase: k })}
+                className={`rounded-xl px-2 py-2 text-center transition-colors ${on ? "bg-card shadow-soft" : "hover:bg-card/60"}`}>
+                <span className="block font-bold">{PHASES[k].label}</span>
+                <span className="block text-xs text-muted">{PHASES[k].blurb}</span>
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <label className="flex cursor-pointer items-start gap-3">
+        <input type="checkbox" className="mt-1 h-5 w-5 accent-olive" checked={a.youth} onChange={(e) => change({ youth: e.target.checked, ...(e.target.checked ? { shakes: false } : {}) })} />
+        <span><b>Under 18</b> <span className="text-muted">Growing kids need plenty of food. We use real-food snacks instead of protein powder and bars (you can still allow shakes below).</span></span>
+      </label>
+
+      <div className={`grid gap-3 ${a.sport === "endurance" ? "sm:grid-cols-2" : ""}`}>
         <label>
           <span className="label">Body weight (lb)</span>
           <input className="field" inputMode="numeric" value={a.weightLb ?? ""} placeholder="e.g. 250"
-            onChange={(e) => {
-              const w = Number(e.target.value.replace(/\D/g, "")) || null;
-              onChange({ weightLb: w, ...(w && w >= 60 && w <= 600 ? suggest(a.goal, w) : {}) });
-            }} />
+            onChange={(e) => change({ weightLb: Number(e.target.value.replace(/\D/g, "")) || null })} />
         </label>
+        {a.sport === "endurance" && (
+          <label>
+            <span className="label">Miles a week</span>
+            <input className="field" inputMode="numeric" value={a.milesPerWeek ?? ""} placeholder="e.g. 25"
+              onChange={(e) => change({ milesPerWeek: Number(e.target.value.replace(/\D/g, "")) || null })} />
+          </label>
+        )}
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
         <label>
           <span className="label">Calories a day</span>
           <input className="field" inputMode="numeric" value={a.calories} onChange={(e) => onChange({ calories: Number(e.target.value.replace(/\D/g, "")) || 0 })} />
@@ -89,7 +131,7 @@ function AthleteCard({ a, onChange, onRemove }: { a: Athlete; onChange: (p: Part
         </label>
       </div>
       <p className="-mt-2 text-sm text-muted">
-        {a.weightLb ? "Filled in from body weight and goal. Change them to your coach's numbers anytime." : "Enter body weight and we'll suggest numbers."}
+        {a.weightLb ? `Suggested for a ${sport.label.toLowerCase()} at ${a.weightLb} lb. Change them to your coach's numbers anytime.` : "Enter body weight and we'll suggest numbers."}
         {" "}Training days get the full amount; rest days about 10% fewer calories.
       </p>
 
@@ -120,8 +162,9 @@ function AthleteCard({ a, onChange, onRemove }: { a: Athlete; onChange: (p: Part
           <p className="mt-1 text-sm text-muted">3 meals + {Math.max(0, a.mealsPerDay - 3)} snack{a.mealsPerDay - 3 === 1 ? "" : "s"} or shake{a.mealsPerDay - 3 === 1 ? "" : "s"}</p>
         </div>
         <label>
-          <span className="label">Next competition or race <span className="font-normal text-muted">(optional)</span></span>
+          <span className="label">Next {sport.eventLabel} <span className="font-normal text-muted">(optional)</span></span>
           <input type="date" className="field" value={a.competitionDate ?? ""} onChange={(e) => onChange({ competitionDate: e.target.value || null })} />
+          <span className="mt-1 block text-sm text-muted">{EVENT_HINT[sport.event]}</span>
         </label>
       </div>
 

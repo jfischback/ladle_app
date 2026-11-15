@@ -130,7 +130,7 @@ export async function planWeek(input: {
       baby: settings.hasBaby ? { ageMonths: settings.babyAgeMonths } : null,
     },
     priorities: settings.motivation.map((m) => MOTIVATIONS[m]),
-    athletes: settings.athletes.map((a) => ({ name: a.name, goal: a.goal, proteinGramsPerDay: a.protein, caloriesPerDay: a.calories })),
+    athletes: settings.athletes.map((a) => ({ name: a.name, type: a.sport, phase: a.phase, teen: a.youth, proteinGramsPerDay: a.protein, caloriesPerDay: a.calories })),
     dinnersPerWeek: settings.dinnersPerWeek,
     weeklyBudget: settings.weeklyBudget,
     staplesCost: Math.round(input.staplesCost ?? 0),
