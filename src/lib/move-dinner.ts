@@ -19,30 +19,22 @@ function swapDinner(a: PlanDay, b: PlanDay): [PlanDay, PlanDay] {
 
 const lunchContent = (l: PlanLunch) => ({ kind: l.kind, recipeId: l.recipeId, name: l.name, reason: l.reason });
 
-/**
- * Trade two nights' dinners in a week that's already shopped for ("soccer ran late, do Tuesday's on Thursday").
- * The groceries don't change. Leftovers nights follow their dinner and must still come after it, and a
- * next-day leftovers lunch follows its dinner when it can.
- */
-export function moveDinner(days: PlanDay[], from: number, to: number, today: string): { days: PlanDay[] } | { error: string } {
-  const a = days[from];
-  const b = days[to];
-  if (!a || !b || from === to) return { error: "Pick another night." };
-  if (!movable(a, today) || !movable(b, today)) return { error: "Only tonight and the nights ahead can change." };
-  if (a.recipeId === b.recipeId && !a.leftoverOf === !b.leftoverOf) return { error: "Those nights already have the same dinner." };
-
+/** Apply the trades, keep leftovers nights pointing at their dinner, and check they still come after it. */
+function trade(days: PlanDay[], swaps: [number, number][]): PlanDay[] | string {
   const next = days.map((d) => ({ ...d }));
-  [next[from], next[to]] = swapDinner(a, b);
-  // A leftovers night points at the date its dinner is cooked; that dinner may have just moved.
-  for (const d of next) {
-    if (d.leftoverOf === a.date) d.leftoverOf = b.date;
-    else if (d.leftoverOf === b.date) d.leftoverOf = a.date;
+  const dateMap = new Map<string, string>();
+  for (const [i, j] of swaps) {
+    [next[i], next[j]] = swapDinner(days[i], days[j]);
+    dateMap.set(days[i].date, days[j].date);
+    dateMap.set(days[j].date, days[i].date);
   }
+  // A leftovers night points at the date its dinner is cooked; that dinner may have just moved.
+  for (const d of next) if (d.leftoverOf && dateMap.has(d.leftoverOf)) d.leftoverOf = dateMap.get(d.leftoverOf)!;
   for (const d of next) {
     if (!d.leftoverOf) continue;
     const origin = next.find((x) => x.date === d.leftoverOf);
     if (!origin || d.leftoverOf >= d.date || origin.recipeId !== d.recipeId) {
-      return { error: `${d.recipeName ?? "That dinner"}'s leftovers night has to come after the night it's cooked. Move the leftovers night too, or pick another night.` };
+      return `${d.recipeName ?? "That dinner"}'s leftovers night has to come after the night it's cooked. Move the leftovers night too, or pick another night.`;
     }
   }
 
@@ -51,13 +43,15 @@ export function moveDinner(days: PlanDay[], from: number, to: number, today: str
     const l = next[i]?.lunch;
     return !!l && l.kind === "leftovers" && i > 0 && next[i - 1].recipeId !== l.recipeId;
   };
-  const la = from + 1;
-  const lb = to + 1;
-  if ((isStale(la) || isStale(lb)) && next[la]?.lunch && next[lb]?.lunch) {
-    const ca = lunchContent(next[la].lunch!);
-    const cb = lunchContent(next[lb].lunch!);
-    next[la] = { ...next[la], lunch: { ...next[la].lunch!, ...cb } };
-    next[lb] = { ...next[lb], lunch: { ...next[lb].lunch!, ...ca } };
+  for (const [from, to] of swaps) {
+    const la = from + 1;
+    const lb = to + 1;
+    if ((isStale(la) || isStale(lb)) && next[la]?.lunch && next[lb]?.lunch) {
+      const ca = lunchContent(next[la].lunch!);
+      const cb = lunchContent(next[lb].lunch!);
+      next[la] = { ...next[la], lunch: { ...next[la].lunch!, ...cb } };
+      next[lb] = { ...next[lb], lunch: { ...next[lb].lunch!, ...ca } };
+    }
   }
   // Any leftovers lunch still out of step: fine if its dinner is cooked earlier, otherwise say what to do.
   for (let i = 1; i < next.length; i++) {
@@ -73,15 +67,50 @@ export function moveDinner(days: PlanDay[], from: number, to: number, today: str
       };
     }
   }
-  return { days: next };
+  return next;
+}
+
+/** The one leftovers night that eats this dinner, if it has exactly one. */
+function leftoversNight(days: PlanDay[], i: number): number | null {
+  const found = days.flatMap((d, j) => (d.leftoverOf === days[i].date ? [j] : []));
+  return found.length === 1 ? found[0] : null;
+}
+
+/**
+ * Trade two nights' dinners in a week that's already shopped for ("soccer ran late, do Tuesday's on Thursday").
+ * The groceries don't change. Leftovers nights follow their dinner and must still come after it, and a
+ * next-day leftovers lunch follows its dinner when it can. When two cook-once-eat-twice dinners trade, their
+ * leftovers nights trade too (`pair` says which nights).
+ */
+export function moveDinner(days: PlanDay[], from: number, to: number, today: string): { days: PlanDay[]; pair?: [number, number] } | { error: string } {
+  const a = days[from];
+  const b = days[to];
+  if (!a || !b || from === to) return { error: "Pick another night." };
+  if (!movable(a, today) || !movable(b, today)) return { error: "Only tonight and the nights ahead can change." };
+  if (a.recipeId === b.recipeId && !a.leftoverOf === !b.leftoverOf) return { error: "Those nights already have the same dinner." };
+
+  const single = trade(days, [[from, to]]);
+  if (typeof single !== "string") return { days: single };
+  // Both are cooked with a leftovers night: move each dinner with its leftovers.
+  const la = a.leftoverOf ? null : leftoversNight(days, from);
+  const lb = b.leftoverOf ? null : leftoversNight(days, to);
+  if (la != null && lb != null && new Set([from, to, la, lb]).size === 4 && movable(days[la], today) && movable(days[lb], today)) {
+    const paired = trade(days, [[from, to], [la, lb]]);
+    if (typeof paired !== "string") return { days: paired, pair: [la, lb] };
+  }
+  return { error: single };
 }
 
 /** The nights a dinner can trade with: only the ones where the move works (leftovers still after their dinner). */
 export function moveTargets(days: PlanDay[], from: number, today: string): { index: number; label: string }[] {
   if (!days[from] || !movable(days[from], today)) return [];
-  return days.flatMap((o, j) =>
-    j !== from && "days" in moveDinner(days, from, j, today)
-      ? [{ index: j, label: `${dayName(o.date)} ${Number(o.date.slice(8))} · ${o.leftoverOf ? `${o.recipeName} leftovers` : (o.recipeName ?? "night off")}` }]
-      : [],
-  );
+  return days.flatMap((o, j) => {
+    if (j === from) return [];
+    const r = moveDinner(days, from, j, today);
+    if (!("days" in r)) return [];
+    const what = o.leftoverOf ? `${o.recipeName} leftovers` : (o.recipeName ?? "night off");
+    // A pair move says where the leftovers nights land too.
+    const also = r.pair ? " (leftovers nights trade too)" : "";
+    return [{ index: j, label: `${dayName(o.date)} ${Number(o.date.slice(8))} · ${what}${also}` }];
+  });
 }

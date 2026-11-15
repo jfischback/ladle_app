@@ -55,3 +55,14 @@ test("only nights that work are offered", async () => {
   assert.deepEqual(moveTargets(days, 0, "2026-11-15").map((t) => t.index), [1, 3], "a night off can't take the leftovers before the chili");
   assert.deepEqual(moveTargets(days, 2, "2026-11-15").map((t) => t.index), [3]);
 });
+
+test("two cook-once-eat-twice dinners trade along with their leftovers nights", () => {
+  const days = [
+    day("2026-11-22", "sheetpan", { batches: 2 }), day("2026-11-23", "sheetpan", { leftoverOf: "2026-11-22" }),
+    day("2026-11-24", "enchiladas", { batches: 2 }), day("2026-11-25", "enchiladas", { leftoverOf: "2026-11-24" }),
+  ];
+  const r = moveDinner(days, 0, 2, "2026-11-22");
+  assert.ok("days" in r, "error" in r ? r.error : "");
+  assert.deepEqual(r.pair, [1, 3]);
+  assert.deepEqual(r.days.map((d) => [d.recipeId, d.leftoverOf ?? null]), [["enchiladas", null], ["enchiladas", "2026-11-22"], ["sheetpan", null], ["sheetpan", "2026-11-24"]]);
+});
