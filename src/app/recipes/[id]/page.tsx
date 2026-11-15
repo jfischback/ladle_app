@@ -10,6 +10,7 @@ import { leftoverKind, leftoverWhy } from "@/lib/leftovers";
 import { formatMinutes } from "@/lib/format";
 import { FoodArt } from "@/components/FoodArt";
 import { IngredientList } from "./IngredientList";
+import { CookMode } from "./CookMode";
 import { estimateNutrition, trustworthy } from "@/lib/nutrition";
 
 export default async function RecipePage({ params }: { params: Promise<{ id: string }> }) {
@@ -85,11 +86,14 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
 
       <section>
         <h2 className="mb-3 text-2xl font-semibold">Ingredients</h2>
-        {r.ingredients.length ? <IngredientList ingredients={r.ingredients} /> : <p className="text-muted">No ingredients yet.</p>}
+        {r.ingredients.length ? <IngredientList ingredients={r.ingredients} servings={r.servings} /> : <p className="text-muted">No ingredients yet.</p>}
       </section>
 
       <section>
-        <h2 className="mb-3 text-2xl font-semibold">Let&apos;s cook</h2>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-2xl font-semibold">Let&apos;s cook</h2>
+          <CookMode name={r.name} steps={r.steps} ingredients={r.ingredients} />
+        </div>
         {!r.steps.length && r.creditUrl ? (
           <a href={r.creditUrl} target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 p-4 font-bold text-olive-dark hover:shadow-lift">
             <span>See the steps on {r.creditName ?? "the original site"}</span>

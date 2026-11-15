@@ -2,30 +2,47 @@
 
 import { useState } from "react";
 import type { Ingredient } from "@/lib/types";
+import { scaleIngredient } from "@/lib/scaling";
 
-/** Tap ingredients off as you gather them. */
-export function IngredientList({ ingredients }: { ingredients: Ingredient[] }) {
+/** Tap ingredients off as you gather them; change the servings and every amount follows. */
+export function IngredientList({ ingredients, servings }: { ingredients: Ingredient[]; servings?: number | null }) {
   const [got, setGot] = useState<Set<number>>(new Set());
+  const base = servings && servings > 0 ? servings : null;
+  const [makes, setMakes] = useState(base ?? 0);
+  const factor = base ? makes / base : 1;
   const toggle = (n: number) => setGot((prev) => { const next = new Set(prev); if (next.has(n)) next.delete(n); else next.add(n); return next; });
   return (
-    <ul className="card divide-y divide-line/70 p-2">
-      {ingredients.map((i, n) => {
-        const on = got.has(n);
-        return (
-          <li key={n}>
-            <label className={`flex cursor-pointer items-start gap-3 rounded-2xl px-3 py-2.5 hover:bg-cream ${on ? "opacity-50" : ""}`}>
-              <input type="checkbox" className="peer sr-only" checked={on} onChange={() => toggle(n)} />
-              <span aria-hidden="true" className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold peer-focus-visible:ring-2 peer-focus-visible:ring-olive ${on ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>
-                {on ? "✓" : ""}
-              </span>
-              <span className={on ? "line-through" : ""}>
-                {(i.amount || i.unit) && <span className="font-bold">{[i.amount, i.unit].filter(Boolean).join(" ")} </span>}
-                {i.item}
-              </span>
-            </label>
-          </li>
-        );
-      })}
-    </ul>
+    <div className="space-y-2">
+      {base && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-semibold">Makes</span>
+          <button type="button" aria-label="Fewer servings" className="btn-secondary h-9 min-h-9 w-9 px-0" disabled={makes <= 1} onClick={() => setMakes((m) => Math.max(1, m - 1))}>−</button>
+          <span className="w-8 text-center text-lg font-bold" aria-live="polite">{makes}</span>
+          <button type="button" aria-label="More servings" className="btn-secondary h-9 min-h-9 w-9 px-0" disabled={makes >= 24} onClick={() => setMakes((m) => Math.min(24, m + 1))}>+</button>
+          <span className="text-muted">servings</span>
+          {makes !== base && <button type="button" className="btn-quiet min-h-9 px-2 text-sm" onClick={() => setMakes(base)}>Reset to {base}</button>}
+        </div>
+      )}
+      <ul className="card divide-y divide-line/70 p-2">
+        {ingredients.map((raw, n) => {
+          const i = scaleIngredient(raw, factor);
+          const on = got.has(n);
+          return (
+            <li key={n}>
+              <label className={`flex cursor-pointer items-start gap-3 rounded-2xl px-3 py-2.5 hover:bg-cream ${on ? "opacity-50" : ""}`}>
+                <input type="checkbox" className="peer sr-only" checked={on} onChange={() => toggle(n)} />
+                <span aria-hidden="true" className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold peer-focus-visible:ring-2 peer-focus-visible:ring-olive ${on ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>
+                  {on ? "✓" : ""}
+                </span>
+                <span className={on ? "line-through" : ""}>
+                  {(i.amount || i.unit) && <span className="font-bold">{[i.amount, i.unit].filter(Boolean).join(" ")} </span>}
+                  {i.item}
+                </span>
+              </label>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
