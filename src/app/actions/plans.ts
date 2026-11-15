@@ -29,6 +29,7 @@ import type { Settings } from "@/lib/settings";
 import { addDays, dayName, upcomingWeekStart, weekDates } from "@/lib/week";
 import { TOO_MANY, under } from "@/lib/rate-limit";
 import { moveDinner } from "@/lib/move-dinner";
+import { withFeastSections } from "@/lib/feast-grocery";
 import { today } from "@/lib/week";
 
 export type ActionResult = { error?: string } | void;
@@ -261,6 +262,8 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
     const halves = chosen.filter((r) => makeTimes.get(r.id) === 0.5).map((r) => r.name);
     const halfNote = halves.length ? [`Half batches for your household (the amounts on this list are for half the recipe): ${halves.join(", ")}.`] : [];
     groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days), ...healthGroceryNotes(healthNeeds(settings.athletes)), ...portionNotes(athletes), ...halfNote], makeTimes);
+    // A holiday feast (Thanksgiving) gets its own section, sized for the guests.
+    groceryList = withFeastSections(groceryList, plan.days, sales);
     // Weekly staples get their own section, with this week's sale prices where we found them.
     const snap = new Map((plan.staples ?? []).map((l) => [stapleTerm(l.item), l]));
     const items = settings.staples.filter((x) => x.active).map((x) => {

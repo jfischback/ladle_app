@@ -6,6 +6,7 @@ import { approvePlan, moveDinnerTo, planUpcomingWeek, rateCookedDinner, startOve
 import { answerPantryCheck } from "./actions/pantry";
 import { addGroceryItem, removeGroceryItem, setGroceryChecks } from "./actions/grocery";
 import { tickKey } from "@/lib/grocery-checks";
+import { FeastCard, FeastPlanner } from "@/components/FeastCard";
 import { ADDED_SECTION } from "@/lib/grocery-add";
 import { useRouter } from "next/navigation";
 import { groceryText } from "@/lib/grocery-text";
@@ -46,12 +47,15 @@ export function PlanButton({ label, big }: { label: string; big?: boolean }) {
   );
 }
 
-export function DayCard({ planId, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [] }: {
+export function DayCard({ planId, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [], canFeast = false, feastGuests = 4 }: {
   planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number; picky?: string[];
   moveTargets?: { index: number; label: string }[];
+  canFeast?: boolean; // a holiday with a menu (Thanksgiving) that hasn't passed
+  feastGuests?: number;
 }) {
   const [open, setOpen] = useState(false);
   const [moving, setMoving] = useState(false);
+  const [feasting, setFeasting] = useState(false);
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const swap = (recipeId: string | null) =>
@@ -96,9 +100,13 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
     </div>
   );
 
+  // A holiday dinner (Thanksgiving) has its own card.
+  if (day.feast) return <FeastCard planId={planId} index={index} day={day} isToday={isToday} canChange={canFeast} locked={locked} defaultGuests={feastGuests} />;
+  const dinnerName = day.recipeId ? null : day.leftoverOf ? day.recipeName : null; // feast leftovers have no recipe
+
   return (
     <div className={`card overflow-hidden transition-opacity ${isToday ? "ring-2 ring-terracotta shadow-lift" : ""} ${pending ? "opacity-60" : ""}`}>
-      {!isToday && !day.recipeId && !day.lunch && !day.breakfast && !day.holiday ? (
+      {!isToday && !day.recipeId && !day.leftoverOf && !day.lunch && !day.breakfast && !day.holiday ? (
         // A plain night off is one slim row, so the week's dinners show sooner.
         <div className="flex items-center gap-3 px-4 py-2.5">
           <span className="text-lg" aria-hidden="true">🍕</span>
@@ -124,9 +132,9 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
               {day.recipeId ? (
                 <Link href={`/recipes/${day.recipeId}`} className="font-display text-2xl font-semibold leading-snug hover:underline">{day.recipeName}</Link>
               ) : (
-                <p className="font-display text-2xl font-semibold">Night off tonight!</p>
+                <p className="font-display text-2xl font-semibold">{dinnerName ?? "Night off tonight!"}</p>
               )}
-              <Details cookTime={day.leftoverOf ? null : cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} leftover={!!day.leftoverOf} plates={plates ? plates * (day.batches ?? 1) : undefined} />
+              <Details cookTime={day.leftoverOf ? null : cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId && !day.leftoverOf} leftover={!!day.leftoverOf} plates={plates ? plates * (day.batches ?? 1) : undefined} />
             </div>
             {swapButton}
           </div>
@@ -151,9 +159,9 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
             {day.recipeId ? (
               <Link href={`/recipes/${day.recipeId}`} className="block font-bold leading-snug hover:underline">{day.recipeName}</Link>
             ) : (
-              <p className="font-bold text-olive-dark">Night off</p>
+              <p className="font-bold text-olive-dark">{dinnerName ?? "Night off"}</p>
             )}
-            <Details cookTime={day.leftoverOf ? null : cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} leftover={!!day.leftoverOf} plates={plates ? plates * (day.batches ?? 1) : undefined} />
+            <Details cookTime={day.leftoverOf ? null : cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId && !day.leftoverOf} leftover={!!day.leftoverOf} plates={plates ? plates * (day.batches ?? 1) : undefined} />
           </div>
           {swapButton}
         </div>
@@ -192,6 +200,15 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
           </div>
           {movePicker && <div className="border-t border-line pt-3">{movePicker}</div>}
           <ErrorNote error={error} />
+        </div>
+      )}
+      {canFeast && !day.feast && (
+        <div className="border-t border-line bg-ochre-soft/60 p-4">
+          {feasting ? (
+            <FeastPlanner planId={planId} index={index} day={day} defaultGuests={feastGuests} onDone={() => setFeasting(false)} />
+          ) : (
+            <button type="button" className="btn-warm w-full sm:w-auto" onClick={() => setFeasting(true)}>🦃 Plan {day.holiday} dinner instead</button>
+          )}
         </div>
       )}
       {moving && locked && (

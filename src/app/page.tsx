@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { moveTargets } from "@/lib/move-dinner";
+import { feastMenu, feastTips } from "@/lib/feast";
 import { redirect } from "next/navigation";
 import { requireUserId } from "@/auth";
 import { activePlans, getSettings, myRecipes } from "@/lib/data";
@@ -34,6 +35,8 @@ export default async function HomePage() {
   const inProgress = currentWeekStart(settings.shoppingDay);
   const plan = plans.find((p) => p.weekOf === upcoming) ?? plans.find((p) => p.weekOf === inProgress) ?? null;
   const todayStr = today();
+  // The holiday countdown ("move the turkey to the fridge today") on the days it falls on.
+  const feastTipsByDate = feastTips(plan?.days ?? []);
 
   // Rating prompt after each cook: past dinners from approved plans that haven't been rated.
   const toRate = plans
@@ -123,9 +126,11 @@ export default async function HomePage() {
                   isToday={d.date === todayStr}
                   locked={approved}
                   recipes={recipeInfo}
-                  picky={[...(prep?.finish[d.date] ? [`🥡 Prepped ${dayName(prep.date)}: about ${prep.finish[d.date]} minutes to finish tonight.`] : []), ...pickyFor(d)]}
+                  picky={[...(feastTipsByDate.get(d.date) ?? []), ...(prep?.finish[d.date] ? [`🥡 Prepped ${dayName(prep.date)}: about ${prep.finish[d.date]} minutes to finish tonight.`] : []), ...pickyFor(d)]}
                   plates={settings.tightBudget ? Math.max(1, settings.adults + settings.kids * 0.7) : undefined}
                   moveTargets={moveTargets(plan.days, i, todayStr)}
+                  canFeast={!!d.holiday && !!feastMenu(d.holiday) && d.date >= todayStr}
+                  feastGuests={settings.adults + settings.kids}
                 />
               </li>
             ))}

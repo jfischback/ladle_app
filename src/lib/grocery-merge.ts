@@ -6,7 +6,7 @@ import { AISLES } from "./aisles";
 
 // Sections whose lines stay as they are: baby food is its own thing, a deal names one product,
 // and the pantry sections aren't things to buy.
-const KEEP_APART = /^baby$|breakfast meat deal|stock up|pantry check|already in your pantry/i;
+const KEEP_APART = /^baby$|breakfast meat deal|stock up|pantry check|already in your pantry|^thanksgiving dinner \(/i;
 // Words that don't change what to buy.
 const IGNORE = new Set(["boneles", "skinles", "boneless", "skinless", "raw", "uncooked", "dozen", "ct"]);
 
