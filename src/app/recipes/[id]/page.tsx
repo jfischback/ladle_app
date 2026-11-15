@@ -11,11 +11,12 @@ import { formatMinutes } from "@/lib/format";
 import { FoodArt } from "@/components/FoodArt";
 import { IngredientList } from "./IngredientList";
 import { CookMode } from "./CookMode";
+import { dinnerServings } from "@/lib/scaling";
 import { RecipeNotes } from "./RecipeNotes";
 import { ShareRecipe } from "./ShareRecipe";
 import { estimateCost, estimateNutrition, estimateSodium, trustworthy } from "@/lib/nutrition";
 
-export default async function RecipePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cook?: string }> }) {
+export default async function RecipePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cook?: string; batches?: string }> }) {
   const userId = await requireUserId();
   const { id } = await params;
   const sp = await searchParams;
@@ -29,6 +30,11 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
   const sodium = estimateSodium(r);
   const cost = estimateCost(r);
   const cookNow = sp.cook === "1";
+  // Dinners open sized for the family (times the batches tonight cooks: a double batch for a leftovers night).
+  const batches = Math.min(3, Math.max(1, Number(sp.batches) || 1));
+  // The same rounding as the grocery list: to the nearest half recipe, rounded up.
+  const familyServings = r.meal === "dinner" && r.servings ? Math.round(r.servings * Math.max(0.5, Math.ceil(((dinnerServings(settings) * batches) / r.servings) * 2) / 2)) : null;
+  const sizedWhy = familyServings ? (batches > 1 ? `Sized for your family, times ${batches} for the leftovers night, like your grocery list.` : "Sized for your family, like your grocery list.") : null;
 
   return (
     <article className="space-y-6">
@@ -118,7 +124,7 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
           <h2 className="text-2xl font-semibold">Ingredients</h2>
           <ShareRecipe recipe={{ id: r.id, name: r.name, servings: r.servings, totalMinutes: r.totalMinutes, ingredients: r.ingredients, steps: r.steps, creditName: r.creditName, creditUrl: r.creditUrl }} />
         </div>
-        {r.ingredients.length ? <IngredientList recipeId={r.id} ingredients={r.ingredients} servings={r.servings} /> : <p className="text-muted">No ingredients yet.</p>}
+        {r.ingredients.length ? <IngredientList recipeId={r.id} ingredients={r.ingredients} servings={r.servings} familyServings={familyServings} why={sizedWhy} /> : <p className="text-muted">No ingredients yet.</p>}
       </section>
 
       <section>
