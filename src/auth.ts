@@ -7,6 +7,7 @@ import { z } from "zod";
 import { authConfig } from "./auth.config";
 import { getDb } from "./db";
 import { settings as settingsTable, users } from "./db/schema";
+import { mayCreateAccount } from "./lib/signup-policy";
 
 export const googleEnabled = !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
 
@@ -32,6 +33,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
+    // Invite-only mode applies to Google sign-ups too: a new Google account needs an invite (or to be the first).
+    async signIn({ user, account }) {
+      if (account?.provider !== "google" || !user.email) return true;
+      const db = await getDb();
+      const [found] = await db.select({ id: users.id }).from(users).where(eq(users.email, user.email.toLowerCase()));
+      return found ? true : mayCreateAccount({});
+    },
     async jwt({ token, user, account }) {
       if (user && account?.provider === "google" && user.email) {
         // Link Google sign-ins to our users table by email.

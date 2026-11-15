@@ -85,6 +85,13 @@
       "when": 1794755254111,
       "tag": "0011_lush_dracula",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794755860944,
+      "tag": "0012_wonderful_the_captain",
+      "breakpoints": true
     }
   ]
 }

@@ -1,22 +1,36 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { cancelInvite, createInvite, leaveHousehold, removeMember } from "../actions/household";
+import { cancelInvite, createFamilyInvite, createInvite, leaveHousehold, removeMember } from "../actions/household";
 
 type Member = { id: string; label: string; email: string; owner: boolean };
 
-export function HouseholdClient({ me, members, invites, canLeave }: { me: string; members: Member[]; invites: { code: string; expires: string }[]; canLeave: boolean }) {
+export function HouseholdClient({ me, members, invites, canLeave }: { me: string; members: Member[]; invites: { code: string; expires: string; kind: "join" | "family" }[]; canLeave: boolean }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
-  const link = (code: string) => `${window.location.origin}/join/${code}`;
-  const share = async (code: string) => {
-    const url = link(code);
+  const linkFor = (i: { code: string; kind: "join" | "family" }) => (i.kind === "family" ? `/signup?invite=${i.code}` : `/join/${i.code}`);
+  const share = async (i: { code: string; kind: "join" | "family" }) => {
+    const url = `${window.location.origin}${linkFor(i)}`;
+    const text = i.kind === "family" ? "Try Ladle for planning your family's dinners:" : "Plan dinners with me on Ladle:";
     try {
-      if (navigator.share) await navigator.share({ title: "Join my Ladle household", text: "Plan dinners with me on Ladle:", url });
-      else { await navigator.clipboard.writeText(url); setCopied(code); }
+      if (navigator.share) await navigator.share({ title: i.kind === "family" ? "You're invited to Ladle" : "Join my Ladle household", text, url });
+      else { await navigator.clipboard.writeText(url); setCopied(i.code); }
     } catch { /* closed the share sheet */ }
   };
+  const InviteList = ({ items }: { items: { code: string; expires: string; kind: "join" | "family" }[] }) =>
+    items.length ? (
+      <ul className="space-y-2">
+        {items.map((i) => (
+          <li key={i.code} className="flex flex-wrap items-center gap-2 rounded-2xl bg-oat p-3 text-sm">
+            <code className="min-w-0 flex-1 truncate">{linkFor(i)}</code>
+            <span className="text-muted">until {new Date(i.expires).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
+            <button className="btn-secondary min-h-9 px-3 text-sm" onClick={() => share(i)}>{copied === i.code ? "Copied!" : "Share"}</button>
+            <button className="btn-quiet min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(() => cancelInvite(i.code))}>Cancel</button>
+          </li>
+        ))}
+      </ul>
+    ) : null;
   return (
     <div className="space-y-4">
       <section className="card p-5">
@@ -40,21 +54,22 @@ export function HouseholdClient({ me, members, invites, canLeave }: { me: string
           setError(null);
           const r = await createInvite();
           if (r.error) setError(r.error);
-          else if (r.code) await share(r.code);
+          else if (r.code) await share({ code: r.code, kind: "join" });
         })}>💌 Create an invite link</button>
         {error && <p className="font-semibold text-terracotta-dark">{error}</p>}
-        {invites.length > 0 && (
-          <ul className="space-y-2">
-            {invites.map((i) => (
-              <li key={i.code} className="flex flex-wrap items-center gap-2 rounded-2xl bg-oat p-3 text-sm">
-                <code className="min-w-0 flex-1 truncate">/join/{i.code}</code>
-                <span className="text-muted">until {new Date(i.expires).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
-                <button className="btn-secondary min-h-9 px-3 text-sm" onClick={() => share(i.code)}>{copied === i.code ? "Copied!" : "Share"}</button>
-                <button className="btn-quiet min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(() => cancelInvite(i.code))}>Cancel</button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <InviteList items={invites.filter((i) => i.kind === "join")} />
+      </section>
+
+      <section className="card space-y-3 p-5">
+        <h2 className="text-xl font-semibold">Invite another family</h2>
+        <p className="text-muted">A friend, a sister, another mom: a sign-up link so they can start Ladle with their own recipes and plans (separate from yours). Works once, for 14 days, even when sign-up is invite-only.</p>
+        <button className="btn-secondary" disabled={pending} onClick={() => start(async () => {
+          setError(null);
+          const r = await createFamilyInvite();
+          if (r.error) setError(r.error);
+          else if (r.code) await share({ code: r.code, kind: "family" });
+        })}>🎁 Create a family invite</button>
+        <InviteList items={invites.filter((i) => i.kind === "family")} />
       </section>
 
       {canLeave && (

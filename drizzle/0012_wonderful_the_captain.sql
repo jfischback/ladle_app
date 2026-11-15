@@ -1,0 +1,1 @@
+ALTER TABLE "household_invites" ADD COLUMN "kind" text DEFAULT 'join' NOT NULL;

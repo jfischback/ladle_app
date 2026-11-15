@@ -23,6 +23,18 @@ export async function createInvite(): Promise<{ code?: string; error?: string }>
   return { code };
 }
 
+/** "Invite another family": a sign-up link for someone to start their own household (works even when sign-up is invite-only). */
+export async function createFamilyInvite(): Promise<{ code?: string; error?: string }> {
+  if (!loginRequired) return { error: "Turn on sign-in first, so each family has their own account." };
+  const me = await currentAccount();
+  if (!(await under("invite", me.accountId))) return { error: TOO_MANY };
+  const code = randomBytes(9).toString("base64url");
+  const db = await getDb();
+  await db.insert(householdInvites).values({ code, householdId: me.householdId, createdBy: me.accountId, expiresAt: new Date(Date.now() + 14 * DAY), kind: "family" });
+  revalidatePath("/household");
+  return { code };
+}
+
 export async function cancelInvite(code: string) {
   const me = await currentAccount();
   const db = await getDb();
@@ -34,7 +46,7 @@ export async function cancelInvite(code: string) {
 export async function joinHousehold(code: string): Promise<{ error?: string }> {
   const me = await currentAccount();
   const db = await getDb();
-  const [inv] = await db.select().from(householdInvites).where(and(eq(householdInvites.code, code), isNull(householdInvites.usedAt), gt(householdInvites.expiresAt, new Date())));
+  const [inv] = await db.select().from(householdInvites).where(and(eq(householdInvites.code, code), eq(householdInvites.kind, "join"), isNull(householdInvites.usedAt), gt(householdInvites.expiresAt, new Date())));
   if (!inv) return { error: "This invite link has expired or was already used. Ask for a new one." };
   if (inv.householdId === me.householdId) return { error: "You're already in this household." };
   // The owner of the data set up before sign-in can't move away from it (everyone else would lose their owner).
