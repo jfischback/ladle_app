@@ -251,6 +251,7 @@ export function Celebrate() {
 }
 
 const SECTION_ICONS: [RegExp, string][] = [
+  [/staple/i, "🧺"],
   [/produce|fruit|veg/i, "🥕"],
   [/meat|seafood|protein|butcher/i, "🥩"],
   [/dairy|egg|cheese|milk/i, "🧀"],
@@ -306,8 +307,12 @@ export function GroceryChecklist({ plan }: { plan: Plan }) {
                         <span className={`font-semibold ${on ? "line-through" : ""}`}>{it.item}</span>
                         {it.quantity && <span> · {it.quantity}</span>}
                         {it.note && <span className="text-muted"> · {it.note}</span>}
-                        <br />
-                        <span className="text-sm text-muted">For {it.forRecipes.join(", ")}</span>
+                        {it.forRecipes.length > 0 && (
+                          <>
+                            <br />
+                            <span className="text-sm text-muted">For {it.forRecipes.join(", ")}</span>
+                          </>
+                        )}
                       </span>
                     </label>
                   </li>

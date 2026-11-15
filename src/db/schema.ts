@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, timestamp, jsonb, integer, real, index, boolean, uniqueIndex } from "drizzle-orm/pg-core";
 import type { Settings } from "@/lib/settings";
-import type { Ingredient, PlanDay, GroceryList, SaleItem, SaleCheck } from "@/lib/types";
+import type { Ingredient, PlanDay, GroceryList, SaleItem, SaleCheck, StapleLine } from "@/lib/types";
 
 // Nothing is ever deleted: recipes and plans are archived via archivedAt.
 
@@ -66,6 +66,7 @@ export const plans = pgTable(
     // Older plans stored plain names; newer ones store the full sale with prices.
     saleItems: jsonb("sale_items").$type<(string | SaleItem)[]>().notNull().default([]),
     saleCheck: jsonb("sale_check").$type<SaleCheck>(),
+    staples: jsonb("staples").$type<StapleLine[]>(), // weekly staples with this week's prices
     summary: text("summary"),
     plannerSource: text("planner_source").notNull(), // claude | basic
     estimatedTotal: real("estimated_total"),

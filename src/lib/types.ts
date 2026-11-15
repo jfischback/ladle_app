@@ -32,6 +32,12 @@ export type SaleItem = {
   pctOff: number;
 };
 
+/** Something bought every week no matter what's for dinner (milk, eggs, bread…). */
+export type Staple = { item: string; quantity: string; active: boolean };
+
+/** A staple as it stood when a week was planned: its shelf price and any sale at their Fry's. */
+export type StapleLine = { item: string; quantity: string; price: number | null; sale: SaleItem | null };
+
 /** How this week's price check went, so the home screen can explain an empty sale list. */
 export type SaleCheck =
   | { status: "ok"; checked: number; at: string }

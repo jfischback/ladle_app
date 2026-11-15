@@ -53,6 +53,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
                 <span aria-hidden="true">{ICON[i]}</span> {SHORT[i]}
               </button>
             ))}
+            <a href="/staples" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🧺</span> Staples</a>
           </nav>
         )}
       </div>

@@ -3,6 +3,7 @@ import type { Recipe } from "@/db/schema";
 import type { Ingredient, SaleItem } from "./types";
 import type { Settings } from "./settings";
 import { krogerEnabled, searchProducts, type KrogerProduct } from "./kroger";
+import { stapleTerm } from "./staples";
 
 export type { SaleItem };
 
@@ -10,7 +11,7 @@ export type { SaleItem };
 export type StorePrice = { item: string; product: string; size: string; price: number; onSale: boolean };
 
 export type SaleScan =
-  | { status: "ok"; sales: SaleItem[]; prices: StorePrice[]; checked: number }
+  | { status: "ok"; sales: SaleItem[]; prices: StorePrice[]; checked: number; staplePrices: Map<string, { price: number; product: string }> }
   | { status: "off"; reason: "not-connected" | "no-store" }
   | { status: "failed"; message: string };
 
@@ -110,7 +111,10 @@ export async function scanSales(recipes: Recipe[], settings: Settings): Promise<
   if (!krogerEnabled()) return { status: "off", reason: "not-connected" };
   if (!settings.storeLocationId) return { status: "off", reason: "no-store" };
   const locationId = settings.storeLocationId;
-  const terms = termsForRecipes(recipes);
+  // Weekly staples are bought every week, so they're always checked (first).
+  const stapleTerms = [...new Set(settings.staples.filter((x) => x.active).map((x) => stapleTerm(x.item)).filter(Boolean))];
+  const terms = [...new Set([...stapleTerms, ...termsForRecipes(recipes, Math.max(20, 70 - stapleTerms.length))])];
+  const staplePrices = new Map<string, { price: number; product: string }>();
 
   const results = await inBatches(terms, 6, async (term) => ({ term, products: await searchProducts(term, locationId) }));
   const ok = results.filter((r): r is PromiseFulfilledResult<{ term: string; products: KrogerProduct[] }> => r.status === "fulfilled");
@@ -124,6 +128,8 @@ export async function scanSales(recipes: Recipe[], settings: Settings): Promise<
   for (const { value: { term, products } } of ok) {
     const matches = products.filter((p) => productMatches(term, p));
     if (!matches.length) continue;
+    // For a staple, the store's top match is the usual pick (cheapest could be a tiny size).
+    if (stapleTerms.includes(term)) staplePrices.set(term, { price: round2(matches[0].promo ?? matches[0].regular), product: matches[0].description });
 
     const deals = matches
       .filter((p) => p.promo != null)
@@ -153,5 +159,5 @@ export async function scanSales(recipes: Recipe[], settings: Settings): Promise<
   }
 
   sales.sort((a, b) => b.pctOff - a.pctOff);
-  return { status: "ok", sales, prices, checked: ok.length };
+  return { status: "ok", sales, prices, checked: ok.length, staplePrices };
 }

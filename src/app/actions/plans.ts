@@ -8,10 +8,11 @@ import { cooks, foundRecipes, plans, recipes } from "@/db/schema";
 import { activePlans, getPlan, getSettings, myRecipes, recipesByIds } from "@/lib/data";
 import { adoptFoundRecipe, refreshCooks } from "@/lib/cooks";
 import { ruleProblems } from "@/lib/diet";
-import { buildGroceryList } from "@/lib/grocery";
+import { buildGroceryList, saleNote } from "@/lib/grocery";
+import { stapleTerm, staplesTotal } from "@/lib/staples";
 import { FOUND_PREFIX, planWeek, sumCosts, type NewRecipeOption } from "@/lib/planner";
 import { recipeSales, scanSales, type SaleScan } from "@/lib/sales";
-import type { SaleCheck, SaleItem } from "@/lib/types";
+import type { SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
 import { addDays, upcomingWeekStart, weekDates } from "@/lib/week";
 
@@ -58,12 +59,14 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     : { status: "failed", message: scan.message, at };
   const sales = scan.status === "ok" ? scan.sales : [];
   const newRecipes = settings.newRecipesPerWeek > 0 ? await newRecipeOptions(userId, sales, settings) : [];
+  const staples = stapleLines(settings, scan);
 
   let result;
   try {
     result = await planWeek({
       settings, weekStart, recipes: recipeList, recentPlans: recent,
       saleItems: sales, storePrices: scan.status === "ok" ? scan.prices : [], newRecipes,
+      staplesCost: staplesTotal(staples).total,
     });
   } catch (e) {
     return { error: `The planner hit a problem: ${(e as Error).message}` };
@@ -104,6 +107,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     days: result.days,
     saleItems: sales,
     saleCheck,
+    staples,
     summary: result.summary,
     plannerSource: result.source,
     estimatedTotal: result.estimatedTotal,
@@ -160,6 +164,13 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   try {
     const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
     groceryList = await buildGroceryList(chosen, settings, sales);
+    // Weekly staples get their own section, with this week's sale prices where we found them.
+    const snap = new Map((plan.staples ?? []).map((l) => [stapleTerm(l.item), l]));
+    const items = settings.staples.filter((x) => x.active).map((x) => {
+      const sale = snap.get(stapleTerm(x.item))?.sale;
+      return { item: x.item, quantity: x.quantity, note: sale ? saleNote(sale) : "", forRecipes: [] };
+    });
+    if (items.length) groceryList = { ...groceryList, sections: [{ name: "Weekly staples", items }, ...groceryList.sections] };
   } catch (e) {
     return { error: `Couldn't build the grocery list: ${(e as Error).message}` };
   }
@@ -177,6 +188,18 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   }
   revalidatePath("/");
   revalidatePath("/history");
+}
+
+/** This week's staples with the prices (and sales) the Fry's check found. */
+function stapleLines(settings: Settings, scan: SaleScan): StapleLine[] {
+  return settings.staples
+    .filter((x) => x.active)
+    .map((x) => {
+      const term = stapleTerm(x.item);
+      const found = scan.status === "ok" ? scan.staplePrices.get(term) : undefined;
+      const sale = scan.status === "ok" ? (scan.sales.find((s) => s.item === term) ?? null) : null;
+      return { item: x.item, quantity: x.quantity, price: sale?.salePrice ?? found?.price ?? null, sale };
+    });
 }
 
 /**

@@ -7,7 +7,8 @@ import { PlanButton, DayCard, ApproveBar, RatePrompt, StartOverButton, GroceryCh
 import { FoodArt } from "@/components/FoodArt";
 import { Highlight } from "@/components/Highlight";
 import type { Plan } from "@/db/schema";
-import type { SaleItem } from "@/lib/types";
+import type { SaleItem, Staple } from "@/lib/types";
+import { staplesTotal } from "@/lib/staples";
 import { krogerEnabled } from "@/lib/kroger";
 import { ruleProblems } from "@/lib/diet";
 
@@ -102,6 +103,7 @@ export default async function HomePage() {
             ))}
           </ul>
           <BudgetMeter plan={plan} budget={settings.weeklyBudget} mode={settings.budgetMode} />
+          <StaplesCard plan={plan} staples={settings.staples} />
           {approved ? (
             <>
               <Celebrate />
@@ -255,8 +257,9 @@ function EmptyState({ weekOf, recipeCount, needed, checksSales }: { weekOf: stri
 }
 
 function BudgetMeter({ plan, budget, mode }: { plan: Plan; budget: number; mode: "target" | "hard" }) {
-  const total = plan.estimatedTotal;
-  if (total == null) {
+  const dinners = plan.estimatedTotal;
+  const staples = staplesTotal(plan.staples);
+  if (dinners == null && !staples.priced) {
     return (
       <div className="flex items-center gap-3 rounded-3xl bg-card p-4 shadow-soft">
         <span className="text-3xl" aria-hidden="true">🫙</span>
@@ -267,22 +270,57 @@ function BudgetMeter({ plan, budget, mode }: { plan: Plan; budget: number; mode:
       </div>
     );
   }
+  const total = (dinners ?? 0) + staples.total;
   const over = total > budget;
-  const pct = Math.min(100, Math.round((total / budget) * 100));
+  const pct = (n: number) => Math.min(100, (n / Math.max(budget, total)) * 100);
   return (
     <section aria-label="Budget" className={`rounded-3xl p-5 shadow-soft ${over ? "bg-terracotta-soft" : "bg-olive-soft"}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-lg">
-          <span className="font-bold">About {money(total)}</span> <span className="text-muted">of your {money(budget)} budget</span>
+          <span className="font-bold">About {money(total)}</span> <span className="text-muted">{dinners == null ? "so far " : ""}of your {money(budget)} budget</span>
         </p>
         <p className={`text-lg font-bold ${over ? "text-terracotta-dark" : "text-olive-dark"}`}>
           {over ? `${money(total - budget)} over ${mode === "hard" ? "your limit" : "budget"}` : `${money(budget - total)} left 🎉`}
         </p>
       </div>
-      <div className="mt-3 h-4 overflow-hidden rounded-full bg-card" role="meter" aria-valuemin={0} aria-valuemax={budget} aria-valuenow={total} aria-label="Estimated cart compared with budget">
-        <div className={`h-full rounded-full transition-all ${over ? "bg-terracotta" : "bg-olive"}`} style={{ width: `${pct}%` }} />
+      <div className="mt-3 flex h-4 overflow-hidden rounded-full bg-card" role="meter" aria-valuemin={0} aria-valuemax={budget} aria-valuenow={total} aria-label="Estimated cart compared with budget">
+        <div className={`h-full transition-all ${over ? "bg-terracotta" : "bg-olive"}`} style={{ width: `${pct(dinners ?? 0)}%` }} />
+        {staples.total > 0 && <div className="h-full bg-ochre transition-all" style={{ width: `${pct(staples.total)}%` }} />}
       </div>
-      <p className="mt-2 text-sm text-muted">Estimate. Your receipt may be a little different.</p>
+      {staples.total > 0 && (
+        <p className="mt-2 flex flex-wrap gap-x-4 text-sm font-semibold">
+          <span><span aria-hidden="true" className={`mr-1 inline-block h-2.5 w-2.5 rounded-full ${over ? "bg-terracotta" : "bg-olive"}`} />Dinners {dinners == null ? "(no prices yet)" : money(dinners)}</span>
+          <span><span aria-hidden="true" className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-ochre" />Staples {money(staples.total)}</span>
+        </p>
+      )}
+      <p className="mt-1 text-sm text-muted">Estimate. Your receipt may be a little different.</p>
     </section>
+  );
+}
+
+/** A small card for the weekly staples, with any that are on sale this week. */
+function StaplesCard({ plan, staples }: { plan: Plan | null; staples: Staple[] }) {
+  const active = staples.filter((s) => s.active);
+  const onSale = (plan?.staples ?? []).filter((l) => l.sale);
+  if (!active.length) {
+    return (
+      <Link href="/staples" className="flex items-center gap-3 rounded-3xl bg-card p-4 shadow-soft hover:shadow-lift">
+        <span className="text-3xl" aria-hidden="true">🧺</span>
+        <span className="flex-1"><span className="font-bold">Add your weekly staples</span><br /><span className="text-sm text-muted">Milk, eggs, bread… added to every grocery list.</span></span>
+        <span aria-hidden="true" className="font-bold text-olive-dark">›</span>
+      </Link>
+    );
+  }
+  return (
+    <Link href="/staples" className="flex items-center gap-3 rounded-3xl bg-card p-4 shadow-soft hover:shadow-lift">
+      <span className="text-3xl" aria-hidden="true">🧺</span>
+      <span className="min-w-0 flex-1">
+        <span className="font-bold">{active.length} weekly staple{active.length === 1 ? "" : "s"}</span> <span className="text-muted">go on your list</span>
+        <span className="block truncate text-sm text-muted">
+          {onSale.length ? <><span className="font-bold text-terracotta-dark">🏷️ {onSale.map((l) => `${l.item} ${l.sale!.pctOff}% off`).join(", ")}</span></> : active.map((s) => s.item).join(", ")}
+        </span>
+      </span>
+      <span className="shrink-0 text-sm font-bold text-olive-dark">Edit ›</span>
+    </Link>
   );
 }
