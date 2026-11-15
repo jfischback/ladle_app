@@ -4,7 +4,8 @@ import type { GroceryList, PlanDay, SaleItem } from "./types";
 import { basicGroceryList } from "./grocery";
 import { addQuantities } from "./grocery-merge";
 import { parseAmount } from "./nutrition";
-import { FEAST_SECTION, feastDishes, isFeastSection, type Feast } from "./feast";
+import { FEAST_SECTION, agree, feastDishes, isFeastSection, type Feast } from "./feast";
+import { niceAmount } from "./scaling";
 
 // Things bought whole: cans, bags, crusts, stalks, a bunch, or a count with no unit.
 const WHOLE = /^(\(.*\)\s*\w+|stalks?|bunch(es)?|heads?|cans?|bags?|boxes?|jars?|loaf|loaves)?$/;
@@ -19,9 +20,34 @@ export function wholePackages(quantity: string): string {
       if (!m || n == null || Number.isInteger(n) || !WHOLE.test(m[2].trim())) return part;
       const whole = Math.ceil(n);
       const unit = m[2].trim();
-      return [String(whole), whole > 1 && unit && !/s$/.test(unit) ? `${unit}s` : unit].filter(Boolean).join(" ");
+      return [String(whole), agree(String(whole), unit)].filter(Boolean).join(" ");
     })
     .join(" + ");
+}
+
+const PER_CUP: Record<string, number> = { cup: 1, cups: 1, tbsp: 16, tsp: 48 };
+
+/** "1 3/4 cups" + "6 tbsp": put spoons into cups (or teaspoons into tablespoons) so they add up. */
+export function sameVolume(parts: string[]): string[] {
+  const read = parts.map((p) => {
+    const m = p.match(/^(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)\s*(cups?|tbsp|tsp)$/i);
+    const n = m ? parseAmount(m[1]) : null;
+    return m && n != null ? { n, unit: m[2].toLowerCase() } : null;
+  });
+  if (read.some((r) => !r)) return parts; // something that isn't a spoon or cup measure: leave it alone
+  const target = read.some((r) => r!.unit.startsWith("cup")) ? "cup" : read.some((r) => r!.unit === "tbsp") ? "tbsp" : "tsp";
+  const total = read.reduce((a, r) => a + r!.n / PER_CUP[r!.unit], 0) * PER_CUP[target];
+  return [`${niceAmount(Math.ceil(total * 8) / 8)} ${target}`];
+}
+
+/** Butter is sold in sticks (1/2 cup each). */
+export function butterSticks(q: string): string {
+  const m = q.match(/^(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)\s*(cups?|tbsp|tsp)$/i);
+  const n = m ? parseAmount(m[1]) : null;
+  if (!m || n == null) return q;
+  const cups = n / PER_CUP[m[2].toLowerCase()];
+  const sticks = Math.max(1, Math.ceil(cups * 2));
+  return `${sticks} stick${sticks === 1 ? "" : "s"}`;
 }
 
 /** The feast's groceries as one section, in store order, with this week's sale prices where we found them. */
@@ -41,7 +67,11 @@ export function feastSection(feast: Feast, sales: SaleItem[] = []): GroceryList[
       had.note = had.note || it.note;
     } else byThing.set(key, { ...it, item: thing, parts: [it.quantity] });
   }
-  const items = [...byThing.values()].map(({ parts, ...it }) => ({ ...it, quantity: wholePackages(parts.length > 1 ? addQuantities(parts.filter(Boolean)) : parts[0]) }));
+  const items = [...byThing.values()].map(({ parts, ...it }) => {
+    const each = parts.filter(Boolean).flatMap((x) => x.split(/\s*\+\s*/));
+    const q = each.length > 1 ? addQuantities(sameVolume(each)) : (parts[0] ?? "");
+    return { ...it, quantity: /^butter$/i.test(it.item) ? butterSticks(q) : wholePackages(q) };
+  });
   return { name: FEAST_SECTION(feast), items };
 }
 

@@ -72,6 +72,7 @@ export function rebalanceBatches(days: PlanDay[], keepsWell: (recipeId: string) 
   out = out.map((d) => {
     if (!d.leftoverOf) return d;
     const cook = out.find((c) => c.date === d.leftoverOf && !c.leftoverOf);
+    if (cook?.feast) return d; // holiday leftovers
     if (cook?.recipeId && cook.recipeId === d.recipeId && keepsWell(cook.recipeId)) return d;
     return { ...d, recipeId: null, recipeName: null, estimatedCost: null, reason: "No-cook night", saleItems: [], leftoverOf: null };
   });
@@ -92,7 +93,7 @@ export function budgetNotes(days: PlanDay[]): string[] {
   for (const d of days) {
     if (!d.leftoverOf) continue;
     const cook = days.find((x) => x.date === d.leftoverOf);
-    if (cook) notes.push(`Make a double batch of ${cook.recipeName} on ${dayName(cook.date)}: ${dayName(d.date)} is leftovers night.`);
+    if (cook && !cook.feast) notes.push(`Make a double batch of ${cook.recipeName} on ${dayName(cook.date)}: ${dayName(d.date)} is leftovers night.`);
   }
   return notes;
 }

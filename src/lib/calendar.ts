@@ -61,13 +61,13 @@ export function weekEvents(
   days: PlanDay[],
   recipes: Map<string, { totalMinutes: number | null; prepAhead: string | null }>,
   origin: string,
-  opts: { dinnerAt?: number; prep?: { date: string; minutes: number } | null } = {},
+  opts: { dinnerAt?: number; prep?: { date: string; minutes: number } | null; boughtOn?: string; today?: string } = {},
 ): CalEvent[] {
   const dinnerAt = opts.dinnerAt ?? 18 * 60;
   const out: CalEvent[] = [];
   for (const d of days) {
     if (d.feast) {
-      out.push(...feastEvents(planId, d, origin, days.indexOf(d)));
+      out.push(...feastEvents(planId, d, origin, days.indexOf(d), { boughtOn: opts.boughtOn, today: opts.today }));
       continue;
     }
     if (!d.recipeId && d.leftoverOf && d.recipeName) {
@@ -92,19 +92,19 @@ export function weekEvents(
 }
 
 /** A holiday dinner's countdown: thaw in the morning, the day-before cooking in the evening, the turkey, then dinner (at 3 PM). */
-function feastEvents(planId: string, d: PlanDay, origin: string, index: number): CalEvent[] {
+function feastEvents(planId: string, d: PlanDay, origin: string, index: number, when: { boughtOn?: string; today?: string }): CalEvent[] {
   const feast = d.feast!;
   const url = `${origin}/feast/${planId}/${index}`;
   const dinnerAt = 15 * 60;
   const t = turkeyFor(feast.guests);
   const out: CalEvent[] = [];
-  for (const step of feastTimeline(feast, d.date)) {
+  for (const step of feastTimeline(feast, d.date, when)) {
     if (step.date === d.date) continue;
-    const thaw = /freezer/.test(step.what);
-    out.push({ uid: `${planId}-${step.date}-${thaw ? "thaw" : "ahead"}@ladle`, date: step.date, startMinutes: thaw ? 9 * 60 : 19 * 60, minutes: thaw ? 15 : 90, title: thaw ? "🦃 Move the turkey to the fridge" : `🦃 Get ahead for ${feast.holiday}`, notes: step.what, url });
+    const thaw = /freezer|cold water/.test(step.what);
+    out.push({ uid: `${planId}-${step.date}-${thaw ? "thaw" : "ahead"}@ladle`, date: step.date, startMinutes: thaw ? 9 * 60 : 19 * 60, minutes: thaw ? 15 : 90, title: thaw ? (/cold water/.test(step.what) ? "🦃 Turkey: no time to thaw in the fridge" : `🦃 Move the ${t.two ? "turkeys" : "turkey"} to the fridge`) : `🦃 Get ahead for ${feast.holiday}`, notes: step.what, url });
   }
   if (feast.dishes.includes("turkey")) {
-    const minutes = Math.round((t.roastHours + 1) * 60);
+    const minutes = Math.round((t.roastHours + 0.5) * 60); // in the oven, then resting
     out.push({ uid: `${planId}-${d.date}-turkey@ladle`, date: d.date, startMinutes: dinnerAt - minutes, minutes, title: "🦃 Turkey in the oven", notes: `Roast about ${t.roastHours} hours to 165°F in the thigh, then rest 30 minutes.`, url });
   }
   out.push({ uid: `${planId}-${d.date}-dinner@ladle`, date: d.date, startMinutes: dinnerAt, minutes: 120, title: `🦃 ${feast.holiday} dinner for ${feast.guests}`, notes: `Recipes and countdown: ${url}`, url });

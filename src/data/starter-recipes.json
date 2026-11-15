@@ -9314,8 +9314,7 @@
    "budget",
    "one-pot",
    "leftovers",
-   "freezer",
-   "low-sodium"
+   "freezer"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -9996,8 +9995,8 @@
     "item": "frozen corn"
    },
    {
-    "amount": "1",
-    "unit": "(10 oz) can",
+    "amount": "2",
+    "unit": "(10 oz) cans",
     "item": "red enchilada sauce"
    },
    {

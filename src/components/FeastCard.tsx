@@ -63,12 +63,12 @@ export function FeastPlanner({ planId, index, day, defaultGuests, onDone }: { pl
 }
 
 /** The holiday dinner on its day: the menu, the turkey, and the countdown. */
-export function FeastCard({ planId, index, day, isToday, canChange, locked, defaultGuests }: { planId: string; index: number; day: PlanDay; isToday: boolean; canChange: boolean; locked: boolean; defaultGuests: number }) {
+export function FeastCard({ planId, index, day, isToday, canChange, locked, defaultGuests, when = {} }: { planId: string; index: number; day: PlanDay; isToday: boolean; canChange: boolean; locked: boolean; defaultGuests: number; when?: { boughtOn?: string; today?: string } }) {
   const [editing, setEditing] = useState(false);
   const feast = day.feast!;
   const menu = feastMenu(feast.holiday) ?? [];
   const t = turkeyFor(feast.guests);
-  const steps = feastTimeline(feast, day.date);
+  const steps = feastTimeline(feast, day.date, when);
   return (
     <div className={`card overflow-hidden ${isToday ? "ring-2 ring-terracotta shadow-lift" : ""}`}>
       <div className="bg-ochre-soft p-4">

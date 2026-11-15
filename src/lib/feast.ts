@@ -1,5 +1,7 @@
 import type { Ingredient, PlanDay } from "./types";
 import { scaleIngredient } from "./scaling";
+import { parseAmount } from "./nutrition";
+import { plural, singular } from "./grocery-merge";
 import { addDays, dayName } from "./week";
 
 /** One dish on a holiday menu. Amounts are for `servings` people; the feast scales them to the guest count. */
@@ -11,6 +13,7 @@ export type FeastDish = {
   steps: string[];
   ahead?: string; // what can be done the day before
   main?: boolean; // the turkey: sized by the guest count rather than scaled
+  whole?: boolean; // made in one pan (a pie): whole recipes only
   default: boolean; // on the menu unless they take it off
 };
 
@@ -31,7 +34,7 @@ export const THANKSGIVING: FeastDish[] = [
   },
   {
     key: "gravy", name: "Easy Turkey Gravy", servings: 10, default: true,
-    ingredients: [i("1/4", "cup", "butter"), i("1/3", "cup", "all-purpose flour"), i("4", "cups", "chicken broth"), i("", "", "pan drippings from the turkey")],
+    ingredients: [i("1/2", "cup", "butter"), i("1/2", "cup", "all-purpose flour"), i("4", "cups", "chicken broth"), i("", "", "pan drippings from the turkey")],
     steps: [
       "Pour the turkey drippings into a measuring cup and let the fat rise to the top. Spoon off most of the fat.",
       "Melt the butter in a saucepan over medium heat. Whisk in the flour and cook 2 minutes, whisking.",
@@ -94,7 +97,7 @@ export const THANKSGIVING: FeastDish[] = [
     steps: ["Warm the rolls in a 350°F oven for 8 to 10 minutes while the turkey rests. Brush with melted butter."],
   },
   {
-    key: "pumpkin-pie", name: "Easy Pumpkin Pie", servings: 8, default: true,
+    key: "pumpkin-pie", name: "Easy Pumpkin Pie", servings: 8, default: true, whole: true,
     ingredients: [i("1", "", "refrigerated pie crust"), i("1", "(15 oz) can", "pumpkin puree"), i("1", "(12 oz) can", "evaporated milk"), i("2", "", "eggs"), i("3/4", "cup", "sugar"), i("1 1/2", "tsp", "pumpkin pie spice")],
     steps: [
       "Heat the oven to 425°F. Fit the crust into a 9-inch pie plate.",
@@ -111,96 +114,179 @@ export const feastMenu = (holiday: string): FeastDish[] | null => (holiday === "
 
 export type Feast = NonNullable<PlanDay["feast"]>;
 
+// USDA roasting times at 325°F, unstuffed (upper end, in hours): [up to this many lb, hours].
+const WHOLE_HOURS: [number, number][] = [[12, 3], [14, 3.75], [18, 4.25], [20, 4.5], [24, 5]];
+const BREAST_HOURS: [number, number][] = [[6, 2.25], [8, 3.25]];
+const hoursFor = (table: [number, number][], lb: number) => (table.find(([max]) => lb <= max) ?? table[table.length - 1])[1];
+
 /** The turkey for this many people: about 1 1/4 lb a person (leftovers included), or a turkey breast for a small table. */
 export function turkeyFor(guests: number): { kind: "whole turkey" | "bone-in turkey breast"; lb: number; thawDays: number; roastHours: number; two: boolean } {
   if (guests <= 6) {
-    const lb = Math.max(4, Math.ceil(guests * 1));
-    return { kind: "bone-in turkey breast", lb, thawDays: Math.max(1, Math.ceil(lb / 4)), roastHours: Math.round((lb * 20) / 60 * 2) / 2, two: false };
+    const lb = Math.min(8, Math.max(4, Math.ceil(guests)));
+    return { kind: "bone-in turkey breast", lb, thawDays: Math.max(1, Math.ceil(lb / 4)), roastHours: hoursFor(BREAST_HOURS, lb), two: false };
   }
   const total = Math.round(guests * 1.25);
-  // Bigger than about 24 lb won't fit most ovens or roast evenly: two birds.
+  // Bigger than about 24 lb won't fit most ovens or roast evenly: two birds, each no more than 24 lb.
   const two = total > 24;
-  const lb = Math.max(10, two ? Math.ceil(total / 2) : total);
-  return { kind: "whole turkey", lb, thawDays: Math.ceil(lb / 4), roastHours: Math.round((lb * 13) / 60 * 2) / 2, two };
+  const lb = Math.min(24, Math.max(10, two ? Math.ceil(total / 2) : total));
+  return { kind: "whole turkey", lb, thawDays: Math.ceil(lb / 4), roastHours: hoursFor(WHOLE_HOURS, lb), two };
 }
 
-/** How much of each dish to make: guests / servings, rounded up to a half recipe. */
-export const feastTimes = (dish: FeastDish, guests: number) => Math.max(0.5, Math.ceil((guests / dish.servings) * 2) / 2);
+const hoursText = (h: number) => {
+  const whole = Math.floor(h);
+  const part = h - whole;
+  const frac = part === 0.25 ? "¼" : part === 0.5 ? "½" : part === 0.75 ? "¾" : "";
+  return `${whole || ""}${frac}` || "0";
+};
+
+/** The turkey's steps, for a whole bird or a breast (the thermometer goes in a different place). */
+function turkeySteps(t: ReturnType<typeof turkeyFor>): string[] {
+  const breast = t.kind === "bone-in turkey breast";
+  return [
+    `Take the ${breast ? "turkey breast" : "turkey"} out of the fridge 1 hour before roasting. Heat the oven to 325°F.`,
+    breast ? "Pat the turkey breast very dry with paper towels." : "Remove the neck and giblets from inside the turkey. Pat it very dry with paper towels.",
+    breast
+      ? "Rub the butter all over the skin and season with the salt and pepper. Set it skin-side up on the onion, celery, lemon and thyme in a roasting pan."
+      : "Rub the butter all over the skin and season with the salt and pepper. Put the onion, celery, lemon and thyme inside.",
+    breast ? "Roast, uncovered." : "Set the turkey breast-side up on a rack in a roasting pan. Tuck the wing tips under.",
+    `Roast about ${hoursText(t.roastHours)} hours, until a thermometer in the thickest part of the ${breast ? "breast (not touching the bone)" : "thigh (not touching the bone)"} reads 165°F. Start checking 45 minutes early, and tent with foil if the skin browns too fast.`,
+    `Rest the ${breast ? "breast" : "turkey"} on a cutting board, loosely covered with foil, for 30 minutes before carving. Save the pan drippings for gravy.`,
+    ...(t.two ? ["Two turkeys: roast them in two ovens, or roast one the day before, carve it, and keep the meat in the fridge to warm with a little broth."] : []),
+  ];
+}
+
+/** How much of each dish to make: guests / servings, rounded up to a half recipe (at least one whole one; pies whole). */
+export const feastTimes = (dish: FeastDish, guests: number) => {
+  const n = guests / dish.servings;
+  return dish.whole ? Math.max(1, Math.ceil(n)) : Math.max(1, Math.ceil(n * 2) / 2);
+};
+
+/** "4 (12 oz) bag" -> "4 (12 oz) bags", "1 cups" -> "1 cup": the unit agrees with the amount. */
+export function agree(amount: string, unit: string): string {
+  const n = parseAmount(amount);
+  if (n == null || !unit) return unit;
+  const m = unit.match(/^(.*?)(\w+)$/);
+  if (!m) return unit;
+  const [, before, word] = m;
+  if (/^(oz|lb|lbs|tsp|tbsp|g|kg|ml)$/i.test(word)) return unit;
+  return before + (n > 1 ? plural(singular(word)) : singular(word));
+}
 
 /** The chosen dishes with amounts for the guest count (the turkey line sized by turkeyFor). */
 export function feastDishes(feast: Feast): (FeastDish & { scaled: Ingredient[]; times: number })[] {
   const menu = feastMenu(feast.holiday) ?? [];
   const t = turkeyFor(feast.guests);
+  const hasTurkey = feast.dishes.includes("turkey");
   return menu
-    .filter((d) => feast.dishes.includes(d.key))
+    // Gravy is made from the turkey's drippings.
+    .filter((d) => feast.dishes.includes(d.key) && (d.key !== "gravy" || hasTurkey))
     .map((d) => {
       const times = d.main ? 1 : feastTimes(d, feast.guests);
       const scaled = d.ingredients.map((ing) => {
         if (d.main && ing.item === "whole turkey") return { amount: t.two ? "2" : "1", unit: `(${t.lb} lb)`, item: t.kind };
         // The butter, aromatics and seasoning are for a 14 lb bird.
-        if (d.main) return scaleTo(ing, Math.max(1, Math.round((t.lb / 14) * 2) / 2) * (t.two ? 2 : 1));
-        return scaleTo(ing, times);
+        const one = d.main ? scaleTo(ing, Math.max(0.5, Math.round((t.lb / 14) * 2) / 2) * (t.two ? 2 : 1)) : scaleTo(ing, times);
+        return { ...one, unit: agree(one.amount, one.unit) };
       });
-      return { ...d, scaled, times };
+      return { ...d, scaled, times, steps: d.main ? turkeySteps(t) : d.steps };
     });
 }
 
 const scaleTo = (ing: Ingredient, m: number): Ingredient => (m === 1 || !ing.amount.trim() ? ing : scaleIngredient(ing, m));
 
-export const FEAST_SECTION = (feast: Feast) => `${feast.holiday} dinner (${feast.guests} people)`;
-export const isFeastSection = (name: string) => /^(thanksgiving) dinner \(\d+ people\)$/i.test(name);
+// The section keeps the same name when the guest count changes, so ticks made while shopping stay put.
+export const FEAST_SECTION = (feast: Feast) => `${feast.holiday} dinner`;
+export const isFeastSection = (name: string) => /^thanksgiving dinner( \(\d+ people\))?$/i.test(name);
+
+/** Lunches that were leftovers of a dinner no longer cooked the night before become open lunches. */
+function fixLeftoverLunches(days: PlanDay[]): PlanDay[] {
+  return days.map((d, i) => {
+    const l = d.lunch;
+    if (!l || l.kind !== "leftovers" || i === 0) return d;
+    const prev = days[i - 1];
+    const feastBefore = prev.feast || (prev.leftoverOf && !prev.recipeId && days.some((x) => x.date === prev.leftoverOf && x.feast));
+    if (l.recipeId === null ? feastBefore : prev.recipeId === l.recipeId) return d;
+    if (feastBefore) return { ...d, lunch: { ...l, recipeId: null, name: `${feastName(days)} leftovers`, reason: "Turkey sandwiches and leftovers from the feast" } };
+    return { ...d, lunch: { ...l, kind: "open", recipeId: null, name: "Lunch: your pick", reason: "The dinner these leftovers came from changed" } };
+  });
+}
+const feastName = (days: PlanDay[]) => days.find((d) => d.feast)?.feast?.holiday ?? "Holiday";
 
 /** Put the feast on its day. The dinner that was planned there makes way, and its leftovers nights become feast leftovers. */
 export function withFeast(days: PlanDay[], index: number, feast: Feast): PlanDay[] {
   const day = days[index];
-  const replaced = day.recipeId && !day.leftoverOf ? day.recipeName : null;
-  return days.map((d, j) => {
+  const replacing = day.recipeId && !day.leftoverOf ? { id: day.recipeId, name: day.recipeName } : null;
+  const next = days.map((d, j) => {
     if (j === index) {
-      return { ...d, feast: { ...feast, replaced: feast.replaced ?? replaced ?? null }, recipeId: null, recipeName: `${feast.holiday} dinner`, estimatedCost: null, reason: `${feast.holiday} dinner for ${feast.guests}`, saleItems: [], leftoverOf: null, batches: undefined, fromCook: null };
+      return {
+        ...d,
+        feast: { ...feast, replaced: feast.replaced ?? replacing?.name ?? null, replacedId: feast.replacedId ?? replacing?.id ?? null },
+        recipeId: null, recipeName: `${feast.holiday} dinner`, estimatedCost: null, reason: `${feast.holiday} dinner for ${feast.guests}`, saleItems: [], leftoverOf: null, batches: undefined, fromCook: null,
+      };
     }
-    let next = d;
-    if (d.leftoverOf === day.date) next = { ...next, recipeId: null, recipeName: `${feast.holiday} leftovers`, estimatedCost: 0, reason: "Turkey sandwiches and plates of everything" };
-    if (j === index + 1 && d.lunch?.kind === "leftovers") next = { ...next, lunch: { ...d.lunch, recipeId: null, name: `${feast.holiday} leftovers`, reason: "Turkey sandwiches and leftovers from the feast" } };
-    return next;
+    if (d.leftoverOf === day.date) return { ...d, recipeId: null, recipeName: `${feast.holiday} leftovers`, estimatedCost: 0, reason: "Turkey sandwiches and plates of everything" };
+    return d;
+  });
+  return fixLeftoverLunches(dropOrphanBatches(next));
+}
+
+/** A cooking night whose leftovers night just became the feast doesn't need a double batch any more. */
+function dropOrphanBatches(days: PlanDay[]): PlanDay[] {
+  return days.map((d) => {
+    if (!d.batches || d.batches < 2 || !d.recipeId || d.leftoverOf) return d;
+    const want = 1 + days.filter((x) => x.leftoverOf === d.date && x.recipeId === d.recipeId).length;
+    if (want >= d.batches) return d;
+    const cost = d.estimatedCost != null ? Math.round((d.estimatedCost / d.batches) * want * 100) / 100 : null;
+    return { ...d, batches: want > 1 ? want : undefined, estimatedCost: cost, reason: want > 1 ? d.reason : d.reason.replace(/ · double batch for \w+/, "") };
   });
 }
 
-/** Take the feast off: its day and its leftovers night become nights off, and the next-day lunch an open one. */
+/** Take the feast off: the dinner it replaced comes back (or a night off), its leftovers night becomes a night off. */
 export function withoutFeast(days: PlanDay[], index: number): PlanDay[] {
   const day = days[index];
   if (!day?.feast) return days;
-  return days.map((d, j) => {
-    if (j === index) return { ...d, feast: null, recipeId: null, recipeName: null, reason: "No-cook night", estimatedCost: null };
-    let next = d;
-    if (d.leftoverOf === day.date && !d.recipeId) next = { ...next, leftoverOf: null, recipeName: null, reason: "No-cook night", estimatedCost: null };
-    if (j === index + 1 && d.lunch?.kind === "leftovers" && !d.lunch.recipeId) next = { ...next, lunch: { ...d.lunch, kind: "open", name: "Lunch: your pick", reason: "No feast leftovers this time" } };
-    return next;
+  const back = day.feast.replacedId && day.feast.replaced ? { recipeId: day.feast.replacedId, recipeName: day.feast.replaced, reason: "Back on the plan" } : { recipeId: null, recipeName: null, reason: "No-cook night" };
+  const next = days.map((d, j) => {
+    if (j === index) return { ...d, feast: null, ...back, estimatedCost: null };
+    if (d.leftoverOf === day.date && !d.recipeId) return { ...d, leftoverOf: null, recipeName: null, reason: "No-cook night", estimatedCost: null };
+    return d;
   });
+  return fixLeftoverLunches(next);
 }
 
-/** The countdown: thaw, the day before, and the big day. */
-export function feastTimeline(feast: Feast, date: string): { date: string; what: string }[] {
+/**
+ * The countdown: thaw, the day before, and the big day. `boughtOn` is the shopping day (when the turkey comes home)
+ * and `today` the current date: a frozen turkey can't start thawing before either.
+ */
+export function feastTimeline(feast: Feast, date: string, opts: { boughtOn?: string; today?: string } = {}): { date: string; what: string }[] {
   const t = turkeyFor(feast.guests);
   const dishes = feastDishes(feast);
   const out: { date: string; what: string }[] = [];
+  const birds = t.two ? "turkeys" : "turkey";
   if (feast.dishes.includes("turkey") && feast.frozen) {
-    out.push({ date: addDays(date, -t.thawDays), what: `Move the ${t.two ? "turkeys" : "turkey"} from the freezer to the fridge (in a pan, still wrapped). ${t.lb} lb takes about ${t.thawDays} day${t.thawDays === 1 ? "" : "s"} to thaw.` });
+    const thaw = addDays(date, -t.thawDays);
+    const earliest = [opts.boughtOn, opts.today].filter((x): x is string => !!x).sort().pop();
+    if (earliest && thaw < earliest) {
+      // Not enough days in the fridge: say so plainly, with the safe ways to do it.
+      out.push({ date: earliest, what: `A frozen ${t.lb} lb ${t.kind} needs about ${t.thawDays} days in the fridge, and there isn't time. Buy a fresh (not frozen) ${birds === "turkeys" ? "pair" : "one"}, or thaw it in cold water in the sink: about 30 minutes a pound (around ${hoursText(Math.ceil((t.lb * 0.5) * 2) / 2)} hours), still wrapped, changing the water every 30 minutes, then roast it right away. Never thaw it on the counter.` });
+    } else {
+      out.push({ date: thaw, what: `Move the ${birds} from the freezer to the fridge (in a pan, still wrapped). ${t.lb} lb takes about ${t.thawDays} day${t.thawDays === 1 ? "" : "s"} to thaw.` });
+    }
   }
   const ahead = dishes.filter((d) => d.ahead);
   if (ahead.length) out.push({ date: addDays(date, -1), what: ahead.map((d) => `${d.name}: ${d.ahead!.replace(/\.$/, "")}.`).join(" ") });
   if (feast.dishes.includes("turkey")) {
-    const hours = (h: number) => (Number.isInteger(h) ? `${h}` : `${Math.floor(h)}½`);
-    out.push({ date, what: `Turkey in the oven about ${hours(t.roastHours + 1)} hours before you want to eat (${hours(t.roastHours)} hours to roast, then 30 minutes to rest while the sides finish).` });
+    out.push({ date, what: `Take the ${birds} out of the fridge ${hoursText(t.roastHours + 1.5)} hours before you want to eat, and into the oven an hour later: about ${hoursText(t.roastHours)} hours to roast, then 30 minutes to rest while the sides finish.` });
   }
   return out.sort((a, b) => a.date.localeCompare(b.date));
 }
 
 /** "Mon: Move the turkey…" tips for each day of the week, from the feast's countdown. */
-export function feastTips(days: PlanDay[]): Map<string, string[]> {
+export function feastTips(days: PlanDay[], opts: { boughtOn?: string; today?: string } = {}): Map<string, string[]> {
   const tips = new Map<string, string[]>();
   for (const d of days) {
     if (!d.feast) continue;
-    for (const step of feastTimeline(d.feast, d.date)) {
+    for (const step of feastTimeline(d.feast, d.date, opts)) {
       if (step.date === d.date) continue;
       tips.set(step.date, [...(tips.get(step.date) ?? []), `🦃 For ${dayName(d.date)}: ${step.what}`]);
     }

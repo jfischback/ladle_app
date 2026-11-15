@@ -36,7 +36,7 @@ export default async function HomePage() {
   const plan = plans.find((p) => p.weekOf === upcoming) ?? plans.find((p) => p.weekOf === inProgress) ?? null;
   const todayStr = today();
   // The holiday countdown ("move the turkey to the fridge today") on the days it falls on.
-  const feastTipsByDate = feastTips(plan?.days ?? []);
+  const feastTipsByDate = feastTips(plan?.days ?? [], { boughtOn: plan?.weekOf, today: todayStr });
 
   // Rating prompt after each cook: past dinners from approved plans that haven't been rated.
   const toRate = plans
@@ -131,6 +131,7 @@ export default async function HomePage() {
                   moveTargets={moveTargets(plan.days, i, todayStr)}
                   canFeast={!!d.holiday && !!feastMenu(d.holiday) && d.date >= todayStr}
                   feastGuests={settings.adults + settings.kids}
+                  feastWhen={{ boughtOn: plan.weekOf, today: todayStr }}
                 />
               </li>
             ))}

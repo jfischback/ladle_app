@@ -47,11 +47,12 @@ export function PlanButton({ label, big }: { label: string; big?: boolean }) {
   );
 }
 
-export function DayCard({ planId, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [], canFeast = false, feastGuests = 4 }: {
+export function DayCard({ planId, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [], canFeast = false, feastGuests = 4, feastWhen = {} }: {
   planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number; picky?: string[];
   moveTargets?: { index: number; label: string }[];
   canFeast?: boolean; // a holiday with a menu (Thanksgiving) that hasn't passed
   feastGuests?: number;
+  feastWhen?: { boughtOn?: string; today?: string }; // when the turkey comes home, for the thaw countdown
 }) {
   const [open, setOpen] = useState(false);
   const [moving, setMoving] = useState(false);
@@ -101,7 +102,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
   );
 
   // A holiday dinner (Thanksgiving) has its own card.
-  if (day.feast) return <FeastCard planId={planId} index={index} day={day} isToday={isToday} canChange={canFeast} locked={locked} defaultGuests={feastGuests} />;
+  if (day.feast) return <FeastCard planId={planId} index={index} day={day} isToday={isToday} canChange={canFeast} locked={locked} defaultGuests={feastGuests} when={feastWhen} />;
   const dinnerName = day.recipeId ? null : day.leftoverOf ? day.recipeName : null; // feast leftovers have no recipe
 
   return (

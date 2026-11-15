@@ -46,6 +46,11 @@ export function planLunches(days: PlanDay[], settings: Settings, dinners: Map<st
     const eaters = eatersFor(settings, holidayLunch);
 
     const prev = i > 0 ? days[i - 1] : null;
+    // The day after a holiday feast (or its leftovers night): feast leftovers.
+    const feastDay = prev?.feast ? prev : prev?.leftoverOf && !prev.recipeId ? days.find((d) => d.date === prev.leftoverOf && d.feast) : undefined;
+    if (feastDay?.feast) {
+      return { ...day, holiday, lunch: { kind: "leftovers", recipeId: null, name: `${feastDay.feast.holiday} leftovers`, reason: "Turkey sandwiches and leftovers from the feast", eaters: eaters.label, servings: eaters.servings } };
+    }
     const prevRecipe = prev?.recipeId ? dinners.get(prev.recipeId) : undefined;
     const reheatOk = !(holidayLunch && prevRecipe && settings.holidayNoReheat.includes(proteinGroup(prevRecipe)));
     if (prev?.recipeId && prevRecipe && leftoverKind(prevRecipe) === "ok" && reheatOk) {
@@ -87,7 +92,7 @@ export function leftoverNotes(days: PlanDay[]): string[] {
   const out: string[] = [];
   for (let i = 1; i < days.length; i++) {
     const l = days[i].lunch;
-    if (l?.kind === "leftovers" && days[i - 1].recipeName) {
+    if (l?.kind === "leftovers" && days[i - 1].recipeId) { // feast leftovers need no extra cooking
       // On a leftovers night nothing is cooked: the extra comes from the night it was cooked.
       const cookedOn = days[i - 1].leftoverOf ?? days[i - 1].date;
       out.push(`Make extra ${days[i - 1].recipeName} on ${dayName(cookedOn)} for ${dayName(days[i].date)}'s lunch (${l.eaters})${days[i].holiday ? `, ${days[i].holiday}` : ""}.`);
