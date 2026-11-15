@@ -506,7 +506,7 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
   const done = buying.reduce((n, s) => n + s.items.filter((it) => checked[tickKey(s.name, it.item)]).length, 0);
 
   return (
-    <section id="grocery-print" className="card p-5" aria-labelledby="grocery-title">
+    <section id="grocery-print" className="card scroll-mt-24 p-5" aria-labelledby="grocery-title">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h2 id="grocery-title" className="flex items-center gap-2 text-2xl font-semibold"><span aria-hidden="true">🛒</span> Grocery list</h2>
         <span className="tag bg-olive-soft text-olive-dark">{done} of {total} got</span>
@@ -533,11 +533,19 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
           <span aria-hidden="true">🛒</span> {plan.cart?.sentAt ? `${store} cart sent · review` : `Send to my ${store} cart`}
         </Link>
       )}
-      {list.notes && list.notes.length > 0 && (
+      {list.notes && list.notes.length > 0 && (list.notes.length <= 3 ? (
         <ul className="mb-4 space-y-1.5 rounded-2xl bg-ochre-soft p-3 text-sm">
           {list.notes.map((n) => <li key={n} className="flex gap-2"><span aria-hidden="true">🍲</span><span>{n}</span></li>)}
         </ul>
-      )}
+      ) : (
+        // Many notes: folded away so the list itself comes first.
+        <details className="mb-4 rounded-2xl bg-ochre-soft p-3 text-sm">
+          <summary className="cursor-pointer font-bold">🍲 {list.notes.length} cooking notes for this list</summary>
+          <ul className="mt-2 space-y-1.5">
+            {list.notes.map((n) => <li key={n} className="flex gap-2"><span aria-hidden="true">🍲</span><span>{n}</span></li>)}
+          </ul>
+        </details>
+      ))}
       <div className="space-y-5">
         {list.sections.map((s) => s.name === PANTRY_SECTIONS.PANTRY_CHECK ? (
           <PantryCheck key={s.name} planId={plan.id} items={s.items} />
