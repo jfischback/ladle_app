@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireUserId } from "@/auth";
 import { getPlan } from "@/lib/data";
 import { feastDishes, feastTimeline, turkeyFor } from "@/lib/feast";
-import { dayName, shortDate } from "@/lib/week";
+import { dayName, shortDate, today } from "@/lib/week";
 import { CookMode } from "@/app/recipes/[id]/CookMode";
 
 /** The holiday dinner: the countdown, then every dish with amounts for the guest count and cooking mode. */
@@ -16,7 +16,7 @@ export default async function FeastPage({ params }: { params: Promise<{ planId: 
   if (!day?.feast) notFound();
   const feast = day.feast;
   const dishes = feastDishes(feast);
-  const steps = feastTimeline(feast, day.date);
+  const steps = feastTimeline(feast, day.date, { boughtOn: plan!.weekOf, today: today() });
   const t = turkeyFor(feast.guests);
 
   return (

@@ -26,7 +26,7 @@ test("sides scale to the guest count in half recipes", () => {
 
 test("the feast's groceries are one section, without pan drippings, kept apart from the week", () => {
   const sec = feastSection(feast(12));
-  assert.equal(sec.name, "Thanksgiving dinner (12 people)");
+  assert.equal(sec.name, "Thanksgiving dinner");
   assert.ok(sec.items.some((i) => /whole turkey/.test(i.item) && /15 lb/.test(i.quantity)), JSON.stringify(sec.items.slice(0, 3)));
   assert.ok(!sec.items.some((i) => /drippings/.test(i.item)));
   const butter = sec.items.find((i) => i.item.startsWith("butter"));
@@ -80,4 +80,59 @@ test("taking the feast off clears its leftovers night and next-day lunch", async
   assert.equal(out[1].leftoverOf, null);
   assert.equal(out[1].recipeName, null);
   assert.equal(out[1].lunch?.kind, "open");
+});
+
+test("review fixes: roasting times, breast steps, thaw that's too late", () => {
+  assert.equal(turkeyFor(8).roastHours, 3, "a 10 lb bird: up to 3 hours (USDA)");
+  assert.ok(turkeyFor(40).lb <= 24 && turkeyFor(40).two, "never a bird over 24 lb");
+  const breast = feastDishes(feast(4)).find((d) => d.key === "turkey")!;
+  assert.ok(breast.steps.some((s) => /thickest part of the breast/.test(s)));
+  assert.ok(!breast.steps.some((s) => /thigh|giblets/.test(s)));
+  // 24 guests -> 2 x 15 lb, 4 days to thaw: shopping Sunday Nov 22 is still in time; Tuesday isn't.
+  const ok = feastTimeline(feast(10), "2026-11-26", { boughtOn: "2026-11-21", today: "2026-11-15" });
+  assert.match(ok[0].what, /Move the turkey/);
+  const late = feastTimeline(feast(10), "2026-11-26", { boughtOn: "2026-11-24", today: "2026-11-15" });
+  assert.equal(late[0].date, "2026-11-24");
+  assert.match(late[0].what, /cold water/);
+  assert.match(late[0].what, /Never thaw it on the counter/);
+});
+
+test("review fixes: whole pies, at least one recipe of each side, gravy needs the turkey", () => {
+  const small = feastDishes(feast(2));
+  assert.equal(small.find((d) => d.key === "pumpkin-pie")!.times, 1);
+  assert.equal(small.find((d) => d.key === "stuffing")!.times, 1);
+  assert.equal(feastDishes(feast(12)).find((d) => d.key === "pumpkin-pie")!.times, 2, "12 people: two whole pies");
+  assert.ok(!feastDishes(feast(8, { dishes: ["gravy", "potatoes"] })).some((d) => d.key === "gravy"));
+  const units = feastDishes(feast(30)).flatMap((d) => d.scaled.map((i) => `${i.amount} ${i.unit}`));
+  assert.ok(!units.some((u) => /^(1|1\/2|1\/3) cups\b|^[2-9]\d* \(\d+(\.\d+)? oz\) (bag|can)$/.test(u)), units.join(" | "));
+});
+
+test("review fixes: feast grocery amounts read like a shopping list", async () => {
+  const { sameVolume, butterSticks } = await import("@/lib/feast-grocery");
+  assert.deepEqual(sameVolume(["1 3/4 cups", "6 tbsp"]), ["2 1/8 cup"]);
+  assert.deepEqual(sameVolume(["1 tbsp", "3 tsp"]), ["2 tbsp"]);
+  assert.equal(butterSticks("2 1/8 cup"), "5 sticks");
+  const sec = feastSection(feast(12));
+  assert.match(sec.items.find((i) => i.item === "butter")!.quantity, /^\d+ sticks$/);
+  assert.equal(sec.items.find((i) => i.item === "kosher salt")!.quantity, "2 tbsp");
+});
+
+test("review fixes: removing the feast brings back the dinner it replaced; other edits keep feast leftovers", async () => {
+  const { withoutFeast } = await import("@/lib/feast");
+  const { rebalanceBatches } = await import("@/lib/budget");
+  const d = (date: string, recipeId: string | null, extra: Partial<PlanDay> = {}): PlanDay => ({ date, recipeId, recipeName: recipeId, estimatedCost: 9, reason: "", saleItems: [], alternatives: [], ...extra });
+  const days = withFeast([d("2026-11-25", "soup"), d("2026-11-26", "chili", { batches: 2, estimatedCost: 18, holiday: "Thanksgiving" }), d("2026-11-27", "chili", { leftoverOf: "2026-11-26" })], 1, feast(8));
+  const kept = rebalanceBatches(days, () => true);
+  assert.equal(kept[2].recipeName, "Thanksgiving leftovers", "swapping another night doesn't wipe the feast leftovers");
+  const back = withoutFeast(days, 1);
+  assert.equal(back[1].recipeId, "chili");
+  assert.equal(back[2].recipeName, null);
+});
+
+test("review fixes: a feast on a leftovers night drops the double batch", () => {
+  const d = (date: string, recipeId: string | null, extra: Partial<PlanDay> = {}): PlanDay => ({ date, recipeId, recipeName: recipeId, estimatedCost: 10, reason: "x · double batch for Thu", saleItems: [], alternatives: [], ...extra });
+  const out = withFeast([d("2026-11-25", "chili", { batches: 2, estimatedCost: 20 }), d("2026-11-26", "chili", { leftoverOf: "2026-11-25", holiday: "Thanksgiving" })], 1, feast(8));
+  assert.equal(out[0].batches, undefined);
+  assert.equal(out[0].estimatedCost, 10);
+  assert.equal(out[0].reason, "x");
 });
