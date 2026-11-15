@@ -17,3 +17,27 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+
+  smoke:
+    # A browser walk through the real app (set up, plan, approve, shop, cook, every page) on a fresh database.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - name: Start the app
+        run: |
+          PGLITE_DIR="$RUNNER_TEMP/db" nohup npx next start -p 3000 > "$RUNNER_TEMP/app.log" 2>&1 &
+          for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:3000/setup && exit 0; sleep 2; done
+          cat "$RUNNER_TEMP/app.log"; exit 1
+      - run: npm run smoke
+        env:
+          BASE: http://localhost:3000
+      - name: App log (if the smoke test failed)
+        if: failure()
+        run: cat "$RUNNER_TEMP/app.log"
