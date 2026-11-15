@@ -1,7 +1,7 @@
 import "server-only";
 import { and, desc, eq, isNull, isNotNull, inArray } from "drizzle-orm";
 import { getDb } from "@/db";
-import { cooks, foundRecipes, plans, recipes, settings as settingsTable } from "@/db/schema";
+import { cooks, foundRecipes, pantryItems, plans, recipes, settings as settingsTable } from "@/db/schema";
 import { DEFAULT_SETTINGS, cookDaysFor, type Settings } from "./settings";
 
 export async function getSettings(userId: string): Promise<{ data: Settings; complete: boolean }> {
@@ -87,4 +87,9 @@ export async function cookShelf(userId: string, limit = 60) {
     seen.add(key);
     return true;
   }).slice(0, limit);
+}
+
+export async function myPantry(userId: string) {
+  const db = await getDb();
+  return db.select().from(pantryItems).where(eq(pantryItems.userId, userId)).orderBy(pantryItems.place, pantryItems.name);
 }

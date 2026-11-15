@@ -104,6 +104,7 @@ export default async function HomePage() {
           </ul>
           <BudgetMeter plan={plan} budget={settings.weeklyBudget} mode={settings.budgetMode} />
           <StaplesCard plan={plan} staples={settings.staples} />
+          <PantryCard plan={plan} />
           {approved ? (
             <>
               <Celebrate />
@@ -295,6 +296,24 @@ function BudgetMeter({ plan, budget, mode }: { plan: Plan; budget: number; mode:
       )}
       <p className="mt-1 text-sm text-muted">Estimate. Your receipt may be a little different.</p>
     </section>
+  );
+}
+
+/** Pantry: what's running low and any "buy on sale" items on sale this week. */
+function PantryCard({ plan }: { plan: Plan }) {
+  const deals = plan.stockUp ?? [];
+  return (
+    <Link href="/pantry" className="flex items-center gap-3 rounded-3xl bg-card p-4 shadow-soft hover:shadow-lift">
+      <span className="text-3xl" aria-hidden="true">🥫</span>
+      <span className="min-w-0 flex-1">
+        <span className="font-bold">Pantry</span>{" "}
+        <span className="text-muted">{deals.length ? `· ${deals.length} stock-up deal${deals.length === 1 ? "" : "s"}` : "· skip what you have"}</span>
+        <span className="block truncate text-sm text-muted">
+          {deals.length ? <span className="font-bold text-terracotta-dark">⭐ {deals.map((d) => `${d.item.replace(/(^|\s)([a-z])/g, (_, sp, c) => sp + c.toUpperCase())} ${d.pctOff}% off`).join(", ")}</span> : "Mark what's low or out, and set items to buy only on sale."}
+        </span>
+      </span>
+      <span className="shrink-0 text-sm font-bold text-olive-dark">Open ›</span>
+    </Link>
   );
 }
 

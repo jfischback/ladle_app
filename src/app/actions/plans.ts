@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { and, desc, eq, inArray, isNull, ne } from "drizzle-orm";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
-import { cooks, foundRecipes, plans, recipes } from "@/db/schema";
-import { activePlans, getPlan, getSettings, myRecipes, recipesByIds } from "@/lib/data";
+import { cooks, foundRecipes, pantryItems, plans, recipes } from "@/db/schema";
+import { activePlans, getPlan, getSettings, myPantry, myRecipes, recipesByIds } from "@/lib/data";
 import { adoptFoundRecipe, refreshCooks } from "@/lib/cooks";
 import { ruleProblems } from "@/lib/diet";
 import { buildGroceryList, saleNote } from "@/lib/grocery";
@@ -13,6 +13,7 @@ import { stapleTerm, staplesTotal } from "@/lib/staples";
 import { FOUND_PREFIX, planWeek, sumCosts, type NewRecipeOption } from "@/lib/planner";
 import { recipeSales, scanSales, type SaleScan } from "@/lib/sales";
 import { leftoverNotes, planLunches } from "@/lib/lunch";
+import { applyPantry, pantrySearchTerm, sameThing } from "@/lib/pantry";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
 import { addDays, upcomingWeekStart, weekDates } from "@/lib/week";
@@ -49,9 +50,10 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   );
 
   // A failed price check never blocks planning: the week is planned without sales and the home screen says why.
+  const stockTerms = (await myPantry(userId)).filter((p) => p.onSaleOnly && p.status !== "have").map((p) => pantrySearchTerm(p.name));
   let scan: SaleScan;
   try {
-    scan = await scanSales(recipeList, settings);
+    scan = await scanSales(recipeList, settings, stockTerms);
   } catch (e) {
     scan = { status: "failed", message: (e as Error).message };
   }
@@ -63,6 +65,8 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   const sales = scan.status === "ok" ? scan.sales : [];
   const newRecipes = settings.newRecipesPerWeek > 0 ? await newRecipeOptions(userId, sales, settings) : [];
   const staples = stapleLines(settings, scan);
+  // "Buy on sale" pantry items that are running low and really on sale this week.
+  const stockUp = scan.status === "ok" ? scan.sales.filter((s) => stockTerms.includes(s.item)) : [];
 
   let result;
   try {
@@ -112,6 +116,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     saleItems: sales,
     saleCheck,
     staples,
+    stockUp,
     summary: result.summary,
     plannerSource: result.source,
     estimatedTotal: result.estimatedTotal,
@@ -191,6 +196,16 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
       return { item: x.item, quantity: x.quantity, note: sale ? saleNote(sale) : "", forRecipes: [] };
     });
     if (items.length) groceryList = { ...groceryList, sections: [{ name: "Weekly staples", items }, ...groceryList.sections] };
+    // Pantry check: skip what's on hand, ask about long-lasting items we don't know, add on-sale stock-ups.
+    const pantry = await myPantry(userId);
+    groceryList = applyPantry(groceryList, pantry, plan.stockUp ?? [], saleNote);
+    // Low/out pantry items on this week's list (stock-ups included) will be bought, so they're "have" from now on.
+    const bought = new Set(groceryList.sections.filter((s) => !/already in your pantry|pantry check/i.test(s.name)).flatMap((s) => s.items.map((i) => i.item)));
+    const restocked = pantry.filter((p) => p.status !== "have" && ([...bought].some((b) => sameThing(b, p.name)) || (plan.stockUp ?? []).some((s) => s.item === pantrySearchTerm(p.name))));
+    if (restocked.length) {
+      const db = await getDb();
+      await db.update(pantryItems).set({ status: "have", updatedAt: new Date() }).where(and(eq(pantryItems.userId, userId), inArray(pantryItems.id, restocked.map((p) => p.id))));
+    }
   } catch (e) {
     return { error: `Couldn't build the grocery list: ${(e as Error).message}` };
   }
