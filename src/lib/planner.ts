@@ -88,6 +88,7 @@ Rules:
 export async function planWeek(input: {
   settings: Settings;
   weekStart: string;
+  fromDate?: string; // plan only from this date on (the rest of a week that's already started)
   recipes: Recipe[];
   recentPlans: Plan[];
   /** All approved weeks, to bring back favorites that haven't been cooked in a while. */
@@ -98,7 +99,7 @@ export async function planWeek(input: {
   newRecipes?: NewRecipeOption[];
 }): Promise<PlanResult> {
   const { settings, weekStart } = input;
-  const dates = weekDates(weekStart);
+  const dates = weekDates(weekStart).filter((d) => !input.fromDate || d >= input.fromDate);
 
   const recentRecipeIds = new Set(
     input.recentPlans.flatMap((p) => p.days.map((d) => d.recipeId).filter(Boolean) as string[]),

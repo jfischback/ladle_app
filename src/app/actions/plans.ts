@@ -26,7 +26,7 @@ import { healthGroceryNotes, healthNeeds } from "@/lib/health";
 import { budgetNotes, cookOnceEatTwice, dinnerCost, enforceCap, fillCosts, rebalanceBatches } from "@/lib/budget";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
-import { addDays, dayName, upcomingWeekStart, weekDates } from "@/lib/week";
+import { addDays, currentWeekStart, dayName, upcomingWeekStart, weekDates, weekday } from "@/lib/week";
 import { TOO_MANY, under } from "@/lib/rate-limit";
 import { moveDinner } from "@/lib/move-dinner";
 import { withFeastSections } from "@/lib/feast-grocery";
@@ -42,18 +42,30 @@ async function archiveOthersForWeek(userId: string, weekOf: string, keepId?: str
   await db.update(plans).set({ archivedAt: new Date() }).where(and(...conds));
 }
 
-/** The Plan button: check this week's prices at their Fry's, ask Claude for the week, save it as a draft. */
-export async function planUpcomingWeek(): Promise<ActionResult> {
+/**
+ * The Plan button: check this week's prices at their Fry's, ask Claude for the week, save it as a draft.
+ * `thisWeek`: someone just starting mid-week plans the rest of the current week (today to the day before
+ * the next shopping day) instead of waiting for the next one.
+ */
+export async function planUpcomingWeek(thisWeek = false): Promise<ActionResult> {
   const userId = await requireUserId();
   if (!(await under("plan", userId))) return { error: TOO_MANY };
   const { data: settings } = await getSettings(userId);
-  const weekStart = upcomingWeekStart(settings.shoppingDay);
+  const fromDate = thisWeek === true ? today() : undefined;
+  const weekStart = fromDate ? currentWeekStart(settings.shoppingDay) : upcomingWeekStart(settings.shoppingDay);
+  if (fromDate) {
+    const left = weekDates(weekStart).filter((d) => d >= fromDate);
+    if (left.length < 2) return { error: "There's only a day left this week: plan the next one instead." };
+    if ((await activePlans(userId)).some((p) => p.weekOf === weekStart && p.status === "approved")) return { error: "This week is already planned." };
+  }
+  // A short week needs only as many dinners as it has cooking nights.
+  const needed = fromDate ? Math.max(1, weekDates(weekStart).filter((d) => d >= fromDate && settings.cookDays.includes(weekday(d))).length) : settings.dinnersPerWeek;
   const recipeList = await myRecipes(userId);
-  if (recipeList.length < settings.dinnersPerWeek) {
-    return { error: `You need at least ${settings.dinnersPerWeek} dinners in My Recipes to plan a week.` };
+  if (recipeList.length < needed) {
+    return { error: `You need at least ${needed} dinners in My Recipes to plan a week.` };
   }
   const fitting = recipeList.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment) && !(r.rating != null && r.rating <= 2)).length;
-  if (fitting < settings.dinnersPerWeek) {
+  if (fitting < needed) {
     return {
       error: `Only ${fitting} of your recipes fit your food rules, and you cook ${settings.dinnersPerWeek} nights. Add a few more recipes that fit (your cooks are a good place to look), or cook fewer nights in Settings.`,
     };
@@ -98,7 +110,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   let result;
   try {
     result = await planWeek({
-      settings, weekStart, recipes: recipeList, recentPlans: recent, history: allPlans.filter((p) => p.status === "approved"),
+      settings, weekStart, fromDate, recipes: recipeList, recentPlans: recent, history: allPlans.filter((p) => p.status === "approved"),
       saleItems: sales, storePrices: scan.status === "ok" ? scan.prices : [], newRecipes,
       staplesCost: staplesTotal(staples).total + extrasTotal(extraLines),
     });
@@ -437,17 +449,19 @@ export async function reuseWeek(planId: string): Promise<ActionResult> {
   // Only recipes still in the box that fit today's food rules and kitchen.
   const box = (await myRecipes(userId)).filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment));
   const live = new Map(box.map((r) => [r.id, r]));
-  let days: PlanDay[] = dates.map((date, i) => {
-    const d = source.days[i];
+  let days: PlanDay[] = dates.map((date) => {
+    // Same weekday as before (a short "rest of this week" plan doesn't start on the shopping day).
+    const d = source.days.find((x) => weekday(x.date) === weekday(date));
     const r = d?.recipeId ? live.get(d.recipeId) : undefined;
     // A leftovers night keeps pointing at its cooking night (same weekday in the new week).
-    const from = d?.leftoverOf ? source.days.findIndex((x) => x.date === d.leftoverOf) : -1;
+    const origin = d?.leftoverOf ? source.days.find((x) => x.date === d.leftoverOf) : undefined;
+    const from = origin ? dates.findIndex((x) => weekday(x) === weekday(origin.date)) : -1;
     return {
       date,
       recipeId: r ? r.id : null,
       recipeName: r ? r.name : null,
-      estimatedCost: r && !d.leftoverOf ? dinnerCost(r, settings, []).total : r ? 0 : null,
-      reason: r ? (d.leftoverOf ? `Leftovers from ${dayName(dates[from] ?? date)}: cook once, eat twice` : `Reused from week of ${source.weekOf}`) : "No-cook night",
+      estimatedCost: r && !d?.leftoverOf ? dinnerCost(r, settings, []).total : r ? 0 : null,
+      reason: r ? (d?.leftoverOf ? `Leftovers from ${dayName(dates[from] ?? date)}: cook once, eat twice` : `Reused from week of ${source.weekOf}`) : "No-cook night",
       saleItems: [],
       alternatives: [],
       leftoverOf: r && from >= 0 ? dates[from] : null,

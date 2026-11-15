@@ -34,7 +34,7 @@ await step("setup: a store, then start with Ladle's recipes", async () => {
   // First time through there are no shortcuts: step through, answering what's required.
   for (let i = 0; i < 12 && !(await page.getByRole("button", { name: "Start with our recipes" }).count()); i++) {
     if (await page.locator("#storeName").count() && !(await page.inputValue("#storeName"))) await page.fill("#storeName", "Fry's on Main");
-    const next = page.getByRole("button", { name: /Next/ });
+    const next = page.getByRole("button", { name: /^Next/ });
     if (await next.isDisabled()) throw new Error(`stuck on setup step ${i + 1}: ${(await page.locator("main").innerText()).slice(0, 120)}`);
     await next.click();
   }

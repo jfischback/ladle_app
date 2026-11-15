@@ -30,15 +30,15 @@ function ErrorNote({ error }: { error: string | null }) {
   return error ? <p role="alert" className="rounded-2xl bg-terracotta-soft px-4 py-2 text-terracotta-dark">{error}</p> : null;
 }
 
-export function PlanButton({ label, big }: { label: string; big?: boolean }) {
+export function PlanButton({ label, big, thisWeek = false, quiet = false }: { label: string; big?: boolean; thisWeek?: boolean; quiet?: boolean }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   return (
     <div className="flex flex-col items-center gap-2">
       <button
-        className={big ? "btn-warm min-h-14 px-8 text-lg" : "btn-secondary"}
+        className={big ? "btn-warm min-h-14 px-8 text-lg" : quiet ? "btn-quiet" : "btn-secondary"}
         disabled={pending}
-        onClick={() => start(async () => { setError(null); const r = await planUpcomingWeek(); if (r?.error) setError(r.error); })}
+        onClick={() => start(async () => { setError(null); const r = await planUpcomingWeek(thisWeek); if (r?.error) setError(r.error); })}
       >
         {pending ? <><span className="animate-wiggle inline-block" aria-hidden="true">🥄</span> Stirring up your week…</> : label}
       </button>

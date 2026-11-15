@@ -35,6 +35,8 @@ export default async function HomePage() {
   const inProgress = currentWeekStart(settings.shoppingDay);
   const plan = plans.find((p) => p.weekOf === upcoming) ?? plans.find((p) => p.weekOf === inProgress) ?? null;
   const todayStr = today();
+  // Days before the next shopping day: enough to plan the rest of this week now?
+  const daysLeft = Math.round((Date.parse(upcomingWeekStart(settings.shoppingDay)) - Date.parse(todayStr)) / 86400_000);
   // The holiday countdown ("move the turkey to the fridge today") on the days it falls on.
   const feastTipsByDate = feastTips(plan?.days ?? [], { boughtOn: plan?.weekOf, today: todayStr });
 
@@ -81,7 +83,7 @@ export default async function HomePage() {
       <header>
         <p className="eyebrow">{greeting()}!</p>
         <h1 className="text-4xl font-semibold leading-tight">
-          {plan ? <>Week of {shortDate(plan.weekOf)}</> : "Let's plan dinner"}
+          {plan ? (plan.days[0] && plan.days[0].date > plan.weekOf ? <>This week, {shortDate(plan.days[0].date)} to {shortDate(plan.days[plan.days.length - 1].date)}</> : <>Week of {shortDate(plan.weekOf)}</>) : "Let's plan dinner"}
         </h1>
         <p className="mt-1 text-muted">
           {plan
@@ -122,7 +124,7 @@ export default async function HomePage() {
       )}
 
       {!plan ? (
-        <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} yours={yours} />
+        <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} yours={yours} startNow={daysLeft >= 2 ? `the rest of this week (${dayName(todayStr).slice(0, 3)} to ${dayName(addDays(upcoming, -1)).slice(0, 3)})` : null} />
       ) : (
         <>
           <ul id="dinners" className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)] gap-3">
@@ -274,7 +276,7 @@ function SaleBanner({ plan, saleThreshold, yours }: { plan: Plan | null; saleThr
   );
 }
 
-function EmptyState({ weekOf, recipeCount, needed, checksSales, yours }: { weekOf: string; recipeCount: number; needed: number; checksSales: boolean; yours: string }) {
+function EmptyState({ weekOf, recipeCount, needed, checksSales, yours, startNow }: { weekOf: string; recipeCount: number; needed: number; checksSales: boolean; yours: string; startNow?: string | null }) {
   if (recipeCount < needed) {
     return (
       <div className="card flex flex-col items-center gap-4 p-8 text-center">
@@ -301,6 +303,10 @@ function EmptyState({ weekOf, recipeCount, needed, checksSales, yours }: { weekO
         <p className="mt-1 text-lg text-muted">We&apos;ll pick dinners for the week of {shortDate(weekOf)} from the recipes your family likes{checksSales ? `, built around what's on sale at ${yours}` : ""}. You can swap anything.</p>
       </div>
       <PlanButton label="Plan my week" big />
+      {startNow && (
+        // Starting mid-week: no need to wait for the next shopping day.
+        <PlanButton label={`Or start now: plan ${startNow}`} thisWeek quiet />
+      )}
     </div>
   );
 }
