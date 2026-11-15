@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUserId } from "@/auth";
-import { getSettings } from "@/lib/data";
+import { getSettings, myCooks } from "@/lib/data";
+import { FeatureCards } from "@/components/FeatureCards";
 import { krogerEnabled } from "@/lib/kroger";
 import { claudeEnabled } from "@/lib/claude";
 import { SetupWizard } from "./SetupWizard";
@@ -8,8 +9,14 @@ import { SetupWizard } from "./SetupWizard";
 export default async function SetupPage() {
   const userId = await requireUserId();
   const { data, complete } = await getSettings(userId);
+  const creators = complete ? (await myCooks(userId)).map((c) => c.name) : [];
   return (
     <>
+      {complete && (
+        <div className="mb-6">
+          <FeatureCards creators={creators} athletes={data.athletes.length} title="Make Ladle yours" />
+        </div>
+      )}
       <SetupWizard initial={data} isEdit={complete} krogerEnabled={krogerEnabled()} />
       {complete && (
         <p className="mt-6 text-center">

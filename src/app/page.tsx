@@ -3,7 +3,7 @@ import { moveTargets } from "@/lib/move-dinner";
 import { feastHolidayOn, feastTips } from "@/lib/feast";
 import { redirect } from "next/navigation";
 import { requireUserId } from "@/auth";
-import { activePlans, getSettings, myRecipes } from "@/lib/data";
+import { activePlans, getSettings, myCooks, myRecipes } from "@/lib/data";
 import { addDays, currentWeekStart, dayName, greeting, money, shortDate, today, upcomingWeekStart, weekDates, weekday } from "@/lib/week";
 import { PlanButton, DayCard, ApproveBar, RatePrompt, StartOverButton, GroceryChecklist, Celebrate } from "./HomeClient";
 import { FoodArt } from "@/components/FoodArt";
@@ -21,6 +21,7 @@ import { prepPlan } from "@/lib/prep";
 import { PrepCard } from "@/components/PrepCard";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { AthleteWeekCard } from "@/components/AthleteWeekCard";
+import { FeatureCards } from "@/components/FeatureCards";
 
 // Planning, approving and importing can take a while (the AI, store prices): give them a minute.
 export const maxDuration = 60;
@@ -35,6 +36,8 @@ export default async function HomePage() {
   const inProgress = currentWeekStart(settings.shoppingDay);
   const plan = plans.find((p) => p.weekOf === upcoming) ?? plans.find((p) => p.weekOf === inProgress) ?? null;
   const todayStr = today();
+  // Ladle's stand-out features, shown until they're in use.
+  const creators = (await myCooks(userId)).map((c) => c.name);
   // Days before the next shopping day: enough to plan the rest of this week now?
   const daysLeft = Math.round((Date.parse(upcomingWeekStart(settings.shoppingDay)) - Date.parse(todayStr)) / 86400_000);
   // The holiday countdown ("move the turkey to the fridge today") on the days it falls on.
@@ -101,6 +104,8 @@ export default async function HomePage() {
         )}
       </header>
 
+      {plan && <FeatureCards creators={creators} athletes={settings.athletes.length} only="unused" compact />}
+
       {prepTomorrow.map(({ d, r }) => (
         <div key={d.date} className="flex items-start gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft">
           <span className="animate-wiggle text-3xl" aria-hidden="true">⏰</span>
@@ -124,7 +129,7 @@ export default async function HomePage() {
       )}
 
       {!plan ? (
-        <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={daysLeft >= 2 ? Math.min(settings.dinnersPerWeek, Math.max(1, weekDates(inProgress).filter((d) => d >= todayStr && settings.cookDays.includes(weekday(d))).length)) : settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} yours={yours} startNow={daysLeft >= 2 ? `the rest of this week (${dayName(todayStr).slice(0, 3)} to ${dayName(addDays(upcoming, -1)).slice(0, 3)})` : null} />
+        <EmptyState creators={creators} athletes={settings.athletes.length} weekOf={upcoming} recipeCount={recipes.length} needed={daysLeft >= 2 ? Math.min(settings.dinnersPerWeek, Math.max(1, weekDates(inProgress).filter((d) => d >= todayStr && settings.cookDays.includes(weekday(d))).length)) : settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} yours={yours} startNow={daysLeft >= 2 ? `the rest of this week (${dayName(todayStr).slice(0, 3)} to ${dayName(addDays(upcoming, -1)).slice(0, 3)})` : null} />
       ) : (
         <>
           <ul id="dinners" className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)] gap-3">
@@ -277,7 +282,7 @@ function SaleBanner({ plan, saleThreshold, yours }: { plan: Plan | null; saleThr
   );
 }
 
-function EmptyState({ weekOf, recipeCount, needed, checksSales, yours, startNow }: { weekOf: string; recipeCount: number; needed: number; checksSales: boolean; yours: string; startNow?: string | null }) {
+function EmptyState({ weekOf, recipeCount, needed, checksSales, yours, startNow, creators, athletes }: { creators: string[]; athletes: number; weekOf: string; recipeCount: number; needed: number; checksSales: boolean; yours: string; startNow?: string | null }) {
   if (recipeCount < needed) {
     return (
       <div className="card flex flex-col items-center gap-4 p-8 text-center">
@@ -308,6 +313,9 @@ function EmptyState({ weekOf, recipeCount, needed, checksSales, yours, startNow 
         // Starting mid-week: no need to wait for the next shopping day.
         <PlanButton label={`Or start now: plan ${startNow}`} thisWeek quiet />
       )}
+      <div className="w-full pt-4 text-left">
+        <FeatureCards creators={creators} athletes={athletes} title="Make Ladle yours" />
+      </div>
     </div>
   );
 }

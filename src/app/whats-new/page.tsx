@@ -10,6 +10,8 @@ const NEW: { when: string; items: Item[] }[] = [
   {
     when: "November 2026",
     items: [
+      { icon: "✨", title: "Recipes from your favorite food creators", text: "Follow the food bloggers and creators you love (Half Baked Harvest, RecipeTin Eats, Pinch of Yum, or paste any site). Ladle watches for their new dinners and works them into your week, especially when the ingredients are on sale, and skips anything that breaks your food rules.", href: "/recipes?tab=cooks" },
+      { icon: "💪", title: "Athlete mode", text: "Pick each person's sport (CrossFit, strongman, lifting, running…), goal and phase. Ladle sizes their portions, raises the protein, adds the right snacks and shakes, and gives simple tips, while everyone else eats as usual.", href: "/athletes" },
       { icon: "🦃", title: "Thanksgiving and Christmas dinners", text: "On the holiday's card, plan the feast: how many people and which dishes. The turkey or ham is sized for the table, the groceries get their own section, and a countdown says when to thaw, what to make the day before, and when it goes in the oven.", where: "Home, on the holiday" },
       { icon: "👥", title: "Who's eating tonight?", text: "Company coming, or someone away? Before you approve the week, change who's at dinner on any night and its groceries follow.", where: "Home, Swap on any night" },
       { icon: "🔀", title: "Move a dinner to another night", text: "Soccer ran late? Trade two nights' dinners, even after shopping. Leftovers nights move with their dinner.", where: "Home, Move on any night" },
