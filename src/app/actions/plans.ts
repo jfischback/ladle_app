@@ -21,6 +21,7 @@ import { athleteWeeks } from "@/lib/athlete-week";
 import { canCook } from "@/lib/prep";
 import { leftoverKind } from "@/lib/leftovers";
 import { recipeMultipliers } from "@/lib/scaling";
+import { mergeDuplicates } from "@/lib/grocery-merge";
 import { healthGroceryNotes, healthNeeds } from "@/lib/health";
 import { budgetNotes, cookOnceEatTwice, dinnerCost, enforceCap, fillCosts, rebalanceBatches } from "@/lib/budget";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
@@ -280,6 +281,8 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
     }
     // Pantry check: skip what's on hand, ask about long-lasting items we don't know, add on-sale stock-ups.
     const pantry = await myPantry(userId);
+    // One line per thing: eggs in the staples, a recipe and athlete fuel become one line with the amounts added.
+    groceryList = mergeDuplicates(groceryList);
     groceryList = applyPantry(groceryList, pantry, plan.stockUp ?? [], saleNote);
     // Low/out pantry items on this week's list (stock-ups included) will be bought, so they're "have" from now on.
     const bought = new Set(groceryList.sections.filter((s) => !/already in your pantry|pantry check/i.test(s.name)).flatMap((s) => s.items.map((i) => i.item)));
