@@ -24,3 +24,12 @@ test("added things get their own section, add up, come off, and go to the cart",
   list = removeFromList(removeFromList(list, "paper towels"), "Milk");
   assert.ok(!list.sections.some((s) => s.name === ADDED_SECTION));
 });
+
+test("fractions and names that start with a number", () => {
+  assert.deepEqual(parseAdded("1/2 gallon milk"), { item: "gallon milk", quantity: "1/2" });
+  assert.deepEqual(parseAdded("7up"), { item: "7up", quantity: "1" });
+  assert.deepEqual(parseAdded("9v batteries"), { item: "9v batteries", quantity: "1" });
+  let list = addToList(base, "1/2 lemons");
+  list = addToList(list, "1/2 lemons");
+  assert.equal(list.sections[0].items[0].quantity, "1");
+});

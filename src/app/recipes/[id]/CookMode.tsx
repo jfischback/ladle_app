@@ -22,7 +22,16 @@ const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, 
  */
 export function CookMode({ recipeId, name, steps, ingredients, startOpen = false, notes = null }: { recipeId: string; name: string; steps: string[]; ingredients: Ingredient[]; startOpen?: boolean; notes?: string | null }) {
   const factor = useServingsFactor(recipeId);
-  const [open, setOpen] = useState(startOpen);
+  const [open, setOpenState] = useState(startOpen);
+  // Opened from "Start cooking" (?cook=1): closing it takes that off the address, so a reload doesn't reopen it.
+  const setOpen = useCallback((v: boolean) => {
+    setOpenState(v);
+    if (!v && window.location.search.includes("cook=1")) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("cook");
+      window.history.replaceState(window.history.state, "", url);
+    }
+  }, []);
   const [at, setAt] = useState(0);
   const [showIngredients, setShowIngredients] = useState(false);
   const [timer, setTimer] = useState<{ left: number; total: number; running: boolean } | null>(null);
@@ -61,7 +70,7 @@ export function CookMode({ recipeId, name, steps, ingredients, startOpen = false
     const key = (e: KeyboardEvent) => { if (e.key === "ArrowRight") go(1); if (e.key === "ArrowLeft") go(-1); if (e.key === "Escape") setOpen(false); };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [open, go]);
+  }, [open, go, setOpen]);
 
   if (!steps.length) return null;
   const minutes = stepMinutes(steps[at]);

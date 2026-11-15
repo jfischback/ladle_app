@@ -5,8 +5,9 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
-import { pantryItems, plans } from "@/db/schema";
-import { getPlan } from "@/lib/data";
+import { updateGroceryList } from "@/lib/plan-list";
+import type { GroceryItem } from "@/lib/types";
+import { pantryItems } from "@/db/schema";
 import { PANTRY_SECTIONS, guessPlace, pantryName, type Place } from "@/lib/pantry";
 
 const ItemSchema = z.object({
@@ -56,13 +57,30 @@ export async function removePantryItem(id: string) {
  */
 export async function answerPantryCheck(planId: string, item: string | null, have: boolean) {
   const userId = await requireUserId();
-  const plan = await getPlan(userId, planId);
-  if (!plan?.groceryList) return;
-  const sections = plan.groceryList.sections.map((s) => ({ ...s, items: [...s.items] }));
-  const check = sections.find((s) => s.name === PANTRY_SECTIONS.PANTRY_CHECK);
-  if (!check) return;
-  // One item, or every question at once ("I have all of these").
-  const answering = item === null ? [...check.items] : check.items.filter((i) => i.item === item);
+  if (!/^[0-9a-f-]{36}$/i.test(planId)) return;
+  let answering: GroceryItem[] = [];
+  // Read, change and save the list under a lock, so a tick-off or an added item at the same moment isn't lost.
+  await updateGroceryList(userId, planId, (list) => {
+    const sections = list.sections.map((s) => ({ ...s, items: [...s.items] }));
+    const check = sections.find((s) => s.name === PANTRY_SECTIONS.PANTRY_CHECK);
+    if (!check) return null;
+    // One item, or every question at once ("I have all of these").
+    answering = item === null ? [...check.items] : check.items.filter((i) => i.item === item);
+    if (!answering.length) return null;
+    check.items = check.items.filter((i) => !answering.includes(i));
+    for (const moved of answering) {
+      const targetName = have ? PANTRY_SECTIONS.HAVE_IT : "Pantry items to buy";
+      let target = sections.find((s) => s.name === targetName);
+      if (!target) {
+        target = { name: targetName, items: [] };
+        // "To buy" goes just before the pantry check; "have it" goes last.
+        if (have) sections.push(target);
+        else sections.splice(sections.indexOf(check), 0, target);
+      }
+      target.items.push({ ...moved, note: have ? "You have this" : "You said you need it" });
+    }
+    return { ...list, sections: sections.filter((s) => s.items.length) };
+  });
   if (!answering.length) return;
   const db = await getDb();
   for (const it of answering) {
@@ -74,21 +92,5 @@ export async function answerPantryCheck(planId: string, item: string | null, hav
       .values({ userId, name, place: guessPlace(name), status: "have" })
       .onConflictDoUpdate({ target: [pantryItems.userId, pantryItems.name], set: { status: "have", updatedAt: new Date() } });
   }
-  check.items = check.items.filter((i) => !answering.includes(i));
-  for (const moved of answering) {
-    const targetName = have ? PANTRY_SECTIONS.HAVE_IT : "Pantry items to buy";
-    let target = sections.find((s) => s.name === targetName);
-    if (!target) {
-      target = { name: targetName, items: [] };
-      // "To buy" goes just before the pantry check; "have it" goes last.
-      if (have) sections.push(target);
-      else sections.splice(sections.indexOf(check), 0, target);
-    }
-    target.items.push({ ...moved, note: have ? "You have this" : "You said you need it" });
-  }
-  await db
-    .update(plans)
-    .set({ groceryList: { ...plan.groceryList, sections: sections.filter((s) => s.items.length) } })
-    .where(and(eq(plans.id, planId), eq(plans.userId, userId)));
   revalidatePath("/");
 }
