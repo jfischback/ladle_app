@@ -4,6 +4,7 @@ import { setActualSpend } from "@/app/actions/plans";
 import { dayName, money, shortDate } from "@/lib/week";
 import { FoodArt } from "@/components/FoodArt";
 import { ReuseButton } from "./ReuseButton";
+import { ReceiptButton } from "./ReceiptButton";
 import { cartTotal } from "@/lib/cart-total";
 
 // Planning, approving and importing can take a while (the AI, store prices): give them a minute.
@@ -117,6 +118,7 @@ export default async function HistoryPage() {
                     </div>
                     <button className="btn-secondary min-h-11 text-sm">Save</button>
                   </form>
+                  <ReceiptButton planId={w.id} />
                   <ReuseButton planId={w.id} />
                 </div>
               </li>
