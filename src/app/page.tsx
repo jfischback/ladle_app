@@ -9,6 +9,7 @@ import { Highlight } from "@/components/Highlight";
 import type { Plan } from "@/db/schema";
 import type { SaleItem } from "@/lib/types";
 import { krogerEnabled } from "@/lib/kroger";
+import { ruleProblems } from "@/lib/diet";
 
 export default async function HomePage() {
   const userId = await requireUserId();
@@ -38,7 +39,10 @@ export default async function HomePage() {
           .filter((x) => x.r?.prepAhead)
       : [];
 
-  const recipeInfo = recipes.map((r) => ({ id: r.id, name: r.name, protein: r.protein, totalMinutes: r.totalMinutes }));
+  // Swap choices only offer recipes that fit the household's food rules.
+  const recipeInfo = recipes
+    .filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes).length)
+    .map((r) => ({ id: r.id, name: r.name, protein: r.protein, totalMinutes: r.totalMinutes }));
   const store = settings.storeName ? settings.storeName.split(" · ")[0] : "your Fry's";
   const approved = plan?.status === "approved";
   const dinners = plan?.days.filter((d) => d.recipeId).length ?? 0;

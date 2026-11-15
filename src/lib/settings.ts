@@ -1,3 +1,5 @@
+import type { FoodRule } from "./diet";
+
 export const MOTIVATIONS = {
   save_money: "Save money",
   eat_healthier: "Eat healthier",
@@ -25,7 +27,10 @@ export type Settings = {
   weeklyBudget: number;
   budgetMode: "target" | "hard";
   // Q4 Meals
-  dinnersPerWeek: number;
+  dinnersPerWeek: number; // kept equal to cookDays.length
+  cookDays: number[]; // 0 = Sunday … 6 = Saturday: the nights we plan a dinner for
+  foodRules: FoodRule[]; // allergies, diets, "no bones"
+  dislikes: string[]; // foods the family won't eat, e.g. ["mushroom", "olive"]
   noRepeatWeeks: number;
   favorQuickWeeknights: boolean;
   newRecipesPerWeek: number; // 0-2 new dinners from followed cooks, picked by the planner
@@ -53,6 +58,9 @@ export const DEFAULT_SETTINGS: Settings = {
   weeklyBudget: 150,
   budgetMode: "target",
   dinnersPerWeek: 5,
+  cookDays: [0, 1, 2, 3, 4],
+  foodRules: [],
+  dislikes: [],
   noRepeatWeeks: 3,
   favorQuickWeeknights: true,
   newRecipesPerWeek: 1,
@@ -63,3 +71,13 @@ export const DEFAULT_SETTINGS: Settings = {
   fruitRule: true,
   prepReminders: true,
 };
+
+// Nights to fill first when an older setting only said "N dinners a week": Mon–Thu, then Sun, Fri, Sat.
+const DAY_PREFERENCE = [1, 2, 3, 4, 0, 5, 6];
+
+/** Older saved settings had only a dinner count; turn it into specific nights. */
+export function cookDaysFor(saved: Partial<Settings>): number[] {
+  if (Array.isArray(saved.cookDays) && saved.cookDays.length) return [...new Set(saved.cookDays)].filter((d) => d >= 0 && d <= 6).sort();
+  const n = Math.min(7, Math.max(1, saved.dinnersPerWeek ?? 5));
+  return DAY_PREFERENCE.slice(0, n).sort();
+}

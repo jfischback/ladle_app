@@ -4,7 +4,8 @@ import type { Recipe, Plan } from "@/db/schema";
 import { MOTIVATIONS, type Settings } from "./settings";
 import type { PlanDay } from "./types";
 import { askClaude, claudeEnabled } from "./claude";
-import { dayName, weekDates } from "./week";
+import { dayName, weekDates, weekday } from "./week";
+import { ruleProblems, rulesSummary } from "./diet";
 import { recipeSales, type SaleItem, type StorePrice } from "./sales";
 import type { Ingredient } from "./types";
 
@@ -49,7 +50,8 @@ const SYSTEM = `You are the weekly dinner planner inside Ladle, a meal-planning 
 You receive one JSON package: the household's settings and priorities, their approved recipe list, this week's sale items at their store (may be empty), and recent weeks' dinners. Pick the week's dinners following these rules exactly. Do not make up rules beyond these.
 
 Rules:
-- Return all seven dates. Exactly "dinnersPerWeek" of them get a recipe; the rest are no-cook nights (recipeKey null, reason like "Leftovers night").
+- Return all seven dates. Only the dates marked cook: true get a recipe (one each); every other date is a no-cook night (recipeKey null, reason like "Leftovers night").
+- foodRules are strict (allergies, diets, "no bones", foods they won't eat). The recipe lists were already checked, but if a recipe still looks like it breaks a rule, don't pick it.
 - Only use recipe keys from the recipe list. Never pick the same recipe twice in one week.
 - Never pick a recipe that appears in the recent weeks' dinners (the no-repeat window is already applied to that list).
 - Never pick a recipe rated 1 or 2 stars. Favor higher-rated recipes. Unrated recipes are fine.
@@ -80,10 +82,13 @@ export async function planWeek(input: {
     input.recentPlans.flatMap((p) => p.days.map((d) => d.recipeId).filter(Boolean) as string[]),
   );
   // Section 5: skip 1-2 star meals; no-repeat window.
-  const eligible = input.recipes.filter((r) => !(r.rating != null && r.rating <= 2) && !recentRecipeIds.has(r.id));
-  const pool = eligible.length >= settings.dinnersPerWeek ? eligible : input.recipes.filter((r) => !(r.rating != null && r.rating <= 2));
+  // Food rules are hard: a recipe that breaks one is never planned.
+  const allowed = input.recipes.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes).length);
+  const eligible = allowed.filter((r) => !(r.rating != null && r.rating <= 2) && !recentRecipeIds.has(r.id));
+  const pool = eligible.length >= settings.dinnersPerWeek ? eligible : allowed.filter((r) => !(r.rating != null && r.rating <= 2));
+  const cookDays = new Set(settings.cookDays);
 
-  const newOptions = settings.newRecipesPerWeek > 0 ? (input.newRecipes ?? []) : [];
+  const newOptions = settings.newRecipesPerWeek > 0 ? (input.newRecipes ?? []).filter((n) => !ruleProblems(n, settings.foodRules, settings.dislikes).length) : [];
   if (!claudeEnabled()) return basicPlan(dates, pool, settings, input.saleItems, newOptions);
 
   const keyed = pool.map((r, i) => ({ key: `r${i + 1}`, recipe: r }));
@@ -92,7 +97,8 @@ export async function planWeek(input: {
   const byNewKey = new Map(newKeyed.map((k) => [k.key, k.option]));
 
   const pkg = {
-    week: dates.map((d) => ({ date: d, day: dayName(d) })),
+    week: dates.map((d) => ({ date: d, day: dayName(d), cook: cookDays.has(weekday(d)) })),
+    foodRules: rulesSummary(settings.foodRules, settings.dislikes) || "none",
     household: {
       adults: settings.adults,
       kids: settings.kids,
@@ -139,6 +145,8 @@ export async function planWeek(input: {
   const used = new Set<string>();
   let newCount = 0;
   const days: PlanDay[] = dates.map((date) => {
+    // Nights they didn't pick are always nights off, whatever came back.
+    if (!cookDays.has(weekday(date))) return { date, recipeId: null, recipeName: null, estimatedCost: null, reason: "No-cook night", saleItems: [], alternatives: [] };
     const d = out.days.find((x) => x.date === date);
     const option = d?.recipeKey ? byNewKey.get(d.recipeKey) : undefined;
     if (option && !used.has(option.foundId) && newCount < settings.newRecipesPerWeek) {
@@ -206,10 +214,8 @@ function basicPlan(dates: string[], pool: Recipe[], settings: Settings, sales: S
     .map((x) => x.r);
   const picks = shuffled.slice(0, settings.dinnersPerWeek);
   const rest = shuffled.slice(settings.dinnersPerWeek);
-  // Spread cooking nights from the start of the week.
-  const cookIdx = new Set(
-    Array.from({ length: Math.min(picks.length, 7) }, (_, i) => Math.round((i * 7) / Math.max(picks.length, 1))),
-  );
+  // Cook on the nights they picked.
+  const cookIdx = new Set(dates.map((d, i) => (settings.cookDays.includes(weekday(d)) ? i : -1)).filter((i) => i >= 0));
   let p = 0;
   const days: PlanDay[] = dates.map((date, i) => {
     const r = cookIdx.has(i) ? picks[p++] : undefined;

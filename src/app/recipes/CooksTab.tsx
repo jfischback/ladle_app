@@ -1,6 +1,7 @@
 import { activePlans, cookShelf, getSettings, myCooks } from "@/lib/data";
 import { SUGGESTED_COOKS } from "@/lib/cooks";
 import { recipeSales } from "@/lib/sales";
+import { ruleProblems } from "@/lib/diet";
 import { formatMinutes } from "@/lib/format";
 import type { SaleItem } from "@/lib/types";
 import { FoodArt } from "@/components/FoodArt";
@@ -16,7 +17,11 @@ function ago(d: Date | null): string {
 }
 
 export async function CooksTab({ userId }: { userId: string }) {
-  const [following, shelf, plans, { data: settings }] = await Promise.all([myCooks(userId), cookShelf(userId), activePlans(userId), getSettings(userId)]);
+  const [following, allShelf, plans, { data: settings }] = await Promise.all([myCooks(userId), cookShelf(userId, 150), activePlans(userId), getSettings(userId)]);
+  // Recipes that break the household's food rules never show up.
+  const fits = allShelf.filter(({ found }) => !ruleProblems(found, settings.foodRules, settings.dislikes).length);
+  const hidden = allShelf.length - fits.length;
+  const shelf = fits.slice(0, 60);
   // Sales from the newest plan, so the shelf can show what's on sale right now.
   const sales = (plans[0]?.saleItems ?? []).filter((x): x is SaleItem => typeof x !== "string");
   const followedFeeds = new Set(following.map((c) => c.feedUrl));
@@ -71,7 +76,10 @@ export async function CooksTab({ userId }: { userId: string }) {
       {following.length > 0 && (
         <section aria-labelledby="shelf-title">
           <h2 id="shelf-title" className="mb-1 text-2xl font-semibold">New from your cooks</h2>
-          <p className="mb-4 text-muted">Save the ones that look good, or let the planner surprise you.</p>
+          <p className="mb-4 text-muted">
+            Save the ones that look good, or let the planner surprise you.
+            {hidden > 0 && <> We hid {hidden} that don&apos;t fit your food rules.</>}
+          </p>
           {shelf.length === 0 ? (
             <div className="card flex flex-col items-center gap-3 p-8 text-center">
               <FoodArt kind="soup" className="h-20 w-20" rounded="rounded-full" />

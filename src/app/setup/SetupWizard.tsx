@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { lookupStores, saveSettings } from "@/app/actions/settings";
 import { DAY_NAMES, MOTIVATIONS, type Motivation, type Settings } from "@/lib/settings";
+import { FOOD_RULES, FOOD_RULE_GROUPS, parseDislikes, type FoodRule } from "@/lib/diet";
 import type { StoreLocation } from "@/lib/kroger";
 
 
@@ -12,7 +13,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const set = <K extends keyof Settings>(k: K, v: Settings[K]) => setS((prev) => ({ ...prev, [k]: v }));
-  const last = isEdit ? 5 : 6;
+  const last = isEdit ? 6 : 7;
 
   function finish(startWith?: "ours" | "own") {
     setError(null);
@@ -29,8 +30,9 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
 
   const canNext =
     (step !== 0 || s.motivation.length > 0) &&
-    (step !== 3 || s.weeklyBudget >= 10) &&
-    (step !== 2 || s.storeName.trim().length > 0 || !!s.storeLocationId);
+    (step !== 4 || s.weeklyBudget >= 10) &&
+    (step !== 3 || s.storeName.trim().length > 0 || !!s.storeLocationId) &&
+    (step !== 5 || s.cookDays.length > 0);
 
   return (
     <div className="mx-auto max-w-xl">
@@ -43,6 +45,16 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
             <div key={i} className={`h-2.5 flex-1 rounded-full transition-colors ${i <= step ? "bg-terracotta" : "bg-oat"}`} />
           ))}
         </div>
+        {isEdit && (
+          // In Settings, jump straight to any question.
+          <nav aria-label="Settings sections" className="mt-3 flex flex-wrap gap-1.5">
+            {QUESTION.slice(0, last + 1).map((q, i) => (
+              <button key={q} type="button" aria-current={i === step ? "step" : undefined} onClick={() => setStep(i)} className={`rounded-full px-3 py-1 text-sm font-bold transition-colors ${i === step ? "bg-terracotta text-cream" : "bg-oat text-olive-dark hover:bg-olive-soft"}`}>
+                <span aria-hidden="true">{ICON[i]}</span> {SHORT[i]}
+              </button>
+            ))}
+          </nav>
+        )}
       </div>
 
       <section key={step} className="card animate-pop p-6" aria-labelledby="q-title">
@@ -70,9 +82,11 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
           </div>
         )}
 
-        {step === 2 && <StoreStep s={s} set={set} krogerEnabled={krogerEnabled} />}
+        {step === 2 && <FoodRulesStep rules={s.foodRules} dislikes={s.dislikes} onRules={(v) => set("foodRules", v)} onDislikes={(v) => set("dislikes", v)} />}
 
-        {step === 3 && (
+        {step === 3 && <StoreStep s={s} set={set} krogerEnabled={krogerEnabled} />}
+
+        {step === 4 && (
           <div className="space-y-5">
             <div>
               <label htmlFor="budget" className="label">Weekly grocery budget</label>
@@ -93,9 +107,9 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
           </div>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <div className="space-y-5">
-            <Counter label="Dinners cooked per week" value={s.dinnersPerWeek} min={1} max={7} onChange={(v) => set("dinnersPerWeek", v)} />
+            <DayPicker value={s.cookDays} onChange={(v) => { set("cookDays", v); set("dinnersPerWeek", v.length); }} />
             <Counter label="Weeks before a dinner can repeat" value={s.noRepeatWeeks} min={0} max={12} onChange={(v) => set("noRepeatWeeks", v)} />
             <YesNo label="Favor quick meals on weeknights?" value={s.favorQuickWeeknights} onChange={(v) => set("favorQuickWeeknights", v)} />
             <div>
@@ -106,7 +120,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
           </div>
         )}
 
-        {step === 5 && (
+        {step === 6 && (
           <div className="space-y-5">
             <div>
               <label htmlFor="sale" className="label">What counts as a sale?</label>
@@ -120,7 +134,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
           </div>
         )}
 
-        {step === 6 && !isEdit && (
+        {step === 7 && !isEdit && (
           <div className="grid gap-3">
             <button className="btn-warm min-h-14 text-lg" disabled={pending} onClick={() => finish("ours")}>
               {pending ? "Setting things up…" : "Start with our recipes"}
@@ -157,20 +171,23 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
 const QUESTION = [
   "What matters most to you?",
   "Who's eating?",
+  "Any food rules?",
   "Where do you shop?",
   "What's your weekly budget?",
   "How do you cook?",
   "How do you buy?",
   "Last step: your recipe box",
 ];
-const ICON = ["💛", "👨‍👩‍👧", "🛒", "💰", "🍳", "🏷️", "📖"];
+const ICON = ["💛", "👨‍👩‍👧", "🥗", "🛒", "💰", "🍳", "🏷️", "📖"];
+const SHORT = ["Priorities", "Family", "Food rules", "Store", "Budget", "Cooking", "Buying", "Recipes"];
 const MOTIVATION_ICON: Record<Motivation, string> = { save_money: "💰", eat_healthier: "🥦", try_new: "✨" };
 const HINT = [
   "Tap them in order, most important first. This changes how we pick dinners.",
   "We use this for portions and baby-safe choices.",
+  "Allergies, diets, or foods your family won't eat. We'll never plan a dinner that breaks these.",
   "We plan around what's on sale at your Fry's.",
   "We keep the week's dinners near this number.",
-  "We plan dinners only, for now.",
+  "Pick the nights you want dinner planned. The others are nights off.",
   "Two quick rules for picking products.",
   "Most families start with ours and add favorites over time.",
 ];
@@ -312,5 +329,76 @@ function Choice<T extends string>({ label, value, onChange, options }: { label: 
         ))}
       </div>
     </fieldset>
+  );
+}
+
+const DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function DayPicker({ value, onChange }: { value: number[]; onChange: (v: number[]) => void }) {
+  const toggle = (d: number) => onChange(value.includes(d) ? value.filter((x) => x !== d) : [...value, d].sort());
+  const presets: [string, number[]][] = [["Weeknights", [1, 2, 3, 4]], ["Sun–Thu", [0, 1, 2, 3, 4]], ["Every night", [0, 1, 2, 3, 4, 5, 6]]];
+  return (
+    <fieldset>
+      <legend className="text-lg font-semibold">Which nights should we plan?</legend>
+      <div className="mt-2 grid grid-cols-7 gap-1">
+        {DAY_SHORT.map((d, i) => {
+          const on = value.includes(i);
+          return (
+            <button key={d} type="button" aria-pressed={on} aria-label={DAY_NAMES[i]} onClick={() => toggle(i)}
+              className={`flex h-14 flex-col items-center justify-center rounded-2xl border-2 text-[0.8rem] font-extrabold sm:text-sm transition-all active:scale-95 ${on ? "border-terracotta bg-terracotta text-cream shadow-soft" : "border-line bg-card text-muted hover:border-terracotta/60"}`}>
+              {d}
+              <span aria-hidden="true" className="text-xs font-bold">{on ? "🍽" : "–"}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        {presets.map(([label, days]) => (
+          <button key={label} type="button" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft" onClick={() => onChange(days)}>{label}</button>
+        ))}
+      </div>
+      <p className="mt-2 text-sm text-muted" aria-live="polite">
+        {value.length ? `${value.length} dinner${value.length === 1 ? "" : "s"} a week · nights off: ${DAY_SHORT.filter((_, i) => !value.includes(i)).join(", ") || "none"}` : "Pick at least one night."}
+      </p>
+    </fieldset>
+  );
+}
+
+function FoodRulesStep({ rules, dislikes, onRules, onDislikes }: { rules: FoodRule[]; dislikes: string[]; onRules: (v: FoodRule[]) => void; onDislikes: (v: string[]) => void }) {
+  const [text, setText] = useState(dislikes.join(", "));
+  const toggle = (r: FoodRule) => {
+    let next = rules.includes(r) ? rules.filter((x) => x !== r) : [...rules, r];
+    // Vegetarian already covers pescatarian.
+    if (r === "vegetarian" && next.includes("vegetarian")) next = next.filter((x) => x !== "pescatarian");
+    if (r === "pescatarian" && next.includes("pescatarian")) next = next.filter((x) => x !== "vegetarian");
+    onRules(next);
+  };
+  return (
+    <div className="space-y-5">
+      {FOOD_RULE_GROUPS.map((g) => (
+        <fieldset key={g.group}>
+          <legend className="label">{g.title}</legend>
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(FOOD_RULES) as FoodRule[]).filter((k) => FOOD_RULES[k].group === g.group).map((k) => {
+              const on = rules.includes(k);
+              return (
+                <button key={k} type="button" aria-pressed={on} onClick={() => toggle(k)}
+                  className={`flex min-h-11 items-center gap-1.5 rounded-full border-2 px-3.5 font-bold transition-all active:scale-95 ${on ? "border-terracotta bg-blush text-terracotta-dark" : "border-line bg-card text-ink hover:border-terracotta/60"}`}>
+                  <span aria-hidden="true">{on ? "✓" : FOOD_RULES[k].icon}</span> {FOOD_RULES[k].label}
+                </button>
+              );
+            })}
+          </div>
+          {g.group === "texture" && <p className="mt-1 text-sm text-muted">Leaves out bone-in chicken, ribs, wings, drumsticks and whole fish.</p>}
+        </fieldset>
+      ))}
+      <div>
+        <label htmlFor="dislikes" className="label">Foods your family won&apos;t eat</label>
+        <input id="dislikes" className="field" placeholder="e.g. mushrooms, olives, cilantro" value={text}
+          onChange={(e) => { setText(e.target.value); onDislikes(parseDislikes(e.target.value)); }} />
+        <p className="mt-1 text-sm text-muted">Separate with commas. Dinners with these are skipped too.</p>
+      </div>
+      {rules.length === 0 && dislikes.length === 0 && <p className="text-sm text-muted">No rules? That&apos;s fine, just tap Next.</p>}
+    </div>
   );
 }

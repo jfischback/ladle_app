@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUserId } from "@/auth";
-import { getRecipe } from "@/lib/data";
+import { getRecipe, getSettings } from "@/lib/data";
+import { ruleProblems } from "@/lib/diet";
 import { addStarter, archiveRecipe } from "@/app/actions/recipes";
 import { RecipeRating } from "./RecipeRating";
 import { formatMinutes } from "@/lib/format";
@@ -13,7 +14,9 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const r = await getRecipe(userId, id);
+  const { data: settings } = await getSettings(userId);
   if (!r) notFound();
+  const problems = ruleProblems(r, settings.foodRules, settings.dislikes);
   const mine = r.ownerId === userId;
 
   return (
@@ -38,6 +41,13 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
           )}
         </div>
       </div>
+
+      {problems.length > 0 && (
+        <div className="flex items-start gap-3 rounded-3xl bg-terracotta-soft p-4 shadow-soft" role="note">
+          <span className="text-2xl" aria-hidden="true">⚠︎</span>
+          <p><span className="font-bold">Doesn&apos;t fit your food rules:</span> {problems.join(", ")}. We won&apos;t plan it.</p>
+        </div>
+      )}
 
       {r.trial && (
         <div className="flex items-start gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft">

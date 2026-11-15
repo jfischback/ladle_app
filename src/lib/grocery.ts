@@ -4,6 +4,7 @@ import type { Recipe } from "@/db/schema";
 import type { Settings } from "./settings";
 import type { GroceryList, SaleItem } from "./types";
 import { ingredientTerm } from "./sales";
+import { rulesSummary } from "./diet";
 import { askClaude, claudeEnabled } from "./claude";
 
 const GrocerySchema = z.object({
@@ -32,6 +33,7 @@ Rules:
 - If preferPremiumOnSale is true, add the note "premium if on sale" to items where brand quality matters (olive oil, cheese, meat). The cheap version only wins when it is at least premiumDeeperPoints percentage points deeper on sale.
 - If limitFreezer is true, don't suggest stocking up on frozen items.
 - If there is a baby: never include honey for the baby, and skip toddler-labeled products.
+- foodRules are strict (allergies, diets). If a product could hide a problem (e.g. broth with gluten, sauces with soy or dairy), add a short note like "check label: gluten-free".
 - If an item matches one of saleItems (same ingredient), make its note "On sale $X.XX (N% off)" using that sale's salePrice and pctOff, plus the product name when it helps pick the right one.
 - Keep notes short; use an empty string when there is nothing to say.`;
 
@@ -48,6 +50,7 @@ export async function buildGroceryList(recipes: Recipe[], settings: Settings, sa
     limitFreezer: settings.limitFreezer,
     dinners: recipes.map((r) => ({ name: r.name, servings: r.servings, ingredients: r.ingredients })),
     saleItems: sales,
+    foodRules: rulesSummary(settings.foodRules, settings.dislikes) || "none",
   };
   const out = await askClaude({ system: SYSTEM, content: JSON.stringify(pkg), schema: GrocerySchema, effort: "low" });
   return { sections: out.sections, source: "claude" };
