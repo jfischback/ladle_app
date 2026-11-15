@@ -11,12 +11,12 @@
   --color-olive-dark: #4f5b3a;
   --color-olive: #5e6b47;
   --color-olive-soft: #e3e5d3;
-  --color-terracotta: #b5654a;
+  --color-terracotta: #a65c44; /* a shade darker than the logo's #b5654a, so text on it (and it as text) is readable (WCAG AA 4.5:1) */
   --color-terracotta-dark: #8e4632;
   --color-terracotta-soft: #f3e0d8;
   --color-blush: #f8ebe4;
   --color-ochre: #d2a24c;
-  --color-ochre-dark: #8a6420;
+  --color-ochre-dark: #7c5a1c; /* readable on ochre-soft (WCAG AA) */
   --color-ochre-soft: #f4e6c6;
   /* Fonts are loaded in layout.tsx with next/font and exposed as these variables. */
   --font-sans: var(--font-nunito), ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
