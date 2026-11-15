@@ -345,6 +345,11 @@ export function GroceryChecklist({ plan }: { plan: Plan }) {
         <h2 id="grocery-title" className="flex items-center gap-2 text-2xl font-semibold"><span aria-hidden="true">🛒</span> Grocery list</h2>
         <span className="tag bg-olive-soft text-olive-dark">{done} of {total} got</span>
       </div>
+      {plan.status === "approved" && (
+        <Link href={`/cart?plan=${plan.id}`} className="btn-warm mb-4 w-full sm:w-auto">
+          <span aria-hidden="true">🛒</span> {plan.cart?.sentAt ? "Fry's cart sent · review" : "Send to my Fry's cart"}
+        </Link>
+      )}
       {list.notes && list.notes.length > 0 && (
         <ul className="mb-4 space-y-1.5 rounded-2xl bg-ochre-soft p-3 text-sm">
           {list.notes.map((n) => <li key={n} className="flex gap-2"><span aria-hidden="true">🍲</span><span>{n}</span></li>)}

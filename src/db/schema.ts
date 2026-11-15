@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, timestamp, jsonb, integer, real, index, boolean, uniqueIndex } from "drizzle-orm/pg-core";
 import type { Settings } from "@/lib/settings";
-import type { Ingredient, PlanDay, GroceryList, SaleItem, SaleCheck, StapleLine, ExtraLine } from "@/lib/types";
+import type { Ingredient, PlanDay, GroceryList, SaleItem, SaleCheck, StapleLine, ExtraLine, CartState } from "@/lib/types";
 
 // Nothing is ever deleted: recipes and plans are archived via archivedAt.
 
@@ -70,6 +70,7 @@ export const plans = pgTable(
     stockUp: jsonb("stock_up").$type<SaleItem[]>(), // "buy on sale" pantry items that are on sale and running low
     breakfastDeal: jsonb("breakfast_deal").$type<SaleItem>(), // this week's breakfast-meat deal, if any
     extras: jsonb("extras").$type<ExtraLine[]>(), // snacks, sweets, drinks and baby items picked for this week
+    cart: jsonb("cart").$type<CartState>(), // the grocery list matched to Fry's products, and when it was sent
     summary: text("summary"),
     plannerSource: text("planner_source").notNull(), // claude | basic
     estimatedTotal: real("estimated_total"),
@@ -172,6 +173,17 @@ export const extraItems = pgTable(
   },
   (t) => [uniqueIndex("extra_user_cat_name_idx").on(t.userId, t.category, t.name)],
 );
+
+/** A household's connection to their own Kroger/Fry's account, for filling their cart. Tokens are encrypted. */
+export const krogerAccounts = pgTable("kroger_accounts", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => users.id),
+  accessToken: text("access_token").notNull(), // encrypted
+  refreshToken: text("refresh_token").notNull(), // encrypted
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  connectedAt: timestamp("connected_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export type User = typeof users.$inferSelect;
 export type Recipe = typeof recipes.$inferSelect;
