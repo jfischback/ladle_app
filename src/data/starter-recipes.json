@@ -2077,7 +2077,8 @@
    "Ladle into bowls and add toppings as you like."
   ],
   "tags": [
-   "low-carb"
+   "low-carb",
+   "budget"
   ],
   "ease": null,
   "prepAhead": null,
@@ -7880,7 +7881,8 @@
    "quick",
    "for-one",
    "vegetarian",
-   "low-sodium"
+   "low-sodium",
+   "budget"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -7980,7 +7982,8 @@
   "tags": [
    "for-one",
    "quick",
-   "kid-friendly"
+   "kid-friendly",
+   "budget"
   ],
   "ease": 5,
   "prepAhead": null,

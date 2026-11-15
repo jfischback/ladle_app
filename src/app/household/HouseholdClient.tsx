@@ -3,9 +3,9 @@
 import { useState, useTransition } from "react";
 import { cancelInvite, createInvite, leaveHousehold, removeMember } from "../actions/household";
 
-type Member = { id: string; label: string; email: string };
+type Member = { id: string; label: string; email: string; owner: boolean };
 
-export function HouseholdClient({ me, members, invites, shared }: { me: string; members: Member[]; invites: { code: string; expires: string }[]; shared: boolean }) {
+export function HouseholdClient({ me, members, invites, canLeave }: { me: string; members: Member[]; invites: { code: string; expires: string }[]; canLeave: boolean }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -24,8 +24,8 @@ export function HouseholdClient({ me, members, invites, shared }: { me: string; 
         <ul className="space-y-2">
           {members.map((m) => (
             <li key={m.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-cream/70 p-3">
-              <span><b>{m.label}</b>{m.id === me ? <span className="text-muted"> (you)</span> : null}<span className="block text-sm text-muted">{m.email}</span></span>
-              {m.id !== me && (
+              <span><b>{m.label}</b>{m.id === me ? <span className="text-muted"> (you)</span> : null}{m.owner ? <span className="tag ml-1.5 px-2 py-0 text-xs">Owner</span> : null}<span className="block text-sm text-muted">{m.email}</span></span>
+              {m.id !== me && !m.owner && (
                 <button className="btn-quiet min-h-9 px-3 text-sm" disabled={pending} onClick={() => confirm(`Remove ${m.label} from your household? They'll go back to their own recipes and plans.`) && start(() => removeMember(m.id))}>Remove</button>
               )}
             </li>
@@ -57,7 +57,7 @@ export function HouseholdClient({ me, members, invites, shared }: { me: string; 
         )}
       </section>
 
-      {shared && (
+      {canLeave && (
         <section className="card space-y-2 p-5">
           <h2 className="text-xl font-semibold">Leave this household</h2>
           <p className="text-muted">You&apos;ll go back to your own recipes and plans (anything you had before joining is still there).</p>

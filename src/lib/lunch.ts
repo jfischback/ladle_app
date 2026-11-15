@@ -6,6 +6,7 @@ import { holidayOn } from "./holidays";
 import { leftoverKind } from "./leftovers";
 import { proteinGroup } from "./protein";
 import { ruleProblems } from "./diet";
+import { canCook } from "./prep";
 import { recipeSales } from "./sales";
 
 /** Words that name a kind of dish, so a BLT lunch and a BLT dinner on the same day count as the same thing. */
@@ -36,7 +37,7 @@ function eatersFor(settings: Settings, holiday: boolean): { label: string; servi
  */
 export function planLunches(days: PlanDay[], settings: Settings, dinners: Map<string, Recipe>, lunchPool: Recipe[], sales: SaleItem[], breakfasts?: Map<string, Recipe>): PlanDay[] {
   const used = new Set<string>();
-  const pool = lunchPool.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && !(r.rating != null && r.rating <= 2));
+  const pool = lunchPool.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment) && !(r.rating != null && r.rating <= 2));
   return days.map((day, i) => {
     const wd = weekday(day.date);
     const holiday = holidayOn(day.date);

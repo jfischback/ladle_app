@@ -12,6 +12,9 @@ export const users = pgTable("users", {
   // The household whose recipes, plans and settings this account uses (null = its own).
   // A partner who joins by invite, or the first account taking over the shared guest data, points here.
   householdId: uuid("household_id"),
+  // True for the account that took over the shared data when sign-in was turned on: it owns that household
+  // (can't leave it or be removed), even though the data is stored under the old shared account.
+  ownsHousehold: boolean("owns_household").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

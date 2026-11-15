@@ -79,24 +79,23 @@ export async function claimSharedDataIfFirst(newUserId: string): Promise<boolean
   if (!guest) return false;
   const [guestSettings] = await db.select({ userId: settingsTable.userId }).from(settingsTable).where(eq(settingsTable.userId, guest.id));
   if (!guestSettings) return false;
-  // Already claimed by someone? (anyone pointing at the guest household, other than this new account)
+  // Only one account ever takes it over: the first to sign up after sign-in is turned on. (Accounts made
+  // earlier, e.g. while testing, don't block this; anyone already in the shared household does.)
   const [claimed] = await db.select({ id: users.id }).from(users).where(and(eq(users.householdId, guest.id), ne(users.id, newUserId)));
   if (claimed) return false;
   // Only the very first real account gets it.
-  const others = await db.select({ id: users.id }).from(users).where(and(ne(users.id, newUserId), ne(users.id, guest.id)));
-  if (others.length) return false;
-  await db.update(users).set({ householdId: guest.id }).where(eq(users.id, newUserId));
+  await db.update(users).set({ householdId: guest.id, ownsHousehold: true }).where(eq(users.id, newUserId));
   return true;
 }
 
 /** The signed-in account (not the household): for account pages like "Household". */
-export async function currentAccount(): Promise<{ accountId: string; householdId: string; email: string; name: string | null }> {
+export async function currentAccount(): Promise<{ accountId: string; householdId: string; email: string; name: string | null; isOwner: boolean }> {
   const db = await getDb();
   const id = loginRequired ? (await auth())?.user?.id : await guestUserId();
   if (!id) throw new Error("Not signed in");
   const [u] = await db.select().from(users).where(eq(users.id, id));
   if (!u) throw new Error("Not signed in");
-  return { accountId: u.id, householdId: u.householdId ?? u.id, email: u.email, name: u.name };
+  return { accountId: u.id, householdId: u.householdId ?? u.id, email: u.email, name: u.name, isOwner: !u.householdId || u.ownsHousehold };
 }
 
 /** Returns the current user's id or throws (use in server actions / pages behind middleware). */

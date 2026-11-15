@@ -45,9 +45,11 @@ const FOODS: Food[] = [
   F(/meatball/, [250, 15, 8, 17], { each: 30, usd: 1.0 }),
   F(/hot dog|frank/, [290, 10, 4, 26], { each: 45, usd: 0.6 }),
   F(/bacon/, [417, 13, 1.4, 40], { slice: 23, usd: 1.5 }),
-  F(/sausage|chorizo|kielbasa|bratwurst|pepperoni|salami/, [300, 14, 2, 26], { each: 85, cup: 135, usd: 1.0 }),
+  F(/pepperoni|salami/, [494, 23, 1, 44], { slice: 2, cup: 120, pack: 170, usd: 2.0 }),
+  F(/sausage|chorizo|kielbasa|bratwurst/, [300, 14, 2, 26], { each: 85, cup: 135, usd: 1.0 }),
   F(/\bham\b|prosciutto|deli meat|lunch meat|cold cuts/, [120, 18, 2, 4], { slice: 28, cup: 140, usd: 1.0 }),
   F(/\bribs?\b|pork belly|pork shoulder|pork butt|carnitas/, [260, 17, 0, 21], { usd: 0.65 }),
+  F(/ground pork/, [263, 17, 0, 21], { usd: 0.9 }),
   F(/pork/, [143, 21, 0, 6], { each: 170, usd: 0.75 }),
   F(/steak|beef|chuck|brisket|sirloin|ribeye|flank|skirt|tri-tip|roast/, [200, 21, 0, 13], { each: 225, usd: 1.8 }),
   F(/lamb/, [280, 17, 0, 23], { usd: 2.2 }),
@@ -60,6 +62,7 @@ const FOODS: Food[] = [
   // Grains and bread
   F(/cooked rice|leftover rice/, [130, 2.7, 28, 0.3], { cup: 158, usd: 0.15 }),
   F(/\brice\b|arroz/, [360, 7, 79, 0.6], { cup: 185, usd: 0.25 }),
+  F(/instant ramen|ramen noodles|\bramen\b/, [440, 10, 63, 17], { each: 85, pack: 85, usd: 0.7 }),
   F(/spaghetti|penne|fettuccine|linguine|macaroni|rigatoni|pasta|noodle|orzo|ziti|lasagna/, [371, 13, 75, 1.5], { cup: 100, pack: 454, usd: 0.33 }),
   F(/oats|oatmeal/, [389, 17, 66, 7], { cup: 80, usd: 0.35 }),
   F(/granola/, [470, 10, 64, 20], { cup: 120, usd: 0.9 }),
@@ -147,7 +150,8 @@ function gramsPer(unitText: string, food: Food): number | null {
   const weight = (w: string) => (/^(lb|lbs|pounds?)$/.test(w) ? 453.6 : /^(oz|ounces?)$/.test(w) ? 28.35 : /^(g|grams?)$/.test(w) ? 1 : /^(kg|kilograms?)$/.test(w) ? 1000 : null);
   if (weight(first) != null) return weight(first);
   const sized = u.match(/(\d+(?:\.\d+)?)(?:\s*(?:to|-)\s*(\d+(?:\.\d+)?))?\s*(oz|ounces?|g|grams?|lb|pounds?)\b/);
-  if (sized && /can|package|pack|jar|bag|box|container|carton|tub|bottle|\(/.test(u)) {
+  const containerUnit = /^\(|^(cans?|packages?|packs?|jars?|bags?|box(es)?|containers?|cartons?|tubs?|bottles?)\b/.test(u);
+  if (sized && containerUnit) {
     const n = sized[2] ? (Number(sized[1]) + Number(sized[2])) / 2 : Number(sized[1]);
     return n * (/^(oz|ounce)/.test(sized[3]) ? 28.35 : /^(lb|pound)/.test(sized[3]) ? 453.6 : 1);
   }
@@ -181,6 +185,9 @@ function gramsPer(unitText: string, food: Food): number | null {
 
 /** What one ingredient line is and how much of it: null if we can't tell, "skip" for seasoning and garnish. */
 export function ingredientAmount(ing: Ingredient): { food: Food; grams: number } | null | "skip" {
+  // Some recipes put the amount in the item: "About 2 lb bone-in chicken pieces".
+  const inItem = !ing.amount.trim() && plain(ing.item).match(/^(about |roughly |around )?(\d+(?:\.\d+)?(?:\s+\d+\/\d+)?|\d+\/\d+)\s*(lbs?|pounds?|oz|ounces?|cups?)\s+(.*)$/);
+  if (inItem) return ingredientAmount({ amount: inItem[2], unit: inItem[3], item: inItem[4] });
   const item = ing.item.trim();
   if (!ing.amount.trim() || /^(for (garnish|serving)|optional|to serve)/i.test(item)) return "skip";
   const food = findFood(item);

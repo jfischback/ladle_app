@@ -8,9 +8,10 @@ import { leftoverKind } from "./leftovers";
 import { ruleProblems } from "./diet";
 import { dayName, weekday } from "./week";
 import { canCook } from "./prep";
+import { dinnerServings } from "./scaling";
 
-/** Grown-up-sized portions this household eats at dinner (kids count a bit less, a baby not at all). */
-export const householdServings = (s: Settings) => Math.max(1, s.adults + s.kids * 0.7);
+/** Grown-up-sized portions this household eats at dinner (the same count the grocery list scales to). */
+export const householdServings = (s: Settings) => dinnerServings(s);
 
 /** A dinner's estimated cost for this household, with this week's sales taken off. */
 export function dinnerCost(recipe: Pick<Recipe, "ingredients" | "servings">, settings: Settings, sales: SaleItem[]): { total: number; perServing: number } {
@@ -53,23 +54,45 @@ export function cookOnceEatTwice(days: PlanDay[], byId: Map<string, Recipe>): { 
       alternatives: b.recipeId ? [{ recipeId: b.recipeId, recipeName: b.recipeName!, estimatedCost: b.estimatedCost, reason: b.reason }, ...b.alternatives].slice(0, 3) : b.alternatives,
       leftoverOf: a.date,
     };
-    out[cookIdx[k]] = { ...a, reason: `${a.reason} · double batch for ${dayName(b.date)}` };
+    // The double batch is bought and cooked on the first night, so that night carries both dinners' cost.
+    out[cookIdx[k]] = { ...a, batches: 2, estimatedCost: a.estimatedCost != null ? Math.round(a.estimatedCost * 2 * 100) / 100 : null, reason: `${a.reason} · double batch for ${dayName(b.date)}` };
     notes.push(`Make a double batch of ${a.recipeName} on ${dayName(a.date)}: ${dayName(b.date)} is leftovers night.`);
   }
   return { days: out, notes };
 }
 
+/**
+ * After a change (a swap, a cheaper pick), make each night's batches add up again: a leftovers night needs its
+ * dinner to still be cooked and to reheat well (otherwise it becomes a night off), and each cooking night's
+ * cost covers every night it feeds.
+ */
+export function rebalanceBatches(days: PlanDay[], keepsWell: (recipeId: string) => boolean): PlanDay[] {
+  let out = days.map((d) => ({ ...d }));
+  // Leftovers whose dinner is gone, changed, or doesn't reheat well become nights off.
+  out = out.map((d) => {
+    if (!d.leftoverOf) return d;
+    const cook = out.find((c) => c.date === d.leftoverOf && !c.leftoverOf);
+    if (cook?.recipeId && cook.recipeId === d.recipeId && keepsWell(cook.recipeId)) return d;
+    return { ...d, recipeId: null, recipeName: null, estimatedCost: null, reason: "No-cook night", saleItems: [], leftoverOf: null };
+  });
+  return out.map((d) => {
+    if (!d.recipeId || d.leftoverOf) return d.batches ? { ...d, batches: undefined } : d;
+    const want = 1 + out.filter((x) => x.leftoverOf === d.date).length;
+    const had = d.batches ?? 1;
+    if (want === had) return d;
+    const cost = d.estimatedCost != null ? Math.round((d.estimatedCost / had) * want * 100) / 100 : null;
+    const reason = want > 1 ? d.reason : d.reason.replace(/ · double batch for \w+/, "");
+    return { ...d, batches: want > 1 ? want : undefined, estimatedCost: cost, reason };
+  });
+}
+
 /** Grocery list notes for the week's portions: double batches, and small households. */
-export function budgetNotes(days: PlanDay[], settings: Settings): string[] {
+export function budgetNotes(days: PlanDay[]): string[] {
   const notes: string[] = [];
   for (const d of days) {
     if (!d.leftoverOf) continue;
     const cook = days.find((x) => x.date === d.leftoverOf);
     if (cook) notes.push(`Make a double batch of ${cook.recipeName} on ${dayName(cook.date)}: ${dayName(d.date)} is leftovers night.`);
-  }
-  const people = settings.adults + settings.kids;
-  if (people <= 2 && !settings.cookOnceEatTwice) {
-    notes.push(`Cooking for ${people === 1 ? "one" : "two"}: most recipes serve 4. Make half, or cook it all and freeze the extra portions for a night off.`);
   }
   return notes;
 }
@@ -90,7 +113,8 @@ export function enforceCap(
 ): { days: PlanDay[]; swaps: number; over: number } {
   const out = days.map((d) => ({ ...d }));
   const cap = settings.weeklyBudget;
-  const fits = pool.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment) && !(r.rating != null && r.rating <= 2) && !r.trial);
+  const family = settings.adults + settings.kids >= 2;
+  const fits = pool.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment) && !(family && r.servings === 1) && !(r.rating != null && r.rating <= 2) && !r.trial);
   const costOf = new Map(fits.map((r) => [r.id, dinnerCost(r, settings, sales).total]));
   let swaps = 0;
   for (let guard = 0; guard < 14 && dinnersTotal(out) + otherCosts > cap; guard++) {
@@ -103,7 +127,9 @@ export function enforceCap(
     for (const { d, i } of priciest) {
       const busy = settings.busyDays.includes(weekday(d.date));
       const cheaper = fits
-        .filter((r) => !used.has(r.id) && !(recentIds.has(r.id) && fits.length > 20) && (costOf.get(r.id) ?? 99) < (d.estimatedCost ?? 0) - 1)
+        .filter((r) => !used.has(r.id) && !(recentIds.has(r.id) && fits.length > 20) && (costOf.get(r.id) ?? 99) * (d.batches ?? 1) < (d.estimatedCost ?? 0) - 1)
+        // A double-batch night must still suit leftovers.
+        .filter((r) => (d.batches ?? 1) < 2 || leftoverKind(r) === "ok")
         .filter((r) => !busy || (r.totalMinutes ?? 30) <= settings.busyMaxMinutes)
         .sort((x, y) => (costOf.get(x.id) ?? 0) - (costOf.get(y.id) ?? 0));
       const pick = cheaper[0];
@@ -113,7 +139,7 @@ export function enforceCap(
         ...d,
         recipeId: pick.id,
         recipeName: pick.name,
-        estimatedCost: costOf.get(pick.id) ?? null,
+        estimatedCost: Math.round((costOf.get(pick.id) ?? 0) * (d.batches ?? 1) * 100) / 100,
         reason: `Cheaper pick to stay under your $${cap} budget`,
         saleItems: [],
         fromCook: null,

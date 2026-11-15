@@ -35,7 +35,8 @@ export default async function HomePage() {
   const toRate = plans
     .filter((p) => p.status === "approved")
     .flatMap((p) => p.days.map((d, i) => ({ plan: p, d, i })))
-    .filter(({ d }) => d.recipeId && d.date < todayStr && !d.ratedAt && d.date >= addDays(todayStr, -14))
+    // A leftovers night is the same dinner: it's rated once, on the night it was cooked.
+    .filter(({ d }) => d.recipeId && !d.leftoverOf && d.date < todayStr && !d.ratedAt && d.date >= addDays(todayStr, -14))
     .slice(0, 2);
 
   // Prep-ahead reminder for tomorrow's dinner.

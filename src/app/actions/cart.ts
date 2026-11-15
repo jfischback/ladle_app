@@ -7,7 +7,7 @@ import { getDb } from "@/db";
 import { krogerAccounts, plans } from "@/db/schema";
 import { getPlan, getSettings } from "@/lib/data";
 import { addToCart, krogerEnabled, refreshUserTokens, searchProducts } from "@/lib/kroger";
-import { cartItems, pickOptions } from "@/lib/cart";
+import { cartItems, packagesForWeight, pickOptions } from "@/lib/cart";
 import { open, seal } from "@/lib/secret-box";
 import type { CartLine, CartState } from "@/lib/types";
 import { storeBrand, yourStore } from "@/lib/stores";
@@ -45,7 +45,10 @@ export async function matchCart(planId: string): Promise<{ error?: string }> {
       const prev = before.get(x.key);
       const { options, chosen } = r.status === "fulfilled" ? pickOptions(x.term, r.value, saleProduct.get(x.term), settings.tightBudget) : { options: [], chosen: null };
       const keepChoice = prev && prev.chosen != null ? options.findIndex((o) => o.upc === prev.options[prev.chosen!]?.upc) : -1;
-      lines.push({ key: x.key, section: x.section, item: x.item, quantity: prev ? prev.quantity : x.quantity, chosen: keepChoice >= 0 ? keepChoice : chosen, options });
+      const pick = keepChoice >= 0 ? keepChoice : chosen;
+      // Weighed items: as many packages of the chosen product as the recipe amounts need.
+      const byWeight = pick != null && options[pick] ? packagesForWeight(x.raw, options[pick].size) : null;
+      lines.push({ key: x.key, section: x.section, item: x.item, quantity: prev ? prev.quantity : byWeight ?? x.quantity, chosen: pick, options });
     });
   }
   if (lines.length && lines.every((l) => !l.options.length)) return { error: `${brand.name ?? "The store"} didn't answer. Try again in a minute.` };

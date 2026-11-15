@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "owns_household" boolean DEFAULT false NOT NULL;
