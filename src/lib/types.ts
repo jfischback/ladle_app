@@ -18,7 +18,18 @@ export type PlanDay = {
   ratedAt?: string | null;
   fromCook?: string | null; // set when this is a new recipe from a followed cook
   lunch?: PlanLunch | null; // the next-day-style lunch planned for this date, if someone's home
+  breakfast?: PlanBreakfast | null; // breakfast for this date, if planned
   holiday?: string | null; // federal holiday on this date
+};
+
+/** Breakfast for one day. */
+export type PlanBreakfast = {
+  recipeId: string | null;
+  name: string;
+  reason: string;
+  eaters: string;
+  servings: number;
+  withDeal?: string | null; // e.g. "ham, 30% off": this week's breakfast-meat deal goes in
 };
 
 /** Lunch for one day: last night's leftovers, a lunch recipe, or an open slot. */

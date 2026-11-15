@@ -39,7 +39,7 @@ export function RecipeForm({ id, initial }: { id?: string; initial?: Partial<Rec
     setError(null);
     const input: RecipeInputType = {
       ...v,
-      meal: v.meal === "lunch" ? "lunch" : "dinner",
+      meal: v.meal === "lunch" || v.meal === "breakfast" ? v.meal : "dinner",
       creditName: v.creditName?.trim() || null,
       creditUrl: v.creditUrl?.trim() || null,
       prepAhead: v.prepAhead?.trim() || null,
@@ -59,12 +59,12 @@ export function RecipeForm({ id, initial }: { id?: string; initial?: Partial<Rec
           <input id="name" required className="field text-lg" value={v.name} onChange={(e) => set("name", e.target.value)} />
         </div>
         <fieldset>
-          <legend className="label">Is it a dinner or a lunch?</legend>
+          <legend className="label">Which meal is it?</legend>
           <div className="flex gap-2">
-            {(["dinner", "lunch"] as const).map((m) => (
+            {(["breakfast", "lunch", "dinner"] as const).map((m) => (
               <button key={m} type="button" aria-pressed={(v.meal ?? "dinner") === m} onClick={() => set("meal", m)}
                 className={`btn min-h-10 border-2 px-4 text-sm ${(v.meal ?? "dinner") === m ? "border-olive bg-olive text-cream" : "border-line bg-card text-ink"}`}>
-                {m === "dinner" ? "🍽 Dinner" : "🥪 Lunch"}
+                {m === "dinner" ? "🍽 Dinner" : m === "lunch" ? "🥪 Lunch" : "☕ Breakfast"}
               </button>
             ))}
           </div>

@@ -13,6 +13,7 @@ import { stapleTerm, staplesTotal } from "@/lib/staples";
 import { FOUND_PREFIX, planWeek, sumCosts, type NewRecipeOption } from "@/lib/planner";
 import { recipeSales, scanSales, type SaleScan } from "@/lib/sales";
 import { leftoverNotes, planLunches } from "@/lib/lunch";
+import { BREAKFAST_MEAT_TERMS, breakfastDeal, planBreakfasts } from "@/lib/breakfast";
 import { applyPantry, pantrySearchTerm, sameThing } from "@/lib/pantry";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
@@ -51,9 +52,10 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
 
   // A failed price check never blocks planning: the week is planned without sales and the home screen says why.
   const stockTerms = (await myPantry(userId)).filter((p) => p.onSaleOnly && p.status !== "have").map((p) => pantrySearchTerm(p.name));
+  const wantsBreakfastDeal = settings.breakfastMeatDeal && settings.breakfastDays.length > 0;
   let scan: SaleScan;
   try {
-    scan = await scanSales(recipeList, settings, stockTerms);
+    scan = await scanSales(recipeList, settings, [...stockTerms, ...(wantsBreakfastDeal ? BREAKFAST_MEAT_TERMS : [])]);
   } catch (e) {
     scan = { status: "failed", message: (e as Error).message };
   }
@@ -67,6 +69,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   const staples = stapleLines(settings, scan);
   // "Buy on sale" pantry items that are running low and really on sale this week.
   const stockUp = scan.status === "ok" ? scan.sales.filter((s) => stockTerms.includes(s.item)) : [];
+  const bDeal = wantsBreakfastDeal && scan.status === "ok" ? breakfastDeal(scan.sales) : null;
 
   let result;
   try {
@@ -105,7 +108,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     }),
   );
   result.estimatedTotal = sumCosts(result.days);
-  result.days = await withLunches(userId, result.days, settings, sales);
+  result.days = await withLunches(userId, await withBreakfasts(userId, result.days, settings, sales, bDeal), settings, sales);
 
   await archiveOthersForWeek(userId, weekStart);
   await db.insert(plans).values({
@@ -117,6 +120,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     saleCheck,
     staples,
     stockUp,
+    breakfastDeal: bDeal,
     summary: result.summary,
     plannerSource: result.source,
     estimatedTotal: result.estimatedTotal,
@@ -169,8 +173,15 @@ async function withLunches(userId: string, days: PlanDay[], settings: Settings, 
   const needsLunch = settings.lunchDays.length > 0 || settings.holidayEveryoneHome;
   if (!needsLunch) return days.map((d) => ({ ...d, lunch: null }));
   const dinnerIds = days.map((d) => d.recipeId).filter((x): x is string => !!x);
-  const [dinnerRows, lunchPool] = await Promise.all([recipesByIds(userId, dinnerIds), myRecipes(userId, "lunch")]);
-  return planLunches(days, settings, new Map(dinnerRows.map((r) => [r.id, r])), lunchPool, sales);
+  const breakfastIds = days.map((d) => d.breakfast?.recipeId).filter((x): x is string => !!x);
+  const [dinnerRows, lunchPool, breakfastRows] = await Promise.all([recipesByIds(userId, dinnerIds), myRecipes(userId, "lunch"), recipesByIds(userId, breakfastIds)]);
+  return planLunches(days, settings, new Map(dinnerRows.map((r) => [r.id, r])), lunchPool, sales, new Map(breakfastRows.map((r) => [r.id, r])));
+}
+
+/** Plan the week's breakfasts (quick, the household's bread/egg mix, must-haves, the breakfast-meat deal). */
+async function withBreakfasts(userId: string, days: PlanDay[], settings: Settings, sales: SaleItem[], deal: SaleItem | null): Promise<PlanDay[]> {
+  if (!settings.breakfastDays.length && !settings.holidayEveryoneHome) return days.map((d) => ({ ...d, breakfast: null }));
+  return planBreakfasts(days, settings, await myRecipes(userId, "breakfast"), sales, deal);
 }
 
 /** The human gate: lock the plan and build the grocery list. Cart fill comes later; never checkout. */
@@ -183,7 +194,7 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   const { data: settings } = await getSettings(userId);
   const ids = plan.days.map((d) => d.recipeId).filter((x): x is string => !!x);
   // Lunch recipes need shopping too (leftover lunches are covered by cooking extra at dinner).
-  const lunchIds = plan.days.map((d) => (d.lunch?.kind === "recipe" ? d.lunch.recipeId : null)).filter((x): x is string => !!x);
+  const lunchIds = plan.days.flatMap((d) => [d.lunch?.kind === "recipe" ? d.lunch.recipeId : null, d.breakfast?.recipeId ?? null]).filter((x): x is string => !!x);
   const chosen = await recipesByIds(userId, [...new Set([...ids, ...lunchIds])]);
   let groceryList;
   try {
@@ -196,6 +207,11 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
       return { item: x.item, quantity: x.quantity, note: sale ? saleNote(sale) : "", forRecipes: [] };
     });
     if (items.length) groceryList = { ...groceryList, sections: [{ name: "Weekly staples", items }, ...groceryList.sections] };
+    // This week's breakfast-meat deal, for the egg breakfasts.
+    if (plan.breakfastDeal && plan.days.some((d) => d.breakfast?.withDeal)) {
+      const d = plan.breakfastDeal;
+      groceryList = { ...groceryList, sections: [...groceryList.sections, { name: "Breakfast meat deal", items: [{ item: d.product, quantity: d.size, note: saleNote(d), forRecipes: plan.days.filter((x) => x.breakfast?.withDeal).map((x) => x.breakfast!.name) }] }] };
+    }
     // Pantry check: skip what's on hand, ask about long-lasting items we don't know, add on-sale stock-ups.
     const pantry = await myPantry(userId);
     groceryList = applyPantry(groceryList, pantry, plan.stockUp ?? [], saleNote);
