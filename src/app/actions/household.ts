@@ -35,6 +35,8 @@ export async function joinHousehold(code: string): Promise<{ error?: string }> {
   const [inv] = await db.select().from(householdInvites).where(and(eq(householdInvites.code, code), isNull(householdInvites.usedAt), gt(householdInvites.expiresAt, new Date())));
   if (!inv) return { error: "This invite link has expired or was already used. Ask for a new one." };
   if (inv.householdId === me.householdId) return { error: "You're already in this household." };
+  // The owner of the data set up before sign-in can't move away from it (everyone else would lose their owner).
+  if (me.isOwner && me.householdId !== me.accountId) return { error: "You own your household's recipes and plans, so you can't join another one. Ask them to join yours instead." };
   await db.update(users).set({ householdId: inv.householdId === me.accountId ? null : inv.householdId }).where(eq(users.id, me.accountId));
   await db.update(householdInvites).set({ usedBy: me.accountId, usedAt: new Date() }).where(eq(householdInvites.code, code));
   revalidatePath("/", "layout");
@@ -44,7 +46,7 @@ export async function joinHousehold(code: string): Promise<{ error?: string }> {
 /** Leave the shared household and go back to your own. */
 export async function leaveHousehold() {
   const me = await currentAccount();
-  if (me.householdId === me.accountId) return;
+  if (me.isOwner) return; // the owner stays with their own data
   const db = await getDb();
   await db.update(users).set({ householdId: null }).where(eq(users.id, me.accountId));
   revalidatePath("/", "layout");
@@ -56,6 +58,7 @@ export async function removeMember(accountId: string) {
   const me = await currentAccount();
   if (accountId === me.accountId) return;
   const db = await getDb();
-  await db.update(users).set({ householdId: null }).where(and(eq(users.id, accountId), eq(users.householdId, me.householdId)));
+  // The owner can't be removed from their own household.
+  await db.update(users).set({ householdId: null }).where(and(eq(users.id, accountId), eq(users.householdId, me.householdId), eq(users.ownsHousehold, false)));
   revalidatePath("/household");
 }
