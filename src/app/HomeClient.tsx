@@ -11,7 +11,7 @@ import { EatingPicker } from "@/components/EatingPicker";
 import { feastHolidayOn, feastIcon, feastLabel } from "@/lib/feast";
 import { ADDED_SECTION } from "@/lib/grocery-add";
 import { useRouter } from "next/navigation";
-import { groceryText } from "@/lib/grocery-text";
+import { assistantText, groceryText } from "@/lib/grocery-text";
 import { PANTRY_SECTIONS } from "@/lib/pantry";
 import { StarPicker } from "@/components/Stars";
 import { FoodArt } from "@/components/FoodArt";
@@ -428,12 +428,13 @@ const sectionIcon = (name: string) => SECTION_ICONS.find(([re]) => re.test(name)
  * with the list open picks up the others' ticks every few seconds (so two people can split the store).
  * Ticks made with no signal are kept and sent when the phone is back online.
  */
-export function GroceryChecklist({ plan, store }: { plan: Plan; store: string }) {
+export function GroceryChecklist({ plan, store, aiShopper }: { plan: Plan; store: string; aiShopper?: { rules: string; budget: number } }) {
   const list = plan.groceryList;
   const key = `ladle-grocery-${plan.id}`;
   const pendingKey = `ladle-grocery-unsent-${plan.id}`;
   const [checked, setChecked] = useState<Record<string, boolean>>(plan.groceryChecked ?? {});
   const [shared, setShared] = useState(false);
+  const [copiedAi, setCopiedAi] = useState(false);
   const router = useRouter();
   const [adding, startAdding] = useTransition();
   const [addError, setAddError] = useState<string | null>(null);
@@ -529,6 +530,17 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
       </div>
       <div className="no-print mb-4 flex flex-wrap gap-2">
         <button type="button" className="btn-secondary min-h-10 px-4 text-sm" onClick={shareList}>{shared ? "✓ Copied" : "📤 Text the list"}</button>
+        <button
+          type="button"
+          className="btn-quiet min-h-10 px-4 text-sm"
+          title="Copies the list with shopping instructions, to paste into Claude, ChatGPT or another AI assistant you use to shop any store"
+          onClick={async () => {
+            const text = assistantText(list, { rules: aiShopper?.rules, budget: aiShopper?.budget, isChecked: (s, _i, item) => !!checked[tickKey(s, item)] });
+            try { await navigator.clipboard.writeText(text); setCopiedAi(true); setTimeout(() => setCopiedAi(false), 4000); } catch {}
+          }}
+        >
+          {copiedAi ? "✓ Copied: paste it into your AI assistant" : "🤖 Copy for my AI shopper"}
+        </button>
         <button type="button" className="btn-quiet min-h-10 px-4 text-sm" onClick={printList}>🖨️ Print</button>
       </div>
       <p className="no-print -mt-2 mb-4 text-xs text-muted">Ticks show up on every phone in your household, so you can split up the store.</p>

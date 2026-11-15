@@ -36,6 +36,7 @@ export const LIMITS = {
   approve: [20, 60 * 60],
   importRecipe: [30, 60 * 60],
   receipt: [20, 60 * 60],
+  fridge: [20, 60 * 60],
   cooks: [30, 60 * 60],
   cartMatch: [15, 60 * 60],
   cartSend: [10, 60 * 60],

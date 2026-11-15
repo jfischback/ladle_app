@@ -1,3 +1,4 @@
+import { rulesSummary } from "@/lib/diet";
 import Link from "next/link";
 import { moveTargets } from "@/lib/move-dinner";
 import { feastHolidayOn, feastTips } from "@/lib/feast";
@@ -179,7 +180,7 @@ export default async function HomePage() {
           {approved ? (
             <>
               <Celebrate />
-              <GroceryChecklist plan={plan} store={brand.name ?? "store"} />
+              <GroceryChecklist plan={plan} store={brand.name ?? "store"} aiShopper={{ rules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway), budget: settings.weeklyBudget }} />
             </>
           ) : (
             <ApproveBar planId={plan.id} />

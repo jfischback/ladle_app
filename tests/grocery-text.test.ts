@@ -24,3 +24,14 @@ test("checked-off items are left out", () => {
   const done = groceryText({ ...list, sections: [list.sections[0]] }, { isChecked: () => true });
   assert.match(done, /All done/);
 });
+
+test("the list for an AI shopping assistant: instructions, food rules, budget, items", async () => {
+  const { assistantText } = await import("@/lib/grocery-text");
+  const list = { source: "basic" as const, sections: [{ name: "Produce", items: [{ item: "onion", quantity: "2", forRecipes: [] }] }, { name: "Already in your pantry", items: [{ item: "salt", quantity: "1 tsp", forRecipes: [] }] }] };
+  const t = assistantText(list, { store: "Walmart", budget: 150, rules: "Peanut allergy" });
+  assert.match(t, /^Please add these groceries to my cart at Walmart\. Don't check out/);
+  assert.match(t, /never break these\): Peanut allergy/);
+  assert.match(t, /under \$150/);
+  assert.match(t, /• onion \(2\)/);
+  assert.doesNotMatch(t, /salt/);
+});

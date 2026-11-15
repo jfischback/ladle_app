@@ -10,6 +10,7 @@ import type { Recipe } from "@/db/schema";
 import { formatMinutes } from "@/lib/format";
 import { FoodArt } from "@/components/FoodArt";
 import { CooksTab } from "./CooksTab";
+import { FridgeButton } from "./FridgeButton";
 import { RecipePacks } from "./RecipePacks";
 import { getDb } from "@/db";
 import { recipes as recipesTable } from "@/db/schema";
@@ -139,6 +140,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
                 {pantryOnHand.length > 0 ? <>Also counting the {pantryOnHand.length} things on hand in your <Link href="/pantry" className="font-bold text-olive-dark underline">Pantry</Link>. </> : <>Tip: things you mark in your <Link href="/pantry" className="font-bold text-olive-dark underline">Pantry</Link> count too. </>}
                 Dinners that use up the most come first.
               </p>
+              <FridgeButton tab={tab} typed={typedHave} />
             </form>
           )}
           {(q || filter || haveMode) && (
