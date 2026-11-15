@@ -17,5 +17,6 @@ export default function middleware(req: NextRequest, ctx: unknown) {
 }
 
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|icon.svg).*)"],
+  // App files that must load without signing in: the install manifest, icons and the service worker.
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|manifest.webmanifest|sw.js|icons/).*)"],
 };
