@@ -29,6 +29,7 @@ import type { Settings } from "@/lib/settings";
 import { addDays, currentWeekStart, dayName, upcomingWeekStart, weekDates, weekday } from "@/lib/week";
 import { TOO_MANY, under } from "@/lib/rate-limit";
 import { moveDinner } from "@/lib/move-dinner";
+import { readReceipt, usableTotal } from "@/lib/receipt";
 import { withFeastSections } from "@/lib/feast-grocery";
 import { today } from "@/lib/week";
 
@@ -421,6 +422,29 @@ export async function rateCookedDinner(planId: string, dayIndex: number, stars: 
   await db.update(plans).set({ days: plan.days }).where(eq(plans.id, planId));
   revalidatePath("/");
   revalidatePath("/recipes");
+}
+
+/** "Read my receipt": a photo of the receipt fills in what the week cost. */
+export async function readReceiptTotal(planId: string, form: FormData): Promise<{ total?: number; saved?: number | null; error?: string }> {
+  const userId = await requireUserId();
+  if (!/^[0-9a-f-]{36}$/i.test(planId)) return { error: "Week not found." };
+  if (!(await under("receipt", userId))) return { error: TOO_MANY };
+  const file = form.get("photo");
+  if (!(file instanceof File) || !file.size) return { error: "Take or choose a photo of the receipt." };
+  if (file.size > 5 * 1024 * 1024) return { error: "That photo is over 5 MB. Try a smaller one." };
+  const plan = await getPlan(userId, planId);
+  if (!plan) return { error: "Week not found." };
+  try {
+    const read = await readReceipt(Buffer.from(await file.arrayBuffer()).toString("base64"), file.type);
+    const total = usableTotal(read);
+    if (total == null) return { error: read.isReceipt ? "We couldn't read the total clearly. Try a straighter, closer photo, or type it in." : "That doesn't look like a receipt." };
+    const db = await getDb();
+    await db.update(plans).set({ actualSpend: total }).where(and(eq(plans.id, planId), eq(plans.userId, userId)));
+    revalidatePath("/history");
+    return { total, saved: read.saved };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
 }
 
 export async function setActualSpend(planId: string, form: FormData) {
