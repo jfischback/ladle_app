@@ -2,6 +2,7 @@ import type { GroceryList, GroceryItem } from "./types";
 import { coreWords } from "./pantry";
 import { parseAmount } from "./nutrition";
 import { niceAmount } from "./scaling";
+import { AISLES } from "./aisles";
 
 // Sections whose lines stay as they are: baby food is its own thing, a deal names one product,
 // and the pantry sections aren't things to buy.
@@ -88,7 +89,8 @@ function combine(a: GroceryItem, b: GroceryItem, aSection: string, bSection: str
   const quantity = addQuantities([a.quantity, b.quantity].filter((q) => q && q.trim()));
   const notes = [...new Set([a.note, b.note].flatMap((n) => (n ? n.split(" · ") : [])).filter(Boolean))];
   // Say where the extra comes from, unless it's from the same section.
-  const also = bSection !== aSection ? `also for ${/^everything$/i.test(bSection) ? "recipes" : bSection.toLowerCase()}` : "";
+  const fromRecipes = /^everything$/i.test(bSection) || (AISLES as readonly string[]).includes(bSection);
+  const also = bSection !== aSection && !(fromRecipes && (AISLES as readonly string[]).includes(aSection)) ? `also for ${fromRecipes ? "recipes" : bSection.toLowerCase()}` : "";
   if (also && !notes.includes(also)) notes.push(also);
   return { ...a, quantity, note: notes.join(" · "), forRecipes: [...new Set([...a.forRecipes, ...b.forRecipes])] };
 }
