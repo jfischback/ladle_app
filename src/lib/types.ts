@@ -22,6 +22,7 @@ export type PlanDay = {
   holiday?: string | null; // federal holiday on this date
   leftoverOf?: string | null; // "cook once, eat twice": leftovers of the dinner cooked on this date
   batches?: number; // how many dinners' worth this night cooks (2 = a double batch for a leftovers night)
+  feast?: { holiday: string; guests: number; dishes: string[]; frozen: boolean; replaced?: string | null } | null; // a holiday dinner (Thanksgiving) instead of a recipe
 };
 
 /** One store product option for a grocery line. */

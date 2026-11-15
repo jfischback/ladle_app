@@ -5,7 +5,7 @@ import { dayName } from "./week";
 const DINNER_KEYS = ["recipeId", "recipeName", "estimatedCost", "reason", "saleItems", "alternatives", "ratedAt", "fromCook", "leftoverOf", "batches"] as const;
 
 /** Nights that can still change: not past, and not already rated as cooked. */
-export const movable = (d: PlanDay, today: string) => d.date >= today && !d.ratedAt;
+export const movable = (d: PlanDay, today: string) => d.date >= today && !d.ratedAt && !d.feast; // a holiday feast stays on its holiday
 
 function swapDinner(a: PlanDay, b: PlanDay): [PlanDay, PlanDay] {
   const na = { ...a };
