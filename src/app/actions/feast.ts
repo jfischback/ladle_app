@@ -6,7 +6,7 @@ import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
 import { plans } from "@/db/schema";
 import { getPlan } from "@/lib/data";
-import { feastMenu, withFeast } from "@/lib/feast";
+import { feastMenu, withFeast, withoutFeast } from "@/lib/feast";
 import { withFeastSections } from "@/lib/feast-grocery";
 import { today } from "@/lib/week";
 import type { PlanDay, SaleItem } from "@/lib/types";
@@ -46,12 +46,7 @@ export async function removeFeast(planId: string, dayIndex: number): Promise<{ e
   const plan = await getPlan(userId, planId);
   const day = plan?.days[dayIndex];
   if (!plan || !day?.feast) return {};
-  const days = plan.days.map((d, j) => {
-    if (j === dayIndex) return { ...d, feast: null, recipeId: null, recipeName: null, reason: "No-cook night", estimatedCost: null };
-    if (d.leftoverOf === day.date && !d.recipeId) return { ...d, leftoverOf: null, recipeName: null, reason: "No-cook night", estimatedCost: null };
-    if (j === dayIndex + 1 && d.lunch?.kind === "leftovers" && !d.lunch.recipeId) return { ...d, lunch: { ...d.lunch, kind: "open" as const, name: "Lunch: your pick", reason: "No feast leftovers this time" } };
-    return d;
-  });
+  const days = withoutFeast(plan.days, dayIndex);
   const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
   await save(userId, planId, days, plan.status === "approved", plan.groceryList, sales);
   return {};

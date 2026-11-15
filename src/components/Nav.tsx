@@ -79,7 +79,7 @@ export function TabBar() {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-3 bottom-3 z-40 rounded-[2rem] bg-card/95 shadow-lift ring-1 ring-line/60 backdrop-blur sm:hidden"
+      className="no-print fixed inset-x-3 bottom-3 z-40 rounded-[2rem] bg-card/95 shadow-lift ring-1 ring-line/60 backdrop-blur sm:hidden"
       style={{ marginBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="grid grid-cols-4">
