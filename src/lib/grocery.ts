@@ -7,6 +7,7 @@ import { ingredientTerm } from "./sales";
 import { rulesSummary } from "./diet";
 import { askClaude, claudeEnabled } from "./claude";
 import { scaleIngredient } from "./scaling";
+import { AISLES, aisleOf, notBought } from "./aisles";
 
 const GrocerySchema = z.object({
   sections: z.array(
@@ -84,11 +85,13 @@ export function basicGroceryList(recipes: Recipe[], sales: SaleItem[] = [], make
       map.set(key, entry);
     }
   }
-  const items = [...map.values()]
-    .sort((a, b) => a.item.localeCompare(b.item))
-    .map((e) => {
-      const sale = saleByTerm.get(ingredientTerm(e.item) ?? "");
-      return { item: e.item, quantity: e.quantities.join(" + "), note: sale ? saleNote(sale) : "", forRecipes: [...e.forRecipes] };
-    });
-  return { sections: [{ name: "Everything", items }], source: "basic" };
+  // Sorted into store sections, in the order most stores are walked; water and skewers aren't groceries.
+  const bySection = new Map<string, GroceryList["sections"][number]["items"]>();
+  for (const e of [...map.values()].sort((a, b) => a.item.localeCompare(b.item))) {
+    if (notBought(e.item)) continue;
+    const sale = saleByTerm.get(ingredientTerm(e.item) ?? "");
+    const aisle = aisleOf(e.item);
+    bySection.set(aisle, [...(bySection.get(aisle) ?? []), { item: e.item, quantity: e.quantities.join(" + "), note: sale ? saleNote(sale) : "", forRecipes: [...e.forRecipes] }]);
+  }
+  return { sections: AISLES.filter((a) => bySection.has(a)).map((a) => ({ name: a, items: bySection.get(a)! })), source: "basic" };
 }
