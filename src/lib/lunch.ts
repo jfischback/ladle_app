@@ -87,7 +87,9 @@ export function leftoverNotes(days: PlanDay[]): string[] {
   for (let i = 1; i < days.length; i++) {
     const l = days[i].lunch;
     if (l?.kind === "leftovers" && days[i - 1].recipeName) {
-      out.push(`Make extra ${days[i - 1].recipeName} on ${dayName(days[i - 1].date)} for ${dayName(days[i].date)}'s lunch (${l.eaters})${days[i].holiday ? `, ${days[i].holiday}` : ""}.`);
+      // On a leftovers night nothing is cooked: the extra comes from the night it was cooked.
+      const cookedOn = days[i - 1].leftoverOf ?? days[i - 1].date;
+      out.push(`Make extra ${days[i - 1].recipeName} on ${dayName(cookedOn)} for ${dayName(days[i].date)}'s lunch (${l.eaters})${days[i].holiday ? `, ${days[i].holiday}` : ""}.`);
     }
   }
   return out;

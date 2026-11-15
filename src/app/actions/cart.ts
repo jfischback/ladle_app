@@ -43,7 +43,7 @@ export async function matchCart(planId: string): Promise<{ error?: string }> {
     batch.forEach((x, j) => {
       const r = found[j];
       const prev = before.get(x.key);
-      const { options, chosen } = r.status === "fulfilled" ? pickOptions(x.term, r.value, saleProduct.get(x.term)) : { options: [], chosen: null };
+      const { options, chosen } = r.status === "fulfilled" ? pickOptions(x.term, r.value, saleProduct.get(x.term), settings.tightBudget) : { options: [], chosen: null };
       const keepChoice = prev && prev.chosen != null ? options.findIndex((o) => o.upc === prev.options[prev.chosen!]?.upc) : -1;
       lines.push({ key: x.key, section: x.section, item: x.item, quantity: prev ? prev.quantity : x.quantity, chosen: keepChoice >= 0 ? keepChoice : chosen, options });
     });

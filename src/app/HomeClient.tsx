@@ -41,8 +41,8 @@ export function PlanButton({ label, big }: { label: string; big?: boolean }) {
   );
 }
 
-export function DayCard({ planId, index, day, isToday, locked, recipes }: {
-  planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[];
+export function DayCard({ planId, index, day, isToday, locked, recipes, plates }: {
+  planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number;
 }) {
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
@@ -95,7 +95,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
               ) : (
                 <p className="font-display text-2xl font-semibold">Night off tonight!</p>
               )}
-              <Details cookTime={cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} />
+              <Details cookTime={day.leftoverOf ? null : cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} leftover={!!day.leftoverOf} plates={plates} />
             </div>
             {swapButton}
           </div>
@@ -116,7 +116,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
             ) : (
               <p className="font-bold text-olive-dark">Night off</p>
             )}
-            <Details cookTime={cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} />
+            <Details cookTime={day.leftoverOf ? null : cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} leftover={!!day.leftoverOf} plates={plates} />
           </div>
           {swapButton}
         </div>
@@ -164,13 +164,16 @@ function NewBadge({ label, className = "" }: { label: string; className?: string
   return <span className={`inline-flex items-center rounded-full bg-ochre-soft px-2 py-0.5 text-xs font-extrabold text-ochre-dark ${className}`}>{label}</span>;
 }
 
-function Details({ cookTime, cost, noCook }: { cookTime: string | null; cost: number | null; noCook: boolean }) {
+const perPlate = (n: number) => "$" + n.toFixed(2);
+
+function Details({ cookTime, cost, noCook, leftover, plates }: { cookTime: string | null; cost: number | null; noCook: boolean; leftover?: boolean; plates?: number }) {
   if (noCook) return <p className="text-sm text-muted">Leftovers or takeout. No judgment.</p>;
+  if (leftover) return <p className="mt-0.5 text-sm font-semibold text-olive-dark">♻️ Leftovers night: just reheat · $0</p>;
   if (!cookTime && cost == null) return null;
   return (
     <p className="mt-0.5 flex flex-wrap gap-x-3 text-sm font-semibold text-muted">
       {cookTime && <span>⏱ {cookTime}</span>}
-      {cost != null && <span>{money(cost)}</span>}
+      {cost != null && <span>{money(cost)}{plates && cost > 0 ? ` · ${perPlate(cost / plates)} a plate` : ""}</span>}
     </p>
   );
 }

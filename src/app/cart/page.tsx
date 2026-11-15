@@ -62,6 +62,7 @@ export default async function CartPage({ searchParams }: { searchParams: Promise
           connected={!!account}
           fulfillment={settings.fulfillment}
           cart={plan.cart ?? null}
+          snap={settings.snap}
           pantryQuestions={plan.groceryList.sections.find((s) => s.name === "Pantry check")?.items.length ?? 0}
         />
       )}

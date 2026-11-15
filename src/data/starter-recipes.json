@@ -5076,5 +5076,1155 @@
   "creditName": null,
   "creditUrl": null,
   "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Red Beans and Rice with Smoked Sausage",
+  "protein": "Sausage",
+  "servings": 4,
+  "totalMinutes": 40,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "long-grain white rice"
+   },
+   {
+    "amount": "12",
+    "unit": "oz",
+    "item": "smoked sausage, sliced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "green bell pepper, chopped"
+   },
+   {
+    "amount": "2",
+    "unit": "(15 oz) cans",
+    "item": "red kidney beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "chicken broth"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "Cajun seasoning"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   }
+  ],
+  "steps": [
+   "Cook the rice.",
+   "Brown the sausage in the oil in a big pot, about 5 minutes.",
+   "Add the onion and pepper and cook until soft.",
+   "Stir in the beans, broth and Cajun seasoning. Simmer 15 minutes, mashing some beans to thicken it.",
+   "Serve over the rice."
+  ],
+  "tags": [
+   "budget",
+   "one-pot",
+   "leftovers"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Black Bean and Cheese Quesadillas",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "8",
+    "unit": "",
+    "item": "flour tortillas"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "black beans, drained and lightly mashed"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "cumin"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "salsa"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "butter"
+   }
+  ],
+  "steps": [
+   "Mix the beans with the cumin.",
+   "Spread beans on half of each tortilla, top with cheese and fold.",
+   "Cook in a buttered skillet over medium heat, 2 to 3 minutes a side, until golden and melty.",
+   "Cut into wedges and serve with salsa."
+  ],
+  "tags": [
+   "budget",
+   "quick",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Sheet-Pan Chicken Thighs and Potatoes",
+  "protein": "Chicken",
+  "servings": 4,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "boneless skinless chicken thighs"
+   },
+   {
+    "amount": "2",
+    "unit": "lb",
+    "item": "potatoes, cut in chunks"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, cut in wedges"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "paprika"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "salt"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 425°F.",
+   "Toss the potatoes and onion with 2 Tbsp oil and half the seasonings on a sheet pan. Roast 15 minutes.",
+   "Rub the chicken with the rest of the oil and seasonings and add it to the pan.",
+   "Roast 20 to 25 minutes more, until the chicken is cooked through."
+  ],
+  "tags": [
+   "budget",
+   "sheet-pan",
+   "leftovers"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Creamy Potato Soup",
+  "protein": "Dairy",
+  "servings": 4,
+  "totalMinutes": 40,
+  "ingredients": [
+   {
+    "amount": "3",
+    "unit": "lb",
+    "item": "russet potatoes, peeled and diced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "butter"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "all-purpose flour"
+   },
+   {
+    "amount": "4",
+    "unit": "cups",
+    "item": "chicken broth"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "milk"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "4",
+    "unit": "slices",
+    "item": "bacon, cooked and crumbled (optional)"
+   }
+  ],
+  "steps": [
+   "Melt the butter in a big pot and cook the onion until soft.",
+   "Stir in the flour, then slowly whisk in the broth.",
+   "Add the potatoes and simmer 15 to 20 minutes, until tender.",
+   "Mash some potatoes right in the pot, stir in the milk and cheese, and heat through.",
+   "Top with bacon if you have it."
+  ],
+  "tags": [
+   "budget",
+   "one-pot",
+   "leftovers"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Big-Batch Veggie Fried Rice",
+  "protein": "Eggs",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "cups",
+    "item": "cooked rice, cold (day-old is best)"
+   },
+   {
+    "amount": "5",
+    "unit": "",
+    "item": "eggs, beaten"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "frozen peas and carrots"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "green onions, sliced"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "soy sauce"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   }
+  ],
+  "steps": [
+   "Heat the oil in a big skillet over high heat. Scramble the eggs, then push them to the side.",
+   "Add the frozen vegetables and cook 3 minutes.",
+   "Add the rice and stir-fry until hot, breaking up clumps.",
+   "Stir in the soy sauce and green onions."
+  ],
+  "tags": [
+   "budget",
+   "quick",
+   "one-pot"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Buttery Pasta with Peas and Parmesan",
+  "protein": "Dairy",
+  "servings": 4,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "pasta (any short shape)"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "frozen peas"
+   },
+   {
+    "amount": "4",
+    "unit": "Tbsp",
+    "item": "butter"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "grated parmesan"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "black pepper"
+   }
+  ],
+  "steps": [
+   "Boil the pasta in salted water. Add the peas for the last 2 minutes.",
+   "Save a cup of pasta water, then drain.",
+   "Melt the butter with the garlic in the pot, add the pasta and peas, the parmesan and a splash of pasta water. Toss until glossy."
+  ],
+  "tags": [
+   "budget",
+   "quick",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Lentil Sloppy Joes",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 35,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "dry brown lentils, rinsed"
+   },
+   {
+    "amount": "2 1/2",
+    "unit": "cups",
+    "item": "water"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "green bell pepper, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "tomato sauce"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "ketchup"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "brown sugar"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "mustard"
+   },
+   {
+    "amount": "8",
+    "unit": "",
+    "item": "hamburger buns"
+   }
+  ],
+  "steps": [
+   "Simmer the lentils in the water about 20 minutes, until tender. Drain any extra water.",
+   "Meanwhile soften the onion and pepper in a little oil.",
+   "Add the lentils, tomato sauce, ketchup, brown sugar and mustard. Simmer 10 minutes until thick.",
+   "Spoon onto buns."
+  ],
+  "tags": [
+   "budget",
+   "kid-friendly",
+   "leftovers"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "One-Pot Chicken and Rice",
+  "protein": "Chicken",
+  "servings": 4,
+  "totalMinutes": 40,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "boneless skinless chicken thighs, cut in bites"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "long-grain white rice"
+   },
+   {
+    "amount": "3",
+    "unit": "cups",
+    "item": "chicken broth"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "frozen mixed vegetables"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   }
+  ],
+  "steps": [
+   "Brown the chicken in the oil, then add the onion and cook 3 minutes.",
+   "Stir in the rice and garlic powder, then the broth. Bring to a boil.",
+   "Cover, turn to low and cook 15 minutes.",
+   "Stir in the frozen vegetables, cover and cook 5 more minutes."
+  ],
+  "tags": [
+   "budget",
+   "one-pot",
+   "leftovers"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Stretch-It Beef and Bean Chili",
+  "protein": "Beef",
+  "servings": 4,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "1/2",
+    "unit": "lb",
+    "item": "ground beef"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "2",
+    "unit": "(15 oz) cans",
+    "item": "pinto or kidney beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "(28 oz) can",
+    "item": "crushed tomatoes"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "chili powder"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "cumin"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "water"
+   }
+  ],
+  "steps": [
+   "Brown the beef with the onion in a big pot; drain the fat.",
+   "Add everything else and simmer 30 minutes, stirring now and then.",
+   "Serve with crackers or over rice to stretch it further."
+  ],
+  "tags": [
+   "budget",
+   "one-pot",
+   "leftovers"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Potato and Egg Breakfast-for-Dinner Hash",
+  "protein": "Eggs",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "lb",
+    "item": "potatoes, diced small"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "8",
+    "unit": "",
+    "item": "eggs"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "paprika"
+   }
+  ],
+  "steps": [
+   "Fry the potatoes in the oil in a big skillet, covered, 10 minutes, stirring once.",
+   "Add the onion and paprika and cook uncovered until crisp, 8 to 10 minutes.",
+   "Make 8 wells, crack in the eggs, cover and cook until set.",
+   "Sprinkle with cheese."
+  ],
+  "tags": [
+   "budget",
+   "one-pot"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Loaded Baked Potato Bar",
+  "protein": "Dairy",
+  "servings": 4,
+  "totalMinutes": 60,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "large russet potatoes"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "frozen broccoli, steamed"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "sour cream"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "chili beans, warmed"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "butter"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 425°F. Poke the potatoes and bake about 50 minutes, until soft.",
+   "Split them open with butter.",
+   "Set out the broccoli, beans, cheese and sour cream so everyone builds their own."
+  ],
+  "tags": [
+   "budget",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Spaghetti with Half-and-Half Meat Sauce",
+  "protein": "Beef",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "spaghetti"
+   },
+   {
+    "amount": "1/2",
+    "unit": "lb",
+    "item": "ground beef"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "lentils or white beans, drained and mashed"
+   },
+   {
+    "amount": "1",
+    "unit": "(24 oz) jar",
+    "item": "marinara sauce"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   }
+  ],
+  "steps": [
+   "Boil the spaghetti.",
+   "Brown the beef and onion; drain.",
+   "Stir in the mashed lentils and the marinara and simmer 10 minutes.",
+   "Toss with the spaghetti. (The lentils stretch half a pound of beef to feed four.)"
+  ],
+  "tags": [
+   "budget",
+   "quick",
+   "kid-friendly",
+   "leftovers"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Cabbage, Potato and Sausage Skillet",
+  "protein": "Sausage",
+  "servings": 4,
+  "totalMinutes": 35,
+  "ingredients": [
+   {
+    "amount": "12",
+    "unit": "oz",
+    "item": "smoked sausage, sliced"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "head cabbage, chopped"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "potatoes, diced small"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, sliced"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "paprika"
+   }
+  ],
+  "steps": [
+   "Cook the potatoes in the oil, covered, 10 minutes.",
+   "Add the sausage and onion and cook 5 minutes.",
+   "Add the cabbage and paprika, cover and cook until the cabbage is tender, about 10 minutes."
+  ],
+  "tags": [
+   "budget",
+   "one-pot",
+   "leftovers"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Bean and Rice Burritos",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "8",
+    "unit": "",
+    "item": "flour tortillas"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "cooked rice"
+   },
+   {
+    "amount": "1",
+    "unit": "(16 oz) can",
+    "item": "refried beans"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "salsa"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "cumin"
+   }
+  ],
+  "steps": [
+   "Warm the refried beans with the cumin.",
+   "Fill each tortilla with beans, rice, cheese and salsa and roll up.",
+   "Toast seam-side down in a dry skillet until golden. Extras freeze well."
+  ],
+  "tags": [
+   "budget",
+   "quick",
+   "kid-friendly",
+   "freezer"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Tuna Noodle Casserole",
+  "protein": "Seafood",
+  "servings": 4,
+  "totalMinutes": 40,
+  "ingredients": [
+   {
+    "amount": "12",
+    "unit": "oz",
+    "item": "egg noodles"
+   },
+   {
+    "amount": "2",
+    "unit": "(5 oz) cans",
+    "item": "tuna, drained"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "butter"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "all-purpose flour"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "milk"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "frozen peas"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 375°F and boil the noodles until just tender.",
+   "Melt the butter, stir in the flour, then whisk in the milk and cook until thick.",
+   "Stir in the cheese, tuna, peas and noodles.",
+   "Bake in a greased dish 20 minutes, until bubbly."
+  ],
+  "tags": [
+   "budget",
+   "leftovers"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Lentil and Vegetable Soup",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "dry brown lentils, rinsed"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "carrots, diced"
+   },
+   {
+    "amount": "2",
+    "unit": "stalks",
+    "item": "celery, diced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, diced"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "diced tomatoes"
+   },
+   {
+    "amount": "6",
+    "unit": "cups",
+    "item": "vegetable broth"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "Italian seasoning"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   }
+  ],
+  "steps": [
+   "Soften the onion, carrots and celery in the oil, about 8 minutes.",
+   "Add the lentils, tomatoes, broth and seasoning.",
+   "Simmer 30 minutes, until the lentils are tender.",
+   "Serve with bread or crackers."
+  ],
+  "tags": [
+   "budget",
+   "one-pot",
+   "leftovers",
+   "freezer"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Turkey Taco Rice Bowls",
+  "protein": "Turkey",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "ground turkey"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "long-grain white rice"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "black beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "salsa"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "taco seasoning"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   }
+  ],
+  "steps": [
+   "Cook the rice.",
+   "Brown the turkey, then stir in the taco seasoning with a splash of water.",
+   "Warm the beans.",
+   "Build bowls: rice, turkey, beans, salsa and cheese."
+  ],
+  "tags": [
+   "budget",
+   "quick",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "French Bread Pizzas",
+  "protein": "Pork",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "loaf French bread, split lengthwise and cut in 4"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "pizza sauce"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "shredded mozzarella"
+   },
+   {
+    "amount": "3",
+    "unit": "oz",
+    "item": "pepperoni"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 425°F.",
+   "Spread sauce on the bread, then top with cheese and pepperoni.",
+   "Bake 10 to 12 minutes, until bubbly and crisp."
+  ],
+  "tags": [
+   "budget",
+   "quick",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Pancakes and Scrambled Eggs",
+  "protein": "Eggs",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "all-purpose flour"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "sugar"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "baking powder"
+   },
+   {
+    "amount": "1 3/4",
+    "unit": "cups",
+    "item": "milk"
+   },
+   {
+    "amount": "8",
+    "unit": "",
+    "item": "eggs (2 for the batter, 6 scrambled)"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "butter, melted"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "syrup"
+   }
+  ],
+  "steps": [
+   "Whisk the flour, sugar and baking powder. Add the milk, 2 eggs and melted butter and stir just until mixed.",
+   "Cook 1/4 cup at a time on a hot buttered griddle until bubbles form, then flip.",
+   "Scramble the other 6 eggs and serve with syrup."
+  ],
+  "tags": [
+   "budget",
+   "quick",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Chicken and Black Bean Enchilada Skillet",
+  "protein": "Chicken",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "boneless skinless chicken thighs, diced"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "black beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "(10 oz) can",
+    "item": "enchilada sauce"
+   },
+   {
+    "amount": "6",
+    "unit": "",
+    "item": "corn tortillas, torn in pieces"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   }
+  ],
+  "steps": [
+   "Brown the chicken in the oil.",
+   "Stir in the beans, enchilada sauce and torn tortillas; simmer 5 minutes.",
+   "Top with cheese, cover until melted."
+  ],
+  "tags": [
+   "budget",
+   "quick",
+   "one-pot",
+   "leftovers"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
  }
 ]

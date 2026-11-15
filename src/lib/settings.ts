@@ -28,6 +28,9 @@ export type Settings = {
   // Q3 Money
   weeklyBudget: number;
   budgetMode: "target" | "hard";
+  tightBudget: boolean; // "Every dollar counts": cheapest dinners and products win, brands and extras don't matter
+  cookOnceEatTwice: boolean; // cook a double batch, eat it again the next planned night (less cost and waste)
+  snap: boolean; // pays with SNAP/EBT: keep the cart EBT-friendly
   // Q4 Meals
   dinnersPerWeek: number; // kept equal to cookDays.length
   cookDays: number[]; // 0 = Sunday … 6 = Saturday: the nights we plan a dinner for
@@ -78,6 +81,9 @@ export const DEFAULT_SETTINGS: Settings = {
   shoppingDay: 6,
   weeklyBudget: 150,
   budgetMode: "target",
+  tightBudget: false,
+  cookOnceEatTwice: false,
+  snap: false,
   dinnersPerWeek: 5,
   cookDays: [0, 1, 2, 3, 4],
   foodRules: [],

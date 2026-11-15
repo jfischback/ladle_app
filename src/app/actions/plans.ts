@@ -18,6 +18,7 @@ import { CATEGORIES, extraSearchTerm, extrasTotal, neverRegex, planExtras, terms
 import { applyPantry, pantrySearchTerm, sameThing } from "@/lib/pantry";
 import { fuelGroceries, fuelTerms, portionNotes } from "@/lib/athletes";
 import { athleteWeeks } from "@/lib/athlete-week";
+import { budgetNotes, cookOnceEatTwice, dinnerCost, enforceCap, fillCosts } from "@/lib/budget";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
 import { addDays, upcomingWeekStart, weekDates } from "@/lib/week";
@@ -82,7 +83,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   // "Buy on sale" pantry items that are running low and really on sale this week.
   const stockUp = scan.status === "ok" ? scan.sales.filter((s) => stockTerms.includes(s.item)) : [];
   const bDeal = wantsBreakfastDeal && scan.status === "ok" ? breakfastDeal(scan.sales) : null;
-  const extraLines = planExtras(extras, settings.extras, scan.status === "ok" ? scan.sales : [], scan.status === "ok" ? scan.staplePrices : new Map());
+  let extraLines = planExtras(extras, settings.extras, scan.status === "ok" ? scan.sales : [], scan.status === "ok" ? scan.staplePrices : new Map());
 
   let result;
   try {
@@ -120,6 +121,21 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
       }
     }),
   );
+  // Costs for every dinner (the basic planner doesn't estimate them), then the budget rules.
+  const planned = await recipesByIds(userId, result.days.map((d) => d.recipeId).filter((x): x is string => !!x));
+  const byId = new Map([...recipeList, ...planned].map((r) => [r.id, r]));
+  result.days = fillCosts(result.days, byId, settings, sales);
+  if (settings.cookOnceEatTwice) result.days = cookOnceEatTwice(result.days, byId).days;
+  if (settings.budgetMode === "hard" || settings.tightBudget) {
+    const recentIds = new Set(recent.flatMap((p) => p.days.map((d) => d.recipeId)).filter((x): x is string => !!x));
+    let capped = enforceCap(result.days, recipeList, settings, sales, staplesTotal(staples).total + extrasTotal(extraLines), recentIds);
+    // Every dollar counts: if dinners alone can't fit, the optional snacks go first (every-trip and running-low items stay).
+    if (capped.over > 0 && settings.tightBudget) {
+      extraLines = extraLines.filter((l) => /^Every trip|You're out|Running low/.test(l.reason));
+      capped = enforceCap(capped.days, recipeList, settings, sales, staplesTotal(staples).total + extrasTotal(extraLines), recentIds);
+    }
+    result.days = capped.days;
+  }
   result.estimatedTotal = sumCosts(result.days);
   result.days = await withLunches(userId, await withBreakfasts(userId, result.days, settings, sales, bDeal), settings, sales);
 
@@ -149,8 +165,10 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
   const day = plan.days[dayIndex];
   if (!day) return { error: "Day not found." };
 
+  const { data: settings } = await getSettings(userId);
+  const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
   if (recipeId === null) {
-    plan.days[dayIndex] = { ...day, recipeId: null, recipeName: null, estimatedCost: null, reason: "No-cook night", saleItems: [], fromCook: null };
+    plan.days[dayIndex] = { ...day, recipeId: null, recipeName: null, estimatedCost: null, reason: "No-cook night", saleItems: [], fromCook: null, leftoverOf: null };
   } else {
     const [recipe] = await recipesByIds(userId, [recipeId]);
     if (!recipe) return { error: "Recipe not found." };
@@ -164,16 +182,21 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
       ...day,
       recipeId,
       recipeName: recipe.name,
-      estimatedCost: alt?.estimatedCost ?? null,
+      estimatedCost: alt?.estimatedCost ?? dinnerCost(recipe, settings, sales).total,
       reason: alt?.reason ?? "Your pick",
+      leftoverOf: null,
       saleItems: recipeSales(recipe, plan.saleItems.filter((x): x is SaleItem => typeof x !== "string")),
       fromCook: recipe.trial ? recipe.creditName : null,
       alternatives: [...previous, ...day.alternatives.filter((a) => a.recipeId !== recipeId)].slice(0, 3),
     };
   }
+  // A leftovers night follows the dinner it came from (or becomes a night off).
+  const now = plan.days[dayIndex];
+  plan.days = plan.days.map((d) => (d.leftoverOf === day.date
+    ? now.recipeId ? { ...d, recipeId: now.recipeId, recipeName: now.recipeName } : { ...d, recipeId: null, recipeName: null, reason: "No-cook night", leftoverOf: null }
+    : d));
   // Lunches depend on the night before, so re-plan them after any dinner change.
-  const { data: settings } = await getSettings(userId);
-  plan.days = await withLunches(userId, plan.days, settings, plan.saleItems.filter((x): x is SaleItem => typeof x !== "string"));
+  plan.days = await withLunches(userId, plan.days, settings, sales);
   const db = await getDb();
   await db
     .update(plans)
@@ -214,7 +237,7 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   try {
     const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
     const athletes = await athleteWeeks(userId, plan, settings);
-    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...portionNotes(athletes)]);
+    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days, settings), ...portionNotes(athletes)]);
     // Weekly staples get their own section, with this week's sale prices where we found them.
     const snap = new Map((plan.staples ?? []).map((l) => [stapleTerm(l.item), l]));
     const items = settings.staples.filter((x) => x.active).map((x) => {
