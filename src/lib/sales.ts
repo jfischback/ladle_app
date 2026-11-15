@@ -148,7 +148,7 @@ export async function scanSales(recipes: Recipe[], settings: Settings, extraTerm
       // Deepest discount wins. With "prefer premium on sale", a name brand wins unless the store brand is clearly deeper.
       deals.sort((a, b) => b.pct - a.pct);
       let best = deals[0];
-      if (settings.preferPremiumOnSale) {
+      if (settings.preferPremiumOnSale && !settings.tightBudget) {
         const premium = deals.find((d) => !/^(kroger|simple truth|private selection|heritage farm)/i.test(d.p.brand));
         if (premium && best.pct - premium.pct < settings.premiumDeeperPoints) best = premium;
       }

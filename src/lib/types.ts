@@ -20,6 +20,7 @@ export type PlanDay = {
   lunch?: PlanLunch | null; // the next-day-style lunch planned for this date, if someone's home
   breakfast?: PlanBreakfast | null; // breakfast for this date, if planned
   holiday?: string | null; // federal holiday on this date
+  leftoverOf?: string | null; // "cook once, eat twice": leftovers of the dinner cooked on this date
 };
 
 /** One store product option for a grocery line. */

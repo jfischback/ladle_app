@@ -105,6 +105,7 @@ export default async function HomePage() {
                   isToday={d.date === todayStr}
                   locked={approved}
                   recipes={recipeInfo}
+                  plates={settings.tightBudget ? Math.max(1, settings.adults + settings.kids * 0.7) : undefined}
                 />
               </li>
             ))}

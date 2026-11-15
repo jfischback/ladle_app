@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { lookupStores, saveSettings } from "@/app/actions/settings";
+import { addRecipePack } from "@/app/actions/recipes";
 import { DAY_NAMES, MOTIVATIONS, type Motivation, type Settings } from "@/lib/settings";
 import { FOOD_RULES, FOOD_RULE_GROUPS, parseDislikes, type FoodRule } from "@/lib/diet";
 import type { StoreLocation } from "@/lib/kroger";
@@ -119,6 +120,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
                 { value: "hard", label: "Hard limit", hint: "Never go over, even if it drops a good dinner." },
               ]}
             />
+            <TightBudget s={s} set={set} />
           </div>
         )}
 
@@ -323,6 +325,43 @@ function Counter({ label, value, min, max, onChange }: { label: string; value: n
         <span className="w-8 text-center text-2xl font-bold" aria-live="polite">{value}</span>
         <button type="button" aria-label={`More ${label.toLowerCase()}`} className="btn-secondary h-11 w-11 p-0 text-2xl" disabled={value >= max} onClick={() => onChange(value + 1)}>+</button>
       </div>
+    </div>
+  );
+}
+
+/** "Every dollar counts": cheapest wins, plus the ways to stretch a tight budget. */
+function TightBudget({ s, set }: { s: Settings; set: <K extends keyof Settings>(k: K, v: Settings[K]) => void }) {
+  const [pending, start] = useTransition();
+  const [added, setAdded] = useState<number | null>(null);
+  const toggle = (on: boolean) => {
+    set("tightBudget", on);
+    if (on) { set("budgetMode", "hard"); set("preferPremiumOnSale", false); set("cookOnceEatTwice", true); }
+  };
+  return (
+    <div className={`space-y-4 rounded-3xl border-2 p-4 ${s.tightBudget ? "border-olive bg-olive-soft/60" : "border-line"}`}>
+      <label className="flex cursor-pointer items-start gap-3">
+        <input type="checkbox" className="mt-1 h-6 w-6 accent-olive" checked={s.tightBudget} onChange={(e) => toggle(e.target.checked)} />
+        <span>
+          <span className="block text-lg font-bold">💵 Every dollar counts</span>
+          <span className="text-muted">For a fixed income, a student budget or a lean month. The cheapest dinners and the lowest price per ounce win every time; brands don&apos;t matter, and optional snacks drop off first if the week runs over.</span>
+        </span>
+      </label>
+      <label className="flex cursor-pointer items-start gap-3">
+        <input type="checkbox" className="mt-1 h-5 w-5 accent-olive" checked={s.cookOnceEatTwice} onChange={(e) => set("cookOnceEatTwice", e.target.checked)} />
+        <span><b>Cook once, eat twice</b> <span className="text-muted">A double batch, then leftovers the next planned night. Half the cooking, less to buy, nothing wasted.</span></span>
+      </label>
+      <label className="flex cursor-pointer items-start gap-3">
+        <input type="checkbox" className="mt-1 h-5 w-5 accent-olive" checked={s.snap} onChange={(e) => set("snap", e.target.checked)} />
+        <span><b>I pay with SNAP / EBT</b> <span className="text-muted">We&apos;ll remind you how to pay with EBT on pickup orders.</span></span>
+      </label>
+      {s.tightBudget && (
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-card p-3">
+          <span className="min-w-0 flex-1 text-sm"><b>Budget recipe pack:</b> 20 filling dinners for about $1 to $2.50 a plate (rice and beans, sheet-pan chicken, potato soup…).</span>
+          <button type="button" className="btn-secondary min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(async () => setAdded((await addRecipePack("budget")).added))}>
+            {added == null ? "Add them" : added ? `✓ Added ${added}` : "✓ Already added"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

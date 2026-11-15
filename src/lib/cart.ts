@@ -42,6 +42,20 @@ export function cartItems(list: GroceryList): { key: string; section: string; it
   return out;
 }
 
+/** Price per ounce (or per item), from a package size like "16 oz", "2 lb", "1 gal", "12 ct". Null if unknown. */
+export function unitPrice(size: string, price: number): { per: number; unit: "oz" | "ct" } | null {
+  const s = size.toLowerCase();
+  const m = s.match(/(\d+(?:\.\d+)?)\s*(fl\.? ?oz|oz|ounces?|lbs?|pounds?|gal(?:lon)?s?|qt|quarts?|pt|pints?|ml|l\b|liters?|g\b|grams?|kg|ct|count|pk|pack|each|ea)\b/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  if (!n) return null;
+  const u = m[2];
+  const oz = /^fl|^oz|^ounce/.test(u) ? n : /^lb|^pound/.test(u) ? n * 16 : /^gal/.test(u) ? n * 128 : /^qt|^quart/.test(u) ? n * 32 : /^pt|^pint/.test(u) ? n * 16
+    : u === "ml" ? n / 29.57 : /^l$|^liter/.test(u) ? n * 33.8 : /^g$|^gram/.test(u) ? n / 28.35 : u === "kg" ? n * 35.27 : null;
+  if (oz) return { per: price / oz, unit: "oz" };
+  return { per: price / n, unit: "ct" };
+}
+
 const toCart = (p: KrogerProduct): CartProduct => ({ upc: p.upc, description: p.description, size: p.size, price: p.promo ?? p.regular, regular: p.regular, onSale: p.promo != null });
 
 /**
@@ -49,13 +63,17 @@ const toCart = (p: KrogerProduct): CartProduct => ({ upc: p.upc, description: p.
  * (the store's own order is kept otherwise: its top hit is usually the everyday pick). If nothing truly matches,
  * the store's top results are offered but none is chosen, so the family picks.
  */
-export function pickOptions(term: string, products: KrogerProduct[], preferProduct?: string | null): { options: CartProduct[]; chosen: number | null } {
+export function pickOptions(term: string, products: KrogerProduct[], preferProduct?: string | null, cheapest = false): { options: CartProduct[]; chosen: number | null } {
   const matching = products.filter((p) => productMatches(term, p));
   if (!matching.length) return { options: products.slice(0, 3).map(toCart), chosen: null };
-  const ranked = matching
-    .map((p, i) => ({ p, i, score: (preferProduct && p.description === preferProduct ? -100 : 0) + (p.promo != null ? -10 : 0) + i }))
-    .sort((a, b) => a.score - b.score)
-    .map((x) => x.p);
+  // "Every dollar counts": the lowest price per ounce wins (store brands usually), whatever the brand.
+  const per = (p: KrogerProduct) => unitPrice(p.size, p.promo ?? p.regular)?.per ?? (p.promo ?? p.regular);
+  const ranked = cheapest
+    ? [...matching].sort((a, b) => per(a) - per(b))
+    : matching
+        .map((p, i) => ({ p, i, score: (preferProduct && p.description === preferProduct ? -100 : 0) + (p.promo != null ? -10 : 0) + i }))
+        .sort((a, b) => a.score - b.score)
+        .map((x) => x.p);
   return { options: ranked.slice(0, 3).map(toCart), chosen: 0 };
 }
 

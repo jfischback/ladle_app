@@ -8,7 +8,7 @@ import type { CartLine, CartState } from "@/lib/types";
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
-export function CartReview({ planId, store, site, connected, fulfillment, cart, pantryQuestions }: { planId: string; store: string; site: string; connected: boolean; fulfillment: "pickup" | "delivery"; cart: CartState | null; pantryQuestions: number }) {
+export function CartReview({ planId, store, site, connected, fulfillment, cart, pantryQuestions, snap }: { planId: string; store: string; site: string; snap: boolean; connected: boolean; fulfillment: "pickup" | "delivery"; cart: CartState | null; pantryQuestions: number }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<{ tone: "ok" | "warn"; text: string; reconnect?: boolean } | null>(null);
   const run = (fn: () => Promise<{ error?: string; reconnect?: boolean; sent?: number } | void>) =>
@@ -39,6 +39,9 @@ export function CartReview({ planId, store, site, connected, fulfillment, cart, 
         )}
       </section>
 
+      {snap && (
+        <p className="card bg-olive-soft p-4">💳 <b>Paying with SNAP / EBT:</b> {store} takes EBT on pickup orders. At checkout on {store}&apos;s site, add your EBT card as a payment method; EBT-eligible groceries go on it and anything else (like paper goods) on a second card.</p>
+      )}
       {pantryQuestions > 0 && (
         <p className="card bg-ochre-soft p-4">❓ {pantryQuestions} pantry question{pantryQuestions === 1 ? "" : "s"} still open on your <Link href="/#grocery-title" className="font-bold underline">grocery list</Link>. Answer &ldquo;Need it&rdquo; to add them here.</p>
       )}

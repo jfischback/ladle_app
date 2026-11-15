@@ -29,6 +29,21 @@ export async function addAllStarters() {
   redirect("/recipes");
 }
 
+/** Add every starter recipe with a pack tag (e.g. "budget") to My Recipes. Returns how many were new. */
+export async function addRecipePack(tag: string): Promise<{ added: number }> {
+  const userId = await requireUserId();
+  if (!/^[a-z-]{2,30}$/.test(tag)) return { added: 0 };
+  const db = await getDb();
+  const all = await db.select({ id: recipes.id, tags: recipes.tags }).from(recipes).where(and(isNull(recipes.ownerId), isNull(recipes.archivedAt)));
+  const ids = all.filter((r) => r.tags.includes(tag)).map((r) => r.id);
+  const mine = await db.select({ starterId: recipes.starterId }).from(recipes).where(and(eq(recipes.ownerId, userId), isNull(recipes.archivedAt)));
+  const have = new Set(mine.map((m) => m.starterId));
+  await copyStarters(userId, ids);
+  revalidatePath("/recipes");
+  revalidatePath("/");
+  return { added: ids.filter((id) => !have.has(id)).length };
+}
+
 const RecipeInput = z.object({
   name: z.string().trim().min(1, "Give the recipe a name.").max(200),
   meal: z.enum(["dinner", "breakfast", "lunch"]).default("dinner"),
