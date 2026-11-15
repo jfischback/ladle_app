@@ -2,7 +2,8 @@ import "server-only";
 import { z } from "zod";
 import type { Recipe } from "@/db/schema";
 import type { Settings } from "./settings";
-import type { GroceryList } from "./types";
+import type { GroceryList, SaleItem } from "./types";
+import { ingredientTerm } from "./sales";
 import { askClaude, claudeEnabled } from "./claude";
 
 const GrocerySchema = z.object({
@@ -31,10 +32,11 @@ Rules:
 - If preferPremiumOnSale is true, add the note "premium if on sale" to items where brand quality matters (olive oil, cheese, meat). The cheap version only wins when it is at least premiumDeeperPoints percentage points deeper on sale.
 - If limitFreezer is true, don't suggest stocking up on frozen items.
 - If there is a baby: never include honey for the baby, and skip toddler-labeled products.
+- If an item matches one of saleItems (same ingredient), make its note "On sale $X.XX (N% off)" using that sale's salePrice and pctOff, plus the product name when it helps pick the right one.
 - Keep notes short; use an empty string when there is nothing to say.`;
 
-export async function buildGroceryList(recipes: Recipe[], settings: Settings): Promise<GroceryList> {
-  if (!claudeEnabled()) return basicGroceryList(recipes);
+export async function buildGroceryList(recipes: Recipe[], settings: Settings, sales: SaleItem[] = []): Promise<GroceryList> {
+  if (!claudeEnabled()) return basicGroceryList(recipes, sales);
   const pkg = {
     household: {
       adults: settings.adults,
@@ -45,13 +47,19 @@ export async function buildGroceryList(recipes: Recipe[], settings: Settings): P
     premiumDeeperPoints: settings.premiumDeeperPoints,
     limitFreezer: settings.limitFreezer,
     dinners: recipes.map((r) => ({ name: r.name, servings: r.servings, ingredients: r.ingredients })),
+    saleItems: sales,
   };
   const out = await askClaude({ system: SYSTEM, content: JSON.stringify(pkg), schema: GrocerySchema, effort: "low" });
   return { sections: out.sections, source: "claude" };
 }
 
 /** Fallback: merge identical items without unit conversion. */
-export function basicGroceryList(recipes: Recipe[]): GroceryList {
+export function saleNote(s: SaleItem): string {
+  return `On sale $${s.salePrice.toFixed(2)} (${s.pctOff}% off)`;
+}
+
+export function basicGroceryList(recipes: Recipe[], sales: SaleItem[] = []): GroceryList {
+  const saleByTerm = new Map(sales.map((s) => [s.item, s]));
   const map = new Map<string, { item: string; quantities: string[]; forRecipes: Set<string> }>();
   for (const r of recipes) {
     for (const ing of r.ingredients) {
@@ -66,6 +74,9 @@ export function basicGroceryList(recipes: Recipe[]): GroceryList {
   }
   const items = [...map.values()]
     .sort((a, b) => a.item.localeCompare(b.item))
-    .map((e) => ({ item: e.item, quantity: e.quantities.join(" + "), note: "", forRecipes: [...e.forRecipes] }));
+    .map((e) => {
+      const sale = saleByTerm.get(ingredientTerm(e.item) ?? "");
+      return { item: e.item, quantity: e.quantities.join(" + "), note: sale ? saleNote(sale) : "", forRecipes: [...e.forRecipes] };
+    });
   return { sections: [{ name: "Everything", items }], source: "basic" };
 }

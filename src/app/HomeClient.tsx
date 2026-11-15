@@ -32,7 +32,7 @@ export function PlanButton({ label, big }: { label: string; big?: boolean }) {
       >
         {pending ? <><span className="animate-wiggle inline-block" aria-hidden="true">🥄</span> Stirring up your week…</> : label}
       </button>
-      {pending && <p className="text-sm text-muted">Picking dinners from your recipes. This takes a few seconds.</p>}
+      {pending && <p className="text-sm text-muted">Checking prices and picking dinners. This takes a few seconds.</p>}
       <ErrorNote error={error} />
     </div>
   );
@@ -147,7 +147,7 @@ function Details({ reason, cookTime, cost, sale, noCook }: { reason: string | nu
       )}
       {reason && <p className="mt-1 text-muted">{reason}</p>}
       {sale.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">{sale.map((s) => <span key={s} className="tag-sale">🏷️ {s}</span>)}</div>
+        <div className="mt-2 flex flex-wrap gap-1.5">{sale.map((s) => <span key={s} className="tag-sale">🏷️ {s} on sale</span>)}</div>
       )}
     </>
   );
@@ -158,9 +158,9 @@ export function ApproveBar({ planId }: { planId: string }) {
   const [error, setError] = useState<string | null>(null);
   return (
     <div className="sticky bottom-24 z-20 sm:bottom-4">
-      <div className="rounded-[2rem] bg-card/95 p-3 shadow-lift ring-1 ring-line/60 backdrop-blur">
+      <div className="rounded-[2rem] bg-card/95 p-2 shadow-lift ring-1 ring-line/60 backdrop-blur sm:p-3">
         <button
-          className="btn-warm min-h-14 w-full text-lg"
+          className="btn-warm min-h-12 w-full text-lg sm:min-h-14"
           disabled={pending}
           onClick={() =>
             start(async () => {
@@ -176,7 +176,7 @@ export function ApproveBar({ planId }: { planId: string }) {
         >
           {pending ? <><span className="animate-wiggle inline-block" aria-hidden="true">📝</span> Writing your grocery list…</> : "Looks yummy, make my list!"}
         </button>
-        <p className="mt-2 px-2 text-center text-sm text-muted">This locks in the week. You still do the paying and checkout.</p>
+        <p className="mt-1.5 px-2 text-center text-xs text-muted sm:mt-2 sm:text-sm">Locks in the week. You still do the paying and checkout.</p>
         <ErrorNote error={error} />
       </div>
     </div>
