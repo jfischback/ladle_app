@@ -73,6 +73,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
             <span className="absolute left-4 top-4 rounded-full bg-terracotta px-3 py-1 text-sm font-bold text-cream shadow-soft">
               Tonight · {dayName(day.date)}
             </span>
+            {day.fromCook && <NewBadge className="absolute right-4 top-4 shadow-soft" label="✨ New recipe" />}
           </div>
           <div className="flex items-start justify-between gap-3 p-5">
             <div className="min-w-0">
@@ -92,7 +93,10 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
         <div className="flex items-center gap-3 p-3 pr-4">
           <FoodArt name={day.recipeName} protein={recipe?.protein} className="h-[4.5rem] w-[4.5rem]" />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-extrabold text-terracotta">{dayName(day.date)} {Number(day.date.slice(8))}</p>
+            <p className="text-sm font-extrabold text-terracotta">
+              {dayName(day.date)} {Number(day.date.slice(8))}
+              {day.fromCook && <NewBadge className="ml-1.5 align-middle" label="✨ New" />}
+            </p>
             {day.recipeId ? (
               <Link href={`/recipes/${day.recipeId}`} className="block font-bold leading-snug hover:underline">{day.recipeName}</Link>
             ) : (
@@ -138,6 +142,11 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
       )}
     </div>
   );
+}
+
+/** Marks a new recipe from a followed cook. */
+function NewBadge({ label, className = "" }: { label: string; className?: string }) {
+  return <span className={`inline-flex items-center rounded-full bg-ochre-soft px-2 py-0.5 text-xs font-extrabold text-ochre-dark ${className}`}>{label}</span>;
 }
 
 function Details({ cookTime, cost, noCook }: { cookTime: string | null; cost: number | null; noCook: boolean }) {

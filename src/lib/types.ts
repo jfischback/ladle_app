@@ -16,6 +16,7 @@ export type PlanDay = {
   saleItems: string[];
   alternatives: PlanAlternative[];
   ratedAt?: string | null;
+  fromCook?: string | null; // set when this is a new recipe from a followed cook
 };
 
 export type GroceryItem = { item: string; quantity: string; note?: string; forRecipes: string[] };

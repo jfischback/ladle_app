@@ -6,6 +6,11 @@ import type { PlanDay } from "./types";
 import { askClaude, claudeEnabled } from "./claude";
 import { dayName, weekDates } from "./week";
 import { recipeSales, type SaleItem, type StorePrice } from "./sales";
+import type { Ingredient } from "./types";
+
+/** A recipe from a followed cook that isn't in the user's list yet. Planned days point at it as "found:<id>". */
+export type NewRecipeOption = { foundId: string; title: string; cookName: string; ingredients: Ingredient[]; totalMinutes: number | null };
+export const FOUND_PREFIX = "found:";
 
 export type PlanResult = {
   days: PlanDay[];
@@ -56,7 +61,8 @@ Rules:
 - Costs: estimate what the ingredients for each dinner cost for this household's size. When an ingredient is in storePrices, use that real shelf price at their Fry's (sale prices are already applied there); otherwise estimate typical Phoenix-area Fry's prices. Pantry staples they likely have count as zero. These are labeled estimates in the app, so be reasonable rather than precise.
 - When a reason mentions a sale, name the item and the discount, e.g. "Chicken thighs are 35% off".
 - Each pick gets a one-line reason a tired parent can read in two seconds.
-- Give two or three alternatives for each cooking night, from the same recipe list, not already used that week and following the same rules.`;
+- Give two or three alternatives for each cooking night, from the same recipe list, not already used that week and following the same rules.
+- newRecipes are new dinners from food creators the family follows. Use at most newRecipesPerWeek of them (their keys start with "n"), and only on a night that suits them. Prefer ones that use sale items. Their reason must start with "New from <cookName>" and say why, e.g. "New from Pinch of Yum: ground beef is 30% off". Never use newRecipes as alternatives.`;
 
 export async function planWeek(input: {
   settings: Settings;
@@ -65,6 +71,7 @@ export async function planWeek(input: {
   recentPlans: Plan[];
   saleItems: SaleItem[];
   storePrices?: StorePrice[];
+  newRecipes?: NewRecipeOption[];
 }): Promise<PlanResult> {
   const { settings, weekStart } = input;
   const dates = weekDates(weekStart);
@@ -76,10 +83,13 @@ export async function planWeek(input: {
   const eligible = input.recipes.filter((r) => !(r.rating != null && r.rating <= 2) && !recentRecipeIds.has(r.id));
   const pool = eligible.length >= settings.dinnersPerWeek ? eligible : input.recipes.filter((r) => !(r.rating != null && r.rating <= 2));
 
-  if (!claudeEnabled()) return basicPlan(dates, pool, settings, input.saleItems);
+  const newOptions = settings.newRecipesPerWeek > 0 ? (input.newRecipes ?? []) : [];
+  if (!claudeEnabled()) return basicPlan(dates, pool, settings, input.saleItems, newOptions);
 
   const keyed = pool.map((r, i) => ({ key: `r${i + 1}`, recipe: r }));
   const byKey = new Map(keyed.map((k) => [k.key, k.recipe]));
+  const newKeyed = newOptions.map((n, i) => ({ key: `n${i + 1}`, option: n }));
+  const byNewKey = new Map(newKeyed.map((k) => [k.key, k.option]));
 
   const pkg = {
     week: dates.map((d) => ({ date: d, day: dayName(d) })),
@@ -114,13 +124,31 @@ export async function planWeek(input: {
       prepAhead: r.prepAhead || null,
       ingredients: r.ingredients.map((i) => [i.amount, i.unit, i.item].filter(Boolean).join(" ")),
     })),
+    newRecipesPerWeek: newOptions.length ? settings.newRecipesPerWeek : 0,
+    newRecipes: newKeyed.map(({ key, option: n }) => ({
+      key,
+      name: n.title,
+      cookName: n.cookName,
+      totalMinutes: n.totalMinutes,
+      ingredients: n.ingredients.map((i) => [i.amount, i.unit, i.item].filter(Boolean).join(" ")),
+    })),
   };
 
   const out = await askClaude({ system: SYSTEM, content: JSON.stringify(pkg), schema: PlanSchema });
 
   const used = new Set<string>();
+  let newCount = 0;
   const days: PlanDay[] = dates.map((date) => {
     const d = out.days.find((x) => x.date === date);
+    const option = d?.recipeKey ? byNewKey.get(d.recipeKey) : undefined;
+    if (option && !used.has(option.foundId) && newCount < settings.newRecipesPerWeek) {
+      used.add(option.foundId);
+      newCount++;
+      return newDay(date, option, input.saleItems, d?.reason, d?.estimatedCost ?? null, (d?.alternatives ?? [])
+        .map((a) => byKey.get(a.recipeKey))
+        .filter((r): r is Recipe => !!r)
+        .map((r) => ({ recipeId: r.id, recipeName: r.name, estimatedCost: null, reason: "One of your recipes" })));
+    }
     const recipe = d?.recipeKey ? byKey.get(d.recipeKey) : undefined;
     const valid = recipe && !used.has(recipe.id);
     if (valid) used.add(recipe.id);
@@ -143,6 +171,26 @@ export async function planWeek(input: {
   return { days, summary: out.summary, estimatedTotal: sumCosts(days), source: "claude" };
 }
 
+/** A planned night that uses a new recipe from a followed cook. */
+function newDay(date: string, n: NewRecipeOption, sales: SaleItem[], reason: string | undefined, cost: number | null, alternatives: PlanDay["alternatives"]): PlanDay {
+  const onSale = recipeSales(n, sales);
+  let why = reason?.trim();
+  if (!why || !why.toLowerCase().startsWith("new from")) {
+    const top = sales.find((s) => s.item === onSale[0]);
+    why = top ? `New from ${n.cookName}: ${top.item} ${/s$/.test(top.item) ? "are" : "is"} ${top.pctOff}% off` : `New from ${n.cookName}, something new to try`;
+  }
+  return {
+    date,
+    recipeId: `${FOUND_PREFIX}${n.foundId}`,
+    recipeName: n.title,
+    estimatedCost: cost,
+    reason: why,
+    saleItems: onSale,
+    alternatives,
+    fromCook: n.cookName,
+  };
+}
+
 /** The sale items a dinner really uses: what the recipe's ingredients match, plus any valid ones Claude named. */
 function daySales(recipe: Recipe, named: string[], sales: SaleItem[]): string[] {
   const known = new Set(sales.map((s) => s.item));
@@ -150,7 +198,7 @@ function daySales(recipe: Recipe, named: string[], sales: SaleItem[]): string[] 
 }
 
 /** Used when no Claude key is configured: random picks that respect the hard rules, leaning on sale items, no costs. */
-function basicPlan(dates: string[], pool: Recipe[], settings: Settings, sales: SaleItem[]): PlanResult {
+function basicPlan(dates: string[], pool: Recipe[], settings: Settings, sales: SaleItem[], newOptions: NewRecipeOption[]): PlanResult {
   // Shuffle, then let recipes that use more sale items float to the top.
   const shuffled = [...pool]
     .map((r) => ({ r, score: recipeSales(r, sales).length + Math.random() * 0.9 }))
@@ -179,6 +227,16 @@ function basicPlan(dates: string[], pool: Recipe[], settings: Settings, sales: S
         reason: "From your recipes",
       })) : [],
     };
+  });
+  // Swap in new recipes from followed cooks for the last cooking nights, best sale matches first.
+  const newPicks = [...newOptions]
+    .sort((a, b) => recipeSales(b, sales).length - recipeSales(a, sales).length)
+    .slice(0, settings.newRecipesPerWeek);
+  const cookingDays = days.map((d, i) => (d.recipeId ? i : -1)).filter((i) => i >= 0).reverse();
+  newPicks.forEach((n, k) => {
+    const i = cookingDays[k];
+    if (i == null) return;
+    days[i] = newDay(days[i].date, n, sales, undefined, null, days[i].recipeId ? [{ recipeId: days[i].recipeId!, recipeName: days[i].recipeName!, estimatedCost: null, reason: "One of your recipes" }, ...days[i].alternatives].slice(0, 3) : []);
   });
   return {
     days,

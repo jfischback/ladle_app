@@ -28,6 +28,7 @@ export type Settings = {
   dinnersPerWeek: number;
   noRepeatWeeks: number;
   favorQuickWeeknights: boolean;
+  newRecipesPerWeek: number; // 0-2 new dinners from followed cooks, picked by the planner
   // Q5 Buying
   saleThresholdPct: number;
   preferPremiumOnSale: boolean;
@@ -54,6 +55,7 @@ export const DEFAULT_SETTINGS: Settings = {
   dinnersPerWeek: 5,
   noRepeatWeeks: 3,
   favorQuickWeeknights: true,
+  newRecipesPerWeek: 1,
   saleThresholdPct: 20,
   preferPremiumOnSale: true,
   premiumDeeperPoints: 30,

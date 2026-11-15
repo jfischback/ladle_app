@@ -89,6 +89,20 @@ function extractRecipeSource(html: string): string {
   return `Page text:\n${text.slice(0, 60000)}`;
 }
 
+/** The schema.org Recipe object in a page's JSON-LD, if the page has one. */
+export function recipeJsonLd(html: string): Record<string, unknown> | null {
+  const blocks = [...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+  for (const b of blocks) {
+    try {
+      const found = findRecipe(JSON.parse(b[1].trim()));
+      if (found) return found as Record<string, unknown>;
+    } catch {
+      /* ignore malformed JSON-LD */
+    }
+  }
+  return null;
+}
+
 function findRecipe(node: unknown): unknown {
   if (!node || typeof node !== "object") return null;
   if (Array.isArray(node)) {
