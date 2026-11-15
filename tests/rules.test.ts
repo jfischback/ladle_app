@@ -66,3 +66,11 @@ test("store names", () => {
   assert.equal(storeBrand("King Soopers").site, "https://www.kingsoopers.com");
   assert.equal(storeBrand("").name, null);
 });
+
+test("cooking-mode timers read the time from a step", async () => {
+  const { stepMinutes } = await import("@/app/recipes/[id]/CookMode");
+  assert.equal(stepMinutes("Simmer 15 minutes, stirring now and then."), 15);
+  assert.equal(stepMinutes("Bake 20 to 25 minutes until golden."), 25);
+  assert.equal(stepMinutes("Cook on low 6 hours or high 4 hours."), 360);
+  assert.equal(stepMinutes("Season with salt."), null);
+});
