@@ -204,6 +204,7 @@ export async function planUpcomingWeek(thisWeek = false, checkIn?: unknown): Pro
     extras: extraLines,
     summary: result.summary,
     plannerSource: result.source,
+    mode: settings.mode,
     estimatedTotal: result.estimatedTotal,
   });
   revalidatePath("/");

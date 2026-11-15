@@ -1,14 +1,14 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { and, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
 import { recipes, settings as settingsTable } from "@/db/schema";
 import { findStores, krogerEnabled, type StoreLocation } from "@/lib/kroger";
-import { DEFAULT_SETTINGS, type Settings } from "@/lib/settings";
+import { DEFAULT_SETTINGS, MODES, type Mode, type Settings } from "@/lib/settings";
 import { SEEN_KEYS, markSeen, type SeenKey } from "@/lib/seen";
 import { getSettings } from "@/lib/data";
 import { FOOD_RULES, type FoodRule } from "@/lib/diet";
@@ -75,6 +75,19 @@ const SettingsSchema = z.object({
   preferPremiumOnSale: z.boolean(),
 });
 
+/** Switch the mode (Normal, Cost Cutting, Workout). Cost Cutting is "every dollar counts". */
+export async function setMode(mode: string): Promise<{ error?: string }> {
+  const userId = await requireUserId();
+  if (!(mode in MODES)) return { error: "Pick a mode." };
+  const db = await getDb();
+  const [row] = await db.select({ data: settingsTable.data }).from(settingsTable).where(eq(settingsTable.userId, userId));
+  if (!row) return { error: "Finish setting up first." };
+  const data = row.data as Settings;
+  await db.update(settingsTable).set({ data: { ...data, mode: mode as Mode, tightBudget: mode === "cost" }, updatedAt: new Date() }).where(eq(settingsTable.userId, userId));
+  revalidatePath("/");
+  return {};
+}
+
 /** Getting started: mark a section as looked at, or hide the list. */
 export async function markSectionSeen(key: string): Promise<void> {
   const userId = await requireUserId();
@@ -90,6 +103,9 @@ export async function saveSettings(input: Partial<Settings>, startWith?: "ours" 
   // Keep settings the wizard doesn't show (e.g. prepReminders) instead of resetting them to defaults.
   const { data: current } = await getSettings(userId);
   const data: Settings = { ...DEFAULT_SETTINGS, ...current, ...parsed, cookDays, dinnersPerWeek: cookDays.length };
+  // "Every dollar counts" in Settings and Cost Cutting mode are the same thing.
+  if (data.tightBudget) data.mode = "cost";
+  else if (data.mode === "cost") data.mode = "normal";
   const db = await getDb();
   const now = new Date();
   await db

@@ -11,6 +11,13 @@ export const MOTIVATIONS = {
 } as const;
 export type Motivation = keyof typeof MOTIVATIONS;
 
+export const MODES = {
+  normal: { label: "Normal", icon: "🍲", blurb: "A balance of favorites, sales and new things." },
+  cost: { label: "Cost Cutting", icon: "💵", blurb: "The cheapest dinners and products win; brands don't matter." },
+  workout: { label: "Workout", icon: "💪", blurb: "High-protein dinners for everyone, plus athlete mode's portions." },
+} as const;
+export type Mode = keyof typeof MODES;
+
 export const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export type Settings = {
@@ -72,6 +79,7 @@ export type Settings = {
   limitFreezer: boolean; // don't stock up on frozen
   fruitRule: boolean; // buy a lot of in-season fruit, only when on sale
   prepReminders: boolean; // remind the day before (marinating, thawing)
+  mode: Mode; // the week's goal: one at a time, always shown in a banner (dietary rules stay on whatever the mode)
   seen: string[]; // Getting started: the sections they've looked at (cooking, pantry, staples, athletes…)
 };
 
@@ -133,6 +141,7 @@ export const DEFAULT_SETTINGS: Settings = {
   limitFreezer: true,
   fruitRule: true,
   prepReminders: true,
+  mode: "normal",
   seen: [],
 };
 
