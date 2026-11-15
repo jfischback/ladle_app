@@ -40,6 +40,35 @@ export const SUGGESTED_COOKS: CookSource[] = [
   { name: "Chelsea's Messy Apron", siteUrl: "https://www.chelseasmessyapron.com", feedUrl: "https://www.chelseasmessyapron.com/feed/", feedKind: "rss" },
   { name: "The Recipe Critic", siteUrl: "https://therecipecritic.com", feedUrl: "https://therecipecritic.com/feed/", feedKind: "rss" },
   { name: "Jo Cooks", siteUrl: "https://www.jocooks.com", feedUrl: "https://www.jocooks.com/feed/", feedKind: "rss" },
+  { name: "Smitten Kitchen", siteUrl: "https://smittenkitchen.com", feedUrl: "https://smittenkitchen.com/feed/", feedKind: "rss" },
+  { name: "Once Upon a Chef", siteUrl: "https://www.onceuponachef.com", feedUrl: "https://www.onceuponachef.com/feed/", feedKind: "rss" },
+  { name: "The Stay at Home Chef", siteUrl: "https://thestayathomechef.com", feedUrl: "https://thestayathomechef.com/feed/", feedKind: "rss" },
+  { name: "Budget Bytes", siteUrl: "https://www.budgetbytes.com", feedUrl: "https://www.budgetbytes.com/feed/", feedKind: "rss" },
+  { name: "The Mediterranean Dish", siteUrl: "https://www.themediterraneandish.com", feedUrl: "https://www.themediterraneandish.com/feed/", feedKind: "rss" },
+  { name: "A Couple Cooks", siteUrl: "https://www.acouplecooks.com", feedUrl: "https://www.acouplecooks.com/feed/", feedKind: "rss" },
+  { name: "Love and Lemons", siteUrl: "https://www.loveandlemons.com", feedUrl: "https://www.loveandlemons.com/feed/", feedKind: "rss" },
+  { name: "Downshiftology", siteUrl: "https://downshiftology.com", feedUrl: "https://downshiftology.com/feed/", feedKind: "rss" },
+  { name: "Skinnytaste", siteUrl: "https://www.skinnytaste.com", feedUrl: "https://www.skinnytaste.com/feed/", feedKind: "rss" },
+  { name: "Ambitious Kitchen", siteUrl: "https://www.ambitiouskitchen.com", feedUrl: "https://www.ambitiouskitchen.com/feed/", feedKind: "rss" },
+  { name: "Tastes Better From Scratch", siteUrl: "https://tastesbetterfromscratch.com", feedUrl: "https://tastesbetterfromscratch.com/feed/", feedKind: "rss" },
+  { name: "The Girl Who Ate Everything", siteUrl: "https://www.the-girl-who-ate-everything.com", feedUrl: "https://www.the-girl-who-ate-everything.com/feed/", feedKind: "rss" },
+  { name: "Dinner at the Zoo", siteUrl: "https://www.dinneratthezoo.com", feedUrl: "https://www.dinneratthezoo.com/feed/", feedKind: "rss" },
+  { name: "The Country Cook", siteUrl: "https://www.thecountrycook.net", feedUrl: "https://www.thecountrycook.net/feed/", feedKind: "rss" },
+  { name: "Plain Chicken", siteUrl: "https://www.plainchicken.com", feedUrl: "https://www.plainchicken.com/feed/", feedKind: "rss" },
+  { name: "Grandbaby Cakes", siteUrl: "https://grandbaby-cakes.com", feedUrl: "https://grandbaby-cakes.com/feed/", feedKind: "rss" },
+  { name: "Butter Be Ready", siteUrl: "https://www.butterbeready.com", feedUrl: "https://www.butterbeready.com/feed/", feedKind: "rss" },
+  { name: "The Kitchn", siteUrl: "https://www.thekitchn.com", feedUrl: "https://www.thekitchn.com/main.rss", feedKind: "rss" },
+  { name: "FoodieCrush", siteUrl: "https://www.foodiecrush.com", feedUrl: "https://www.foodiecrush.com/post-sitemap.xml", feedKind: "sitemap" },
+  { name: "How Sweet Eats", siteUrl: "https://www.howsweeteats.com", feedUrl: "https://www.howsweeteats.com/feed/", feedKind: "rss" },
+  { name: "Well Plated", siteUrl: "https://www.wellplated.com", feedUrl: "https://www.wellplated.com/feed/", feedKind: "rss" },
+  { name: "The Woks of Life", siteUrl: "https://thewoksoflife.com", feedUrl: "https://thewoksoflife.com/feed/", feedKind: "rss" },
+  { name: "Damn Spicy", siteUrl: "https://damnspicy.com", feedUrl: "https://damnspicy.com/feed/", feedKind: "rss" },
+  { name: "Moribyan", siteUrl: "https://moribyan.com", feedUrl: "https://moribyan.com/feed/", feedKind: "rss" },
+  { name: "Hungry Happens", siteUrl: "https://hungryhappens.net", feedUrl: "https://hungryhappens.net/feed/", feedKind: "rss" },
+  { name: "Broma Bakery", siteUrl: "https://bromabakery.com", feedUrl: "https://bromabakery.com/feed/", feedKind: "rss" },
+  { name: "Preppy Kitchen", siteUrl: "https://preppykitchen.com", feedUrl: "https://preppykitchen.com/feed/", feedKind: "rss" },
+  { name: "The Big Man's World", siteUrl: "https://thebigmansworld.com", feedUrl: "https://thebigmansworld.com/feed/", feedKind: "rss" },
+  { name: "I Am Homesteader", siteUrl: "https://iamhomesteader.com", feedUrl: "https://iamhomesteader.com/feed/", feedKind: "rss" },
   { name: "Magnolia Table", siteUrl: "https://magnolia.com/blogs/recipe", feedUrl: "https://magnolia.com/blogs/recipe.atom", feedKind: "atom" },
 ];
 
@@ -161,7 +190,7 @@ export async function findSource(input: string): Promise<CookSource> {
 
 // ---------- reading one recipe page ----------
 
-const NOT_DINNER = /dessert|cookie|cake|brownie|blondie|\bbars?\b|\bpie\b|tart\b|drinks?\b|cocktail|punch\b|smoothie|breakfast|brunch|appetizer|snack|\bdips?\b|dressing|\bsides?\b|side dish|bread|muffin|frosting|candy|fudge|pinwheel|bites\b|puffs\b|cheese board|charcuterie|granola|pancake|waffle|meal plan|menu|gift guide|round-?up|marshmallow|stuffing|gravy|cranberry sauce|mashed potatoes|seasoning|spice blend|dukkah|condiment|cider\b|lemonade|latte|cocoa|hot chocolate|eggnog|sangria|margarita|mocktail|twice baked|mashed|potato casserole|roasted vegetables|coleslaw|rolls\b|biscuits\b|cornbread|\bcrisp\b|cobbler|crumble\b|pur[eé]e|^how to\b/i;
+const NOT_DINNER = /dessert|cookie|cake|brownie|blondie|\bbars?\b|\bpie\b|tart\b|drinks?\b|cocktail|punch\b|smoothie|breakfast|brunch|appetizer|snack|\bdips?\b|dressing|\bsides?\b|side dish|bread|muffin|frosting|candy|fudge|pinwheel|bites\b|puffs\b|cheese board|charcuterie|granola|pancake|waffle|meal plan|menu|gift guide|round-?up|marshmallow|stuffing|gravy|cranberry sauce|mashed potatoes|seasoning|spice blend|dukkah|condiment|cider\b|lemonade|latte|cocoa|hot chocolate|eggnog|sangria|margarita|mocktail|twice baked|mashed|potato casserole|roasted vegetables|coleslaw|rolls\b|biscuits\b|cornbread|\bcrisp\b|cobbler|crumble\b|sticky buns|cinnamon rolls?|scones?\b|pur[eé]e|^how to\b/i;
 const DINNER = /main|dinner|entr[eé]e|soup|stew|chili|pasta|casserole|curry|skillet|sheet pan|slow cooker|instant pot|tacos?/i;
 
 function text(v: unknown): string {
@@ -261,11 +290,12 @@ export async function refreshCooks(userId: string, opts: { budgetMs?: number; mi
   const db = await getDb();
   const mine = await db.select().from(cooks).where(and(eq(cooks.userId, userId), isNull(cooks.archivedAt)));
   const due = mine.filter((c) => !c.lastCheckedAt || Date.now() - c.lastCheckedAt.getTime() > minHours * 3600_000);
-  if (!due.length) return { checked: 0, found: 0 };
+  if (!due.length) return { checked: 0, found: 0, remaining: 0 };
   const known = new Set((await db.select({ url: foundRecipes.url }).from(foundRecipes).where(eq(foundRecipes.userId, userId))).map((r) => r.url));
   let found = 0;
+  let done = 0;
 
-  await inPool(due, 4, stopAt, async (cook) => {
+  await inPool(due, 6, stopAt, async (cook) => {
     try {
       // The first time, read a few pages back so there's a good choice to start with.
       const first = !cook.lastCheckedAt;
@@ -302,11 +332,14 @@ export async function refreshCooks(userId: string, opts: { budgetMs?: number; mi
         if (isDinner) found++;
       }
       await db.update(cooks).set({ lastCheckedAt: new Date(), lastError: null }).where(eq(cooks.id, cook.id));
+      done++;
     } catch (e) {
+      done++;
       await db.update(cooks).set({ lastCheckedAt: new Date(), lastError: (e as Error).message }).where(eq(cooks.id, cook.id));
     }
   });
-  return { checked: due.length, found };
+  // Cooks we ran out of time for stay "due" and are picked up by the next check.
+  return { checked: done, found, remaining: due.length - done };
 }
 
 /**

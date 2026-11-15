@@ -7,7 +7,7 @@ import { getDb } from "@/db";
 import { cooks, foundRecipes } from "@/db/schema";
 import { SUGGESTED_COOKS, adoptFoundRecipe, findSource, refreshCooks, type CookSource } from "@/lib/cooks";
 
-type Result = { error?: string; found?: number } | void;
+type Result = { error?: string; found?: number; remaining?: number } | void;
 
 async function addCook(userId: string, src: CookSource) {
   const db = await getDb();
@@ -29,7 +29,7 @@ export async function followCook(site: string): Promise<Result> {
   }
   const r = await refreshCooks(userId, { budgetMs: 25000 });
   revalidatePath("/recipes");
-  return { found: r.found };
+  return { found: r.found, remaining: r.remaining };
 }
 
 /** Follow one or more of the suggested cooks. */
@@ -38,7 +38,7 @@ export async function followSuggested(names: string[]): Promise<Result> {
   for (const src of SUGGESTED_COOKS.filter((c) => names.includes(c.name))) await addCook(userId, src);
   const r = await refreshCooks(userId, { budgetMs: 25000 });
   revalidatePath("/recipes");
-  return { found: r.found };
+  return { found: r.found, remaining: r.remaining };
 }
 
 export async function unfollowCook(id: string) {
@@ -53,7 +53,7 @@ export async function checkCooks(): Promise<Result> {
   const userId = await requireUserId();
   const r = await refreshCooks(userId, { budgetMs: 25000, minHours: 0 });
   revalidatePath("/recipes");
-  return { found: r.found };
+  return { found: r.found, remaining: r.remaining };
 }
 
 /** Save a found recipe to My Recipes. */
