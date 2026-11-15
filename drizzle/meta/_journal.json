@@ -113,6 +113,13 @@
       "when": 1794758886496,
       "tag": "0015_fancy_randall",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794778905357,
+      "tag": "0016_omniscient_swordsman",
+      "breakpoints": true
     }
   ]
 }

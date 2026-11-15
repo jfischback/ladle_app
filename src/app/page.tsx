@@ -1,3 +1,6 @@
+import { ModeBanner } from "@/components/ModeBanner";
+import { averageCost, weekSaving } from "@/lib/mode-savings";
+import { dinnerCost } from "@/lib/budget";
 import { rulesSummary } from "@/lib/diet";
 import Link from "next/link";
 import { moveTargets } from "@/lib/move-dinner";
@@ -72,6 +75,14 @@ export default async function HomePage() {
   const approved = plan?.status === "approved";
   const dinners = plan?.days.filter((d) => d.recipeId).length ?? 0;
 
+  // Cost Cutting: what it saved this week and this month, against a typical week of the family's own dinners.
+  const averageDinner = averageCost(recipes.filter((r) => r.meal === "dinner").map((r) => dinnerCost(r, settings, []).total));
+  const month = todayStr.slice(0, 7);
+  const costWeeks = plans.filter((p) => p.mode === "cost" && p.status === "approved" && p.weekOf.slice(0, 7) === month);
+  const modeSaved = settings.mode === "cost" && plan?.mode === "cost"
+    ? { week: weekSaving(plan.days, averageDinner), month: costWeeks.reduce((a, p) => a + weekSaving(p.days, averageDinner), 0) }
+    : null;
+
   // The home hub: a tile for each place in Ladle.
   const tonight = plan?.days.find((d) => d.date === todayStr);
   const groceryCount = plan?.groceryList?.sections.filter((s) => !/already in your pantry/i.test(s.name)).reduce((n, s) => n + s.items.length, 0) ?? 0;
@@ -121,6 +132,7 @@ export default async function HomePage() {
       </header>
 
       {/* Everything starts here: one tile for each place in Ladle. */}
+      <ModeBanner mode={settings.mode} dietary={rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway)} saved={modeSaved} />
       <HomeHub tiles={hubTiles} />
       {!settings.seen.includes("getting-started-hidden") && <GettingStarted steps={startSteps} />}
 
