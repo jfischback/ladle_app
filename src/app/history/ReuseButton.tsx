@@ -11,7 +11,7 @@ export function ReuseButton({ planId }: { planId: string }) {
   return (
     <div className="text-right">
       <button
-        className="btn-quiet"
+        className="btn-primary min-h-11 text-sm"
         disabled={pending}
         onClick={() =>
           start(async () => {
@@ -21,7 +21,7 @@ export function ReuseButton({ planId }: { planId: string }) {
           })
         }
       >
-        {pending ? "Copying…" : "Reuse this week"}
+        {pending ? "Copying…" : "↻ Cook this week again"}
       </button>
       {error && <p className="text-sm text-terracotta-dark">{error}</p>}
     </div>

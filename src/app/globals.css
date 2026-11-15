@@ -5,7 +5,7 @@
   --color-oat: #ede6d8;
   --color-cream: #f8f4ec;
   --color-card: #fffdf8;
-  --color-line: #ddd3c0;
+  --color-line: #e6dccb;
   --color-ink: #2e2b24;
   --color-muted: #6b6455;
   --color-olive-dark: #4f5b3a;
@@ -14,9 +14,15 @@
   --color-terracotta: #b5654a;
   --color-terracotta-dark: #8e4632;
   --color-terracotta-soft: #f3e0d8;
+  --color-blush: #f8ebe4;
   --color-ochre: #d2a24c;
+  --color-ochre-dark: #8a6420;
   --color-ochre-soft: #f4e6c6;
-  --font-sans: ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI", system-ui, sans-serif;
+  /* Fonts are loaded in layout.tsx with next/font and exposed as these variables. */
+  --font-sans: var(--font-nunito), ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --shadow-soft: 0 1px 2px rgb(94 80 50 / 0.06), 0 4px 14px rgb(94 80 50 / 0.08);
+  --shadow-lift: 0 2px 4px rgb(94 80 50 / 0.08), 0 10px 28px rgb(94 80 50 / 0.14);
 }
 
 html {
@@ -24,44 +30,89 @@ html {
 }
 
 body {
-  background: var(--color-cream);
+  background-color: var(--color-cream);
+  /* A faint dot pattern, like a kitchen tea towel. */
+  background-image: radial-gradient(rgb(181 101 74 / 0.09) 1.2px, transparent 1.3px);
+  background-size: 22px 22px;
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
+h1,
+h2,
+.font-display {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 100, "WONK" 0;
+  letter-spacing: -0.01em;
+}
+
 @utility btn {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
-  }
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 font-bold transition-all active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
+}
 
 @utility btn-primary {
-    @apply btn bg-olive text-cream hover:bg-olive-dark;
-  }
+  @apply btn bg-olive text-cream shadow-[0_3px_0_var(--color-olive-dark)] hover:bg-olive-dark;
+}
+
+@utility btn-warm {
+  @apply btn bg-terracotta text-cream shadow-[0_3px_0_var(--color-terracotta-dark)] hover:bg-terracotta-dark;
+}
 
 @utility btn-secondary {
-    @apply btn border-2 border-olive bg-card text-olive-dark hover:bg-olive-soft;
-  }
+  @apply btn border-2 border-olive/40 bg-card text-olive-dark hover:border-olive hover:bg-olive-soft;
+}
 
 @utility btn-quiet {
-    @apply btn text-olive-dark hover:bg-olive-soft;
-  }
+  @apply btn text-olive-dark hover:bg-olive-soft;
+}
 
 @utility card {
-    @apply rounded-2xl border border-line bg-card;
-  }
+  @apply rounded-3xl bg-card shadow-soft;
+}
 
 @utility field {
-    @apply min-h-11 w-full rounded-xl border-2 border-line bg-card px-3 py-2 text-ink outline-none focus:border-olive;
-  }
+  @apply min-h-11 w-full rounded-2xl border-2 border-line bg-card px-3 py-2 text-ink outline-none transition-colors focus:border-olive;
+}
 
 @utility label {
-    @apply mb-1 block font-semibold;
-  }
+  @apply mb-1 block font-bold;
+}
 
 @utility tag-sale {
-    @apply inline-flex items-center rounded-full bg-ochre-soft px-2.5 py-0.5 text-sm font-semibold text-ink;
-  }
+  @apply inline-flex items-center gap-1 rounded-full bg-ochre-soft px-2.5 py-0.5 text-sm font-bold text-ochre-dark;
+}
 
 @utility tag {
-    @apply inline-flex items-center rounded-full bg-oat px-2.5 py-0.5 text-sm text-muted;
-  }
+  @apply inline-flex items-center gap-1 rounded-full bg-oat px-2.5 py-0.5 text-sm font-semibold text-muted;
+}
+
+@utility eyebrow {
+  @apply text-sm font-bold text-terracotta;
+}
+
+/* Little celebration when the week is approved. */
+@keyframes confetti-fall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(105vh) rotate(540deg); opacity: 0.9; }
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+.animate-pop { animation: pop-in 0.45s ease-out both; }
+.animate-wiggle { animation: wiggle 1.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop, .animate-wiggle, .confetti-piece { animation: none !important; }
+  .confetti-piece { display: none; }
+}

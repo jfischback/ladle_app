@@ -1,27 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { approvePlan, planUpcomingWeek, rateCookedDinner, startOver, swapDay } from "./actions/plans";
 import { StarPicker } from "@/components/Stars";
+import { FoodArt } from "@/components/FoodArt";
+import type { Plan } from "@/db/schema";
 import type { PlanDay } from "@/lib/types";
-import { dayName, money, shortDate } from "@/lib/week";
+import { formatMinutes } from "@/lib/format";
+import { dayName, money } from "@/lib/week";
+
+type RecipeInfo = { id: string; name: string; protein: string | null; totalMinutes: number | null };
+
+const CELEBRATE_KEY = "ladle-celebrate";
+// Reasons the basic planner writes; they add nothing for the person reading.
+const FILLER_REASONS = new Set(["Picked from your recipes", "No-cook night", ""]);
 
 function ErrorNote({ error }: { error: string | null }) {
-  return error ? <p role="alert" className="rounded-xl bg-terracotta-soft px-3 py-2 text-terracotta-dark">{error}</p> : null;
+  return error ? <p role="alert" className="rounded-2xl bg-terracotta-soft px-4 py-2 text-terracotta-dark">{error}</p> : null;
 }
 
 export function PlanButton({ label, big }: { label: string; big?: boolean }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col items-center gap-2">
       <button
-        className={big ? "btn-primary min-h-14 px-8 text-lg" : "btn-secondary"}
+        className={big ? "btn-warm min-h-14 px-8 text-lg" : "btn-secondary"}
         disabled={pending}
         onClick={() => start(async () => { setError(null); const r = await planUpcomingWeek(); if (r?.error) setError(r.error); })}
       >
-        {pending ? "Planning your week…" : label}
+        {pending ? <><span className="animate-wiggle inline-block" aria-hidden="true">🥄</span> Stirring up your week…</> : label}
       </button>
       {pending && <p className="text-sm text-muted">Picking dinners from your recipes. This takes a few seconds.</p>}
       <ErrorNote error={error} />
@@ -30,7 +39,7 @@ export function PlanButton({ label, big }: { label: string; big?: boolean }) {
 }
 
 export function DayCard({ planId, index, day, isToday, locked, recipes }: {
-  planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: { id: string; name: string }[];
+  planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[];
 }) {
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
@@ -43,44 +52,69 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
       else setOpen(false);
     });
   const used = new Set<string>();
+  const recipe = recipes.find((r) => r.id === day.recipeId);
+  const reason = day.reason && !FILLER_REASONS.has(day.reason) ? day.reason : null;
+  const cookTime = recipe?.totalMinutes ? formatMinutes(recipe.totalMinutes) : null;
+
+  const swapButton = !locked && (
+    <button className="btn-secondary min-h-10 shrink-0 px-3.5 text-sm" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+      {open ? "Close" : "Swap"}
+    </button>
+  );
 
   return (
-    <div className={`card p-4 ${isToday ? "border-2 border-olive" : ""} ${pending ? "opacity-60" : ""}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-sm font-semibold uppercase tracking-wide text-muted">
-            {dayName(day.date)} · {shortDate(day.date)} {isToday && <span className="text-olive-dark">· Tonight</span>}
-          </p>
-          {day.recipeId ? (
-            <Link href={`/recipes/${day.recipeId}`} className="text-xl font-bold leading-snug hover:underline">{day.recipeName}</Link>
-          ) : (
-            <p className="text-xl font-bold text-muted">No-cook night</p>
-          )}
-          {day.reason && day.recipeId && <p className="mt-1 text-muted">{day.reason}</p>}
-          {day.saleItems.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">{day.saleItems.map((s) => <span key={s} className="tag-sale">On sale: {s}</span>)}</div>
-          )}
+    <div className={`card overflow-hidden transition-opacity ${isToday ? "ring-2 ring-terracotta shadow-lift" : ""} ${pending ? "opacity-60" : ""}`}>
+      {isToday ? (
+        // Tonight gets the big hero treatment.
+        <div>
+          <div className="relative">
+            <FoodArt name={day.recipeName} protein={recipe?.protein} className="h-44 w-full sm:h-52" rounded="rounded-none" />
+            <span className="absolute left-4 top-4 rounded-full bg-terracotta px-3 py-1 text-sm font-bold text-cream shadow-soft">
+              Tonight · {dayName(day.date)}
+            </span>
+          </div>
+          <div className="flex items-start justify-between gap-3 p-5">
+            <div className="min-w-0">
+              {day.recipeId ? (
+                <Link href={`/recipes/${day.recipeId}`} className="font-display text-2xl font-semibold leading-snug hover:underline">{day.recipeName}</Link>
+              ) : (
+                <p className="font-display text-2xl font-semibold">Night off tonight!</p>
+              )}
+              <Details reason={reason} cookTime={cookTime} cost={day.recipeId ? day.estimatedCost : null} sale={day.saleItems} noCook={!day.recipeId} />
+            </div>
+            {swapButton}
+          </div>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-2">
-          {day.recipeId && day.estimatedCost != null && <span className="text-lg font-semibold">{money(day.estimatedCost)}</span>}
-          {!locked && (
-            <button className="btn-secondary min-h-10 px-4 text-sm" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-              Swap
-            </button>
-          )}
+      ) : (
+        <div className="flex items-center gap-3 p-3 pr-4">
+          <FoodArt name={day.recipeName} protein={recipe?.protein} className="h-[4.5rem] w-[4.5rem]" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-extrabold text-terracotta">{dayName(day.date)} {Number(day.date.slice(8))}</p>
+            {day.recipeId ? (
+              <Link href={`/recipes/${day.recipeId}`} className="block font-bold leading-snug hover:underline">{day.recipeName}</Link>
+            ) : (
+              <p className="font-bold text-olive-dark">Night off</p>
+            )}
+            <Details reason={reason} cookTime={cookTime} cost={day.recipeId ? day.estimatedCost : null} sale={day.saleItems} noCook={!day.recipeId} />
+          </div>
+          {swapButton}
         </div>
-      </div>
+      )}
       {open && !locked && (
-        <div className="mt-4 space-y-3 border-t border-line pt-4">
+        <div className="space-y-3 border-t border-line bg-cream/60 p-4">
+          <p className="font-bold">Swap {dayName(day.date)} for…</p>
           {day.alternatives.length > 0 && (
             <ul className="grid gap-2">
               {day.alternatives.map((a) => {
                 used.add(a.recipeId);
                 return (
                   <li key={a.recipeId}>
-                    <button className="w-full rounded-xl border-2 border-line bg-cream p-3 text-left hover:border-olive" disabled={pending} onClick={() => swap(a.recipeId)}>
-                      <span className="flex justify-between gap-2 font-semibold"><span>{a.recipeName}</span><span>{money(a.estimatedCost)}</span></span>
-                      <span className="text-sm text-muted">{a.reason}</span>
+                    <button className="flex w-full items-center gap-3 rounded-2xl bg-card p-3 text-left shadow-soft ring-2 ring-transparent hover:ring-olive" disabled={pending} onClick={() => swap(a.recipeId)}>
+                      <FoodArt name={a.recipeName} className="h-12 w-12" rounded="rounded-xl" />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex justify-between gap-2 font-bold"><span>{a.recipeName}</span><span>{money(a.estimatedCost)}</span></span>
+                        <span className="text-sm text-muted">{a.reason}</span>
+                      </span>
                     </button>
                   </li>
                 );
@@ -89,10 +123,10 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
           )}
           <div className="flex flex-wrap gap-2">
             <select aria-label="Pick any recipe" className="field flex-1" defaultValue="" disabled={pending} onChange={(e) => e.target.value && swap(e.target.value)}>
-              <option value="" disabled>Or pick any recipe…</option>
+              <option value="" disabled>Pick any of your recipes…</option>
               {recipes.filter((r) => r.id !== day.recipeId && !used.has(r.id)).map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
             </select>
-            {day.recipeId && <button className="btn-quiet" disabled={pending} onClick={() => swap(null)}>Make it a no-cook night</button>}
+            {day.recipeId && <button className="btn-quiet" disabled={pending} onClick={() => swap(null)}>Take the night off 🍕</button>}
           </div>
           <ErrorNote error={error} />
         </div>
@@ -101,21 +135,164 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
   );
 }
 
+function Details({ reason, cookTime, cost, sale, noCook }: { reason: string | null; cookTime: string | null; cost: number | null; sale: string[]; noCook: boolean }) {
+  if (noCook) return <p className="text-sm text-muted">Leftovers or takeout. No judgment.</p>;
+  return (
+    <>
+      {(cookTime || cost != null) && (
+        <p className="mt-0.5 flex flex-wrap gap-x-3 text-sm font-semibold text-muted">
+          {cookTime && <span>⏱ {cookTime}</span>}
+          {cost != null && <span>{money(cost)}</span>}
+        </p>
+      )}
+      {reason && <p className="mt-1 text-muted">{reason}</p>}
+      {sale.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">{sale.map((s) => <span key={s} className="tag-sale">🏷️ {s}</span>)}</div>
+      )}
+    </>
+  );
+}
+
 export function ApproveBar({ planId }: { planId: string }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   return (
-    <div className="space-y-2">
-      <button
-        className="btn-primary min-h-14 w-full text-xl"
-        disabled={pending}
-        onClick={() => start(async () => { setError(null); const r = await approvePlan(planId); if (r?.error) setError(r.error); })}
-      >
-        {pending ? "Building your grocery list…" : "Approve"}
-      </button>
-      <p className="text-center text-sm text-muted">Approving locks the week and makes your grocery list. You stay in charge of paying and checkout.</p>
-      <ErrorNote error={error} />
+    <div className="sticky bottom-24 z-20 sm:bottom-4">
+      <div className="rounded-[2rem] bg-card/95 p-3 shadow-lift ring-1 ring-line/60 backdrop-blur">
+        <button
+          className="btn-warm min-h-14 w-full text-lg"
+          disabled={pending}
+          onClick={() =>
+            start(async () => {
+              setError(null);
+              try { sessionStorage.setItem(CELEBRATE_KEY, "1"); } catch {}
+              const r = await approvePlan(planId);
+              if (r?.error) {
+                setError(r.error);
+                try { sessionStorage.removeItem(CELEBRATE_KEY); } catch {}
+              }
+            })
+          }
+        >
+          {pending ? <><span className="animate-wiggle inline-block" aria-hidden="true">📝</span> Writing your grocery list…</> : "Looks yummy, make my list!"}
+        </button>
+        <p className="mt-2 px-2 text-center text-sm text-muted">This locks in the week. You still do the paying and checkout.</p>
+        <ErrorNote error={error} />
+      </div>
     </div>
+  );
+}
+
+const CONFETTI_COLORS = ["#b5654a", "#d2a24c", "#5e6b47", "#f3e0d8", "#f2c94c"];
+
+/** A little confetti shower right after the week is approved. */
+export function Celebrate() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    let flag = false;
+    try {
+      flag = sessionStorage.getItem(CELEBRATE_KEY) === "1";
+      sessionStorage.removeItem(CELEBRATE_KEY);
+    } catch {}
+    if (!flag) return;
+    setShow(true);
+    const t = setTimeout(() => setShow(false), 3500);
+    return () => clearTimeout(t);
+  }, []);
+  if (!show) return null;
+  return (
+    <>
+      <div className="animate-pop rounded-3xl bg-olive p-5 text-center text-cream shadow-lift" role="status">
+        <p className="font-display text-2xl font-semibold">Your week is set! 🎉</p>
+        <p>Grocery list is ready below.</p>
+      </div>
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+        {Array.from({ length: 48 }, (_, i) => (
+          <span
+            key={i}
+            className="confetti-piece absolute top-0 block rounded-sm"
+            style={{
+              left: `${(i * 37) % 100}%`,
+              width: 8 + (i % 3) * 3,
+              height: 12 + (i % 4) * 2,
+              background: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+              animation: `confetti-fall ${2.2 + (i % 5) * 0.3}s ${(i % 8) * 0.08}s ease-in forwards`,
+            }}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+const SECTION_ICONS: [RegExp, string][] = [
+  [/produce|fruit|veg/i, "🥕"],
+  [/meat|seafood|protein|butcher/i, "🥩"],
+  [/dairy|egg|cheese|milk/i, "🧀"],
+  [/bak|bread/i, "🍞"],
+  [/frozen/i, "🧊"],
+  [/spice|season|pantry|canned|dry/i, "🫙"],
+];
+const sectionIcon = (name: string) => SECTION_ICONS.find(([re]) => re.test(name))?.[1] ?? "🛒";
+
+/** The grocery list, with ticks remembered on this phone. */
+export function GroceryChecklist({ plan }: { plan: Plan }) {
+  const list = plan.groceryList;
+  const key = `ladle-grocery-${plan.id}`;
+  const [checked, setChecked] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) setChecked(JSON.parse(saved));
+    } catch {}
+  }, [key]);
+  if (!list) return null;
+  const toggle = (id: string) =>
+    setChecked((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      try { localStorage.setItem(key, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  const total = list.sections.reduce((n, s) => n + s.items.length, 0);
+  const done = Object.values(checked).filter(Boolean).length;
+
+  return (
+    <section className="card p-5" aria-labelledby="grocery-title">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <h2 id="grocery-title" className="flex items-center gap-2 text-2xl font-semibold"><span aria-hidden="true">🛒</span> Grocery list</h2>
+        <span className="tag bg-olive-soft text-olive-dark">{done} of {total} got</span>
+      </div>
+      <div className="space-y-5">
+        {list.sections.map((s) => (
+          <div key={s.name}>
+            <h3 className="mb-2 flex items-center gap-2 font-bold text-terracotta-dark"><span aria-hidden="true">{sectionIcon(s.name)}</span>{s.name}</h3>
+            <ul className="space-y-1">
+              {s.items.map((it, i) => {
+                const id = `${s.name}-${i}-${it.item}`;
+                const on = !!checked[id];
+                return (
+                  <li key={id}>
+                    <label className={`flex cursor-pointer items-start gap-3 rounded-2xl p-2 transition-colors hover:bg-cream ${on ? "opacity-55" : ""}`}>
+                      <input type="checkbox" className="peer sr-only" checked={on} onChange={() => toggle(id)} />
+                      <span aria-hidden="true" className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold peer-focus-visible:ring-2 peer-focus-visible:ring-olive ${on ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>
+                        {on ? "✓" : ""}
+                      </span>
+                      <span>
+                        <span className={`font-semibold ${on ? "line-through" : ""}`}>{it.item}</span>
+                        {it.quantity && <span> · {it.quantity}</span>}
+                        {it.note && <span className="text-muted"> · {it.note}</span>}
+                        <br />
+                        <span className="text-sm text-muted">For {it.forRecipes.join(", ")}</span>
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -123,26 +300,30 @@ export function StartOverButton({ planId, approved }: { planId: string; approved
   const [pending, start] = useTransition();
   return (
     <button
-      className="btn-quiet"
+      className="btn-quiet text-sm"
       disabled={pending}
       onClick={() => {
         if (approved && !confirm("Unlock this week and plan it again? The current plan stays in your records.")) return;
+        if (!approved && !confirm("Start this week over with new picks?")) return;
         start(() => startOver(planId));
       }}
     >
-      {approved ? "Re-plan this week" : "Start over"}
+      {approved ? "Re-plan this week" : "Start over with new picks"}
     </button>
   );
 }
 
-export function RatePrompt({ planId, dayIndex, label }: { planId: string; dayIndex: number; label: string }) {
+export function RatePrompt({ planId, dayIndex, label, recipeName }: { planId: string; dayIndex: number; label: string; recipeName: string }) {
   const [pending, start] = useTransition();
   return (
-    <div className={`card flex flex-wrap items-center justify-between gap-2 p-4 ${pending ? "opacity-60" : ""}`}>
-      <p className="font-semibold">{label}</p>
-      <div className="flex items-center gap-1">
-        <StarPicker value={null} label={label} onPick={(n) => start(() => rateCookedDinner(planId, dayIndex, n))} />
-        <button className="btn-quiet min-h-10 px-3 text-sm" onClick={() => start(() => rateCookedDinner(planId, dayIndex, null))}>Skip</button>
+    <div className={`card flex flex-wrap items-center gap-4 p-4 ${pending ? "opacity-60" : ""}`}>
+      <FoodArt name={recipeName} className="h-16 w-16" rounded="rounded-full" />
+      <div className="min-w-0 flex-1">
+        <p className="font-bold">{label}</p>
+        <div className="flex flex-wrap items-center gap-1">
+          <StarPicker value={null} label={label} onPick={(n) => start(() => rateCookedDinner(planId, dayIndex, n))} />
+          <button className="btn-quiet mb-5 min-h-10 px-3 text-sm" onClick={() => start(() => rateCookedDinner(planId, dayIndex, null))}>Skip</button>
+        </div>
       </div>
     </div>
   );
