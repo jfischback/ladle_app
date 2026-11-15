@@ -215,7 +215,7 @@ const HINT = [
   "Tap them in order, most important first. This changes how we pick dinners.",
   "We use this for portions and baby-safe choices.",
   "Allergies, diets, or foods your family won't eat. We'll never plan a dinner that breaks these.",
-  "We plan around what's on sale at your Fry's.",
+  "We plan around what's on sale at your store: Kroger, Fry's, Ralphs, King Soopers, Smith's, Fred Meyer, Harris Teeter and other Kroger stores.",
   "We keep the week's dinners near this number.",
   "Pick the nights you want dinner planned. The others are nights off.",
   "Two quick rules for picking products.",
@@ -259,7 +259,7 @@ function StoreStep({ s, set, krogerEnabled }: { s: Settings; set: <K extends key
       if (res.error) setMsg(res.error);
       else if (res.stores) {
         setStores(res.stores);
-        if (!res.stores.length) setMsg("No Fry's stores found near that zip.");
+        if (!res.stores.length) setMsg("No Kroger-family stores found near that zip. You can still type your store below.");
       }
     });
   return (
@@ -270,7 +270,7 @@ function StoreStep({ s, set, krogerEnabled }: { s: Settings; set: <K extends key
           <input id="zip" inputMode="numeric" autoComplete="postal-code" maxLength={5} className="field" value={s.zip} onChange={(e) => set("zip", e.target.value.replace(/\D/g, ""))} />
           {krogerEnabled && (
             <button type="button" className="btn-secondary shrink-0" onClick={find} disabled={pending || s.zip.length !== 5}>
-              {pending ? "Looking…" : "Find my Fry's"}
+              {pending ? "Looking…" : "Find my store"}
             </button>
           )}
         </div>
@@ -290,8 +290,8 @@ function StoreStep({ s, set, krogerEnabled }: { s: Settings; set: <K extends key
         </fieldset>
       ) : (
         <div>
-          <label htmlFor="storeName" className="label">Your Fry&apos;s</label>
-          <input id="storeName" className="field" placeholder="e.g. Fry's on Camelback & 44th" value={s.storeName} onChange={(e) => { set("storeName", e.target.value); set("storeLocationId", null); }} />
+          <label htmlFor="storeName" className="label">Your store</label>
+          <input id="storeName" className="field" placeholder="e.g. Kroger on Main St" value={s.storeName} onChange={(e) => { set("storeName", e.target.value); set("storeLocationId", null); }} />
           {!krogerEnabled && <p className="mt-1 text-sm text-muted">Just type the one you usually go to.</p>}
         </div>
       )}

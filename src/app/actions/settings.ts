@@ -6,7 +6,7 @@ import { z } from "zod";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
 import { recipes, settings as settingsTable } from "@/db/schema";
-import { findFrysStores, krogerEnabled, type StoreLocation } from "@/lib/kroger";
+import { findStores, krogerEnabled, type StoreLocation } from "@/lib/kroger";
 import { DEFAULT_SETTINGS, type Settings } from "@/lib/settings";
 import { getSettings } from "@/lib/data";
 import { FOOD_RULES, type FoodRule } from "@/lib/diet";
@@ -90,7 +90,7 @@ export async function lookupStores(zip: string): Promise<{ stores?: StoreLocatio
   if (!krogerEnabled()) return { disabled: true };
   if (!/^\d{5}$/.test(zip.trim())) return { error: "Enter a 5-digit zip code." };
   try {
-    return { stores: await findFrysStores(zip.trim()) };
+    return { stores: await findStores(zip.trim()) };
   } catch (e) {
     return { error: (e as Error).message };
   }

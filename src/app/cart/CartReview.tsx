@@ -8,7 +8,7 @@ import type { CartLine, CartState } from "@/lib/types";
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
-export function CartReview({ planId, connected, fulfillment, cart, pantryQuestions }: { planId: string; connected: boolean; fulfillment: "pickup" | "delivery"; cart: CartState | null; pantryQuestions: number }) {
+export function CartReview({ planId, store, site, connected, fulfillment, cart, pantryQuestions }: { planId: string; store: string; site: string; connected: boolean; fulfillment: "pickup" | "delivery"; cart: CartState | null; pantryQuestions: number }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<{ tone: "ok" | "warn"; text: string; reconnect?: boolean } | null>(null);
   const run = (fn: () => Promise<{ error?: string; reconnect?: boolean; sent?: number } | void>) =>
@@ -16,7 +16,7 @@ export function CartReview({ planId, connected, fulfillment, cart, pantryQuestio
       setMsg(null);
       const r = await fn();
       if (r?.error) setMsg({ tone: "warn", text: r.error, reconnect: r.reconnect });
-      else if (r?.sent) setMsg({ tone: "ok", text: `🎉 ${r.sent} item${r.sent === 1 ? "" : "s"} added to your Fry's cart.` });
+      else if (r?.sent) setMsg({ tone: "ok", text: `🎉 ${r.sent} item${r.sent === 1 ? "" : "s"} added to your ${store} cart.` });
     });
 
   const lines = cart?.lines ?? [];
@@ -29,13 +29,13 @@ export function CartReview({ planId, connected, fulfillment, cart, pantryQuestio
     <div className="space-y-5">
       <section className="card flex flex-wrap items-center justify-between gap-3 p-5">
         <div>
-          <h2 className="text-xl font-semibold">{connected ? "✅ Fry's account connected" : "Connect your Fry's account"}</h2>
-          <p className="text-muted">{connected ? `Items go in your cart for ${fulfillment}.` : "Sign in with Fry's once, so Ladle can add things to your cart. Ladle never sees your password and never checks out."}</p>
+          <h2 className="text-xl font-semibold">{connected ? `✅ ${store} account connected` : `Connect your ${store} account`}</h2>
+          <p className="text-muted">{connected ? `Items go in your cart for ${fulfillment}.` : `Sign in with ${store} once, so Ladle can add things to your cart. Ladle never sees your password and never checks out.`}</p>
         </div>
         {connected ? (
           <button className="btn-quiet min-h-9 px-3 text-sm" disabled={pending} onClick={() => run(() => disconnectKroger())}>Disconnect</button>
         ) : (
-          <a href={connectHref} className="btn-primary">Connect Fry&apos;s</a>
+          <a href={connectHref} className="btn-primary">Connect {store}</a>
         )}
       </section>
 
@@ -47,7 +47,7 @@ export function CartReview({ planId, connected, fulfillment, cart, pantryQuestio
         <section className="card space-y-3 p-5 text-center">
           <p className="text-5xl" aria-hidden="true">🛒</p>
           <p className="text-lg">Ready when you are. We&apos;ll look up everything on this week&apos;s list.</p>
-          <button className="btn-warm" disabled={pending} onClick={() => run(() => matchCart(planId))}>{pending ? "Looking at your Fry's…" : "Find my groceries at Fry's"}</button>
+          <button className="btn-warm" disabled={pending} onClick={() => run(() => matchCart(planId))}>{pending ? `Looking at your ${store}…` : `Find my groceries at ${store}`}</button>
         </section>
       ) : (
         <>
@@ -69,13 +69,13 @@ export function CartReview({ planId, connected, fulfillment, cart, pantryQuestio
 
           {msg && (
             <p className={`card p-4 font-semibold ${msg.tone === "ok" ? "bg-olive-soft text-olive-dark" : "bg-ochre-soft"}`}>
-              {msg.text} {msg.reconnect && <a href={connectHref} className="underline">Connect Fry&apos;s</a>}
+              {msg.text} {msg.reconnect && <a href={connectHref} className="underline">Connect {store}</a>}
             </p>
           )}
           {cart.sentAt && (
             <p className="card bg-olive-soft p-4 text-olive-dark">
               Sent {cart.sentCount} item{cart.sentCount === 1 ? "" : "s"} on {new Date(cart.sentAt).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}.{" "}
-              <a href="https://www.frysfood.com/cart" target="_blank" rel="noreferrer" className="font-bold underline">Open my Fry&apos;s cart →</a>
+              <a href={`${site}/cart`} target="_blank" rel="noreferrer" className="font-bold underline">Open my {store} cart →</a>
               <span className="block text-sm">Sending again adds the items again, so only resend if you emptied the cart.</span>
             </p>
           )}
@@ -139,7 +139,7 @@ function Line({ planId, line }: { planId: string; line: CartLine }) {
             })}
           </div>
         ) : (
-          <p className="text-sm text-muted">Not found at your Fry&apos;s. Grab it in the store, or skip it.</p>
+          <p className="text-sm text-muted">Not found at this store. Grab it in the store, or skip it.</p>
         )
       )}
       {!skipped && line.options.length > 0 && line.chosen == null && <p className="text-sm text-terracotta-dark">Not sure these are right. Tap one, or skip.</p>}

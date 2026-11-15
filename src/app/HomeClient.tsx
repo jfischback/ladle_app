@@ -319,7 +319,7 @@ const SECTION_ICONS: [RegExp, string][] = [
 const sectionIcon = (name: string) => SECTION_ICONS.find(([re]) => re.test(name))?.[1] ?? "🛒";
 
 /** The grocery list, with ticks remembered on this phone. */
-export function GroceryChecklist({ plan }: { plan: Plan }) {
+export function GroceryChecklist({ plan, store }: { plan: Plan; store: string }) {
   const list = plan.groceryList;
   const key = `ladle-grocery-${plan.id}`;
   const [checked, setChecked] = useState<Record<string, boolean>>({});
@@ -348,7 +348,7 @@ export function GroceryChecklist({ plan }: { plan: Plan }) {
       </div>
       {plan.status === "approved" && (
         <Link href={`/cart?plan=${plan.id}`} className="btn-warm mb-4 w-full sm:w-auto">
-          <span aria-hidden="true">🛒</span> {plan.cart?.sentAt ? "Fry's cart sent · review" : "Send to my Fry's cart"}
+          <span aria-hidden="true">🛒</span> {plan.cart?.sentAt ? `${store} cart sent · review` : `Send to my ${store} cart`}
         </Link>
       )}
       {list.notes && list.notes.length > 0 && (

@@ -49,7 +49,7 @@ const PlanSchema = z.object({
   estimatedTotal: z.number().describe("Estimated total cart cost in USD for the week's dinners"),
 });
 
-const SYSTEM = `You are the weekly dinner planner inside Ladle, a meal-planning app for busy families who shop at Fry's (Kroger) in the Phoenix area.
+const SYSTEM = `You are the weekly dinner planner inside Ladle, a meal-planning app for busy families who shop at a Kroger-family grocery store (Kroger, Fry's, Ralphs, King Soopers, Smith's, Fred Meyer and others) in the US.
 
 You receive one JSON package: the household's settings and priorities, their approved recipe list, this week's sale items at their store (may be empty), and recent weeks' dinners. Pick the week's dinners following these rules exactly. Do not make up rules beyond these.
 
@@ -71,7 +71,7 @@ Rules:
 - If beforeHoliday is true, don't pick a dinner whose mainProtein is in holidayNoReheat (everyone eats its leftovers tomorrow).
 - Freshness: Fish and Seafood dinners go in the first three days after shopping (daysAfterShopping 0-2).
 - Bring back favorites: a recipe rated 4 or 5 with lastCookedWeeksAgo of 4 or more (or never planned) deserves a spot; mention it, e.g. "A favorite you haven't had in 5 weeks".
-- Costs: estimate what the ingredients for each dinner cost for this household's size. When an ingredient is in storePrices, use that real shelf price at their Fry's (sale prices are already applied there); otherwise estimate typical Phoenix-area Fry's prices. Pantry staples they likely have count as zero. These are labeled estimates in the app, so be reasonable rather than precise.
+- Costs: estimate what the ingredients for each dinner cost for this household's size. When an ingredient is in storePrices, use that real shelf price at their store (sale prices are already applied there); otherwise estimate typical Phoenix-area Fry's prices. Pantry staples they likely have count as zero. These are labeled estimates in the app, so be reasonable rather than precise.
 - When a reason mentions a sale, name the item and the discount, e.g. "Chicken thighs are 35% off".
 - Each pick gets a one-line reason a tired parent can read in two seconds.
 - Give two or three alternatives for each cooking night, from the same recipe list, not already used that week and following the same rules.
@@ -137,7 +137,7 @@ export async function planWeek(input: {
     budgetMode: settings.budgetMode,
     favorQuickWeeknights: settings.favorQuickWeeknights,
     saleThresholdPct: settings.saleThresholdPct,
-    store: settings.storeName || "Fry's",
+    store: settings.storeName || "their Kroger-family store",
     saleItems: input.saleItems,
     saleProteins: [...saleProteinsOf(input.saleItems)],
     holidayNoReheat: settings.holidayNoReheat,

@@ -18,7 +18,7 @@ export default async function StaplesPage() {
         <p className="eyebrow mt-3">Bought every week</p>
         <h1 className="text-4xl font-semibold">Weekly staples</h1>
         <p className="mt-1 text-lg text-muted">
-          Milk, eggs, the kids&apos; snacks: things you buy no matter what&apos;s for dinner. They&apos;re added to every grocery list, checked for sales at your Fry&apos;s, and counted in your budget.
+          Milk, eggs, the kids&apos; snacks: things you buy no matter what&apos;s for dinner. They&apos;re added to every grocery list, checked for sales at your store, and counted in your budget.
         </p>
       </div>
       <StaplesEditor initial={settings.staples} priceInfo={priceInfo} />

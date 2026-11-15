@@ -14,7 +14,7 @@ export default async function SetupPage() {
         // Behind-the-scenes status, kept off the everyday screens.
         <p className="mx-auto mt-8 max-w-xl text-center text-xs text-muted">
           {!claudeEnabled() && "Smart planning is off (no Claude API key), so plans are random picks without prices. "}
-          {!krogerEnabled() && "Fry's isn't connected yet, so there are no sale prices."}
+          {!krogerEnabled() && "Store prices aren't connected yet, so there are no sale prices."}
         </p>
       )}
     </>

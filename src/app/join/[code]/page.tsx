@@ -29,7 +29,7 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
       ) : (
         <>
           <h1 className="text-3xl font-semibold">Join {who}&apos;s household?</h1>
-          <p className="text-lg text-muted">You&apos;ll share recipes, the weekly plan, the grocery list, the pantry and the Fry&apos;s cart. Anything you set up on your own stays saved; you can leave anytime and go back to it.</p>
+          <p className="text-lg text-muted">You&apos;ll share recipes, the weekly plan, the grocery list, the pantry and the store cart. Anything you set up on your own stays saved; you can leave anytime and go back to it.</p>
           <JoinButton code={code} />
         </>
       )}

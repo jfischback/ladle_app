@@ -33,13 +33,13 @@ async function appToken(scope?: string): Promise<string> {
   return json.access_token;
 }
 
-export type StoreLocation = { locationId: string; name: string; address: string };
+export type StoreLocation = { locationId: string; name: string; address: string; chain: string };
 
-export async function findFrysStores(zip: string): Promise<StoreLocation[]> {
+/** Kroger-family grocery stores near a zip: Kroger, Fry's, Ralphs, King Soopers and the rest. */
+export async function findStores(zip: string): Promise<StoreLocation[]> {
   const token = await appToken();
   const url = new URL(`${BASE}/locations`);
   url.searchParams.set("filter.zipCode.near", zip);
-  url.searchParams.set("filter.chain", "FRYS");
   url.searchParams.set("filter.limit", "10");
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
@@ -47,11 +47,12 @@ export async function findFrysStores(zip: string): Promise<StoreLocation[]> {
   });
   if (!res.ok) throw new Error(`Store lookup failed (${res.status})`);
   const json = (await res.json()) as {
-    data: { locationId: string; name: string; address: { addressLine1: string; city: string; state: string; zipCode: string } }[];
+    data: { locationId: string; name: string; chain?: string; address: { addressLine1: string; city: string; state: string; zipCode: string } }[];
   };
   return json.data.map((l) => ({
     locationId: l.locationId,
     name: l.name,
+    chain: l.chain ?? "",
     address: `${l.address.addressLine1}, ${l.address.city}, ${l.address.state} ${l.address.zipCode}`,
   }));
 }

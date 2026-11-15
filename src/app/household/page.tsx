@@ -24,7 +24,7 @@ export default async function HouseholdPage() {
         <Link href="/setup" className="inline-flex items-center gap-1 font-bold text-olive-dark hover:underline">← Settings</Link>
         <p className="eyebrow mt-3">Plan together</p>
         <h1 className="text-4xl font-semibold">Share my household</h1>
-        <p className="mt-1 text-lg text-muted">Invite your partner (or a grandma who helps out). You&apos;ll share the same recipes, weekly plan, grocery list, pantry and Fry&apos;s cart, and each of you signs in with your own account.</p>
+        <p className="mt-1 text-lg text-muted">Invite your partner (or a grandma who helps out). You&apos;ll share the same recipes, weekly plan, grocery list, pantry and store cart, and each of you signs in with your own account.</p>
       </div>
       {!loginRequired ? (
         <p className="card p-5 text-lg">Sharing needs sign-in turned on, so each person has their own account. Until then, everyone using this site already shares one household.</p>
