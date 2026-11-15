@@ -28,7 +28,7 @@ test("duplicates across sections become one line", () => {
   const out = mergeDuplicates(list);
   const staples = out.sections.find((s) => s.name === "Weekly staples")!;
   const eggs = staples.items.find((i) => i.item === "Eggs")!;
-  assert.equal(eggs.quantity, "3 dozen + 3");
+  assert.equal(eggs.quantity, "3 1/2 dozen");
   assert.match(eggs.note!, /also for recipes/);
   assert.match(eggs.note!, /For Jake/);
   assert.deepEqual(eggs.forRecipes, ["Omelet"]);
@@ -61,4 +61,11 @@ test("grocery ticks are cleaned before saving", async () => {
   assert.deepEqual(cleanChecks({ "Produce-0-onion": true, bad: "yes", ["x".repeat(400)]: true, "": true }), { "Produce-0-onion": true });
   assert.deepEqual(cleanChecks(null), {});
   assert.deepEqual(cleanChecks([true]), {});
+});
+
+test("eggs in dozens and eggs by count add up", async () => {
+  const { addQuantities } = await import("@/lib/grocery-merge");
+  assert.equal(addQuantities(["3 dozen", "17 1/2"]), "4 1/2 dozen");
+  assert.equal(addQuantities(["1 dozen", "2"]), "1 1/2 dozen");
+  assert.equal(addQuantities(["1/2 cup", "1/3 cup"]), "3/4 cup");
 });
