@@ -1,6 +1,7 @@
 import type { FoodRule } from "./diet";
 import type { Athlete } from "./athletes";
 import type { PickyEater } from "./picky";
+import type { Equipment } from "./prep";
 import type { ExtraCategory, ExtrasRule, Staple } from "./types";
 
 export const MOTIVATIONS = {
@@ -41,6 +42,9 @@ export type Settings = {
   staples: Staple[]; // weekly staples, added to every grocery list
   busyDays: number[]; // nights that need a quick dinner (subset of cookDays)
   busyMaxMinutes: number; // "quick" on a busy night, e.g. 30
+  prepDay: number | null; // meal prep day (0 = Sunday): do the slow parts of the week's dinners ahead
+  prepMinutes: number; // how long that prep session can be
+  equipment: Equipment[]; // what the kitchen has; dinners needing something else are skipped
   maxSameProtein: number; // most nights a week with the same main protein (chicken, beef…); sale proteins may go over
   lunchDays: number[]; // weekdays someone eats lunch at home (leftovers first, then a lunch recipe)
   lunchAdults: number; // adults eating those lunches
@@ -94,6 +98,9 @@ export const DEFAULT_SETTINGS: Settings = {
   staples: [],
   busyDays: [],
   busyMaxMinutes: 30,
+  prepDay: null,
+  prepMinutes: 120,
+  equipment: ["oven", "stovetop", "microwave"],
   maxSameProtein: 2,
   lunchDays: [],
   lunchAdults: 1,

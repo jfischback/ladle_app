@@ -4,6 +4,7 @@ import type { Recipe, Plan } from "@/db/schema";
 import { MOTIVATIONS, type Settings } from "./settings";
 import { estimateCost, estimateNutrition } from "./nutrition";
 import { pickyScore, type PickyEater } from "./picky";
+import { canCook } from "./prep";
 import type { PlanDay } from "./types";
 import { askClaude, claudeEnabled } from "./claude";
 import { addDays, dayName, weekDates, weekday } from "./week";
@@ -61,6 +62,7 @@ Rules:
 - Never pick a recipe that appears in the recent weeks' dinners (the no-repeat window is already applied to that list).
 - Never pick a recipe rated 1 or 2 stars. Favor higher-rated recipes. Unrated recipes are fine.
 - Plan around what's on sale: an item counts as on sale only if it is at least saleThresholdPct percent off regular price. Lean on recipes that use sale items.
+- If mealPrepDay is set, the family preps ahead that day: favor dinners that can be made or partly made ahead (casseroles, soups, chili, slow-cooker, marinated or ground-meat dishes) and dinners that share chopped vegetables, so the prep session covers more of the week.
 - pickyEaters are not food rules: a dinner can still have something they won't eat if it can be left off their plate (sauce, onions, toppings). Avoid dinners where the thing they won't eat is the main part of the dish, and favor recipes with kidsAteIt true; avoid kidsAteIt false.
 - If everyDollarCounts is true, money is tight: cost beats everything except food rules. Pick the dinners with the lowest costPerServing (an estimate) and the ones that use this week's sales, favor cheap staples (rice, beans, eggs, pasta, potatoes, chicken thighs), and reuse ingredients across the week so nothing is wasted.
 - If athletes is not empty, someone is training hard: lean toward dinners with more proteinPerServing (an estimate), while keeping every other rule.
@@ -100,7 +102,7 @@ export async function planWeek(input: {
   );
   // Section 5: skip 1-2 star meals; no-repeat window.
   // Food rules are hard: a recipe that breaks one is never planned.
-  const allowed = input.recipes.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length);
+  const allowed = input.recipes.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment));
   const eligible = allowed.filter((r) => !(r.rating != null && r.rating <= 2) && !recentRecipeIds.has(r.id));
   const pool = eligible.length >= settings.dinnersPerWeek ? eligible : allowed.filter((r) => !(r.rating != null && r.rating <= 2));
   const cookDays = new Set(settings.cookDays);
@@ -139,6 +141,7 @@ export async function planWeek(input: {
     staplesCost: Math.round(input.staplesCost ?? 0),
     budgetMode: settings.budgetMode,
     everyDollarCounts: settings.tightBudget,
+    mealPrepDay: settings.prepDay != null ? dayName(addDays(input.weekStart, (settings.prepDay - weekday(input.weekStart) + 7) % 7)) : null,
     pickyEaters: settings.pickyEaters.map((p) => ({ name: p.name, wontEat: p.wontEat, safeFoods: p.safeFoods })),
     favorQuickWeeknights: settings.favorQuickWeeknights,
     saleThresholdPct: settings.saleThresholdPct,
@@ -271,6 +274,7 @@ type Slot = {
   beforeHoliday: boolean; // tomorrow is a federal holiday and everyone's home for lunch
   saleProteins: Set<ProteinGroup>; // proteins with a real deal this week (they may go over the weekly cap)
   athletes?: boolean; // athlete mode is on: lean toward protein-rich dinners
+  prep?: boolean; // there's a meal prep day: favor dinners that can be made ahead
   picky?: PickyEater[]; // picky eaters: avoid dinners they can't eat at all, favor ones they liked
   cheap?: number; // how much cost matters: 0 normally, more with a hard cap, most with "every dollar counts"
 };
@@ -292,7 +296,9 @@ const newCandidate = (n: NewRecipeOption): Candidate => ({
  */
 function fitsNight(c: Candidate, slot: Slot, planned: { slot: Slot; c: Candidate }[], settings: Settings, relax = 0): boolean {
   if (planned.some((p) => p.c.key === c.key)) return false;
-  if (relax < 3 && slot.busy && c.minutes != null && c.minutes > settings.busyMaxMinutes) return false;
+  // A slow-cooker dinner is hands-off, so it suits a busy night when there's a slow cooker.
+  const handsOff = settings.equipment.includes("slow cooker") && !!c.recipe?.tags.includes("slow-cooker");
+  if (relax < 3 && slot.busy && c.minutes != null && c.minutes > settings.busyMaxMinutes && !handsOff) return false;
   // The week's protein deal may go over the cap (beef on sale → more beef nights), up to two extra nights.
   const cap = settings.maxSameProtein + (slot.saleProteins.has(c.protein) ? 2 : 0);
   if (relax < 2 && c.protein !== "Vegetarian" && planned.filter((p) => p.c.protein === c.protein).length >= cap) return false;
@@ -316,6 +322,7 @@ function score(c: Candidate, slot: Slot, sales: SaleItem[]): number {
   if (slot.lunchNext && c.leftovers) s += 0.8; // tomorrow's lunch is covered
   if (slot.saleProteins.has(c.protein)) s += 0.7; // build the week around the protein deal
   if (slot.busy && c.minutes != null) s += Math.max(0, (30 - c.minutes) / 60); // a little nudge to the quickest
+  if (slot.prep && c.recipe && (c.recipe.tags.some((t) => ["make-ahead", "freezer", "slow-cooker", "one-pot", "sheet-pan", "leftovers"].includes(t)) || /casserole|soup|stew|chili|enchilada|lasagna|meatball/i.test(c.name))) s += 0.5;
   if (slot.picky?.length) s += pickyScore({ name: c.name, protein: c.recipe?.protein, ingredients: c.ingredients, tags: c.recipe?.tags, kidVotes: c.recipe?.kidVotes }, slot.picky);
   if (slot.cheap) s += slot.cheap * (3 - Math.min(8, estimateCost({ ingredients: c.ingredients, servings: c.recipe?.servings ?? null }).perServing)); // cheaper is better
   if (slot.athletes) s += Math.min(1.5, estimateNutrition({ ingredients: c.ingredients, servings: c.recipe?.servings ?? null }).protein / 30); // protein for the athlete
@@ -342,6 +349,7 @@ function slotsFor(dates: string[], settings: Settings, sales: SaleItem[]): Slot[
       return {
         index, date, saleProteins, athletes: settings.athletes.length > 0,
         picky: settings.pickyEaters,
+        prep: settings.prepDay != null,
         cheap: settings.tightBudget ? 1.6 : settings.budgetMode === "hard" ? 0.4 : 0,
         busy: settings.busyDays.includes(weekday(date)),
         daysAfterShopping: index,

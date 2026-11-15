@@ -18,6 +18,7 @@ import { CATEGORIES, extraSearchTerm, extrasTotal, neverRegex, planExtras, terms
 import { applyPantry, pantrySearchTerm, sameThing } from "@/lib/pantry";
 import { fuelGroceries, fuelTerms, portionNotes } from "@/lib/athletes";
 import { athleteWeeks } from "@/lib/athlete-week";
+import { canCook } from "@/lib/prep";
 import { budgetNotes, cookOnceEatTwice, dinnerCost, enforceCap, fillCosts } from "@/lib/budget";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
@@ -42,7 +43,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   if (recipeList.length < settings.dinnersPerWeek) {
     return { error: `You need at least ${settings.dinnersPerWeek} dinners in My Recipes to plan a week.` };
   }
-  const fitting = recipeList.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && !(r.rating != null && r.rating <= 2)).length;
+  const fitting = recipeList.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment) && !(r.rating != null && r.rating <= 2)).length;
   if (fitting < settings.dinnersPerWeek) {
     return {
       error: `Only ${fitting} of your recipes fit your food rules, and you cook ${settings.dinnersPerWeek} nights. Add a few more recipes that fit (your cooks are a good place to look), or cook fewer nights in Settings.`,
