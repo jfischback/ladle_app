@@ -10,6 +10,9 @@ const NEW: { when: string; items: Item[] }[] = [
   {
     when: "November 2026",
     items: [
+      { icon: "🏠", title: "Everything starts on Home", text: "Big tiles for this week, the grocery list, planning, recipes, food creators, athlete mode, using up what you have, and Settings. New families get a short Getting started list that ticks itself off.", href: "/" },
+      { icon: "🗓", title: "Plan my week, with a quick check-in", text: "Before planning, four quick questions about this week: which nights you cook (or are busy, or off), who's around, the budget, anything to use up, and what you're in the mood for. Your Settings stay as they are.", href: "/plan" },
+      { icon: "⚡", title: "A quicker start", text: "Setting up Ladle is now five short screens: who's eating, food rules, your store, your budget, and your recipes. The rest can wait.", where: "Sign-up" },
       { icon: "✨", title: "Recipes from your favorite food creators", text: "Follow the food bloggers and creators you love (Half Baked Harvest, RecipeTin Eats, Pinch of Yum, or paste any site). Ladle watches for their new dinners and works them into your week, especially when the ingredients are on sale, and skips anything that breaks your food rules.", href: "/recipes?tab=cooks" },
       { icon: "💪", title: "Athlete mode", text: "Pick each person's sport (CrossFit, strongman, lifting, running…), goal and phase. Ladle sizes their portions, raises the protein, adds the right snacks and shakes, and gives simple tips, while everyone else eats as usual.", href: "/athletes" },
       { icon: "🦃", title: "Thanksgiving and Christmas dinners", text: "On the holiday's card, plan the feast: how many people and which dishes. The turkey or ham is sized for the table, the groceries get their own section, and a countdown says when to thaw, what to make the day before, and when it goes in the oven.", where: "Home, on the holiday" },

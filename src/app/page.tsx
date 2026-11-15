@@ -21,7 +21,7 @@ import { prepPlan } from "@/lib/prep";
 import { PrepCard } from "@/components/PrepCard";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { AthleteWeekCard } from "@/components/AthleteWeekCard";
-import { FeatureCards } from "@/components/FeatureCards";
+import { GettingStarted, HomeHub } from "@/components/HomeHub";
 
 // Planning, approving and importing can take a while (the AI, store prices): give them a minute.
 export const maxDuration = 60;
@@ -70,6 +70,30 @@ export default async function HomePage() {
   const yours = `your ${brand.name ?? "store"}`;
   const approved = plan?.status === "approved";
   const dinners = plan?.days.filter((d) => d.recipeId).length ?? 0;
+
+  // The home hub: a tile for each place in Ladle.
+  const tonight = plan?.days.find((d) => d.date === todayStr);
+  const groceryCount = plan?.groceryList?.sections.filter((s) => !/already in your pantry/i.test(s.name)).reduce((n, s) => n + s.items.length, 0) ?? 0;
+  const nextPlanned = plans.some((p) => p.weekOf === upcoming);
+  const hubTiles = [
+    { href: plan ? "#dinners" : "/plan", icon: "🍲", title: "This week", tone: "warm" as const, sub: !plan ? "Nothing planned yet" : tonight?.feast ? "Tonight: the holiday dinner" : tonight?.recipeName ? `Tonight: ${tonight.recipeName}` : `${dinners} dinner${dinners === 1 ? "" : "s"} planned` },
+    { href: approved && plan?.groceryList ? "#grocery-print" : plan ? "#dinners" : "/plan", icon: "🛒", title: "Grocery list", tone: "plain" as const, sub: approved && plan?.groceryList ? `${groceryCount} item${groceryCount === 1 ? "" : "s"}, shared` : plan ? "Ready when you approve the week" : "Comes with your plan" },
+    { href: "/plan", icon: "🗓", title: "Plan my week", tone: "plain" as const, sub: !plan ? "A few quick questions" : approved && !nextPlanned ? `Next: week of ${shortDate(upcoming)}` : "Re-plan with a check-in" },
+    { href: "/recipes", icon: "📖", title: "Recipes", tone: "plain" as const, sub: `${recipes.length} in your box` },
+    { href: "/recipes?tab=cooks", icon: "✨", title: "Food creators", tone: "ochre" as const, sub: creators.length ? `Following ${creators.length}` : "Recipes from your favorites" },
+    { href: "/athletes", icon: "💪", title: "Athlete mode", tone: "olive" as const, sub: settings.athletes.length ? `${settings.athletes.length} set up` : "For whoever's training" },
+    { href: "/recipes?f=have", icon: "🥫", title: "Use what I have", tone: "plain" as const, sub: "Dinners from your fridge" },
+    { href: "/setup", icon: "⚙️", title: "Settings", tone: "plain" as const, sub: "Family, store, budget" },
+  ];
+  // Getting started: the extras that weren't in the short first setup.
+  const startSteps = [
+    { href: "/plan", title: "Plan your first week", why: "A few quick questions, then dinners for the week and a grocery list.", done: plans.length > 0 },
+    { href: "/setup?step=5", title: "Pick your cooking nights", why: "Which nights you cook, which are busy, and your kitchen.", done: settings.seen.includes("cooking") },
+    { href: "/recipes?tab=cooks", title: "Follow your favorite food creators", why: "Their new dinners come into your week, especially when the ingredients are on sale.", done: creators.length > 0 || settings.seen.includes("creators") },
+    { href: "/athletes", title: "Anyone training? Turn on athlete mode", why: "Portions, protein and snacks for whoever's working out.", done: settings.athletes.length > 0 || settings.seen.includes("athletes") },
+    { href: "/staples", title: "Add your weekly staples", why: "Milk, eggs, bread: the things you buy every week, on every list.", done: settings.staples.length > 0 || settings.seen.includes("staples") },
+    { href: "/pantry", title: "Tell us what's in your pantry", why: "So the list skips what you already have.", done: settings.seen.includes("pantry") },
+  ];
   const athletes = plan ? await athleteWeeks(userId, plan, settings) : [];
   // Meal prep day: one session that does the slow parts of the week's dinners.
   const prep = plan && settings.prepDay != null ? prepPlan(plan.days, new Map(recipes.map((r) => [r.id, r])), settings.prepDay, settings.prepMinutes) : null;
@@ -93,18 +117,11 @@ export default async function HomePage() {
             ? `${dinners} dinner${dinners === 1 ? "" : "s"} · ${approved ? "your list is ready" : "take a look, swap anything"} · ${settings.fulfillment === "pickup" ? "pickup" : "delivery"} from ${store}`
             : `${settings.fulfillment === "pickup" ? "Pickup" : "Delivery"} from ${store}`}
         </p>
-        {plan && approved && plan.groceryList && (
-          // A long page in the store: jump straight to what's needed.
-          <nav aria-label="On this page" className="no-print mt-3 flex flex-wrap gap-1.5">
-            <a href="#dinners" className="rounded-full border-2 border-line bg-card px-3 py-1 text-sm font-bold hover:border-olive/50">🗓 Dinners</a>
-            <a href="#grocery-print" className="rounded-full border-2 border-line bg-card px-3 py-1 text-sm font-bold hover:border-olive/50">🛒 Grocery list</a>
-            {prep && <a href="#prep" className="rounded-full border-2 border-line bg-card px-3 py-1 text-sm font-bold hover:border-olive/50">🥡 Prep day</a>}
-            <Link href={`/menu/${plan.id}`} className="rounded-full border-2 border-line bg-card px-3 py-1 text-sm font-bold hover:border-olive/50">🖨️ Fridge menu</Link>
-          </nav>
-        )}
       </header>
 
-      {plan && <FeatureCards creators={creators} athletes={settings.athletes.length} only="unused" compact />}
+      {/* Everything starts here: one tile for each place in Ladle. */}
+      <HomeHub tiles={hubTiles} />
+      {!settings.seen.includes("getting-started-hidden") && <GettingStarted steps={startSteps} />}
 
       {prepTomorrow.map(({ d, r }) => (
         <div key={d.date} className="flex items-start gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft">
@@ -129,7 +146,7 @@ export default async function HomePage() {
       )}
 
       {!plan ? (
-        <EmptyState creators={creators} athletes={settings.athletes.length} weekOf={upcoming} recipeCount={recipes.length} needed={daysLeft >= 2 ? Math.min(settings.dinnersPerWeek, Math.max(1, weekDates(inProgress).filter((d) => d >= todayStr && settings.cookDays.includes(weekday(d))).length)) : settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} yours={yours} startNow={daysLeft >= 2 ? `the rest of this week (${dayName(todayStr).slice(0, 3)} to ${dayName(addDays(upcoming, -1)).slice(0, 3)})` : null} />
+        <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={daysLeft >= 2 ? Math.min(settings.dinnersPerWeek, Math.max(1, weekDates(inProgress).filter((d) => d >= todayStr && settings.cookDays.includes(weekday(d))).length)) : settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} yours={yours} startNow={daysLeft >= 2 ? `the rest of this week (${dayName(todayStr).slice(0, 3)} to ${dayName(addDays(upcoming, -1)).slice(0, 3)})` : null} />
       ) : (
         <>
           <ul id="dinners" className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)] gap-3">
@@ -282,7 +299,7 @@ function SaleBanner({ plan, saleThreshold, yours }: { plan: Plan | null; saleThr
   );
 }
 
-function EmptyState({ weekOf, recipeCount, needed, checksSales, yours, startNow, creators, athletes }: { creators: string[]; athletes: number; weekOf: string; recipeCount: number; needed: number; checksSales: boolean; yours: string; startNow?: string | null }) {
+function EmptyState({ weekOf, recipeCount, needed, checksSales, yours, startNow }: { weekOf: string; recipeCount: number; needed: number; checksSales: boolean; yours: string; startNow?: string | null }) {
   if (recipeCount < needed) {
     return (
       <div className="card flex flex-col items-center gap-4 p-8 text-center">
@@ -315,9 +332,7 @@ function EmptyState({ weekOf, recipeCount, needed, checksSales, yours, startNow,
         // Starting mid-week: no need to wait for the next shopping day.
         <Link href="/plan?now=1" className="btn-quiet">Or start now: plan {startNow}</Link>
       )}
-      <div className="w-full pt-4 text-left">
-        <FeatureCards creators={creators} athletes={athletes} title="Make Ladle yours" />
-      </div>
+
     </div>
   );
 }

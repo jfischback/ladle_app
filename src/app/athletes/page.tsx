@@ -1,3 +1,4 @@
+import { markSeen } from "@/lib/seen";
 import Link from "next/link";
 import { requireUserId } from "@/auth";
 import { getSettings } from "@/lib/data";
@@ -5,6 +6,8 @@ import { AthletesEditor } from "./AthletesEditor";
 
 export default async function AthletesPage() {
   const userId = await requireUserId();
+  // Getting started: they've looked at this.
+  await markSeen(userId, "athletes");
   const { data: settings } = await getSettings(userId);
   return (
     <div className="space-y-5">

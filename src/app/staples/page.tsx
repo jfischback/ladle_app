@@ -1,3 +1,4 @@
+import { markSeen } from "@/lib/seen";
 import Link from "next/link";
 import { requireUserId } from "@/auth";
 import { activePlans, getSettings } from "@/lib/data";
@@ -6,6 +7,8 @@ import { StaplesEditor } from "./StaplesEditor";
 
 export default async function StaplesPage() {
   const userId = await requireUserId();
+  // Getting started: they've looked at this.
+  await markSeen(userId, "staples");
   const [{ data: settings }, plans] = await Promise.all([getSettings(userId), activePlans(userId)]);
   // Prices and sales from the most recent planned week, keyed by staple.
   const lines = plans.find((p) => p.staples?.length)?.staples ?? [];
