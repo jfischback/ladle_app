@@ -9,7 +9,21 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   name: text("name"),
   passwordHash: text("password_hash"), // null for Google-only accounts
+  // The household whose recipes, plans and settings this account uses (null = its own).
+  // A partner who joins by invite, or the first account taking over the shared guest data, points here.
+  householdId: uuid("household_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** "Join my household" links. */
+export const householdInvites = pgTable("household_invites", {
+  code: text("code").primaryKey(),
+  householdId: uuid("household_id").notNull(),
+  createdBy: uuid("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedBy: uuid("used_by"),
+  usedAt: timestamp("used_at", { withTimezone: true }),
 });
 
 export const settings = pgTable("settings", {

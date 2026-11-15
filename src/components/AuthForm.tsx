@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { login, signup, googleLogin, type FormState } from "@/app/actions/auth";
 import { Wordmark } from "./Logo";
 
-export function AuthForm({ mode, googleEnabled }: { mode: "login" | "signup"; googleEnabled: boolean }) {
+export function AuthForm({ mode, googleEnabled, next }: { mode: "login" | "signup"; googleEnabled: boolean; next?: string }) {
   const [state, action, pending] = useActionState<FormState, FormData>(mode === "login" ? login : signup, undefined);
   const isLogin = mode === "login";
   return (
@@ -16,7 +16,9 @@ export function AuthForm({ mode, googleEnabled }: { mode: "login" | "signup"; go
       </div>
       <div className="card p-6">
         <h1 className="mb-4 text-2xl font-bold">{isLogin ? "Sign in" : "Create your account"}</h1>
+        {next?.startsWith("/join/") && <p className="mb-4 rounded-2xl bg-olive-soft p-3 font-semibold text-olive-dark">🏡 {isLogin ? "Sign in" : "Create an account"} to join the household you were invited to.</p>}
         <form action={action} className="space-y-4">
+          {next && <input type="hidden" name="next" value={next} />}
           {!isLogin && (
             <div>
               <label htmlFor="name" className="label">Your first name</label>
@@ -62,9 +64,9 @@ export function AuthForm({ mode, googleEnabled }: { mode: "login" | "signup"; go
       </div>
       <p className="mt-4 text-center">
         {isLogin ? (
-          <>New here? <Link href="/signup" className="font-semibold text-olive-dark underline">Create an account</Link></>
+          <>New here? <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="font-semibold text-olive-dark underline">Create an account</Link></>
         ) : (
-          <>Already have an account? <Link href="/login" className="font-semibold text-olive-dark underline">Sign in</Link></>
+          <>Already have an account? <Link href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="font-semibold text-olive-dark underline">Sign in</Link></>
         )}
       </p>
     </div>

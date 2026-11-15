@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { AuthError } from "next-auth";
 import { z } from "zod";
-import { signIn, signOut } from "@/auth";
+import { claimSharedDataIfFirst, signIn, signOut } from "@/auth";
 import { getDb } from "@/db";
 import { users } from "@/db/schema";
 
@@ -23,16 +23,22 @@ export async function signup(_: FormState, form: FormData): Promise<FormState> {
   const { email, password, name } = parsed.data;
   const [existing] = await db.select().from(users).where(eq(users.email, email));
   if (existing) return { error: "An account with that email already exists. Sign in instead." };
-  await db.insert(users).values({ email, name: name || null, passwordHash: await bcrypt.hash(password, 10) });
-  await signIn("credentials", { email, password, redirectTo: "/setup" });
+  const [row] = await db.insert(users).values({ email, name: name || null, passwordHash: await bcrypt.hash(password, 10) }).returning();
+  // The first account keeps everything set up while login was off; everyone else starts fresh.
+  const claimed = await claimSharedDataIfFirst(row.id);
+  // Joining someone's household from an invite link: go back to it after signing up.
+  const next = String(form.get("next") ?? "");
+  const redirectTo = /^\/join\/[A-Za-z0-9_-]+$/.test(next) ? next : claimed ? "/" : "/setup";
+  await signIn("credentials", { email, password, redirectTo });
 }
 
 export async function login(_: FormState, form: FormData): Promise<FormState> {
+  const next = String(form.get("next") ?? "");
   try {
     await signIn("credentials", {
       email: form.get("email"),
       password: form.get("password"),
-      redirectTo: "/",
+      redirectTo: /^\/join\/[A-Za-z0-9_-]+$/.test(next) ? next : "/",
     });
   } catch (err) {
     if (err instanceof AuthError) return { error: "That email and password don't match." };
