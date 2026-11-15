@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { and, eq, gt, isNull, ne, or } from "drizzle-orm";
-import { GUEST_EMAIL, currentAccount, loginRequired } from "@/auth";
+import { GUEST_EMAIL, actingFor, currentAccount, homeHouseholdId, loginRequired } from "@/auth";
+import { headers } from "next/headers";
+import { CareClient } from "./CareClient";
 import { getDb } from "@/db";
-import { householdInvites, users } from "@/db/schema";
+import { careLinks, householdInvites, users } from "@/db/schema";
 import { HouseholdClient } from "./HouseholdClient";
 
 export default async function HouseholdPage() {
@@ -18,6 +20,13 @@ export default async function HouseholdPage() {
     ? await db.select({ code: householdInvites.code, expiresAt: householdInvites.expiresAt, kind: householdInvites.kind }).from(householdInvites)
         .where(and(eq(householdInvites.householdId, me.householdId), isNull(householdInvites.usedAt), gt(householdInvites.expiresAt, new Date())))
     : [];
+  // Caregiver mode: the people this family plans for.
+  const home = await homeHouseholdId();
+  const acting = await actingFor(home);
+  const people = await db.select({ id: careLinks.id, label: careLinks.label }).from(careLinks).where(and(eq(careLinks.caregiverHouseholdId, home), isNull(careLinks.archivedAt)));
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const origin = `${h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;
   return (
     <div className="space-y-5">
       <div>
@@ -37,6 +46,7 @@ export default async function HouseholdPage() {
           isOwner={me.isOwner}
         />
       )}
+      <CareClient people={people.map((p) => ({ ...p, current: acting?.linkId === p.id }))} acting={!!acting} loginOn={loginRequired} origin={origin} />
     </div>
   );
 }

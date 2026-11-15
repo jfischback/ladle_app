@@ -1,7 +1,8 @@
+import { ActingBanner } from "@/components/ActingBanner";
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { Fraunces, Nunito } from "next/font/google";
-import { auth, loginRequired } from "@/auth";
+import { actingFor, auth, loginRequired } from "@/auth";
 import { logout } from "./actions/auth";
 import { Wordmark } from "@/components/Logo";
 import { NavLinks, TabBar, GearIcon } from "@/components/Nav";
@@ -29,6 +30,8 @@ export const viewport: Viewport = { themeColor: "#F8F4EC", width: "device-width"
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   if (databaseMissing) return <SetupNeeded />;
   const signedIn = loginRequired ? !!(await auth())?.user : true;
+  // Caregiver mode: planning for someone else's household right now?
+  const acting = signedIn ? await actingFor().catch(() => null) : null;
   return (
     <html lang="en" className={`${nunito.variable} ${fraunces.variable}`}>
       <body className="min-h-screen">
@@ -53,6 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </div>
           </header>
         )}
+        {signedIn && acting && <ActingBanner label={acting.label} />}
         <main className={`mx-auto max-w-3xl px-4 pt-5 sm:pt-8 ${signedIn ? "pb-32 sm:pb-12" : "pb-12"}`}>{children}</main>
         {signedIn && <TabBar />}
         <ServiceWorker clear={!signedIn} />

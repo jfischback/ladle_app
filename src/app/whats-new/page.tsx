@@ -10,6 +10,10 @@ const NEW: { when: string; items: Item[] }[] = [
   {
     when: "November 2026",
     items: [
+      { icon: "🤝", title: "Plan for a parent", text: "Caring for Mom or Grandpa? Give them their own plan, grocery list, pantry and Fry's cart, run from your phone. A bar at the top always says whose week you're planning, and one tap takes you back to your family.", href: "/household#care" },
+      { icon: "🎯", title: "Modes: Normal, Cost Cutting, Workout", text: "Pick one goal for the week from the banner on Home. Cost Cutting picks the cheapest dinners and products and shows what it saved compared with your family's typical week. Workout leans toward high-protein dinners. Your food rules apply in every mode.", where: "Home, the banner at the top" },
+      { icon: "📷", title: "Snap my fridge", text: "Take a photo of the fridge or pantry and Ladle lists the foods it can see, then shows dinners that use them.", href: "/recipes?f=have" },
+      { icon: "🤖", title: "A grocery list for your AI shopper", text: "Copy the list with shopping instructions, your food rules and budget, ready to paste into the AI assistant you already use to shop any store.", where: "Home, Grocery list" },
       { icon: "🏠", title: "Everything starts on Home", text: "Big tiles for this week, the grocery list, planning, recipes, food creators, athlete mode, using up what you have, and Settings. New families get a short Getting started list that ticks itself off.", href: "/" },
       { icon: "🗓", title: "Plan my week, with a quick check-in", text: "Before planning, four quick questions about this week: which nights you cook (or are busy, or off), who's around, the budget, anything to use up, and what you're in the mood for. Your Settings stay as they are.", href: "/plan" },
       { icon: "⚡", title: "A quicker start", text: "Setting up Ladle is now five short screens: who's eating, food rules, your store, your budget, and your recipes. The rest can wait.", where: "Sign-up" },
