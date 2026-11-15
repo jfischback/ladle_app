@@ -15,6 +15,7 @@ export default async function PantryPage() {
         <p className="mt-1 text-lg text-muted">
           Things that last: spices, sauces, rice, tortillas, butter, the freezer. Your grocery list skips what you have, and ⭐ items are only bought when they&apos;re on sale and you&apos;re running low.
         </p>
+        <Link href="/recipes?f=have" className="btn-secondary mt-3">🥫 What can I make with what I have?</Link>
       </div>
       <PantryEditor items={items.map((i) => ({ id: i.id, name: i.name, place: i.place, status: i.status, onSaleOnly: i.onSaleOnly }))} />
     </div>
