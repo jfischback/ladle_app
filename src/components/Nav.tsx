@@ -82,8 +82,8 @@ export function TabBar() {
       className="fixed inset-x-3 bottom-3 z-40 rounded-[2rem] bg-card/95 shadow-lift ring-1 ring-line/60 backdrop-blur sm:hidden"
       style={{ marginBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="grid grid-cols-3">
-        {LINKS.map((l) => {
+      <ul className="grid grid-cols-4">
+        {[...LINKS, { href: "/setup", label: "Settings", icon: GearIcon }].map((l) => {
           const active = isActive(l.href);
           return (
             <li key={l.href}>

@@ -42,8 +42,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     <button className="btn-quiet min-h-9 px-3 text-sm">Sign out</button>
                   </form>
                 )}
-                <Link href="/setup" aria-label="Settings" title="Settings" className="flex h-11 w-11 items-center justify-center rounded-full text-olive-dark hover:bg-olive-soft">
+                <Link href="/setup" title="Settings" className="hidden h-11 items-center justify-center gap-1.5 rounded-full px-3 font-bold text-olive-dark hover:bg-olive-soft sm:flex">
                   <GearIcon />
+                  <span>Settings</span>
                 </Link>
               </div>
             </div>
