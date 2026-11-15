@@ -20,7 +20,7 @@ import { fuelGroceries, fuelTerms, portionNotes } from "@/lib/athletes";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { canCook } from "@/lib/prep";
 import { leftoverKind } from "@/lib/leftovers";
-import { recipeMultipliers } from "@/lib/scaling";
+import { dinnerServings, recipeMultipliers } from "@/lib/scaling";
 import { mergeDuplicates } from "@/lib/grocery-merge";
 import { healthGroceryNotes, healthNeeds } from "@/lib/health";
 import { budgetNotes, cookOnceEatTwice, dinnerCost, enforceCap, fillCosts, rebalanceBatches } from "@/lib/budget";
@@ -29,6 +29,7 @@ import type { Settings } from "@/lib/settings";
 import { addDays, currentWeekStart, dayName, upcomingWeekStart, weekDates, weekday } from "@/lib/week";
 import { TOO_MANY, under } from "@/lib/rate-limit";
 import { moveDinner } from "@/lib/move-dinner";
+import { updatePlanLocked } from "@/lib/plan-list";
 import { readReceipt, usableTotal } from "@/lib/receipt";
 import { withFeastSections } from "@/lib/feast-grocery";
 import { today } from "@/lib/week";
@@ -385,6 +386,36 @@ export async function moveDinnerTo(planId: string, from: number, to: number): Pr
   const db = await getDb();
   await db.update(plans).set({ days: moved.days }).where(and(eq(plans.id, planId), eq(plans.userId, userId)));
   revalidatePath("/");
+}
+
+/**
+ * "Who's eating tonight?": a night with company, or someone away. Before the list is made, that night's dinner
+ * (and its cost) is sized for them; null goes back to the usual household.
+ */
+export async function setEating(planId: string, dayIndex: number, eating: { adults: number; kids: number } | null): Promise<ActionResult> {
+  const userId = await requireUserId();
+  if (!/^[0-9a-f-]{36}$/i.test(planId) || !Number.isInteger(dayIndex)) return { error: "Day not found." };
+  const { data: settings } = await getSettings(userId);
+  const want = eating == null ? null : { adults: Math.round(Number(eating.adults)), kids: Math.round(Number(eating.kids)) };
+  if (want && (!Number.isFinite(want.adults) || !Number.isFinite(want.kids) || want.adults < 0 || want.kids < 0 || want.adults + want.kids < 1 || want.adults > 30 || want.kids > 30)) {
+    return { error: "Choose between 1 and 60 people." };
+  }
+  const usual = want && want.adults === settings.adults && want.kids === settings.kids;
+  const r = await updatePlanLocked(userId, planId, (plan) => {
+    if (plan.status !== "draft") return { error: "The grocery list is already made. Change who's eating before you approve the week." };
+    const day = plan.days[dayIndex];
+    if (!day) return { error: "Day not found." };
+    const before = dinnerServings(day.eating ?? settings);
+    const after = dinnerServings(usual || !want ? settings : want);
+    const days = plan.days.map((d, j) => {
+      if (j !== dayIndex) return d;
+      const cost = d.estimatedCost != null && d.recipeId && !d.leftoverOf ? Math.round(((d.estimatedCost * after) / before) * 100) / 100 : d.estimatedCost;
+      return { ...d, eating: usual || !want ? null : want, estimatedCost: cost };
+    });
+    return { days, estimatedTotal: sumCosts(days) };
+  });
+  if (!r.error) revalidatePath("/");
+  return r;
 }
 
 /** Archive this week's plan so the user can plan again. Nothing is deleted. */

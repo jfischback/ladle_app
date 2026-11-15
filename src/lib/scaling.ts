@@ -22,7 +22,8 @@ export function recipeMultipliers(
   const add = (id: string | null | undefined, n: number) => { if (id) need.set(id, (need.get(id) ?? 0) + n); };
   const family = dinnerServings(settings);
   for (const d of days) {
-    if (d.recipeId) add(d.recipeId, family + athleteExtraPortions); // a leftovers night is a second dinner from the same pot
+    // A leftovers night is a second dinner from the same pot; "who's eating tonight" changes how many plates.
+    if (d.recipeId) add(d.recipeId, (d.eating ? dinnerServings(d.eating) : family) + athleteExtraPortions);
     if (d.breakfast?.recipeId) add(d.breakfast.recipeId, d.breakfast.servings);
     if (d.lunch?.recipeId) add(d.lunch.recipeId, d.lunch.servings); // leftover lunches come from that dinner's pot too
   }
