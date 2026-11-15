@@ -253,3 +253,46 @@ export function estimateNutrition(recipe: { ingredients: Ingredient[]; servings:
 
 /** Is the estimate good enough to show? */
 export const trustworthy = (n: NutritionEstimate) => n.coverage >= 0.6 && n.kcal >= 120;
+
+// ---------- sodium ----------
+
+// Salty seasonings, in mg of sodium per teaspoon (they're "skipped" for calories but matter a lot here).
+const SALTY_TSP: [RegExp, number][] = [
+  [/seasoned salt|seasoning salt|garlic salt|onion salt|celery salt/, 1400],
+  [/taco seasoning|fajita seasoning|cajun|creole|lemon pepper|steak seasoning|ranch (seasoning|mix)|kinder/, 450],
+  [/kosher salt/, 1240], [/sea salt|\bsalt\b/, 2300], [/bouillon|better than bouillon/, 1700], [/soy sauce|tamari/, 300],
+  [/fish sauce/, 480],
+  [/worcestershire/, 55], [/hot sauce|sriracha/, 100], [/mustard/, 55], [/teriyaki|hoisin/, 200], [/baking soda/, 1250], [/baking powder/, 480],
+];
+// Salty foods, in mg of sodium per 100 g.
+const SALTY_FOOD: [RegExp, number][] = [
+  [/broth|stock/, 340], [/bacon/, 1700], [/\bham\b|prosciutto|deli|lunch meat|salami|pepperoni/, 1100], [/sausage|chorizo|kielbasa|hot dog/, 850],
+  [/jerky/, 1800], [/parmesan|pecorino/, 1500], [/feta|cotija/, 1100], [/cheese|cheddar|mozzarella|queso/, 650], [/canned|can\b|beans/, 280],
+  [/marinara|pasta sauce|pizza sauce|tomato sauce|enchilada sauce/, 420], [/bbq sauce|barbecue sauce|ketchup/, 900], [/salsa/, 700],
+  [/tortilla|bread|buns?\b|rolls?\b|bagel|english muffin|crackers|chips/, 500], [/pickles?|olives|capers/, 1200], [/butter\b(?! ?beans)/, 640],
+  [/frozen (fries|tater tots|hash browns)|tater tots|fries/, 400], [/cottage cheese/, 360], [/tuna/, 300], [/shrimp/, 500],
+];
+const TSP_PER: Record<string, number> = { tsp: 1, teaspoon: 1, teaspoons: 1, tbsp: 3, tablespoon: 3, tablespoons: 3, cup: 48, cups: 48, pinch: 1 / 16, pinches: 1 / 16, dash: 1 / 8 };
+
+/** Sodium per serving (mg), a rough estimate. Salt "to taste" counts as a light 1/4 teaspoon per serving. */
+export function estimateSodium(recipe: { ingredients: Ingredient[]; servings: number | null }): number {
+  let mg = 0;
+  for (const ing of recipe.ingredients) {
+    const t = plain(ing.item).replace(/\([^)]*\)/g, " ");
+    if (/low[- ]sodium|no salt|unsalted|salt-free/.test(t)) continue;
+    const salty = SALTY_TSP.find(([re]) => re.test(t));
+    if (salty) {
+      const a = parseAmount(ing.amount);
+      const unit = plain(ing.unit).split(/\s+/)[0] || (/pinch/.test(t) ? "pinch" : "");
+      const tsp = a != null && TSP_PER[unit] != null ? a * TSP_PER[unit] : a == null && /\bsalt\b/.test(t) ? 0.25 * (recipe.servings || 4) : /cube/.test(unit + t) ? 2 * (a ?? 1) : 0.5;
+      // Salt for the pasta or potato water mostly goes down the drain.
+      mg += tsp * salty[1] * (/water|for boiling/.test(t) ? 0.1 : 1);
+      continue;
+    }
+    const food = SALTY_FOOD.find(([re]) => re.test(t));
+    if (!food) continue;
+    const amt = ingredientAmount(ing);
+    if (amt && amt !== "skip") mg += (amt.grams / 100) * food[1];
+  }
+  return Math.round(mg / (recipe.servings && recipe.servings > 0 ? recipe.servings : 4));
+}

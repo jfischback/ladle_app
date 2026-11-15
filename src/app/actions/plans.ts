@@ -19,6 +19,7 @@ import { applyPantry, pantrySearchTerm, sameThing } from "@/lib/pantry";
 import { fuelGroceries, fuelTerms, portionNotes } from "@/lib/athletes";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { canCook } from "@/lib/prep";
+import { healthGroceryNotes, healthNeeds } from "@/lib/health";
 import { budgetNotes, cookOnceEatTwice, dinnerCost, enforceCap, fillCosts } from "@/lib/budget";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
@@ -238,7 +239,7 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   try {
     const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
     const athletes = await athleteWeeks(userId, plan, settings);
-    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days, settings), ...portionNotes(athletes)]);
+    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days, settings), ...healthGroceryNotes(healthNeeds(settings.athletes)), ...portionNotes(athletes)]);
     // Weekly staples get their own section, with this week's sale prices where we found them.
     const snap = new Map((plan.staples ?? []).map((l) => [stapleTerm(l.item), l]));
     const items = settings.staples.filter((x) => x.active).map((x) => {

@@ -14,6 +14,7 @@ import { krogerEnabled } from "@/lib/kroger";
 import { ruleProblems } from "@/lib/diet";
 import { storeBrand } from "@/lib/stores";
 import { pickyTips } from "@/lib/picky";
+import { healthNeeds, healthTips } from "@/lib/health";
 import { prepPlan } from "@/lib/prep";
 import { PrepCard } from "@/components/PrepCard";
 import { athleteWeeks } from "@/lib/athlete-week";
@@ -60,9 +61,11 @@ export default async function HomePage() {
   // Meal prep day: one session that does the slow parts of the week's dinners.
   const prep = plan && settings.prepDay != null ? prepPlan(plan.days, new Map(recipes.map((r) => [r.id, r])), settings.prepDay, settings.prepMinutes) : null;
   // Picky eaters: a tip for each dinner with something they won't eat.
+  const needs = healthNeeds(settings.athletes);
   const pickyFor = (d: { recipeId: string | null; date: string; leftoverOf?: string | null }) => {
     const r = d.recipeId && !d.leftoverOf ? recipes.find((x) => x.id === d.recipeId) : null;
-    return r && settings.pickyEaters.length ? pickyTips(r, settings.pickyEaters, Number(d.date.slice(8))).map((t) => t.tip) : [];
+    if (!r) return [];
+    return [...healthTips(r, needs).map((t) => `🩺 ${t}`), ...(settings.pickyEaters.length ? pickyTips(r, settings.pickyEaters, Number(d.date.slice(8))).map((t) => `🧒 ${t.tip}`) : [])];
   };
 
   return (
@@ -115,7 +118,7 @@ export default async function HomePage() {
                   isToday={d.date === todayStr}
                   locked={approved}
                   recipes={recipeInfo}
-                  picky={[...(prep?.finish[d.date] ? [`Prepped ${dayName(prep.date)}: about ${prep.finish[d.date]} minutes to finish tonight.`] : []), ...pickyFor(d)]}
+                  picky={[...(prep?.finish[d.date] ? [`🥡 Prepped ${dayName(prep.date)}: about ${prep.finish[d.date]} minutes to finish tonight.`] : []), ...pickyFor(d)]}
                   plates={settings.tightBudget ? Math.max(1, settings.adults + settings.kids * 0.7) : undefined}
                 />
               </li>

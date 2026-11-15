@@ -171,7 +171,11 @@ function PickyLines({ tips, className = "" }: { tips: string[]; className?: stri
   if (!tips.length) return null;
   return (
     <ul className={`space-y-1 ${className}`}>
-      {tips.map((t) => <li key={t} className="flex gap-2 rounded-2xl bg-blush/70 px-3 py-1.5 text-sm"><span aria-hidden="true">🧒</span><span>{t}</span></li>)}
+      {tips.map((t) => {
+        // Each tip starts with its icon (🥡 prep, 🩺 health, 🧒 picky eater).
+        const [icon, ...rest] = t.split(" ");
+        return <li key={t} className="flex gap-2 rounded-2xl bg-blush/70 px-3 py-1.5 text-sm"><span aria-hidden="true">{icon}</span><span>{rest.join(" ")}</span></li>;
+      })}
     </ul>
   );
 }
