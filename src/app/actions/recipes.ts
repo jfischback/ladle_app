@@ -2,47 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
 import { recipes } from "@/db/schema";
 import { draftFromPhoto, draftFromUrl, type RecipeDraft } from "@/lib/recipe-import";
+import { copyStarters } from "@/lib/starters";
 
-/** Copy shared starter recipes into the user's private list (skips ones already added). */
-export async function copyStarters(userId: string, starterIds: string[]) {
-  if (!starterIds.length) return;
-  const db = await getDb();
-  const already = await db
-    .select({ starterId: recipes.starterId })
-    .from(recipes)
-    .where(and(eq(recipes.ownerId, userId), inArray(recipes.starterId, starterIds)));
-  const have = new Set(already.map((a) => a.starterId));
-  const starters = await db
-    .select()
-    .from(recipes)
-    .where(and(inArray(recipes.id, starterIds), isNull(recipes.ownerId)));
-  const rows = starters
-    .filter((s) => !have.has(s.id))
-    .map((s) => ({
-      meal: s.meal,
-      name: s.name,
-      protein: s.protein,
-      servings: s.servings,
-      totalMinutes: s.totalMinutes,
-      ingredients: s.ingredients,
-      steps: s.steps,
-      tags: s.tags,
-      ease: s.ease,
-      prepAhead: s.prepAhead,
-      creditName: s.creditName,
-      creditUrl: s.creditUrl,
-      sourceDocUrl: s.sourceDocUrl,
-      ownerId: userId,
-      starterId: s.id,
-    }));
-  if (rows.length) await db.insert(recipes).values(rows);
-}
 
 export async function addStarter(starterId: string) {
   const userId = await requireUserId();

@@ -64,7 +64,8 @@ function productMatches(term: string, p: KrogerProduct): boolean {
   const optional = new Set(["boneless", "skinless", "bone", "in", "skin", "on", "lean", "extra", "regular", "thin", "streaky", "precooked"]);
   return term.split(/[\s-]+/).every((w) => {
     const s = stem(w);
-    return s.length < 3 || optional.has(w) || nameSet.has(s) || name.some((n) => n.startsWith(s));
+    // Short words must match a whole word ("egg" isn't "Eggo", "ham" isn't "Hamburger"); longer ones may be a prefix.
+    return s.length < 3 || optional.has(w) || nameSet.has(s) || (s.length >= 5 && name.some((n) => n.startsWith(s)));
   });
 }
 
