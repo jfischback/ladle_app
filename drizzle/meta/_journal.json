@@ -57,6 +57,13 @@
       "when": 1794746404621,
       "tag": "0007_safe_skreet",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794749522559,
+      "tag": "0008_closed_yellow_claw",
+      "breakpoints": true
     }
   ]
 }

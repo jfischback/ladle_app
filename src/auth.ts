@@ -2,11 +2,11 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
 import { getDb } from "./db";
-import { users } from "./db/schema";
+import { settings as settingsTable, users } from "./db/schema";
 
 export const googleEnabled = !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
 
@@ -41,6 +41,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const row =
           found ?? (await db.insert(users).values({ email, name: user.name ?? null }).returning())[0];
         token.uid = row.id;
+        if (!found) await claimSharedDataIfFirst(row.id);
       } else if (user?.id) {
         token.uid = user.id;
       }
@@ -51,7 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
 export const loginRequired = process.env.REQUIRE_LOGIN === "true";
 
-const GUEST_EMAIL = "guest@ladle.local";
+export const GUEST_EMAIL = "guest@ladle.local";
 
 /** While login is off, everyone shares this one built-in account. */
 async function guestUserId(): Promise<string> {
@@ -68,11 +69,45 @@ async function guestUserId(): Promise<string> {
   return again.id;
 }
 
+/**
+ * When login is first turned on, the first real account takes over everything made while it was off
+ * (recipes, settings, plans, pantry, the Fry's connection), by joining the shared household.
+ */
+export async function claimSharedDataIfFirst(newUserId: string): Promise<boolean> {
+  const db = await getDb();
+  const [guest] = await db.select().from(users).where(eq(users.email, GUEST_EMAIL));
+  if (!guest) return false;
+  const [guestSettings] = await db.select({ userId: settingsTable.userId }).from(settingsTable).where(eq(settingsTable.userId, guest.id));
+  if (!guestSettings) return false;
+  // Already claimed by someone? (anyone pointing at the guest household, other than this new account)
+  const [claimed] = await db.select({ id: users.id }).from(users).where(and(eq(users.householdId, guest.id), ne(users.id, newUserId)));
+  if (claimed) return false;
+  // Only the very first real account gets it.
+  const others = await db.select({ id: users.id }).from(users).where(and(ne(users.id, newUserId), ne(users.id, guest.id)));
+  if (others.length) return false;
+  await db.update(users).set({ householdId: guest.id }).where(eq(users.id, newUserId));
+  return true;
+}
+
+/** The signed-in account (not the household): for account pages like "Household". */
+export async function currentAccount(): Promise<{ accountId: string; householdId: string; email: string; name: string | null }> {
+  const db = await getDb();
+  const id = loginRequired ? (await auth())?.user?.id : await guestUserId();
+  if (!id) throw new Error("Not signed in");
+  const [u] = await db.select().from(users).where(eq(users.id, id));
+  if (!u) throw new Error("Not signed in");
+  return { accountId: u.id, householdId: u.householdId ?? u.id, email: u.email, name: u.name };
+}
+
 /** Returns the current user's id or throws (use in server actions / pages behind middleware). */
 export async function requireUserId(): Promise<string> {
   if (!loginRequired) return guestUserId();
   const session = await auth();
   const id = session?.user?.id;
   if (!id) throw new Error("Not signed in");
-  return id;
+  // A household member uses the household's data.
+  const db = await getDb();
+  const [u] = await db.select({ householdId: users.householdId }).from(users).where(eq(users.id, id));
+  if (!u) throw new Error("Not signed in");
+  return u.householdId ?? id;
 }
