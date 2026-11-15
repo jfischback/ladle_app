@@ -3,11 +3,13 @@
 import { redirect } from "next/navigation";
 import { and, isNull } from "drizzle-orm";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
 import { recipes, settings as settingsTable } from "@/db/schema";
 import { findStores, krogerEnabled, type StoreLocation } from "@/lib/kroger";
 import { DEFAULT_SETTINGS, type Settings } from "@/lib/settings";
+import { SEEN_KEYS, markSeen, type SeenKey } from "@/lib/seen";
 import { getSettings } from "@/lib/data";
 import { FOOD_RULES, type FoodRule } from "@/lib/diet";
 import { StaplesSchema } from "@/lib/staples-schema";
@@ -72,6 +74,14 @@ const SettingsSchema = z.object({
   saleThresholdPct: int(1, 90),
   preferPremiumOnSale: z.boolean(),
 });
+
+/** Getting started: mark a section as looked at, or hide the list. */
+export async function markSectionSeen(key: string): Promise<void> {
+  const userId = await requireUserId();
+  if (!(SEEN_KEYS as readonly string[]).includes(key)) return;
+  await markSeen(userId, key as SeenKey);
+  revalidatePath("/");
+}
 
 export async function saveSettings(input: Partial<Settings>, startWith?: "ours" | "own") {
   const userId = await requireUserId();

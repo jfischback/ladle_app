@@ -72,6 +72,7 @@ export type Settings = {
   limitFreezer: boolean; // don't stock up on frozen
   fruitRule: boolean; // buy a lot of in-season fruit, only when on sale
   prepReminders: boolean; // remind the day before (marinating, thawing)
+  seen: string[]; // Getting started: the sections they've looked at (cooking, pantry, staples, athletes…)
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -132,6 +133,7 @@ export const DEFAULT_SETTINGS: Settings = {
   limitFreezer: true,
   fruitRule: true,
   prepReminders: true,
+  seen: [],
 };
 
 // Nights to fill first when an older setting only said "N dinners a week": Mon–Thu, then Sun, Fri, Sat.

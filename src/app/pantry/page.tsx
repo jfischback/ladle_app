@@ -1,3 +1,4 @@
+import { markSeen } from "@/lib/seen";
 import Link from "next/link";
 import { requireUserId } from "@/auth";
 import { myPantry } from "@/lib/data";
@@ -5,6 +6,8 @@ import { PantryEditor } from "./PantryEditor";
 
 export default async function PantryPage() {
   const userId = await requireUserId();
+  // Getting started: they've looked at this.
+  await markSeen(userId, "pantry");
   const items = await myPantry(userId);
   return (
     <div className="space-y-5">

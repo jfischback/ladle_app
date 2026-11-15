@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { lookupStores, saveSettings } from "@/app/actions/settings";
+import { useEffect, useState, useTransition } from "react";
+import { lookupStores, markSectionSeen, saveSettings } from "@/app/actions/settings";
 import { addRecipePack } from "@/app/actions/recipes";
 import { SAFE_FOOD_IDEAS, WONT_EAT_IDEAS, type PickyEater } from "@/lib/picky";
 import { EQUIPMENT } from "@/lib/prep";
@@ -11,13 +11,24 @@ import { FOOD_RULES, FOOD_RULE_GROUPS, parseDislikes, type FoodRule } from "@/li
 import type { StoreLocation } from "@/lib/kroger";
 
 
-export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Settings; isEdit: boolean; krogerEnabled: boolean }) {
+// First time through, only the essentials (who's eating, food rules, store, budget), then the recipe box.
+// Everything else starts on sensible defaults and is on the "Getting started" list on Home.
+const FIRST_TIME = [1, 2, 3, 4, 7];
+const ALL_SECTIONS = [0, 1, 2, 3, 4, 5, 6];
+
+export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null }: { initial: Settings; isEdit: boolean; krogerEnabled: boolean; startStep?: number | null }) {
   const [s, setS] = useState<Settings>(initial);
-  const [step, setStep] = useState(0);
+  const order = isEdit ? ALL_SECTIONS : FIRST_TIME;
+  const [step, setStep] = useState(startStep != null && order.includes(startStep) ? startStep : order[0]);
+  const pos = order.indexOf(step);
+  const go = (d: number) => setStep(order[Math.min(order.length - 1, Math.max(0, pos + d))]);
+  // Getting started: opening the cooking section in Settings ticks it off.
+  useEffect(() => {
+    if (isEdit && step === 5) markSectionSeen("cooking").catch(() => {});
+  }, [isEdit, step]);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const set = <K extends keyof Settings>(k: K, v: Settings[K]) => setS((prev) => ({ ...prev, [k]: v }));
-  const last = isEdit ? 6 : 7;
 
   function finish(startWith?: "ours" | "own") {
     setError(null);
@@ -51,17 +62,17 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
     <div className="mx-auto max-w-xl">
       <div className="mb-6">
         <p className="eyebrow">
-          {isEdit ? "Settings" : step === 0 ? "Welcome to Ladle!" : "Getting to know you"} · {Math.min(step + 1, last + 1)} of {last + 1}
+          {isEdit ? "Settings" : pos === 0 ? "Welcome to Ladle!" : "Getting to know you"} · {pos + 1} of {order.length}
         </p>
         <div className="mt-2 flex gap-1.5" aria-hidden="true">
-          {Array.from({ length: last + 1 }, (_, i) => (
-            <div key={i} className={`h-2.5 flex-1 rounded-full transition-colors ${i <= step ? "bg-terracotta" : "bg-oat"}`} />
+          {order.map((_, i) => (
+            <div key={i} className={`h-2.5 flex-1 rounded-full transition-colors ${i <= pos ? "bg-terracotta" : "bg-oat"}`} />
           ))}
         </div>
         {isEdit && (
           // In Settings, jump straight to any question.
           <nav aria-label="Settings sections" className="mt-3 flex flex-wrap gap-1.5">
-            {QUESTION.slice(0, last + 1).map((q, i) => (
+            {QUESTION.slice(0, ALL_SECTIONS.length).map((q, i) => (
               <button key={q} type="button" aria-current={i === step ? "step" : undefined} onClick={() => setStep(i)} className={`rounded-full px-3 py-1 text-sm font-bold transition-colors ${i === step ? "bg-terracotta text-cream" : "bg-oat text-olive-dark hover:bg-olive-soft"}`}>
                 <span aria-hidden="true">{ICON[i]}</span> {SHORT[i]}
               </button>
@@ -171,6 +182,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
               {pending ? "Setting things up…" : "Start with our recipes"}
             </button>
             <p className="text-center text-sm text-muted">Adds our family-tested recipes that fit your family&apos;s food rules, kitchen and size. You can add recipe packs or remove any later.</p>
+            <p className="text-center text-sm text-muted">The rest (cooking nights, food creators, athlete mode and more) is on your Getting started list on Home, whenever you&apos;re ready.</p>
             <button className="btn-secondary" disabled={pending} onClick={() => finish("own")}>
               Add my own
             </button>
@@ -184,8 +196,8 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
         // Settings: save from any section, not just the last one.
         <div className="sticky bottom-24 z-20 mt-4 sm:bottom-4">
           <div className="flex items-center justify-between gap-2 rounded-[2rem] bg-card/95 p-2 shadow-lift ring-1 ring-line/60 backdrop-blur">
-            <button className="btn-quiet whitespace-nowrap px-3 text-sm" onClick={() => setStep((x) => Math.max(0, x - 1))} disabled={step === 0 || pending}>← Back</button>
-            {step < last && <button className="btn-secondary whitespace-nowrap px-3 text-sm" onClick={() => setStep((x) => x + 1)} disabled={pending}>Next →</button>}
+            <button className="btn-quiet whitespace-nowrap px-3 text-sm" onClick={() => go(-1)} disabled={pos === 0 || pending}>← Back</button>
+            {pos < order.length - 1 && <button className="btn-secondary whitespace-nowrap px-3 text-sm" onClick={() => go(1)} disabled={pending}>Next →</button>}
             <button className="btn-warm flex-1 whitespace-nowrap px-4 sm:flex-none" onClick={() => finish()} disabled={pending || !allValid}>
               {pending ? "Saving…" : "✓ Save"}
             </button>
@@ -194,11 +206,11 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
         </div>
       ) : (
         <div className="mt-4 flex justify-between">
-          <button className={`btn-quiet ${step === 0 ? "invisible" : ""}`} onClick={() => setStep((x) => x - 1)} disabled={step === 0 || pending}>
+          <button className={`btn-quiet ${pos === 0 ? "invisible" : ""}`} onClick={() => go(-1)} disabled={pos === 0 || pending}>
             ← Back
           </button>
-          {step < last && (
-            <button className="btn-warm px-7" onClick={() => setStep((x) => x + 1)} disabled={!canNext}>
+          {pos < order.length - 1 && (
+            <button className="btn-warm px-7" onClick={() => go(1)} disabled={!canNext}>
               Next →
             </button>
           )}

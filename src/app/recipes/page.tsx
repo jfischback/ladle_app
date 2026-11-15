@@ -1,3 +1,4 @@
+import { markSeen } from "@/lib/seen";
 import Link from "next/link";
 import { requireUserId } from "@/auth";
 import { browseStarters, getSettings, myPantry, myRecipes } from "@/lib/data";
@@ -39,6 +40,8 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
   const haveMode = sp.f === "have";
   const typedHave = (sp.have ?? "").slice(0, 300);
   const tab = t === "browse" ? "browse" : t === "cooks" ? "cooks" : t === "lunch" ? "lunch" : t === "breakfast" ? "breakfast" : "mine";
+  // Getting started: they've looked at this.
+  if (tab === "cooks") await markSeen(userId, "creators");
   const [mine, lunches, breakfasts, browse, { data: settings }] = await Promise.all([myRecipes(userId), myRecipes(userId, "lunch"), myRecipes(userId, "breakfast"), browseStarters(userId), getSettings(userId)]);
   // How many starters are in each recipe pack.
   const db = await getDb();
