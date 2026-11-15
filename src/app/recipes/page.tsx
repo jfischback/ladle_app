@@ -8,12 +8,21 @@ import type { Recipe } from "@/db/schema";
 import { formatMinutes } from "@/lib/format";
 import { FoodArt } from "@/components/FoodArt";
 import { CooksTab } from "./CooksTab";
+import { RecipePacks } from "./RecipePacks";
+import { getDb } from "@/db";
+import { recipes as recipesTable } from "@/db/schema";
+import { and, isNull } from "drizzle-orm";
 
 export default async function RecipesPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const userId = await requireUserId();
   const t = (await searchParams).tab;
   const tab = t === "browse" ? "browse" : t === "cooks" ? "cooks" : t === "lunch" ? "lunch" : t === "breakfast" ? "breakfast" : "mine";
   const [mine, lunches, breakfasts, browse, { data: settings }] = await Promise.all([myRecipes(userId), myRecipes(userId, "lunch"), myRecipes(userId, "breakfast"), browseStarters(userId), getSettings(userId)]);
+  // How many starters are in each recipe pack.
+  const db = await getDb();
+  const starterTags = await db.select({ tags: recipesTable.tags }).from(recipesTable).where(and(isNull(recipesTable.ownerId), isNull(recipesTable.archivedAt)));
+  const packCounts: Record<string, number> = {};
+  for (const r of starterTags) for (const t of r.tags) packCounts[t] = (packCounts[t] ?? 0) + 1;
   const problemsOf = (r: Recipe) => ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway);
   const list = tab === "mine" ? mine : tab === "lunch" ? lunches : tab === "breakfast" ? breakfasts : browse;
 
@@ -32,10 +41,12 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
         <Tab href="/recipes?tab=breakfast" active={tab === "breakfast"}>Breakfasts ({breakfasts.length})</Tab>
         <Tab href="/recipes?tab=lunch" active={tab === "lunch"}>Lunches ({lunches.length})</Tab>
         <Tab href="/recipes?tab=cooks" active={tab === "cooks"}>✨ Your cooks</Tab>
-        {(browse.length > 0 || tab === "browse") && <Tab href="/recipes?tab=browse" active={tab === "browse"}>Starters ({browse.length})</Tab>}
+        <Tab href="/recipes?tab=browse" active={tab === "browse"}>Starters &amp; packs</Tab>
       </div>
 
       {tab === "cooks" && <CooksTab userId={userId} />}
+
+      {tab === "browse" && <RecipePacks counts={packCounts} />}
 
       {tab === "browse" && browse.length > 0 && (
         <form action={addAllStarters} className="mb-4">

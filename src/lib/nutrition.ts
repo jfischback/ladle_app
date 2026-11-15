@@ -74,6 +74,8 @@ const FOODS: Food[] = [
   F(/bagel/, [250, 10, 49, 1.5], { each: 100, usd: 0.6 }),
   F(/english muffin/, [227, 8.9, 44, 1.7], { each: 57, usd: 0.6 }),
   F(/waffle|pancake mix|biscuit/, [290, 7, 45, 9], { each: 38, cup: 120, usd: 0.7 }),
+  F(/pizza dough|bread dough/, [260, 8, 50, 3], { pack: 454, usd: 0.45 }),
+  F(/naan|flatbreads?|pita/, [280, 9, 50, 5], { each: 90, pack: 360, usd: 0.7 }),
   F(/buns?\b|rolls?\b|hoagie|sub roll|brioche|croissant|bread|toast|texas toast|panko|breadcrumbs/, [265, 9, 49, 3.2], { slice: 30, each: 60, cup: 110, pack: 570, usd: 0.45 }),
   // Sweet and sauces
   F(/brown sugar/, [380, 0, 98, 0], { cup: 220, usd: 0.35 }),

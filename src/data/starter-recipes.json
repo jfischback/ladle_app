@@ -155,7 +155,10 @@
    "Bake 25 to 30 minutes, until the top is golden and set and a toothpick in the center comes out clean.",
    "Cool in the pan 10 to 15 minutes, then cut into pieces and serve warm with the chili."
   ],
-  "tags": [],
+  "tags": [
+   "vegetarian",
+   "budget"
+  ],
   "ease": null,
   "prepAhead": null,
   "creditName": "Inspired by chili: The Best Vegetarian Chili by Monique Volz, Ambitious Kitchen; cornbread: Cornbread by Jennifer Segal, Once Upon a Chef",
@@ -254,7 +257,8 @@
    "Serve with diced onion, chopped cilantro and tortillas, with plenty of the cooking broth (the consomé) spooned into bowls for sipping or dipping tacos."
   ],
   "tags": [
-   "slow-cooker"
+   "slow-cooker",
+   "low-carb"
   ],
   "ease": null,
   "prepAhead": null,
@@ -1176,7 +1180,9 @@
    "Serve right away for the best texture, ideally within about 2 hours."
   ],
   "tags": [
-   "quick"
+   "quick",
+   "low-sodium",
+   "microwave"
   ],
   "ease": null,
   "prepAhead": null,
@@ -1326,7 +1332,8 @@
    "Serve: Spoon the creamed corn onto plates, set the chicken on top, and finish with ranch, cilantro and a squeeze of lime. Serve right away."
   ],
   "tags": [
-   "quick"
+   "quick",
+   "low-carb"
   ],
   "ease": null,
   "prepAhead": null,
@@ -2069,7 +2076,9 @@
    "Cover and bring to a boil, then reduce the heat and simmer 45 minutes.",
    "Ladle into bowls and add toppings as you like."
   ],
-  "tags": [],
+  "tags": [
+   "low-carb"
+  ],
   "ease": null,
   "prepAhead": null,
   "creditName": "Inspired by Pozole Blanco (Chicken Pozole) by Maggie Unzueta, Mama Maggie's Kitchen",
@@ -2170,7 +2179,8 @@
    "Cover and refrigerate for at least 1 hour so the flavors come together before serving."
   ],
   "tags": [
-   "slow-cooker"
+   "slow-cooker",
+   "budget"
   ],
   "ease": null,
   "prepAhead": null,
@@ -2379,7 +2389,8 @@
    "Take off the lid and towel, fluff the rice with a fork and serve hot under the chicken and veggies."
   ],
   "tags": [
-   "slow-cooker"
+   "slow-cooker",
+   "budget"
   ],
   "ease": null,
   "prepAhead": null,
@@ -3049,7 +3060,9 @@
    "Take the pan off the heat and let it sit, still covered, for 5 minutes. Then uncover and fluff the rice gently with a fork.",
    "Fold in the cilantro and serve right away with the beans and warm tortillas."
   ],
-  "tags": [],
+  "tags": [
+   "budget"
+  ],
   "ease": null,
   "prepAhead": null,
   "creditName": "Inspired by Mexican Charro Beans (Frijoles Charros) by Lauren Allen, Tastes Better From Scratch; side: Mexican Rice Recipe (Restaurant-Style Mexican Rice) by Emily Walker, Favorite Family Recipes",
@@ -3135,7 +3148,8 @@
    "Fluff the rice with a fork and serve."
   ],
   "tags": [
-   "slow-cooker"
+   "slow-cooker",
+   "budget"
   ],
   "ease": null,
   "prepAhead": null,
@@ -3495,7 +3509,8 @@
    "Serve hot with the potatoes, topped with fresh basil, parsley or Parmesan if you like."
   ],
   "tags": [
-   "sheet-pan"
+   "sheet-pan",
+   "budget"
   ],
   "ease": null,
   "prepAhead": null,
@@ -4261,7 +4276,8 @@
   ],
   "tags": [
    "quick",
-   "one-pot"
+   "one-pot",
+   "budget"
   ],
   "ease": 4,
   "prepAhead": null,
@@ -4302,7 +4318,9 @@
   "tags": [
    "grill",
    "quick",
-   "kid-friendly"
+   "kid-friendly",
+   "low-carb",
+   "budget"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -4349,7 +4367,9 @@
   "tags": [
    "grill",
    "quick",
-   "kid-friendly"
+   "kid-friendly",
+   "low-carb",
+   "budget"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -4389,7 +4409,10 @@
   ],
   "tags": [
    "grill",
-   "quick"
+   "quick",
+   "low-carb",
+   "low-sodium",
+   "budget"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -4428,7 +4451,9 @@
    "For a baby: slice the plain piece very thin or chop it finely, or give a long thin strip to suck and chew. Let it cool before serving."
   ],
   "tags": [
-   "grill"
+   "grill",
+   "low-carb",
+   "low-sodium"
   ],
   "ease": 4,
   "prepAhead": null,
@@ -4468,7 +4493,8 @@
   "tags": [
    "store-bought",
    "quick",
-   "no-leftovers"
+   "no-leftovers",
+   "microwave"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -5190,7 +5216,8 @@
   "tags": [
    "budget",
    "quick",
-   "kid-friendly"
+   "kid-friendly",
+   "vegetarian"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -5250,7 +5277,8 @@
   "tags": [
    "budget",
    "sheet-pan",
-   "leftovers"
+   "leftovers",
+   "low-sodium"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -5371,7 +5399,9 @@
   "tags": [
    "budget",
    "quick",
-   "one-pot"
+   "one-pot",
+   "vegetarian",
+   "low-sodium"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -5425,7 +5455,9 @@
   "tags": [
    "budget",
    "quick",
-   "kid-friendly"
+   "kid-friendly",
+   "vegetarian",
+   "low-sodium"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -5495,7 +5527,9 @@
   "tags": [
    "budget",
    "kid-friendly",
-   "leftovers"
+   "leftovers",
+   "vegetarian",
+   "vegan"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -5555,7 +5589,8 @@
   "tags": [
    "budget",
    "one-pot",
-   "leftovers"
+   "leftovers",
+   "low-sodium"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -5614,7 +5649,8 @@
   "tags": [
    "budget",
    "one-pot",
-   "leftovers"
+   "leftovers",
+   "low-sodium"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -5668,7 +5704,9 @@
   ],
   "tags": [
    "budget",
-   "one-pot"
+   "one-pot",
+   "vegetarian",
+   "low-sodium"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -5721,7 +5759,9 @@
   ],
   "tags": [
    "budget",
-   "kid-friendly"
+   "kid-friendly",
+   "vegetarian",
+   "low-sodium"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -5881,7 +5921,8 @@
    "budget",
    "quick",
    "kid-friendly",
-   "freezer"
+   "freezer",
+   "vegetarian"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -5940,7 +5981,8 @@
   ],
   "tags": [
    "budget",
-   "leftovers"
+   "leftovers",
+   "low-sodium"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -6006,7 +6048,9 @@
    "budget",
    "one-pot",
    "leftovers",
-   "freezer"
+   "freezer",
+   "vegetarian",
+   "vegan"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -6164,7 +6208,9 @@
   "tags": [
    "budget",
    "quick",
-   "kid-friendly"
+   "kid-friendly",
+   "vegetarian",
+   "low-sodium"
   ],
   "ease": 5,
   "prepAhead": null,
@@ -6222,6 +6268,2882 @@
    "leftovers"
   ],
   "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Black Bean Tacos with Corn Salsa",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "(15 oz) cans",
+    "item": "black beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "cumin"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "chili powder"
+   },
+   {
+    "amount": "12",
+    "unit": "",
+    "item": "corn tortillas"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "frozen corn, thawed"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "tomato, diced"
+   },
+   {
+    "amount": "1/4",
+    "unit": "",
+    "item": "red onion, finely chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "lime, juiced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "avocado, sliced"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   }
+  ],
+  "steps": [
+   "Warm the beans in a skillet with the oil, cumin, chili powder and a splash of water; mash a few.",
+   "Stir the corn, tomato, onion and lime juice together for the salsa.",
+   "Warm the tortillas and fill with beans, salsa and avocado."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "quick",
+   "kid-friendly",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Chickpea Coconut Curry",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "3",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "curry powder"
+   },
+   {
+    "amount": "2",
+    "unit": "(15 oz) cans",
+    "item": "chickpeas, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "(13.5 oz) can",
+    "item": "coconut milk"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "diced tomatoes"
+   },
+   {
+    "amount": "3",
+    "unit": "cups",
+    "item": "fresh spinach"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "long-grain white rice"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   }
+  ],
+  "steps": [
+   "Cook the rice.",
+   "Soften the onion and garlic in the oil, then stir in the curry powder for 1 minute.",
+   "Add the chickpeas, coconut milk and tomatoes and simmer 15 minutes.",
+   "Stir in the spinach until wilted. Serve over rice."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "one-pot",
+   "leftovers",
+   "freezer",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Spinach and Ricotta Stuffed Shells",
+  "protein": "Dairy",
+  "servings": 6,
+  "totalMinutes": 60,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "(12 oz) box",
+    "item": "jumbo pasta shells"
+   },
+   {
+    "amount": "15",
+    "unit": "oz",
+    "item": "ricotta cheese"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "shredded mozzarella"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "grated parmesan"
+   },
+   {
+    "amount": "10",
+    "unit": "oz",
+    "item": "frozen chopped spinach, thawed and squeezed dry"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "egg"
+   },
+   {
+    "amount": "1",
+    "unit": "(24 oz) jar",
+    "item": "marinara sauce"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 375°F. Cook the shells until just tender and drain.",
+   "Mix the ricotta, spinach, egg, half the mozzarella and the parmesan.",
+   "Spread half the sauce in a baking dish, fill the shells, and lay them in.",
+   "Top with the rest of the sauce and mozzarella. Cover and bake 25 minutes, then uncover for 5."
+  ],
+  "tags": [
+   "vegetarian",
+   "freezer",
+   "make-ahead",
+   "kid-friendly",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Sweet Potato and Black Bean Enchiladas",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 50,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "sweet potatoes, peeled and diced"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "black beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "cumin"
+   },
+   {
+    "amount": "8",
+    "unit": "",
+    "item": "flour tortillas"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "red enchilada sauce"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "shredded Monterey Jack cheese"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 400°F. Roast the sweet potatoes with the oil and cumin for 20 minutes.",
+   "Mix the sweet potatoes with the beans and half the cheese.",
+   "Fill and roll the tortillas, set them in a dish over a little sauce, and pour the rest on top.",
+   "Sprinkle with cheese and bake 20 minutes."
+  ],
+  "tags": [
+   "vegetarian",
+   "freezer",
+   "make-ahead",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Peanut Noodles with Crunchy Vegetables",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "12",
+    "unit": "oz",
+    "item": "spaghetti"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "peanut butter"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "soy sauce"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "rice vinegar"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "brown sugar"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "hot water"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "shredded carrots"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "cucumber, cut in matchsticks"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "red bell pepper, sliced thin"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "green onions, sliced"
+   }
+  ],
+  "steps": [
+   "Cook the spaghetti and rinse under cold water.",
+   "Whisk the peanut butter, soy sauce, vinegar, brown sugar and hot water until smooth.",
+   "Toss the noodles with the sauce and vegetables. Good warm or cold."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "quick",
+   "kid-friendly",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Hearty Minestrone Soup",
+  "protein": "Beans (no meat)",
+  "servings": 6,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "carrots, diced"
+   },
+   {
+    "amount": "2",
+    "unit": "stalks",
+    "item": "celery, diced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "zucchini, diced"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "(28 oz) can",
+    "item": "diced tomatoes"
+   },
+   {
+    "amount": "6",
+    "unit": "cups",
+    "item": "vegetable broth"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "cannellini beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "small pasta (ditalini or elbows)"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "Italian seasoning"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "fresh spinach"
+   }
+  ],
+  "steps": [
+   "Soften the onion, carrots and celery in the oil, 8 minutes.",
+   "Add the zucchini, tomatoes, broth, beans and seasoning. Simmer 15 minutes.",
+   "Add the pasta and cook until tender, about 10 minutes. Stir in the spinach."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "one-pot",
+   "leftovers",
+   "freezer",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Margherita Flatbread Pizzas",
+  "protein": "Dairy",
+  "servings": 4,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "naan or flatbreads"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "pizza sauce"
+   },
+   {
+    "amount": "8",
+    "unit": "oz",
+    "item": "fresh mozzarella, sliced"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "tomatoes, sliced thin"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "fresh basil leaves"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 425°F.",
+   "Spread sauce on the flatbreads and top with mozzarella and tomato.",
+   "Bake 10 to 12 minutes. Drizzle with oil and add the basil."
+  ],
+  "tags": [
+   "vegetarian",
+   "kid-friendly",
+   "quick",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Shakshuka with Crusty Bread",
+  "protein": "Eggs",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "red bell pepper, chopped"
+   },
+   {
+    "amount": "3",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "paprika"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "cumin"
+   },
+   {
+    "amount": "1",
+    "unit": "(28 oz) can",
+    "item": "crushed tomatoes"
+   },
+   {
+    "amount": "8",
+    "unit": "",
+    "item": "eggs"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "crumbled feta"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "loaf crusty bread"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   }
+  ],
+  "steps": [
+   "Soften the onion and pepper in the oil in a large skillet, 6 minutes. Add the garlic and spices for 1 minute.",
+   "Add the tomatoes and simmer 10 minutes.",
+   "Make 8 wells, crack in the eggs, cover and cook until the whites set, 6 to 8 minutes.",
+   "Sprinkle with feta and serve with bread for dipping."
+  ],
+  "tags": [
+   "vegetarian",
+   "one-pot"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Tofu and Broccoli Stir-Fry",
+  "protein": "Tofu",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "14",
+    "unit": "oz",
+    "item": "extra-firm tofu, pressed and cubed"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "cornstarch"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   },
+   {
+    "amount": "4",
+    "unit": "cups",
+    "item": "broccoli florets"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "soy sauce"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "maple syrup"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "rice vinegar"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "long-grain white rice"
+   }
+  ],
+  "steps": [
+   "Cook the rice.",
+   "Toss the tofu with the cornstarch and fry in 2 Tbsp oil until golden on all sides; set aside.",
+   "Stir-fry the broccoli in the rest of the oil with a splash of water until bright green.",
+   "Add the garlic, soy sauce, syrup and vinegar, then the tofu. Toss and serve over rice."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Mushroom and Bean Burrito Bowls",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "8",
+    "unit": "oz",
+    "item": "mushrooms, sliced"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "pinto beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "taco seasoning"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "long-grain white rice"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "salsa"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "frozen corn"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "lime"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   }
+  ],
+  "steps": [
+   "Cook the rice and stir in the lime juice.",
+   "Brown the mushrooms in the oil, then add the beans, corn, taco seasoning and a splash of water.",
+   "Build bowls with rice, the bean mix and salsa."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "quick",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Lemon Garlic Butter Salmon with Asparagus",
+  "protein": "Seafood",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "salmon fillets (about 6 oz each)"
+   },
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "asparagus, trimmed"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "butter, melted"
+   },
+   {
+    "amount": "3",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "lemon"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 400°F. Toss the asparagus with the oil on a sheet pan and push to the sides.",
+   "Set the salmon in the middle.",
+   "Mix the butter, garlic and lemon juice and spoon over the salmon.",
+   "Roast 12 to 15 minutes."
+  ],
+  "tags": [
+   "low-carb",
+   "sheet-pan",
+   "quick",
+   "low-sodium"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Cheeseburger Lettuce Wraps",
+  "protein": "Beef",
+  "servings": 4,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "ground beef"
+   },
+   {
+    "amount": "4",
+    "unit": "slices",
+    "item": "cheddar cheese"
+   },
+   {
+    "amount": "1",
+    "unit": "head",
+    "item": "butter lettuce or iceberg"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "tomato, sliced"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "pickles, sliced"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "mustard"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "mayo"
+   }
+  ],
+  "steps": [
+   "Shape the beef into 4 patties and cook in a skillet, 4 minutes a side. Top with cheese to melt.",
+   "Wrap each burger in big lettuce leaves with tomato, pickles, mustard and mayo."
+  ],
+  "tags": [
+   "low-carb",
+   "quick",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Chicken Fajita Bowls over Cauliflower Rice",
+  "protein": "Chicken",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "boneless skinless chicken thighs, sliced"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "bell peppers, sliced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, sliced"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "fajita seasoning"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "24",
+    "unit": "oz",
+    "item": "frozen cauliflower rice"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "sour cream"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "avocado, sliced"
+   }
+  ],
+  "steps": [
+   "Toss the chicken, peppers and onion with the oil and seasoning.",
+   "Cook in a hot skillet in two batches until charred and the chicken is done.",
+   "Heat the cauliflower rice. Serve the fajita mix over it with sour cream and avocado."
+  ],
+  "tags": [
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Creamy Garlic Chicken with Spinach",
+  "protein": "Chicken",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "boneless skinless chicken breasts, pounded thin"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "3",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "heavy cream"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "grated parmesan"
+   },
+   {
+    "amount": "4",
+    "unit": "cups",
+    "item": "fresh spinach"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "Italian seasoning"
+   }
+  ],
+  "steps": [
+   "Brown the chicken in the oil, 5 minutes a side; set aside.",
+   "Add the garlic, then the cream, parmesan and seasoning. Simmer 3 minutes.",
+   "Stir in the spinach until wilted and return the chicken to the sauce."
+  ],
+  "tags": [
+   "low-carb",
+   "quick",
+   "low-sodium"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Sausage, Peppers and Cauliflower Sheet Pan",
+  "protein": "Sausage",
+  "servings": 4,
+  "totalMinutes": 35,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "smoked sausage, sliced"
+   },
+   {
+    "amount": "1",
+    "unit": "head",
+    "item": "cauliflower, cut in florets"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "bell peppers, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "red onion, cut in wedges"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "smoked paprika"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 425°F.",
+   "Toss everything on a sheet pan.",
+   "Roast 25 minutes, stirring once, until the cauliflower browns."
+  ],
+  "tags": [
+   "low-carb",
+   "sheet-pan",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Egg Roll in a Bowl",
+  "protein": "Pork",
+  "servings": 4,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "ground pork"
+   },
+   {
+    "amount": "1",
+    "unit": "(14 oz) bag",
+    "item": "coleslaw mix"
+   },
+   {
+    "amount": "3",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "fresh ginger, grated"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "soy sauce"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "sesame oil"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "green onions, sliced"
+   }
+  ],
+  "steps": [
+   "Brown the pork in a big skillet; drain.",
+   "Add the garlic and ginger for 1 minute, then the coleslaw mix and soy sauce.",
+   "Cook until the cabbage is just tender, 5 minutes. Finish with sesame oil and green onions."
+  ],
+  "tags": [
+   "low-carb",
+   "quick",
+   "one-pot",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Taco-Stuffed Bell Peppers",
+  "protein": "Beef",
+  "servings": 4,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "bell peppers, halved and seeded"
+   },
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "ground beef"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "taco seasoning"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "salsa"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "sour cream"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 375°F. Brown the beef, drain, and stir in the taco seasoning and salsa.",
+   "Fill the pepper halves, set in a baking dish, and bake 25 minutes.",
+   "Top with cheese, bake 5 more minutes, and serve with sour cream."
+  ],
+  "tags": [
+   "low-carb",
+   "kid-friendly"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Garlic Butter Pork Chops with Green Beans",
+  "protein": "Pork",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "boneless pork chops (about 6 oz each)"
+   },
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "green beans, trimmed"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "butter"
+   },
+   {
+    "amount": "3",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "dried thyme"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   }
+  ],
+  "steps": [
+   "Season the chops with thyme and sear in the oil, 4 to 5 minutes a side; set aside.",
+   "Add the green beans and a splash of water, cover 4 minutes.",
+   "Add the butter and garlic, toss, and return the chops to warm through."
+  ],
+  "tags": [
+   "low-carb",
+   "quick",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Steak and Broccoli Stir-Fry",
+  "protein": "Beef",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "flank or sirloin steak, sliced thin"
+   },
+   {
+    "amount": "5",
+    "unit": "cups",
+    "item": "broccoli florets"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "soy sauce"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "oyster sauce"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "fresh ginger, grated"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   }
+  ],
+  "steps": [
+   "Sear the steak in half the oil over high heat in batches; set aside.",
+   "Stir-fry the broccoli in the rest of the oil with a splash of water until crisp-tender.",
+   "Add the garlic, ginger, soy and oyster sauce, then the steak. Toss and serve."
+  ],
+  "tags": [
+   "low-carb",
+   "quick",
+   "low-sodium"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Microwave Mug Omelet",
+  "protein": "Eggs",
+  "servings": 1,
+  "totalMinutes": 5,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "eggs"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "milk"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "diced ham or bell pepper"
+   },
+   {
+    "amount": "1",
+    "unit": "slice",
+    "item": "bread, toasted or plain"
+   }
+  ],
+  "steps": [
+   "Spray a big mug with cooking spray.",
+   "Whisk in the eggs and milk, then stir in the cheese and ham or pepper.",
+   "Microwave 45 seconds, stir, then 30 to 45 seconds more until set. Eat with the bread."
+  ],
+  "tags": [
+   "microwave",
+   "quick",
+   "for-one",
+   "low-carb",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Microwave Loaded Potato",
+  "protein": "Dairy",
+  "servings": 1,
+  "totalMinutes": 12,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large russet potato"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "frozen broccoli"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "sour cream"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "butter"
+   }
+  ],
+  "steps": [
+   "Poke the potato all over with a fork. Microwave 5 minutes, turn it, and microwave 3 to 5 minutes more until soft.",
+   "Microwave the broccoli in a covered bowl with a splash of water, 2 minutes.",
+   "Split the potato, add butter, broccoli and cheese; microwave 30 seconds and top with sour cream."
+  ],
+  "tags": [
+   "microwave",
+   "quick",
+   "for-one",
+   "vegetarian",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Microwave Burrito Bowl",
+  "protein": "Beans (no meat)",
+  "servings": 1,
+  "totalMinutes": 6,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "(8.8 oz) pouch",
+    "item": "microwave rice"
+   },
+   {
+    "amount": "1/2",
+    "unit": "(15 oz) can",
+    "item": "black beans, drained"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "salsa"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "frozen corn"
+   }
+  ],
+  "steps": [
+   "Microwave the rice pouch as the package says.",
+   "In a bowl, microwave the beans and corn 1 minute.",
+   "Top the rice with beans, corn, salsa and cheese; microwave 30 seconds to melt."
+  ],
+  "tags": [
+   "microwave",
+   "quick",
+   "for-one",
+   "vegetarian"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Mac and Cheese in a Mug",
+  "protein": "Dairy",
+  "servings": 1,
+  "totalMinutes": 8,
+  "ingredients": [
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "elbow macaroni"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "water"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "milk"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   }
+  ],
+  "steps": [
+   "Put the macaroni and water in a big mug.",
+   "Microwave 2 minutes, stir, and repeat 2 or 3 times until the pasta is tender (add a splash of water if it dries out).",
+   "Stir in the milk and cheese and microwave 30 seconds. Stir until creamy."
+  ],
+  "tags": [
+   "microwave",
+   "quick",
+   "for-one",
+   "vegetarian",
+   "kid-friendly",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Microwave Chicken and Veggie Rice Bowl",
+  "protein": "Chicken",
+  "servings": 1,
+  "totalMinutes": 6,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "(8.8 oz) pouch",
+    "item": "microwave rice"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "shredded rotisserie chicken"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "frozen stir-fry vegetables"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "teriyaki sauce"
+   }
+  ],
+  "steps": [
+   "Microwave the vegetables in a covered bowl with a splash of water, 3 minutes.",
+   "Add the chicken and teriyaki sauce and microwave 1 minute.",
+   "Microwave the rice pouch and top with the chicken and vegetables."
+  ],
+  "tags": [
+   "microwave",
+   "quick",
+   "for-one"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Microwave Bean and Cheese Nachos",
+  "protein": "Beans (no meat)",
+  "servings": 1,
+  "totalMinutes": 5,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "tortilla chips"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "refried beans"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "shredded Mexican cheese blend"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "salsa"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "sour cream"
+   }
+  ],
+  "steps": [
+   "Spread the chips on a microwave-safe plate.",
+   "Dot with spoonfuls of beans and sprinkle with cheese.",
+   "Microwave 60 to 90 seconds until melted. Top with salsa and sour cream."
+  ],
+  "tags": [
+   "microwave",
+   "quick",
+   "for-one",
+   "vegetarian",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Microwave Sweet Potato with Black Beans",
+  "protein": "Beans (no meat)",
+  "servings": 1,
+  "totalMinutes": 12,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "sweet potato"
+   },
+   {
+    "amount": "1/2",
+    "unit": "(15 oz) can",
+    "item": "black beans, drained"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "salsa"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "Greek yogurt or sour cream"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "cumin"
+   }
+  ],
+  "steps": [
+   "Poke the sweet potato and microwave 5 minutes, turn, and 3 to 4 minutes more until soft.",
+   "Microwave the beans with the cumin, 1 minute.",
+   "Split the potato and fill with beans, salsa and yogurt."
+  ],
+  "tags": [
+   "microwave",
+   "quick",
+   "for-one",
+   "vegetarian",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Upgraded Instant Ramen with Egg and Veggies",
+  "protein": "Eggs",
+  "servings": 1,
+  "totalMinutes": 6,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "package",
+    "item": "instant ramen noodles"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "water"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "frozen peas and carrots"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "egg"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "green onion, sliced"
+   }
+  ],
+  "steps": [
+   "Put the noodles, half the seasoning packet, the vegetables and the water in a big microwave-safe bowl.",
+   "Microwave 3 minutes. Crack in the egg, poke the yolk, and microwave 60 to 90 seconds more until the egg is set.",
+   "Top with green onion."
+  ],
+  "tags": [
+   "microwave",
+   "quick",
+   "for-one",
+   "vegetarian",
+   "low-sodium"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Garlic Spinach Pasta for One",
+  "protein": "Dairy",
+  "servings": 1,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "3",
+    "unit": "oz",
+    "item": "spaghetti"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, sliced"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "fresh spinach"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "grated parmesan"
+   },
+   {
+    "amount": "1",
+    "unit": "pinch",
+    "item": "red pepper flakes"
+   }
+  ],
+  "steps": [
+   "Cook the spaghetti; save a splash of the water.",
+   "Warm the oil and garlic until golden, add the pepper flakes and spinach until wilted.",
+   "Toss in the pasta, parmesan and a splash of pasta water."
+  ],
+  "tags": [
+   "for-one",
+   "quick",
+   "vegetarian",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Personal Pita Pizza",
+  "protein": "Pork",
+  "servings": 1,
+  "totalMinutes": 12,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "pita bread"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "pizza sauce"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "shredded mozzarella"
+   },
+   {
+    "amount": "8",
+    "unit": "slices",
+    "item": "pepperoni"
+   }
+  ],
+  "steps": [
+   "Heat the oven or toaster oven to 425°F.",
+   "Top the pita with sauce, cheese and pepperoni.",
+   "Bake 8 to 10 minutes until bubbly."
+  ],
+  "tags": [
+   "for-one",
+   "quick",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Ham and Egg Fried Rice for One",
+  "protein": "Eggs",
+  "servings": 1,
+  "totalMinutes": 12,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "cooked rice, cold"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "egg"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "diced ham"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "frozen peas and carrots"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "soy sauce"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "vegetable oil"
+   }
+  ],
+  "steps": [
+   "Heat the oil in a skillet, scramble the egg and push it aside.",
+   "Add the ham and vegetables for 2 minutes.",
+   "Add the rice and soy sauce and stir-fry until hot."
+  ],
+  "tags": [
+   "for-one",
+   "quick",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Single Skillet Chicken Thigh and Potatoes",
+  "protein": "Chicken",
+  "servings": 1,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "boneless skinless chicken thighs"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "small potato, diced"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "paprika"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   }
+  ],
+  "steps": [
+   "Cook the potato in the oil, covered, 8 minutes.",
+   "Push aside, season the chicken and cook it 5 to 6 minutes a side until done, stirring the potatoes now and then."
+  ],
+  "tags": [
+   "for-one",
+   "quick",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Black Bean Quesadilla for One",
+  "protein": "Beans (no meat)",
+  "servings": 1,
+  "totalMinutes": 10,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "flour tortillas"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "black beans, drained"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "salsa"
+   }
+  ],
+  "steps": [
+   "Spread the beans and cheese over one tortilla and top with the other.",
+   "Toast in a skillet 2 to 3 minutes a side until melted.",
+   "Cut in wedges and serve with salsa."
+  ],
+  "tags": [
+   "for-one",
+   "quick",
+   "vegetarian",
+   "kid-friendly",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Small-Batch Turkey Chili",
+  "protein": "Turkey",
+  "servings": 2,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1/2",
+    "unit": "lb",
+    "item": "ground turkey"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "kidney beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "diced tomatoes"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "chili powder"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "cumin"
+   }
+  ],
+  "steps": [
+   "Brown the turkey and onion in a small pot.",
+   "Add everything else and simmer 20 minutes.",
+   "Eat one bowl tonight and save the other for lunch."
+  ],
+  "tags": [
+   "for-one",
+   "quick",
+   "leftovers",
+   "low-sodium"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Crispy Baked Chicken Tenders with Honey Mustard",
+  "protein": "Chicken",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "chicken tenders"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "panko breadcrumbs"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "grated parmesan"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "eggs, beaten"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "honey"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "mustard"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 425°F. Mix the panko, parmesan and oil.",
+   "Dip the tenders in egg, then the crumbs, and set on a rack or sheet pan.",
+   "Bake 15 to 18 minutes until golden. Stir the honey and mustard together for dipping."
+  ],
+  "tags": [
+   "kid-friendly",
+   "sheet-pan",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Mini Meatloaf Muffins with Mashed Potatoes",
+  "protein": "Beef",
+  "servings": 4,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "ground beef"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "breadcrumbs"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "egg"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "ketchup, divided"
+   },
+   {
+    "amount": "2",
+    "unit": "lb",
+    "item": "potatoes, peeled and cut up"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "milk"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "butter"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 375°F. Mix the beef, breadcrumbs, egg and half the ketchup.",
+   "Press into 12 muffin cups, top with the rest of the ketchup, and bake 20 to 25 minutes.",
+   "Meanwhile boil the potatoes until tender, drain, and mash with the milk and butter."
+  ],
+  "tags": [
+   "kid-friendly",
+   "freezer",
+   "make-ahead",
+   "low-sodium"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Cheesy Chicken and Rice Casserole",
+  "protein": "Chicken",
+  "servings": 6,
+  "totalMinutes": 60,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "boneless skinless chicken breasts, diced"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "long-grain white rice"
+   },
+   {
+    "amount": "3",
+    "unit": "cups",
+    "item": "chicken broth"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "frozen broccoli"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "milk"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "garlic powder"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 375°F.",
+   "Stir the rice, broth, milk, chicken and garlic powder together in a greased 9x13 dish.",
+   "Cover tightly with foil and bake 40 minutes.",
+   "Stir in the broccoli, top with cheese, and bake uncovered 15 minutes."
+  ],
+  "tags": [
+   "kid-friendly",
+   "freezer",
+   "make-ahead",
+   "leftovers",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Classic Sloppy Joes",
+  "protein": "Beef",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "ground beef"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "onion, finely chopped"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "ketchup"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "brown sugar"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "mustard"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "Worcestershire sauce"
+   },
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "hamburger buns"
+   }
+  ],
+  "steps": [
+   "Brown the beef with the onion; drain.",
+   "Stir in the ketchup, brown sugar, mustard and Worcestershire and simmer 10 minutes.",
+   "Spoon onto buns."
+  ],
+  "tags": [
+   "kid-friendly",
+   "quick",
+   "freezer",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Homemade Pizza Night",
+  "protein": "Pork",
+  "servings": 4,
+  "totalMinutes": 35,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "store-bought pizza dough"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "pizza sauce"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "shredded mozzarella"
+   },
+   {
+    "amount": "3",
+    "unit": "oz",
+    "item": "pepperoni"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 450°F and oil a sheet pan.",
+   "Stretch the dough to fill the pan; let the kids add sauce, cheese and toppings.",
+   "Bake 12 to 15 minutes until golden."
+  ],
+  "tags": [
+   "kid-friendly",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Chicken and Corn Quesadillas",
+  "protein": "Chicken",
+  "servings": 4,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "8",
+    "unit": "",
+    "item": "flour tortillas"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "shredded rotisserie chicken"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "frozen corn, thawed"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "shredded Mexican cheese blend"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "salsa"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "butter"
+   }
+  ],
+  "steps": [
+   "Fill half of each tortilla with chicken, corn and cheese and fold.",
+   "Toast in a buttered skillet until golden and melty, 2 to 3 minutes a side.",
+   "Cut into wedges and serve with salsa."
+  ],
+  "tags": [
+   "kid-friendly",
+   "quick",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Freezer Beef and Bean Burritos",
+  "protein": "Beef",
+  "servings": 8,
+  "totalMinutes": 40,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "ground beef"
+   },
+   {
+    "amount": "1",
+    "unit": "(16 oz) can",
+    "item": "refried beans"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "taco seasoning"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "cooked rice"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "8",
+    "unit": "",
+    "item": "large flour tortillas"
+   }
+  ],
+  "steps": [
+   "Brown the beef, drain, and stir in the taco seasoning with a splash of water, then the beans.",
+   "Fill each tortilla with rice, the beef mix and cheese, and roll tightly.",
+   "Wrap each in foil and freeze. Reheat from frozen: unwrap, wrap in a damp paper towel and microwave 2 to 3 minutes."
+  ],
+  "tags": [
+   "freezer",
+   "make-ahead",
+   "kid-friendly",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Make-Ahead Baked Ziti",
+  "protein": "Beef",
+  "servings": 8,
+  "totalMinutes": 60,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "ziti or penne"
+   },
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "ground beef or Italian sausage"
+   },
+   {
+    "amount": "1",
+    "unit": "(24 oz) jar",
+    "item": "marinara sauce"
+   },
+   {
+    "amount": "15",
+    "unit": "oz",
+    "item": "ricotta cheese"
+   },
+   {
+    "amount": "3",
+    "unit": "cups",
+    "item": "shredded mozzarella"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "grated parmesan"
+   }
+  ],
+  "steps": [
+   "Cook the pasta 2 minutes short of done and drain. Brown the meat and drain.",
+   "Mix the pasta, meat, sauce, ricotta and half the mozzarella.",
+   "Split between two 8x8 pans and top with the rest of the cheese.",
+   "Bake one at 375°F for 25 minutes; wrap the other and freeze (bake from thawed, about 35 minutes)."
+  ],
+  "tags": [
+   "freezer",
+   "make-ahead",
+   "kid-friendly",
+   "leftovers"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Chicken Enchilada Casserole",
+  "protein": "Chicken",
+  "servings": 6,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "3",
+    "unit": "cups",
+    "item": "shredded rotisserie chicken"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "black beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "red enchilada sauce"
+   },
+   {
+    "amount": "12",
+    "unit": "",
+    "item": "corn tortillas, quartered"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "shredded Mexican cheese blend"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "sour cream"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 375°F.",
+   "Layer a third of the tortillas, chicken, beans, sauce and cheese in a greased dish; repeat twice.",
+   "Bake 25 minutes until bubbly. (Or cover and freeze before baking.) Serve with sour cream."
+  ],
+  "tags": [
+   "freezer",
+   "make-ahead",
+   "leftovers",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Turkey Meatballs in Marinara",
+  "protein": "Turkey",
+  "servings": 6,
+  "totalMinutes": 40,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "lb",
+    "item": "ground turkey"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "breadcrumbs"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "grated parmesan"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "eggs"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "Italian seasoning"
+   },
+   {
+    "amount": "1",
+    "unit": "(24 oz) jar",
+    "item": "marinara sauce"
+   },
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "spaghetti"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 400°F. Mix the turkey, breadcrumbs, parmesan, eggs and seasoning; roll into 1 1/2-inch balls.",
+   "Bake on a sheet pan 18 to 20 minutes.",
+   "Simmer half the meatballs in the sauce and serve over spaghetti; freeze the rest flat in a bag for another night."
+  ],
+  "tags": [
+   "freezer",
+   "make-ahead",
+   "kid-friendly",
+   "low-sodium"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Slow Cooker White Chicken Chili",
+  "protein": "Chicken",
+  "servings": 6,
+  "totalMinutes": 250,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "lb",
+    "item": "boneless skinless chicken breasts"
+   },
+   {
+    "amount": "2",
+    "unit": "(15 oz) cans",
+    "item": "cannellini beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "(4 oz) can",
+    "item": "mild green chiles"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "4",
+    "unit": "cups",
+    "item": "chicken broth"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "cumin"
+   },
+   {
+    "amount": "4",
+    "unit": "oz",
+    "item": "cream cheese"
+   }
+  ],
+  "steps": [
+   "Put everything but the cream cheese in the slow cooker. (Or bag it raw and freeze: it's a dump-and-go dinner.)",
+   "Cook on low 6 hours or high 4 hours.",
+   "Shred the chicken, stir in the cream cheese until melted."
+  ],
+  "tags": [
+   "freezer",
+   "make-ahead",
+   "slow-cooker",
+   "leftovers",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Shepherd's Pie",
+  "protein": "Beef",
+  "servings": 6,
+  "totalMinutes": 60,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "ground beef"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "onion, chopped"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "frozen peas and carrots"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "tomato paste"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "beef broth"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "Worcestershire sauce"
+   },
+   {
+    "amount": "2 1/2",
+    "unit": "lb",
+    "item": "potatoes, peeled and cut up"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "milk"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "butter"
+   }
+  ],
+  "steps": [
+   "Boil the potatoes until tender, drain, and mash with the milk and butter.",
+   "Brown the beef and onion; drain. Stir in the tomato paste, broth, Worcestershire and vegetables and simmer 5 minutes.",
+   "Spread the filling in a baking dish and top with the potatoes.",
+   "Bake at 400°F for 20 minutes (or cover and freeze before baking)."
+  ],
+  "tags": [
+   "freezer",
+   "make-ahead",
+   "kid-friendly",
+   "leftovers",
+   "low-sodium",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Herb-Roasted Chicken and Sweet Potatoes",
+  "protein": "Chicken",
+  "servings": 4,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "boneless skinless chicken thighs"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "sweet potatoes, cubed"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "red onion, cut in wedges"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "dried rosemary"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "lemon"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 425°F.",
+   "Toss the sweet potatoes and onion with 2 Tbsp oil and half the herbs; roast 15 minutes.",
+   "Add the chicken rubbed with the rest of the oil, herbs and lemon zest. Roast 20 to 25 minutes. Squeeze the lemon over everything."
+  ],
+  "tags": [
+   "low-sodium",
+   "sheet-pan",
+   "low-carb",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Turkey and Veggie Stir-Fry with Low-Sodium Soy",
+  "protein": "Turkey",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "ground turkey"
+   },
+   {
+    "amount": "4",
+    "unit": "cups",
+    "item": "frozen stir-fry vegetables"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "low-sodium soy sauce"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "rice vinegar"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "honey"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "fresh ginger, grated"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "brown rice"
+   }
+  ],
+  "steps": [
+   "Cook the rice.",
+   "Brown the turkey, then add the vegetables and cook until hot.",
+   "Stir in the garlic, ginger, low-sodium soy, vinegar and honey. Serve over rice."
+  ],
+  "tags": [
+   "low-sodium",
+   "quick",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Lemon Herb Baked Fish with Rice and Green Beans",
+  "protein": "Seafood",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "white fish fillets (cod or tilapia)"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "lemon, sliced"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "dried dill"
+   },
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "green beans, trimmed"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "long-grain white rice"
+   }
+  ],
+  "steps": [
+   "Cook the rice.",
+   "Heat the oven to 400°F. Set the fish and green beans on a sheet pan, drizzle with oil and sprinkle with dill.",
+   "Lay lemon slices over the fish and bake 12 to 15 minutes."
+  ],
+  "tags": [
+   "low-sodium",
+   "sheet-pan",
+   "quick"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "No-Salt-Added Taco Bowls",
+  "protein": "Beef",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "lean ground beef"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "chili powder"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "cumin"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "smoked paprika"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "no-salt-added black beans, drained"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "long-grain white rice"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "tomatoes, diced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "avocado"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "lime"
+   }
+  ],
+  "steps": [
+   "Cook the rice.",
+   "Brown the beef and stir in the spices (a homemade taco seasoning without the salt) and a splash of water.",
+   "Warm the beans. Build bowls with rice, beef, beans, tomato and avocado, and squeeze lime over the top."
+  ],
+  "tags": [
+   "low-sodium",
+   "quick",
+   "kid-friendly"
+  ],
+  "ease": 4,
   "prepAhead": null,
   "creditName": null,
   "creditUrl": null,
