@@ -1,5 +1,5 @@
 import type { FoodRule } from "./diet";
-import type { Staple } from "./types";
+import type { ExtraCategory, ExtrasRule, Staple } from "./types";
 
 export const MOTIVATIONS = {
   save_money: "Save money",
@@ -49,6 +49,7 @@ export type Settings = {
   breadBreakfasts: number; // bread-based breakfasts a week (pancakes, bagels…); the rest are egg or protein
   breakfastMustHave: string[]; // e.g. ["omelet"]: at least one of each, every week
   breakfastMeatDeal: boolean; // find the week's best breakfast-meat sale and use it in egg breakfasts
+  extras: Record<ExtraCategory, ExtrasRule>; // snacks, sweets, drinks and baby: how many to rotate, targets, never-buy words
   noRepeatWeeks: number;
   favorQuickWeeknights: boolean;
   newRecipesPerWeek: number; // 0-2 new dinners from followed cooks, picked by the planner
@@ -96,6 +97,13 @@ export const DEFAULT_SETTINGS: Settings = {
   breadBreakfasts: 1,
   breakfastMustHave: [],
   breakfastMeatDeal: true,
+  extras: {
+    snacks: { rotateCount: 2, servingsTarget: null, neverWords: [] },
+    sweets: { rotateCount: 1, servingsTarget: null, neverWords: [] },
+    drinks: { rotateCount: 1, servingsTarget: null, neverWords: [] },
+    // Safety defaults for babies: no honey under 12 months, nothing labeled for toddlers or 12+ months.
+    baby: { rotateCount: 2, servingsTarget: 5, neverWords: ["honey", "toddler", "12+ months", "12 months+"] },
+  },
   noRepeatWeeks: 3,
   favorQuickWeeknights: true,
   newRecipesPerWeek: 1,

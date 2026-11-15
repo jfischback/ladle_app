@@ -49,6 +49,10 @@ const SettingsSchema = z.object({
   breadBreakfasts: int(0, 7),
   breakfastMustHave: z.array(z.string().trim().min(2).max(40)).max(10),
   breakfastMeatDeal: z.boolean(),
+  extras: z.record(
+    z.enum(["snacks", "sweets", "drinks", "baby"]),
+    z.object({ rotateCount: int(0, 10), servingsTarget: int(0, 50).nullable(), neverWords: z.array(z.string().trim().min(2).max(40)).max(30) }),
+  ),
   noRepeatWeeks: int(0, 12),
   favorQuickWeeknights: z.boolean(),
   saleThresholdPct: int(1, 90),

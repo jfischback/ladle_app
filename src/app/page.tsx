@@ -9,6 +9,7 @@ import { Highlight } from "@/components/Highlight";
 import type { Plan } from "@/db/schema";
 import type { SaleItem, Staple } from "@/lib/types";
 import { staplesTotal } from "@/lib/staples";
+import { extrasTotal } from "@/lib/extras";
 import { krogerEnabled } from "@/lib/kroger";
 import { ruleProblems } from "@/lib/diet";
 
@@ -105,6 +106,7 @@ export default async function HomePage() {
           <BudgetMeter plan={plan} budget={settings.weeklyBudget} mode={settings.budgetMode} />
           <StaplesCard plan={plan} staples={settings.staples} />
           <PantryCard plan={plan} />
+          <ExtrasCard plan={plan} />
           {approved ? (
             <>
               <Celebrate />
@@ -260,7 +262,7 @@ function EmptyState({ weekOf, recipeCount, needed, checksSales }: { weekOf: stri
 function BudgetMeter({ plan, budget, mode }: { plan: Plan; budget: number; mode: "target" | "hard" }) {
   const dinners = plan.estimatedTotal;
   const staples = staplesTotal(plan.staples);
-  if (dinners == null && !staples.priced) {
+  if (dinners == null && !staples.priced && !extrasTotal(plan.extras)) {
     return (
       <div className="flex items-center gap-3 rounded-3xl bg-card p-4 shadow-soft">
         <span className="text-3xl" aria-hidden="true">🫙</span>
@@ -271,7 +273,8 @@ function BudgetMeter({ plan, budget, mode }: { plan: Plan; budget: number; mode:
       </div>
     );
   }
-  const total = (dinners ?? 0) + staples.total;
+  const extras = extrasTotal(plan.extras);
+  const total = (dinners ?? 0) + staples.total + extras;
   const over = total > budget;
   const pct = (n: number) => Math.min(100, (n / Math.max(budget, total)) * 100);
   return (
@@ -287,15 +290,36 @@ function BudgetMeter({ plan, budget, mode }: { plan: Plan; budget: number; mode:
       <div className="mt-3 flex h-4 overflow-hidden rounded-full bg-card" role="meter" aria-valuemin={0} aria-valuemax={budget} aria-valuenow={total} aria-label="Estimated cart compared with budget">
         <div className={`h-full transition-all ${over ? "bg-terracotta" : "bg-olive"}`} style={{ width: `${pct(dinners ?? 0)}%` }} />
         {staples.total > 0 && <div className="h-full bg-ochre transition-all" style={{ width: `${pct(staples.total)}%` }} />}
+        {extras > 0 && <div className="h-full bg-terracotta/50 transition-all" style={{ width: `${pct(extras)}%` }} />}
       </div>
-      {staples.total > 0 && (
+      {(staples.total > 0 || extras > 0) && (
         <p className="mt-2 flex flex-wrap gap-x-4 text-sm font-semibold">
           <span><span aria-hidden="true" className={`mr-1 inline-block h-2.5 w-2.5 rounded-full ${over ? "bg-terracotta" : "bg-olive"}`} />Dinners {dinners == null ? "(no prices yet)" : money(dinners)}</span>
-          <span><span aria-hidden="true" className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-ochre" />Staples {money(staples.total)}</span>
+          {staples.total > 0 && <span><span aria-hidden="true" className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-ochre" />Staples {money(staples.total)}</span>}
+          {extras > 0 && <span><span aria-hidden="true" className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-terracotta/50" />Snacks &amp; more {money(extras)}</span>}
         </p>
       )}
       <p className="mt-1 text-sm text-muted">Estimate. Your receipt may be a little different.</p>
     </section>
+  );
+}
+
+/** Snacks, sweets, drinks and baby items on this week's list. */
+function ExtrasCard({ plan }: { plan: Plan }) {
+  const lines = plan.extras ?? [];
+  const deals = lines.filter((l) => l.sale);
+  return (
+    <Link href="/extras" className="flex items-center gap-3 rounded-3xl bg-card p-4 shadow-soft hover:shadow-lift">
+      <span className="text-3xl" aria-hidden="true">🍿</span>
+      <span className="min-w-0 flex-1">
+        <span className="font-bold">Snacks &amp; more</span>{" "}
+        <span className="text-muted">{lines.length ? `· ${lines.length} on your list` : "· snacks, sweets, drinks, baby"}</span>
+        <span className="block truncate text-sm text-muted">
+          {deals.length ? <span className="font-bold text-terracotta-dark">🏷️ {deals.map((l) => `${l.item} ${l.sale!.pctOff}% off`).join(", ")}</span> : lines.length ? lines.map((l) => l.item).join(", ") : "Add favorites and how to buy them: every trip, on sale, rotate."}
+        </span>
+      </span>
+      <span className="shrink-0 text-sm font-bold text-olive-dark">Open ›</span>
+    </Link>
   );
 }
 

@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { and, desc, eq, inArray, isNull, ne } from "drizzle-orm";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
-import { cooks, foundRecipes, pantryItems, plans, recipes } from "@/db/schema";
-import { activePlans, getPlan, getSettings, myPantry, myRecipes, recipesByIds } from "@/lib/data";
+import { cooks, extraItems, foundRecipes, pantryItems, plans, recipes } from "@/db/schema";
+import { activePlans, getPlan, getSettings, myExtras, myPantry, myRecipes, recipesByIds } from "@/lib/data";
 import { adoptFoundRecipe, refreshCooks } from "@/lib/cooks";
 import { ruleProblems } from "@/lib/diet";
 import { buildGroceryList, saleNote } from "@/lib/grocery";
@@ -14,6 +14,7 @@ import { FOUND_PREFIX, planWeek, sumCosts, type NewRecipeOption } from "@/lib/pl
 import { recipeSales, scanSales, type SaleScan } from "@/lib/sales";
 import { leftoverNotes, planLunches } from "@/lib/lunch";
 import { BREAKFAST_MEAT_TERMS, breakfastDeal, planBreakfasts } from "@/lib/breakfast";
+import { CATEGORIES, extraSearchTerm, extrasTotal, neverRegex, planExtras, termsToCheck } from "@/lib/extras";
 import { applyPantry, pantrySearchTerm, sameThing } from "@/lib/pantry";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
@@ -53,9 +54,17 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   // A failed price check never blocks planning: the week is planned without sales and the home screen says why.
   const stockTerms = (await myPantry(userId)).filter((p) => p.onSaleOnly && p.status !== "have").map((p) => pantrySearchTerm(p.name));
   const wantsBreakfastDeal = settings.breakfastMeatDeal && settings.breakfastDays.length > 0;
+  // Snacks, sweets, drinks and baby items: what to price-check, and never-buy words for "any brand" items.
+  const extras = await myExtras(userId);
+  const extraTerms = termsToCheck(extras);
+  const exclude = new Map<string, RegExp>();
+  for (const x of extras) {
+    const re = x.anyBrand ? neverRegex(settings.extras[x.category]?.neverWords ?? []) : null;
+    if (re) exclude.set(extraSearchTerm(x.name), re);
+  }
   let scan: SaleScan;
   try {
-    scan = await scanSales(recipeList, settings, [...stockTerms, ...(wantsBreakfastDeal ? BREAKFAST_MEAT_TERMS : [])]);
+    scan = await scanSales(recipeList, settings, [...stockTerms, ...(wantsBreakfastDeal ? BREAKFAST_MEAT_TERMS : []), ...extraTerms], exclude);
   } catch (e) {
     scan = { status: "failed", message: (e as Error).message };
   }
@@ -70,13 +79,14 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   // "Buy on sale" pantry items that are running low and really on sale this week.
   const stockUp = scan.status === "ok" ? scan.sales.filter((s) => stockTerms.includes(s.item)) : [];
   const bDeal = wantsBreakfastDeal && scan.status === "ok" ? breakfastDeal(scan.sales) : null;
+  const extraLines = planExtras(extras, settings.extras, scan.status === "ok" ? scan.sales : [], scan.status === "ok" ? scan.staplePrices : new Map());
 
   let result;
   try {
     result = await planWeek({
       settings, weekStart, recipes: recipeList, recentPlans: recent, history: allPlans.filter((p) => p.status === "approved"),
       saleItems: sales, storePrices: scan.status === "ok" ? scan.prices : [], newRecipes,
-      staplesCost: staplesTotal(staples).total,
+      staplesCost: staplesTotal(staples).total + extrasTotal(extraLines),
     });
   } catch (e) {
     return { error: `The planner hit a problem: ${(e as Error).message}` };
@@ -121,6 +131,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     staples,
     stockUp,
     breakfastDeal: bDeal,
+    extras: extraLines,
     summary: result.summary,
     plannerSource: result.source,
     estimatedTotal: result.estimatedTotal,
@@ -207,6 +218,11 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
       return { item: x.item, quantity: x.quantity, note: sale ? saleNote(sale) : "", forRecipes: [] };
     });
     if (items.length) groceryList = { ...groceryList, sections: [{ name: "Weekly staples", items }, ...groceryList.sections] };
+    // Snacks, sweets, drinks and baby items, one section each.
+    for (const c of CATEGORIES) {
+      const lines = (plan.extras ?? []).filter((l) => l.category === c.key);
+      if (lines.length) groceryList = { ...groceryList, sections: [...groceryList.sections, { name: c.label, items: lines.map((l) => ({ item: l.item, quantity: String(l.quantity), note: [l.product && l.product.toLowerCase() !== l.item.toLowerCase() ? l.product : "", l.sale ? saleNote(l.sale) : "", l.reason.replace(/(^| · )on sale$/i, "").replace(/^On sale$/, "")].filter(Boolean).join(" · "), forRecipes: [] })) }] };
+    }
     // This week's breakfast-meat deal, for the egg breakfasts.
     if (plan.breakfastDeal && plan.days.some((d) => d.breakfast?.withDeal)) {
       const d = plan.breakfastDeal;
@@ -230,6 +246,14 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
     .update(plans)
     .set({ status: "approved", approvedAt: new Date(), groceryList })
     .where(and(eq(plans.id, planId), eq(plans.status, "draft"), isNull(plans.archivedAt)));
+  // Remember what was bought, so "rotate" items take turns and "when low" items count as restocked.
+  const boughtExtras = new Set((plan.extras ?? []).map((l) => `${l.category}|${l.item}`));
+  if (boughtExtras.size) {
+    const all = await myExtras(userId);
+    for (const x of all.filter((x) => boughtExtras.has(`${x.category}|${x.name}`))) {
+      await db.update(extraItems).set({ lastPickedAt: new Date(), ...(x.mode === "when-low" ? { status: "have" as const } : {}) }).where(eq(extraItems.id, x.id));
+    }
+  }
   // New recipes in an approved week join My Recipes for good.
   const trialIds = chosen.filter((r) => r.trial).map((r) => r.id);
   if (trialIds.length) {
