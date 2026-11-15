@@ -2,10 +2,24 @@
 
 import { useState, useTransition } from "react";
 import { cancelInvite, createFamilyInvite, createInvite, leaveHousehold, removeMember } from "../actions/household";
+import { memberResetLink } from "../actions/password";
 
 type Member = { id: string; label: string; email: string; owner: boolean };
 
-export function HouseholdClient({ me, members, invites, canLeave }: { me: string; members: Member[]; invites: { code: string; expires: string; kind: "join" | "family" }[]; canLeave: boolean }) {
+export function HouseholdClient({ me, members, invites, canLeave, isOwner }: { me: string; members: Member[]; invites: { code: string; expires: string; kind: "join" | "family" }[]; canLeave: boolean; isOwner: boolean }) {
+  const [resetFor, setResetFor] = useState<{ id: string; url: string } | null>(null);
+  const makeReset = (m: Member) => start(async () => {
+    setError(null);
+    const r = await memberResetLink(m.id);
+    if (r.error) setError(r.error);
+    else if (r.url) {
+      setResetFor({ id: m.id, url: r.url });
+      try {
+        if (navigator.share) await navigator.share({ title: "Reset your Ladle password", text: "Here's a link to choose a new Ladle password (works once, for an hour):", url: r.url });
+        else await navigator.clipboard.writeText(r.url);
+      } catch { /* closed the share sheet */ }
+    }
+  });
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -40,7 +54,13 @@ export function HouseholdClient({ me, members, invites, canLeave }: { me: string
             <li key={m.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-cream/70 p-3">
               <span><b>{m.label}</b>{m.id === me ? <span className="text-muted"> (you)</span> : null}{m.owner ? <span className="tag ml-1.5 px-2 py-0 text-xs">Owner</span> : null}<span className="block text-sm text-muted">{m.email}</span></span>
               {m.id !== me && !m.owner && (
-                <button className="btn-quiet min-h-9 px-3 text-sm" disabled={pending} onClick={() => confirm(`Remove ${m.label} from your household? They'll go back to their own recipes and plans.`) && start(() => removeMember(m.id))}>Remove</button>
+                <span className="flex flex-wrap gap-1">
+                  {isOwner && <button className="btn-quiet min-h-9 px-3 text-sm" disabled={pending} onClick={() => makeReset(m)}>🔑 Reset link</button>}
+                  <button className="btn-quiet min-h-9 px-3 text-sm" disabled={pending} onClick={() => confirm(`Remove ${m.label} from your household? They'll go back to their own recipes and plans.`) && start(() => removeMember(m.id))}>Remove</button>
+                </span>
+              )}
+              {resetFor?.id === m.id && (
+                <p className="w-full rounded-xl bg-olive-soft p-2 text-sm text-olive-dark">Reset link for {m.label} (works once, for an hour, and it&apos;s copied): <code className="break-all">{resetFor.url}</code></p>
               )}
             </li>
           ))}

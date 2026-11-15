@@ -10,7 +10,7 @@ const withAuth = loginRequired ? NextAuth(authConfig).auth : null;
 export default function middleware(req: NextRequest, ctx: unknown) {
   if (withAuth) return (withAuth as unknown as (r: NextRequest, c: unknown) => Response)(req, ctx);
   const { pathname } = req.nextUrl;
-  if (pathname.startsWith("/login") || pathname.startsWith("/signup")) {
+  if (pathname.startsWith("/login") || pathname.startsWith("/signup") || pathname.startsWith("/forgot") || pathname.startsWith("/reset/")) {
     return NextResponse.redirect(new URL("/", req.url));
   }
   return NextResponse.next();
