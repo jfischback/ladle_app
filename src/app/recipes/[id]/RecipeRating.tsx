@@ -8,8 +8,8 @@ export function RecipeRating({ id, rating }: { id: string; rating: number | null
   const [value, setValue] = useOptimistic(rating);
   const [, start] = useTransition();
   return (
-    <div className="flex items-center gap-2">
-      <span className="font-semibold">Your rating</span>
+    <div className="flex flex-col gap-1">
+      <span className="font-bold">How does your family like it?</span>
       <StarPicker
         value={value}
         onPick={(n) =>

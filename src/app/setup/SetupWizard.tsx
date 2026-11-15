@@ -35,17 +35,20 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
   return (
     <div className="mx-auto max-w-xl">
       <div className="mb-6">
-        <p className="text-sm font-semibold uppercase tracking-wide text-muted">
-          {isEdit ? "Settings" : "Setup"} · {Math.min(step + 1, last + 1)} of {last + 1}
+        <p className="eyebrow">
+          {isEdit ? "Settings" : step === 0 ? "Welcome to Ladle!" : "Getting to know you"} · {Math.min(step + 1, last + 1)} of {last + 1}
         </p>
-        <div className="mt-2 h-2 rounded-full bg-oat" aria-hidden="true">
-          <div className="h-2 rounded-full bg-olive transition-all" style={{ width: `${((step + 1) / (last + 1)) * 100}%` }} />
+        <div className="mt-2 flex gap-1.5" aria-hidden="true">
+          {Array.from({ length: last + 1 }, (_, i) => (
+            <div key={i} className={`h-2.5 flex-1 rounded-full transition-colors ${i <= step ? "bg-terracotta" : "bg-oat"}`} />
+          ))}
         </div>
       </div>
 
-      <section className="card p-6" aria-labelledby="q-title">
-        <h1 id="q-title" className="mb-1 text-2xl font-bold">{QUESTION[step]}</h1>
-        <p className="mb-6 text-muted">{HINT[step]}</p>
+      <section key={step} className="card animate-pop p-6" aria-labelledby="q-title">
+        <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-soft text-4xl" aria-hidden="true">{ICON[step]}</div>
+        <h1 id="q-title" className="mb-1 text-3xl font-semibold">{QUESTION[step]}</h1>
+        <p className="mb-6 text-lg text-muted">{HINT[step]}</p>
 
         {step === 0 && <MotivationStep value={s.motivation} onChange={(v) => set("motivation", v)} />}
 
@@ -115,7 +118,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
 
         {step === 6 && !isEdit && (
           <div className="grid gap-3">
-            <button className="btn-primary min-h-14 text-lg" disabled={pending} onClick={() => finish("ours")}>
+            <button className="btn-warm min-h-14 text-lg" disabled={pending} onClick={() => finish("ours")}>
               {pending ? "Setting things up…" : "Start with our recipes"}
             </button>
             <p className="text-center text-sm text-muted">Adds our 30 family-tested dinners to your list. You can remove any later.</p>
@@ -129,12 +132,12 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
       </section>
 
       <div className="mt-4 flex justify-between">
-        <button className="btn-quiet" onClick={() => setStep((x) => x - 1)} disabled={step === 0 || pending}>
-          Back
+        <button className={`btn-quiet ${step === 0 ? "invisible" : ""}`} onClick={() => setStep((x) => x - 1)} disabled={step === 0 || pending}>
+          ← Back
         </button>
         {step < last && (
-          <button className="btn-primary" onClick={() => setStep((x) => x + 1)} disabled={!canNext}>
-            Next
+          <button className="btn-warm px-7" onClick={() => setStep((x) => x + 1)} disabled={!canNext}>
+            Next →
           </button>
         )}
         {isEdit && step === last && (
@@ -154,8 +157,10 @@ const QUESTION = [
   "What's your weekly budget?",
   "How do you cook?",
   "How do you buy?",
-  "Last step: your recipes",
+  "Last step: your recipe box",
 ];
+const ICON = ["💛", "👨‍👩‍👧", "🛒", "💰", "🍳", "🏷️", "📖"];
+const MOTIVATION_ICON: Record<Motivation, string> = { save_money: "💰", eat_healthier: "🥦", try_new: "✨" };
 const HINT = [
   "Tap them in order, most important first. This changes how we pick dinners.",
   "We use this for portions and baby-safe choices.",
@@ -178,11 +183,12 @@ function MotivationStep({ value, onChange }: { value: Motivation[]; onChange: (v
             type="button"
             aria-pressed={rank >= 0}
             onClick={() => toggle(m)}
-            className={`flex min-h-14 items-center gap-3 rounded-2xl border-2 px-4 text-left text-lg font-semibold ${rank >= 0 ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive"}`}
+            className={`flex min-h-16 items-center gap-3 rounded-2xl border-2 px-4 text-left text-lg font-bold transition-all active:scale-[0.98] ${rank >= 0 ? "border-terracotta bg-blush" : "border-line bg-card hover:border-terracotta/60"}`}
           >
-            <span className={`flex h-8 w-8 items-center justify-center rounded-full text-base ${rank >= 0 ? "bg-olive text-cream" : "bg-oat text-muted"}`}>
+            <span className={`flex h-8 w-8 items-center justify-center rounded-full text-base ${rank >= 0 ? "bg-terracotta text-cream" : "bg-oat text-muted"}`}>
               {rank >= 0 ? rank + 1 : ""}
             </span>
+            <span aria-hidden="true">{MOTIVATION_ICON[m]}</span>
             {MOTIVATIONS[m]}
           </button>
         );
@@ -224,8 +230,8 @@ function StoreStep({ s, set, krogerEnabled }: { s: Settings; set: <K extends key
           <legend className="label">Pick your store</legend>
           <div className="grid gap-2">
             {stores.map((st) => (
-              <label key={st.locationId} className={`flex cursor-pointer gap-3 rounded-xl border-2 p-3 ${s.storeLocationId === st.locationId ? "border-olive bg-olive-soft" : "border-line"}`}>
-                <input type="radio" name="store" className="mt-1 accent-olive" checked={s.storeLocationId === st.locationId} onChange={() => { set("storeLocationId", st.locationId); set("storeName", `${st.name} · ${st.address}`); }} />
+              <label key={st.locationId} className={`flex cursor-pointer gap-3 rounded-xl border-2 p-3 ${s.storeLocationId === st.locationId ? "border-terracotta bg-blush" : "border-line bg-card"}`}>
+                <input type="radio" name="store" className="mt-1 accent-terracotta" checked={s.storeLocationId === st.locationId} onChange={() => { set("storeLocationId", st.locationId); set("storeName", `${st.name} · ${st.address}`); }} />
                 <span><span className="font-semibold">{st.name}</span><br /><span className="text-sm text-muted">{st.address}</span></span>
               </label>
             ))}
@@ -235,7 +241,7 @@ function StoreStep({ s, set, krogerEnabled }: { s: Settings; set: <K extends key
         <div>
           <label htmlFor="storeName" className="label">Your Fry&apos;s</label>
           <input id="storeName" className="field" placeholder="e.g. Fry's on Camelback & 44th" value={s.storeName} onChange={(e) => { set("storeName", e.target.value); set("storeLocationId", null); }} />
-          {!krogerEnabled && <p className="mt-1 text-sm text-muted">Store search turns on once Fry&apos;s is connected.</p>}
+          {!krogerEnabled && <p className="mt-1 text-sm text-muted">Just type the one you usually go to.</p>}
         </div>
       )}
       <Choice
@@ -277,7 +283,7 @@ function YesNo({ label, value, onChange }: { label: string; value: boolean; onCh
       <span className="text-lg font-semibold" aria-hidden="true">{label}</span>
       <div className="flex gap-2">
         {[true, false].map((v) => (
-          <button key={String(v)} type="button" aria-pressed={value === v} onClick={() => onChange(v)} className={`btn min-w-20 border-2 ${value === v ? "border-olive bg-olive text-cream" : "border-line bg-card text-ink"}`}>
+          <button key={String(v)} type="button" aria-pressed={value === v} onClick={() => onChange(v)} className={`btn min-w-20 border-2 ${value === v ? "border-terracotta bg-terracotta text-cream" : "border-line bg-card text-ink"}`}>
             {v ? "Yes" : "No"}
           </button>
         ))}
@@ -292,8 +298,8 @@ function Choice<T extends string>({ label, value, onChange, options }: { label: 
       <legend className="label">{label}</legend>
       <div className="grid gap-2">
         {options.map((o) => (
-          <label key={o.value} className={`flex cursor-pointer gap-3 rounded-xl border-2 p-3 ${value === o.value ? "border-olive bg-olive-soft" : "border-line bg-card"}`}>
-            <input type="radio" className="mt-1 accent-olive" checked={value === o.value} onChange={() => onChange(o.value)} />
+          <label key={o.value} className={`flex cursor-pointer gap-3 rounded-xl border-2 p-3 ${value === o.value ? "border-terracotta bg-blush" : "border-line bg-card"}`}>
+            <input type="radio" className="mt-1 accent-terracotta" checked={value === o.value} onChange={() => onChange(o.value)} />
             <span>
               <span className="font-semibold">{o.label}</span>
               {o.hint && <><br /><span className="text-sm text-muted">{o.hint}</span></>}
