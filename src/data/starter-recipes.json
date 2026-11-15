@@ -4475,5 +4475,606 @@
   "creditName": null,
   "creditUrl": null,
   "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Ham and Cheese Omelet",
+  "protein": "Eggs",
+  "servings": 2,
+  "totalMinutes": 10,
+  "ingredients": [
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "large eggs"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "diced ham (or this week's breakfast-meat deal)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "butter"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "salt and pepper"
+   }
+  ],
+  "steps": [
+   "Whisk the eggs with a pinch of salt and pepper.",
+   "Melt the butter in a nonstick skillet over medium heat and pour in the eggs.",
+   "As the edges set, lift them so the runny egg flows underneath, about 2 minutes.",
+   "Scatter the ham and cheese over half, fold the omelet over, and cook 1 more minute until the cheese melts.",
+   "For a baby: cook the eggs all the way through, skip the salt, and cut everything into small soft pieces. Let it cool before serving."
+  ],
+  "tags": [
+   "quick",
+   "omelet"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Veggie Omelet with Spinach and Peppers",
+  "protein": "Eggs",
+  "servings": 2,
+  "totalMinutes": 12,
+  "ingredients": [
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "large eggs"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "diced bell pepper"
+   },
+   {
+    "amount": "1",
+    "unit": "handful",
+    "item": "baby spinach"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "shredded cheese"
+   },
+   {
+    "amount": "2",
+    "unit": "teaspoons",
+    "item": "butter or olive oil"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "salt and pepper"
+   }
+  ],
+  "steps": [
+   "Cook the pepper in half the butter for 3 minutes, add the spinach until it wilts, and set aside.",
+   "Whisk the eggs with a pinch of salt and pepper.",
+   "Melt the rest of the butter, pour in the eggs, and lift the edges as they set.",
+   "Add the vegetables and cheese to one half, fold, and cook until the cheese melts.",
+   "For a baby: cook the eggs all the way through, skip the salt, and cut everything into small soft pieces. Let it cool before serving."
+  ],
+  "tags": [
+   "quick",
+   "omelet"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Scramble Breakfast Plate",
+  "protein": "Eggs",
+  "servings": 2,
+  "totalMinutes": 12,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "large eggs"
+   },
+   {
+    "amount": "4",
+    "unit": "slices",
+    "item": "precooked bacon (or this week's breakfast-meat deal)"
+   },
+   {
+    "amount": "2",
+    "unit": "slices",
+    "item": "bread, for toast"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "fresh fruit"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "butter"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "salt and pepper"
+   }
+  ],
+  "steps": [
+   "Start the toast and warm the precooked bacon in a skillet or microwave.",
+   "Whisk the eggs with a pinch of salt and pepper.",
+   "Melt the butter over medium-low heat and gently stir the eggs into soft curds until fully set.",
+   "Plate the eggs with bacon, toast and fruit.",
+   "For a baby: cook the eggs all the way through, skip the salt, and cut everything into small soft pieces. Let it cool before serving."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Breakfast Burritos",
+  "protein": "Eggs",
+  "servings": 2,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "large eggs"
+   },
+   {
+    "amount": "4",
+    "unit": "slices",
+    "item": "precooked bacon or cooked breakfast sausage (or this week's deal)"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "shredded cheese"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "large flour tortillas"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "salsa, for serving"
+   }
+  ],
+  "steps": [
+   "Warm the bacon or sausage and chop it.",
+   "Scramble the eggs until fully set.",
+   "Warm the tortillas, fill with eggs, meat and cheese, and roll up.",
+   "Serve with salsa.",
+   "For a baby: serve plain egg and cheese in small pieces, no salsa."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Sausage and Egg Breakfast Tacos",
+  "protein": "Pork",
+  "servings": 2,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "large eggs"
+   },
+   {
+    "amount": "4",
+    "unit": "oz",
+    "item": "breakfast sausage (or this week's breakfast-meat deal)"
+   },
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "small corn or flour tortillas"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "shredded cheese"
+   }
+  ],
+  "steps": [
+   "Brown the sausage, breaking it up, until cooked through.",
+   "Add the eggs and scramble until fully set.",
+   "Warm the tortillas and fill with the egg mixture and cheese.",
+   "For a baby: offer small pieces of egg and a little sausage; sausage is salty, so keep it small."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Tater Tot Breakfast Hash with Eggs",
+  "protein": "Eggs",
+  "servings": 2,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "frozen tater tots"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "oil or butter"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "large eggs"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "diced ham or precooked bacon (optional)"
+   }
+  ],
+  "steps": [
+   "Microwave the tater tots 2 to 3 minutes until soft, then mash them roughly with a fork.",
+   "Fry the mashed tots in the oil over medium-high heat, pressing flat, until crisp on both sides, about 6 minutes.",
+   "Add the ham or bacon to warm through, then cook the eggs in the same pan until set.",
+   "For a baby: soft potato and fully cooked egg, cut small, no salt."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Greek Yogurt Parfait with Fruit and Granola",
+  "protein": "Dairy",
+  "servings": 2,
+  "totalMinutes": 5,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "plain or vanilla Greek yogurt"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "berries or chopped fruit"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "granola"
+   }
+  ],
+  "steps": [
+   "Layer yogurt, fruit and granola in a bowl or glass.",
+   "For a baby: whole-milk plain yogurt with soft mashed fruit; skip the granola and any honey (no honey under 12 months)."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Pancakes",
+  "protein": "Bread",
+  "servings": 2,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "pancake mix (a premium mix is worth buying on sale)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "water or milk and egg, as the box says"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "butter"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "maple syrup and fruit, for serving"
+   }
+  ],
+  "steps": [
+   "Mix the batter as the box says; a few lumps are fine.",
+   "Heat a buttered skillet over medium heat and pour 1/4 cup per pancake.",
+   "Flip when bubbles pop on top, about 2 minutes, and cook 1 minute more.",
+   "For a baby: small strips of plain pancake with mashed fruit, no syrup."
+  ],
+  "tags": [
+   "quick",
+   "bread-based"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Waffles",
+  "protein": "Bread",
+  "servings": 2,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "pancake and waffle mix (a premium mix is worth buying on sale)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "water or milk, egg and oil, as the box says"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "syrup and fruit, for serving"
+   }
+  ],
+  "steps": [
+   "Heat the waffle iron and mix the batter as the box says.",
+   "Cook each waffle until golden and steam stops, about 4 minutes.",
+   "For a baby: plain waffle strips with fruit, no syrup."
+  ],
+  "tags": [
+   "quick",
+   "bread-based"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "French Toast",
+  "protein": "Bread",
+  "servings": 2,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "slices",
+    "item": "bread"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "large eggs"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "milk"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "cinnamon"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "butter"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "syrup and fruit, for serving"
+   }
+  ],
+  "steps": [
+   "Whisk the eggs, milk and cinnamon in a shallow dish.",
+   "Dip each slice for a few seconds per side.",
+   "Cook in butter over medium heat until golden, 2 to 3 minutes per side.",
+   "For a baby: cook all the way through and cut into finger strips, no syrup."
+  ],
+  "tags": [
+   "quick",
+   "bread-based"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Toasted English Muffins with Butter and Jam",
+  "protein": "Bread",
+  "servings": 2,
+  "totalMinutes": 5,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "English muffins"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "butter"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "jam or fruit spread"
+   }
+  ],
+  "steps": [
+   "Split and toast the muffins.",
+   "Spread with butter and jam.",
+   "For a baby: small pieces of buttered muffin with soft fruit."
+  ],
+  "tags": [
+   "quick",
+   "bread-based"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Bagels with Cream Cheese",
+  "protein": "Bread",
+  "servings": 2,
+  "totalMinutes": 5,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "bagels (blueberry or cinnamon raisin are kid favorites)"
+   },
+   {
+    "amount": "2",
+    "unit": "tablespoons",
+    "item": "cream cheese"
+   }
+  ],
+  "steps": [
+   "Slice and toast the bagels.",
+   "Spread with cream cheese.",
+   "For a baby: bagels are chewy; give small thin pieces or a teething-friendly alternative."
+  ],
+  "tags": [
+   "quick",
+   "bread-based"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Cinnamon Raisin Toast",
+  "protein": "Bread",
+  "servings": 2,
+  "totalMinutes": 5,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "slices",
+    "item": "cinnamon raisin bread"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "butter"
+   }
+  ],
+  "steps": [
+   "Toast the bread and spread with butter.",
+   "For a baby: plain toast strips; raisins are a choking risk for babies, so pick them out."
+  ],
+  "tags": [
+   "quick",
+   "bread-based"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "breakfast",
+  "name": "Banana Bread with Fruit",
+  "protein": "Bread",
+  "servings": 2,
+  "totalMinutes": 5,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "slices",
+    "item": "banana bread (store-bought or homemade)"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "fresh fruit"
+   }
+  ],
+  "steps": [
+   "Warm the banana bread slices if you like and serve with fruit.",
+   "For a baby: a small soft piece with mashed fruit."
+  ],
+  "tags": [
+   "quick",
+   "bread-based"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
  }
 ]

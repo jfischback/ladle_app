@@ -34,7 +34,7 @@ function eatersFor(settings: Settings, holiday: boolean): { label: string; servi
  * protein someone won't eat reheated), otherwise a lunch recipe that fits the food rules and isn't the same dish
  * as that day's dinner. Weekday federal holidays plan lunch for everyone.
  */
-export function planLunches(days: PlanDay[], settings: Settings, dinners: Map<string, Recipe>, lunchPool: Recipe[], sales: SaleItem[]): PlanDay[] {
+export function planLunches(days: PlanDay[], settings: Settings, dinners: Map<string, Recipe>, lunchPool: Recipe[], sales: SaleItem[], breakfasts?: Map<string, Recipe>): PlanDay[] {
   const used = new Set<string>();
   const pool = lunchPool.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && !(r.rating != null && r.rating <= 2));
   return days.map((day, i) => {
@@ -60,11 +60,13 @@ export function planLunches(days: PlanDay[], settings: Settings, dinners: Map<st
     }
 
     const dinnerName = day.recipeName ?? "";
+    const baconMorning = !!day.breakfast?.recipeId && !!breakfasts?.get(day.breakfast.recipeId)?.ingredients.some((i) => /bacon/i.test(i.item));
     const options = pool
       .filter((r) => !sameDish(r.name, dinnerName) && r.id !== day.recipeId)
-      .map((r) => ({ r, s: (used.has(r.id) ? -3 : 0) + recipeSales(r, sales).length * 2 + (r.rating === 5 ? 2 : r.rating === 4 ? 1 : 0) + Math.random() * 1.5 }))
+      // A breakfast that opens a pack of bacon? Use it up in a bacon lunch the same day (a BLT).
+      .map((r) => ({ r, s: (used.has(r.id) ? -3 : 0) + recipeSales(r, sales).length * 2 + (r.rating === 5 ? 2 : r.rating === 4 ? 1 : 0) + (baconMorning && r.ingredients.some((i) => /bacon/i.test(i.item)) ? 6 : 0) + Math.random() * 1.5 }))
       .sort((a, b) => b.s - a.s);
-    const why = !prev?.recipeId ? "No dinner the night before" : prevRecipe && leftoverKind(prevRecipe) !== "ok" ? `${dayName(prev.date)}'s dinner is one night only` : "Leftovers wouldn't suit everyone today";
+    const why = baconMorning && options[0]?.r.ingredients.some((i) => /bacon/i.test(i.item)) ? "Uses up the bacon from breakfast" : !prev?.recipeId ? "No dinner the night before" : prevRecipe && leftoverKind(prevRecipe) !== "ok" ? `${dayName(prev.date)}'s dinner is one night only` : "Leftovers wouldn't suit everyone today";
     if (!options.length) {
       return { ...day, holiday, lunch: { kind: "open", recipeId: null, name: "Lunch: your pick", reason: `${why}. Add lunch recipes to have one planned.`, eaters: eaters.label, servings: eaters.servings } };
     }

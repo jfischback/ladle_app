@@ -127,6 +127,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
               <Counter label="Same main protein, at most" value={s.maxSameProtein ?? 2} min={1} max={4} onChange={(v) => set("maxSameProtein", v)} />
               <p className="mt-1 text-sm text-muted">Nights a week with the same main protein (chicken, beef…). It&apos;s never two nights in a row either.</p>
             </div>
+            <BreakfastSection s={s} set={set} />
             <Counter label="Weeks before a dinner can repeat" value={s.noRepeatWeeks} min={0} max={12} onChange={(v) => set("noRepeatWeeks", v)} />
             <YesNo label="Favor quick meals on weeknights?" value={s.favorQuickWeeknights} onChange={(v) => set("favorQuickWeeknights", v)} />
             <div>
@@ -518,6 +519,57 @@ function LunchSection({ s, set }: { s: Settings; set: <K extends keyof Settings>
           </div>
           <p className="mt-1 text-xs text-muted">We won&apos;t plan these the night before a holiday.</p>
         </fieldset>
+      )}
+    </div>
+  );
+}
+
+function BreakfastSection({ s, set }: { s: Settings; set: <K extends keyof Settings>(k: K, v: Settings[K]) => void }) {
+  const days = s.breakfastDays ?? [];
+  const toggleDay = (d: number) => set("breakfastDays", days.includes(d) ? days.filter((x) => x !== d) : [...days, d].sort());
+  const [must, setMust] = useState((s.breakfastMustHave ?? []).join(", "));
+  const hasLittleOnes = s.kids > 0 || s.hasBaby;
+  return (
+    <div className="space-y-4 border-t border-line pt-5">
+      <fieldset>
+        <legend className="text-lg font-semibold">Plan breakfasts too?</legend>
+        <p className="mb-2 text-sm text-muted">Quick weekday breakfasts, planned with the week and added to the list.</p>
+        <div className="flex flex-wrap gap-1.5">
+          {[1, 2, 3, 4, 5].map((d) => {
+            const on = days.includes(d);
+            return (
+              <button key={d} type="button" aria-pressed={on} aria-label={`Breakfast: ${DAY_NAMES[d]}`} onClick={() => toggleDay(d)}
+                className={`min-h-10 rounded-full border-2 px-3 text-sm font-bold transition-all active:scale-95 ${on ? "border-terracotta bg-blush text-terracotta-dark" : "border-line bg-card text-ink hover:border-terracotta/60"}`}>
+                {on ? "☕ " : ""}{DAY_NAMES[d].slice(0, 3)}
+              </button>
+            );
+          })}
+          <button type="button" className="rounded-full bg-oat px-3 text-sm font-bold text-olive-dark hover:bg-olive-soft" onClick={() => set("breakfastDays", days.length === 5 ? [] : [1, 2, 3, 4, 5])}>
+            {days.length === 5 ? "None" : "Mon–Fri"}
+          </button>
+        </div>
+      </fieldset>
+      {days.length > 0 && (
+        <div className="space-y-4">
+          <Counter label="Adults at breakfast" value={s.breakfastAdults ?? 1} min={0} max={s.adults} onChange={(v) => set("breakfastAdults", v)} />
+          {hasLittleOnes && <YesNo label={s.kids > 0 ? "Kids too?" : "Baby too?"} value={s.breakfastKids ?? true} onChange={(v) => set("breakfastKids", v)} />}
+          <label className="flex flex-wrap items-center justify-between gap-2 text-lg font-semibold">
+            Quick means
+            <select className="field w-auto py-1 text-base" value={s.breakfastMaxMinutes ?? 15} onChange={(e) => set("breakfastMaxMinutes", Number(e.target.value))}>
+              {[10, 15, 20, 30].map((m) => <option key={m} value={m}>{m} minutes or less</option>)}
+            </select>
+          </label>
+          <div>
+            <Counter label="Bread-based breakfasts a week" value={Math.min(s.breadBreakfasts ?? 1, days.length)} min={0} max={days.length} onChange={(v) => set("breadBreakfasts", v)} />
+            <p className="mt-1 text-sm text-muted">Pancakes, waffles, French toast, bagels. The rest are egg or protein breakfasts.</p>
+          </div>
+          <div>
+            <label htmlFor="mustHave" className="label">Every week, at least one</label>
+            <input id="mustHave" className="field" placeholder="e.g. omelet" value={must}
+              onChange={(e) => { setMust(e.target.value); set("breakfastMustHave", e.target.value.split(",").map((w) => w.trim()).filter((w) => w.length >= 2)); }} />
+          </div>
+          <YesNo label="Use the week's best breakfast-meat sale (ham, sausage, bacon)?" value={s.breakfastMeatDeal ?? true} onChange={(v) => set("breakfastMeatDeal", v)} />
+        </div>
       )}
     </div>
   );

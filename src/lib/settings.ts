@@ -42,6 +42,13 @@ export type Settings = {
   holidayEveryoneHome: boolean; // on federal holidays everyone eats lunch at home
   holidayNoReheat: string[]; // proteins someone won't eat reheated on those days (e.g. "Chicken")
   allowAnyway: string[]; // exceptions to diet rules, e.g. "sushi" with No seafood (never allergies)
+  breakfastDays: number[]; // weekdays we plan breakfast
+  breakfastAdults: number; // adults eating those breakfasts
+  breakfastKids: boolean; // kids and the baby eat them too
+  breakfastMaxMinutes: number; // quick mornings, e.g. 15
+  breadBreakfasts: number; // bread-based breakfasts a week (pancakes, bagels…); the rest are egg or protein
+  breakfastMustHave: string[]; // e.g. ["omelet"]: at least one of each, every week
+  breakfastMeatDeal: boolean; // find the week's best breakfast-meat sale and use it in egg breakfasts
   noRepeatWeeks: number;
   favorQuickWeeknights: boolean;
   newRecipesPerWeek: number; // 0-2 new dinners from followed cooks, picked by the planner
@@ -82,6 +89,13 @@ export const DEFAULT_SETTINGS: Settings = {
   holidayEveryoneHome: true,
   holidayNoReheat: [],
   allowAnyway: [],
+  breakfastDays: [],
+  breakfastAdults: 1,
+  breakfastKids: true,
+  breakfastMaxMinutes: 15,
+  breadBreakfasts: 1,
+  breakfastMustHave: [],
+  breakfastMeatDeal: true,
   noRepeatWeeks: 3,
   favorQuickWeeknights: true,
   newRecipesPerWeek: 1,

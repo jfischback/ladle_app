@@ -67,7 +67,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
 
   return (
     <div className={`card overflow-hidden transition-opacity ${isToday ? "ring-2 ring-terracotta shadow-lift" : ""} ${pending ? "opacity-60" : ""}`}>
-      {!isToday && !day.recipeId && !day.lunch && !day.holiday ? (
+      {!isToday && !day.recipeId && !day.lunch && !day.breakfast && !day.holiday ? (
         // A plain night off is one slim row, so the week's dinners show sooner.
         <div className="flex items-center gap-3 px-4 py-2.5">
           <span className="text-lg" aria-hidden="true">🍕</span>
@@ -179,10 +179,22 @@ function Details({ cookTime, cost, noCook }: { cookTime: string | null; cost: nu
 /** Tomorrow-style lunch for this day: leftovers, a lunch recipe, or an open slot. */
 function LunchLine({ day, className = "" }: { day: PlanDay; className?: string }) {
   const l = day.lunch;
-  if (!l && !day.holiday) return null;
+  const b = day.breakfast;
+  if (!l && !b && !day.holiday) return null;
   return (
     <div className={`space-y-1.5 ${className}`}>
       {day.holiday && <span className="inline-flex rounded-full bg-olive-soft px-2.5 py-0.5 text-xs font-extrabold text-olive-dark">🎉 {day.holiday}</span>}
+      {b && (
+        <div className="flex items-start gap-2 rounded-2xl border border-line px-3 py-2 text-sm">
+          <span aria-hidden="true">☕</span>
+          <span className="min-w-0">
+            <span className="font-bold">Breakfast: </span>
+            {b.recipeId ? <Link href={`/recipes/${b.recipeId}`} className="font-semibold hover:underline">{b.name}</Link> : <span className="font-semibold">{b.name}</span>}
+            <span className="text-muted"> · {b.eaters}</span>
+            <span className="block text-xs text-muted">{b.withDeal ? <><span className="font-bold text-terracotta-dark">🏷️ with {b.withDeal}</span></> : b.reason}</span>
+          </span>
+        </div>
+      )}
       {l && (
         <div className="flex items-start gap-2 rounded-2xl border border-line px-3 py-2 text-sm">
           <span aria-hidden="true">🥪</span>
@@ -209,7 +221,7 @@ function WhyLine({ reason, sale, className = "" }: { reason: string | null; sale
         </p>
       )}
       {sale.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">{sale.map((s) => <span key={s} className="tag-sale">🏷️ {s} on sale</span>)}</div>
+        <div className="mt-2 flex flex-wrap gap-1.5">{sale.filter((s, i) => sale.findIndex((t) => t.replace(/s$/, "") === s.replace(/s$/, "")) === i).map((s) => <span key={s} className="tag-sale">🏷️ {s} on sale</span>)}</div>
       )}
     </div>
   );

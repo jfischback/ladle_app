@@ -1,0 +1,1 @@
+ALTER TABLE "plans" ADD COLUMN "breakfast_deal" jsonb;

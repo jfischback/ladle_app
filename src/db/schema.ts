@@ -68,6 +68,7 @@ export const plans = pgTable(
     saleCheck: jsonb("sale_check").$type<SaleCheck>(),
     staples: jsonb("staples").$type<StapleLine[]>(), // weekly staples with this week's prices
     stockUp: jsonb("stock_up").$type<SaleItem[]>(), // "buy on sale" pantry items that are on sale and running low
+    breakfastDeal: jsonb("breakfast_deal").$type<SaleItem>(), // this week's breakfast-meat deal, if any
     summary: text("summary"),
     plannerSource: text("planner_source").notNull(), // claude | basic
     estimatedTotal: real("estimated_total"),
