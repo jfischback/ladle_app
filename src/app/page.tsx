@@ -20,6 +20,9 @@ import { PrepCard } from "@/components/PrepCard";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { AthleteWeekCard } from "@/components/AthleteWeekCard";
 
+// Planning, approving and importing can take a while (the AI, store prices): give them a minute.
+export const maxDuration = 60;
+
 export default async function HomePage() {
   const userId = await requireUserId();
   const { data: settings, complete } = await getSettings(userId);

@@ -6,6 +6,7 @@ import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
 import { cooks, foundRecipes } from "@/db/schema";
 import { SUGGESTED_COOKS, adoptFoundRecipe, findSource, refreshCooks, type CookSource } from "@/lib/cooks";
+import { TOO_MANY, under } from "@/lib/rate-limit";
 
 type Result = { error?: string; found?: number; remaining?: number } | void;
 
@@ -21,6 +22,7 @@ async function addCook(userId: string, src: CookSource) {
 /** Follow a cook by their website address. */
 export async function followCook(site: string): Promise<Result> {
   const userId = await requireUserId();
+  if (!(await under("cooks", userId))) return { error: TOO_MANY };
   if (!site.trim()) return { error: "Type their website, like pinchofyum.com." };
   try {
     await addCook(userId, await findSource(site));
@@ -35,6 +37,7 @@ export async function followCook(site: string): Promise<Result> {
 /** Follow one or more of the suggested cooks. */
 export async function followSuggested(names: string[]): Promise<Result> {
   const userId = await requireUserId();
+  if (!(await under("cooks", userId))) return { error: TOO_MANY };
   for (const src of SUGGESTED_COOKS.filter((c) => names.includes(c.name))) await addCook(userId, src);
   const r = await refreshCooks(userId, { budgetMs: 25000 });
   revalidatePath("/recipes");
@@ -51,6 +54,7 @@ export async function unfollowCook(id: string) {
 /** "Check for new recipes" button. */
 export async function checkCooks(): Promise<Result> {
   const userId = await requireUserId();
+  if (!(await under("cooks", userId))) return { error: TOO_MANY };
   const r = await refreshCooks(userId, { budgetMs: 25000, minHours: 0 });
   revalidatePath("/recipes");
   return { found: r.found, remaining: r.remaining };

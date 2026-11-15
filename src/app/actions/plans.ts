@@ -26,6 +26,7 @@ import { budgetNotes, cookOnceEatTwice, dinnerCost, enforceCap, fillCosts, rebal
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
 import { addDays, dayName, upcomingWeekStart, weekDates } from "@/lib/week";
+import { TOO_MANY, under } from "@/lib/rate-limit";
 
 export type ActionResult = { error?: string } | void;
 
@@ -40,6 +41,7 @@ async function archiveOthersForWeek(userId: string, weekOf: string, keepId?: str
 /** The Plan button: check this week's prices at their Fry's, ask Claude for the week, save it as a draft. */
 export async function planUpcomingWeek(): Promise<ActionResult> {
   const userId = await requireUserId();
+  if (!(await under("plan", userId))) return { error: TOO_MANY };
   const { data: settings } = await getSettings(userId);
   const weekStart = upcomingWeekStart(settings.shoppingDay);
   const recipeList = await myRecipes(userId);
@@ -231,6 +233,7 @@ async function withBreakfasts(userId: string, days: PlanDay[], settings: Setting
 /** The human gate: lock the plan and build the grocery list. Cart fill comes later; never checkout. */
 export async function approvePlan(planId: string): Promise<ActionResult> {
   const userId = await requireUserId();
+  if (!(await under("approve", userId))) return { error: TOO_MANY };
   const plan = await getPlan(userId, planId);
   if (!plan) return { error: "Plan not found." };
   if (plan.status === "approved") return;

@@ -13,6 +13,9 @@ import { getDb } from "@/db";
 import { recipes as recipesTable } from "@/db/schema";
 import { and, isNull } from "drizzle-orm";
 
+// Planning, approving and importing can take a while (the AI, store prices): give them a minute.
+export const maxDuration = 60;
+
 export default async function RecipesPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const userId = await requireUserId();
   const t = (await searchParams).tab;

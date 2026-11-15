@@ -9,6 +9,7 @@ import { getDb } from "@/db";
 import { recipes } from "@/db/schema";
 import { draftFromPhoto, draftFromUrl, type RecipeDraft } from "@/lib/recipe-import";
 import { copyStarters } from "@/lib/starters";
+import { TOO_MANY, under } from "@/lib/rate-limit";
 
 
 export async function addStarter(starterId: string) {
@@ -123,7 +124,8 @@ export async function rateRecipe(id: string, stars: number) {
 export type DraftResult = { draft?: RecipeDraft & { creditUrl?: string }; error?: string };
 
 export async function importFromLink(url: string): Promise<DraftResult> {
-  await requireUserId();
+  const userId = await requireUserId();
+  if (!(await under("importRecipe", userId))) return { error: TOO_MANY };
   try {
     return { draft: await draftFromUrl(url.trim()) };
   } catch (e) {
@@ -132,7 +134,8 @@ export async function importFromLink(url: string): Promise<DraftResult> {
 }
 
 export async function importFromPhoto(form: FormData): Promise<DraftResult> {
-  await requireUserId();
+  const userId = await requireUserId();
+  if (!(await under("importRecipe", userId))) return { error: TOO_MANY };
   const file = form.get("photo");
   if (!(file instanceof File) || !file.size) return { error: "Choose a photo first." };
   if (file.size > 5 * 1024 * 1024) return { error: "That photo is over 5 MB. Try a smaller one." };
