@@ -69,7 +69,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
             <a href="/staples" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🧺</span> Staples</a>
             <a href="/pantry" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🥫</span> Pantry</a>
             <a href="/extras" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🍿</span> Snacks &amp; more</a>
-            <a href="/athletes" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">💪</span> Goals &amp; health</a>
+            <a href="/athletes" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">💪</span> Athletes &amp; health</a>
             <a href="/household" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🏡</span> Household</a>
           </nav>
         )}
@@ -98,6 +98,9 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
               </div>
             )}
             <PickySection s={s} set={set} />
+            <p className="rounded-2xl bg-olive-soft/70 p-3 text-sm">
+              <b>💪 Anyone training?</b> CrossFit, strongman, lifting, running or getting fit: {isEdit ? <a href="/athletes" className="font-bold text-olive-dark underline">set up athlete mode</a> : "after setup, turn on athlete mode from the Home page"} for bigger portions, more protein and the right snacks.
+            </p>
             <LunchSection s={s} set={set} />
           </div>
         )}

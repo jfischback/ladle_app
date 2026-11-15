@@ -32,7 +32,7 @@ export async function CooksTab({ userId }: { userId: string }) {
     <div className="space-y-6">
       <section className="card space-y-4 p-5" aria-labelledby="cooks-title">
         <div>
-          <h2 id="cooks-title" className="text-2xl font-semibold">Your favorite cooks</h2>
+          <h2 id="cooks-title" className="text-2xl font-semibold">Your favorite food creators</h2>
           <p className="text-muted">
             We check their websites for new dinners. {settings.newRecipesPerWeek > 0
               ? `Each week the planner can try ${settings.newRecipesPerWeek === 1 ? "one new recipe" : `${settings.newRecipesPerWeek} new recipes`}, especially when the ingredients are on sale.`
@@ -75,7 +75,7 @@ export async function CooksTab({ userId }: { userId: string }) {
 
       {following.length > 0 && (
         <section aria-labelledby="shelf-title">
-          <h2 id="shelf-title" className="mb-1 text-2xl font-semibold">New from your cooks</h2>
+          <h2 id="shelf-title" className="mb-1 text-2xl font-semibold">New from your food creators</h2>
           <p className="mb-4 text-muted">
             Save the ones that look good, or let the planner surprise you.
             {hidden > 0 && <> We hid {hidden} that don&apos;t fit your food rules.</>}

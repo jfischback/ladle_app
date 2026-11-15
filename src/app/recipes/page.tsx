@@ -86,7 +86,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
         <Tab href="/recipes" active={tab === "mine"}>Dinners ({mine.length})</Tab>
         <Tab href="/recipes?tab=breakfast" active={tab === "breakfast"}>Breakfasts ({breakfasts.length})</Tab>
         <Tab href="/recipes?tab=lunch" active={tab === "lunch"}>Lunches ({lunches.length})</Tab>
-        <Tab href="/recipes?tab=cooks" active={tab === "cooks"}>✨ Your cooks</Tab>
+        <Tab href="/recipes?tab=cooks" active={tab === "cooks"}>✨ Food creators</Tab>
         <Tab href="/recipes?tab=browse" active={tab === "browse"}>Starters &amp; packs</Tab>
       </div>
 
