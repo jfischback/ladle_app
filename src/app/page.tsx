@@ -4,7 +4,7 @@ import { feastHolidayOn, feastTips } from "@/lib/feast";
 import { redirect } from "next/navigation";
 import { requireUserId } from "@/auth";
 import { activePlans, getSettings, myRecipes } from "@/lib/data";
-import { addDays, currentWeekStart, dayName, greeting, money, shortDate, today, upcomingWeekStart } from "@/lib/week";
+import { addDays, currentWeekStart, dayName, greeting, money, shortDate, today, upcomingWeekStart, weekDates, weekday } from "@/lib/week";
 import { PlanButton, DayCard, ApproveBar, RatePrompt, StartOverButton, GroceryChecklist, Celebrate } from "./HomeClient";
 import { FoodArt } from "@/components/FoodArt";
 import { Highlight } from "@/components/Highlight";
@@ -124,7 +124,7 @@ export default async function HomePage() {
       )}
 
       {!plan ? (
-        <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} yours={yours} startNow={daysLeft >= 2 ? `the rest of this week (${dayName(todayStr).slice(0, 3)} to ${dayName(addDays(upcoming, -1)).slice(0, 3)})` : null} />
+        <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={daysLeft >= 2 ? Math.min(settings.dinnersPerWeek, Math.max(1, weekDates(inProgress).filter((d) => d >= todayStr && settings.cookDays.includes(weekday(d))).length)) : settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} yours={yours} startNow={daysLeft >= 2 ? `the rest of this week (${dayName(todayStr).slice(0, 3)} to ${dayName(addDays(upcoming, -1)).slice(0, 3)})` : null} />
       ) : (
         <>
           <ul id="dinners" className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)] gap-3">
