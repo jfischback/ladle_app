@@ -14,16 +14,30 @@ export function parseOnHand(text: string): string[] {
 }
 
 // Words that turn an ingredient into a different thing from what was typed: "chicken" isn't chicken broth,
-// "butter" isn't peanut butter, "onion" isn't onion powder. Colors and cuts ("white rice", "chicken thighs") are fine.
-const OTHER_THING = new Set("peanut almond cashew apple coconut sesame cream cottage chicken beef pork turkey bone powder powdered garlic onion corn flour broth stock bouillon sauce paste extract juice soup seasoning salt cauliflower vinegar noodle wine".split(" "));
+// "butter" isn't peanut butter, "potatoes" aren't sweet potatoes, "rice" isn't cauliflower rice.
+const OTHER_THING = new Set("peanut almond cashew apple coconut sesame cream cottage chicken beef pork turkey bone powder powdered garlic onion broth stock bouillon sauce paste extract juice soup seasoning salt cauliflower vinegar noodle wine sweet".split(" "));
+// Cuts and shapes come after the thing itself ("chicken thighs", "broccoli florets").
+const CUTS = new Set("thigh breast tender tenderloin wing drumstick leg fillet filet cutlet strip floret chunk cube slice piece half quarter wedge stalk clove sprig leaf head bunch".split(" "));
+
+const GENERIC = new Set(["cheese"]);
+
+/** The thing an ingredient is: its last word that isn't a cut ("corn tortillas" -> tortilla, "chicken thighs" -> chicken). */
+function thingOf(words: string[]): string | null {
+  for (let i = words.length - 1; i >= 0; i--) if (!CUTS.has(words[i])) return words[i];
+  return words[words.length - 1] ?? null;
+}
 
 /** Does a recipe ingredient match something on hand? */
 function covered(item: string, onHand: string[]): boolean {
-  const itemWords = coreWords(item.split(",")[0]);
+  const itemWords = coreWords(shortName(item));
   const set = new Set(itemWords);
+  const thing = thingOf(itemWords);
   return onHand.some((h) => {
     const typed = coreWords(h);
     if (itemWords.some((w) => OTHER_THING.has(w) && !typed.includes(w))) return false;
+    // The thing itself has to be what's on hand: "corn" isn't corn tortillas, "tortillas" are.
+    // ("cheddar" covers "cheddar cheese": the kind of cheese is the thing.)
+    if (thing && !typed.includes(thing) && !(GENERIC.has(thing) && typed.length > 0 && itemWords.includes(typed[typed.length - 1]))) return false;
     return sameThing(item, h) || (typed.length > 0 && typed.every((w) => set.has(w)));
   });
 }
