@@ -110,13 +110,13 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
             <button className="btn-secondary shrink-0">Search</button>
           </form>
           <div className="flex flex-wrap gap-1.5">
-            <Link href={linkWith({ f: haveMode ? null : "have" })} aria-pressed={haveMode} className={`rounded-full border-2 px-3 py-1 text-sm font-bold ${haveMode ? "border-terracotta bg-terracotta text-cream" : "border-terracotta/40 bg-card text-terracotta-dark hover:border-terracotta"}`}>
+            <Link href={linkWith({ f: haveMode ? null : "have" })} aria-current={haveMode ? "true" : undefined} className={`rounded-full border-2 px-3 py-1 text-sm font-bold ${haveMode ? "border-terracotta bg-terracotta text-cream" : "border-terracotta/40 bg-card text-terracotta-dark hover:border-terracotta"}`}>
               🥫 Use what I have
             </Link>
             {FILTERS.filter((x) => all.some(x.keep)).map((x) => {
               const on = filter?.key === x.key;
               return (
-                <Link key={x.key} href={linkWith({ f: on ? null : x.key })} aria-pressed={on} className={`rounded-full border-2 px-3 py-1 text-sm font-bold ${on ? "border-olive bg-olive text-cream" : "border-line bg-card text-ink hover:border-olive/50"}`}>
+                <Link key={x.key} href={linkWith({ f: on ? null : x.key })} aria-current={on ? "true" : undefined} className={`rounded-full border-2 px-3 py-1 text-sm font-bold ${on ? "border-olive bg-olive text-cream" : "border-line bg-card text-ink hover:border-olive/50"}`}>
                   {x.label}
                 </Link>
               );
