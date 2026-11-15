@@ -1,0 +1,3747 @@
+[
+ {
+  "meal": "dinner",
+  "name": "Chili with Sweet Potatoes, Corn and Hatch Chiles, with Cornbread",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 60,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "teaspoons",
+    "item": "olive oil"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "yellow onion, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "small carrot, diced"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "red bell pepper, diced"
+   },
+   {
+    "amount": "1",
+    "unit": "(4 oz) can",
+    "item": "mild green chiles (Hatch), the whole can"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "small sweet potato, peeled and cut into 1/2-inch cubes"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon plus 1 teaspoon",
+    "item": "mild chili powder"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "teaspoons",
+    "item": "cumin"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "dried oregano"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "A pinch each of garlic powder, paprika and cayenne pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "A pinch of salt"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Freshly ground black pepper"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "crushed tomatoes (fire-roasted recommended)"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "vegetable broth or water, plus more if needed"
+   },
+   {
+    "amount": "1/2",
+    "unit": "(15 oz) can",
+    "item": "black beans and 1/2 (15 oz) can kidney beans, rinsed and drained (or 1 full can of either)"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "heaping cup frozen sweet corn"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "For garnish: tortilla chips, lime wedges, cheese, avocado, cilantro, sour cream or Greek yogurt"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large egg"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "honey"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup plus 2 tablespoons",
+    "item": "milk (whole preferred; low-fat works)"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup plus 2 tablespoons",
+    "item": "all-purpose flour, spooned into the cup and leveled"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup plus 2 tablespoons",
+    "item": "yellow cornmeal"
+   },
+   {
+    "amount": "3",
+    "unit": "tablespoons",
+    "item": "sugar"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "teaspoons",
+    "item": "baking powder"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "salt"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup (1/2 stick)",
+    "item": "unsalted butter, melted and cooled"
+   }
+  ],
+  "steps": [
+   "Chili: Warm the olive oil in a medium pot over medium-high heat. Add the garlic, onion, carrot, bell pepper, sweet potato and the green chiles and cook 5 to 7 minutes, stirring often.",
+   "Stir in the chili powder, cumin, oregano, garlic powder, paprika, cayenne, salt and some black pepper and cook about 30 seconds, stirring.",
+   "Add the crushed tomatoes, broth or water, beans and corn. Bring to a boil, then lower the heat and simmer 30 to 45 minutes, until thickened and the sweet potato is tender. Taste and adjust salt and seasoning.",
+   "Ladle into bowls and add your favorite garnishes.",
+   "Cornbread: Heat the oven to 350 degrees F and coat an 8 by 4-inch loaf pan with nonstick spray.",
+   "Whisk the egg in a medium bowl, then whisk in the honey, followed by the milk. Set aside.",
+   "In a large bowl, whisk the flour, cornmeal, sugar, baking powder and salt together.",
+   "Pour the milk mixture and the cooled melted butter into the dry ingredients and whisk just until blended. Some lumps are fine; do not overmix.",
+   "Spread the batter evenly in the prepared pan.",
+   "Bake 25 to 30 minutes, until the top is golden and set and a toothpick in the center comes out clean.",
+   "Cool in the pan 10 to 15 minutes, then cut into pieces and serve warm with the chili."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by chili: The Best Vegetarian Chili by Monique Volz, Ambitious Kitchen; cornbread: Cornbread by Jennifer Segal, Once Upon a Chef",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1Y8hIQEmQ7PbgF30A1IbMSUWkR9ve--O87RNYWM5riiA/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Beef Birria",
+  "protein": "Beef",
+  "servings": 4,
+  "totalMinutes": 330,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "roast beef (chuck roast)"
+   },
+   {
+    "amount": "1 to 1 1/2",
+    "unit": "cups",
+    "item": "water"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "dried guajillo chiles"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "dried ancho chile"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "garlic clove"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "dried oregano"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "dried thyme"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "clove"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Small piece of cinnamon stick (about 1/2 inch)"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "beef bouillon"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "laurel leaf or bay leaf"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "oil"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "For serving: diced onion, chopped cilantro and tortillas"
+   }
+  ],
+  "steps": [
+   "Make the chile sauce: Heat a griddle or dry pan. Toast the chiles 2 to 3 minutes, turning them often. Watch closely; if any burn, throw them out and start again, since burnt chiles turn the sauce bitter.",
+   "Move the toasted chiles to a heatproof bowl, pour 1/2 cup of hot water over them and let them soak about 5 minutes, until pliable.",
+   "Pull out the seeds and veins (leaving a few seeds is fine). Keep the soaking water.",
+   "Put the soaking water, chiles, garlic, oregano, thyme, clove, cinnamon, bouillon, bay leaf, salt and pepper in a blender and blend until smooth. Set aside.",
+   "Sear and slow cook the beef: Heat the 1 tablespoon of oil in a pot over medium heat.",
+   "Season the beef with salt and pepper and brown it well on all sides. Do not skip the sear; it builds flavor.",
+   "Transfer the browned beef to the slow cooker and pour the chile sauce over it.",
+   "Add enough water to cover the meat.",
+   "Cover and cook on low 5 to 7 hours, until the beef is tender. The smaller roast is often done sooner than the original 6 to 8 hours, so start checking at 5 hours.",
+   "Serve: Shred the beef.",
+   "Serve with diced onion, chopped cilantro and tortillas, with plenty of the cooking broth (the consomé) spooned into bowls for sipping or dipping tacos."
+  ],
+  "tags": [
+   "slow-cooker"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Slow Cooker Birria Recipe (Birria de Res) by Maggie Unzueta, Mamá Maggie's Kitchen",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1BMRAK7X4tiyur9zaTJ6yOLFCeJJMSZbd2ofB3XzCJVs/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Chicken Fried Steak with Sausage Gravy, Home Fries and Scrambled Eggs",
+  "protein": "Beef",
+  "servings": 2,
+  "totalMinutes": 90,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "olive oil, plus more as needed"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tablespoon",
+    "item": "butter"
+   },
+   {
+    "amount": "2/3",
+    "unit": "cup",
+    "item": "all-purpose flour"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "onion powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "smoked paprika"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "cayenne pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Kosher salt and freshly ground black pepper (amount not specified)"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large egg"
+   },
+   {
+    "amount": "3",
+    "unit": "tablespoons",
+    "item": "water"
+   },
+   {
+    "amount": "1 1/4",
+    "unit": "pounds",
+    "item": "cube steak"
+   },
+   {
+    "amount": "1/2",
+    "unit": "pound",
+    "item": "ground pork breakfast sausage (mild, hot or maple)"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "butter"
+   },
+   {
+    "amount": "2",
+    "unit": "tablespoons",
+    "item": "flour"
+   },
+   {
+    "amount": "1 1/4",
+    "unit": "cups",
+    "item": "milk"
+   },
+   {
+    "amount": "1/8",
+    "unit": "teaspoon",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1/8",
+    "unit": "teaspoon",
+    "item": "seasoned salt"
+   },
+   {
+    "amount": "1/8",
+    "unit": "teaspoon",
+    "item": "salt, plus more to taste"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "black pepper, plus more to taste"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "extra-virgin olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "unsalted butter"
+   },
+   {
+    "amount": "1",
+    "unit": "pound",
+    "item": "Yukon gold potatoes, cubed"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "chopped white onion"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "kosher salt"
+   },
+   {
+    "amount": "1/8",
+    "unit": "teaspoon",
+    "item": "garlic powder (not garlic salt)"
+   },
+   {
+    "amount": "5",
+    "unit": "",
+    "item": "large eggs"
+   },
+   {
+    "amount": "2",
+    "unit": "teaspoons",
+    "item": "milk, plant milk or water"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Extra-virgin olive oil or butter, for the pan"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Sea salt and freshly ground black pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Chopped fresh chives (optional)"
+   }
+  ],
+  "steps": [
+   "Home fries: Set a lidded skillet (10-inch is enough for this amount) over low-medium heat (about 4 on a 1 to 10 electric dial).",
+   "Add the olive oil and butter and stir gently until the butter melts.",
+   "Spread the potatoes in a single layer, put the lid on and cook 10 minutes without stirring so they steam and start to brown.",
+   "Uncover, gently turn the potatoes with a spatula, scatter the onion over the top, cover again and cook another 10 minutes.",
+   "Uncover and season with the salt and garlic powder.",
+   "Keep cooking uncovered, turning now and then, until the potatoes are golden on the sides and very tender when pierced, about 5 to 10 minutes more depending on cube size. Serve hot.",
+   "Chicken fried steak: Heat the olive oil and butter in a large nonstick skillet over medium heat until the surface of the fat ripples.",
+   "Meanwhile, whisk the flour, onion powder, smoked paprika, cayenne, salt and pepper together in a medium bowl.",
+   "In a second bowl, whisk the egg and water together.",
+   "Season the steaks on both sides with salt and pepper.",
+   "Coat a steak in the seasoned flour, dip it in the egg mixture, then coat it in the flour a second time.",
+   "Lay it in the hot skillet and repeat with the rest, adding more oil as needed. Cook in batches; a crowded pan steams the steaks and the coating will not crisp.",
+   "Fry about 3 to 4 minutes, until the underside is crisp and golden brown, then flip and cook about 4 minutes more until the second side is golden.",
+   "Move the steaks to a platter or baking sheet and tent loosely with foil to keep warm while you make the gravy.",
+   "Sausage gravy: Brown the sausage in a large skillet over medium-high heat, breaking it up, until no pink remains.",
+   "Add the butter and stir until it melts.",
+   "Sprinkle the flour over the sausage and stir about 2 minutes, until the raw flour smell is gone.",
+   "Pour in the milk slowly while whisking constantly until smooth; the gravy will bubble and thicken as the milk goes in.",
+   "Whisk in the garlic powder, seasoned salt, salt and pepper. Let it simmer 2 to 3 minutes until thickened, then taste and adjust the seasoning.",
+   "Spoon over the chicken fried steak and serve right away.",
+   "Scrambled eggs: Crack the eggs into a medium bowl, add the milk or water and whisk until completely smooth with no streaks of white.",
+   "Coat a 10-inch nonstick skillet with olive oil or melt a little butter in it over medium heat.",
+   "Pour in the eggs and leave them alone for a few seconds, then pull a rubber spatula across the bottom of the pan to form large, soft curds.",
+   "Turn the heat to medium-low and keep folding and stirring every few seconds, scraping the bottom and sides often so the curds cook evenly and do not dry out.",
+   "Take the pan off the heat while the eggs are mostly set but still look slightly wet; the leftover heat finishes them. The whole cook takes under 5 minutes.",
+   "Spoon out the baby's portion, then season the rest with salt and pepper and top with chives if you like."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by chicken fried steak: Chicken Fried Steak with Country Gravy by Lori Lange, Recipe Girl; sausage gravy: Best Sausage Gravy by Nichole, The Salty Marshmallow; home fries: Home Fries by Jess Smith, Inquiring Chef; scrambled eggs: How to Make Scrambled Eggs by Jeanine Donofrio, Love and Lemons",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1oYcxZauoXutSdGxJy8wekpTQrXYcS6DQLqIhETZPWBQ/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Classic Beef Burgers with Oven Fries",
+  "protein": "Beef",
+  "servings": 2,
+  "totalMinutes": 80,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "pound",
+    "item": "ground chuck"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "crushed saltine crackers or panko breadcrumbs (use 2 tablespoons if using regular dried breadcrumbs)"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large egg, beaten (use half, about 2 tablespoons)"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "Worcestershire sauce"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "milk"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "salt"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "onion powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "black pepper"
+   },
+   {
+    "amount": "2 or 3",
+    "unit": "",
+    "item": "buns and your favorite toppings, for serving"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "medium baking potatoes (about 1 1/2 pounds)"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "tablespoons",
+    "item": "olive oil"
+   },
+   {
+    "amount": "2",
+    "unit": "teaspoons",
+    "item": "seasoned salt or lemon pepper"
+   }
+  ],
+  "steps": [
+   "Oven fries: Heat the oven to 375 F and line a baking sheet with parchment paper.",
+   "Wash the potatoes. Peel them or leave the skins on, then cut them into fries of whatever size you like.",
+   "Soak the cut potatoes in cold water for at least 30 minutes. Drain and dry them very well.",
+   "Toss the fries with the oil and seasoned salt and spread them on the lined pan in a single layer.",
+   "Bake 20 minutes. Raise the oven to 425 F and bake another 20 to 25 minutes, until golden. Make the burgers while the fries finish.",
+   "Burgers: Pinch off about 2 ounces of the plain ground chuck for the baby (see below) before you season anything.",
+   "Put the rest of the ground chuck, crushed crackers, egg, Worcestershire, milk, salt, garlic powder, onion powder and pepper in a large bowl. Mix with your hands just until the mixture looks smooth and evenly combined, then stop; overworking it makes dense, heavy burgers.",
+   "Pat the mixture into an even disk in the bowl and cut it into 3 equal portions for patties of a little under 1/3 pound each.",
+   "Line a plate with wax paper or foil. Form each portion into a firm patty a little wider than your buns, since they shrink as they cook. Press a spoon into the center of each one to make a shallow dent so it stays flat.",
+   "Heat a grill or skillet to medium, about 350 to 400 F.",
+   "Cook the patties 3 to 4 minutes per side on the grill or in the skillet.",
+   "Put the hot patties on buns, add toppings and serve warm with the fries."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Best Hamburger Patty Recipe by Sommer Collier, A Spicy Perspective; side: Baked French Fries (Oven Fries) by Holly Nilsson, Spend With Pennies",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1m1oWGOLTpS5S-5dJe8AqGUqE4f04LgSTFfWywOlzkIU/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Cube Steak and Gravy with Mashed Potatoes",
+  "protein": "Beef",
+  "servings": 2,
+  "totalMinutes": 35,
+  "ingredients": [
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "cube steaks (one for each adult; the baby's portion comes from the third)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "flour (for dredging)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "onion powder"
+   },
+   {
+    "amount": "1/8",
+    "unit": "teaspoon",
+    "item": "salt"
+   },
+   {
+    "amount": "1/8",
+    "unit": "teaspoon",
+    "item": "freshly ground black pepper"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "olive oil or vegetable oil"
+   },
+   {
+    "amount": "2 1/2",
+    "unit": "tablespoons",
+    "item": "butter"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "medium onion, chopped"
+   },
+   {
+    "amount": "5",
+    "unit": "ounces",
+    "item": "mushrooms (about 2/3 of an 8-ounce package)"
+   },
+   {
+    "amount": "1",
+    "unit": "clove",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1 1/4",
+    "unit": "cups",
+    "item": "low-sodium beef broth, 2 tablespoons set aside"
+   },
+   {
+    "amount": "2",
+    "unit": "teaspoons",
+    "item": "Worcestershire sauce"
+   },
+   {
+    "amount": "2",
+    "unit": "teaspoons",
+    "item": "fresh thyme or parsley"
+   },
+   {
+    "amount": "2",
+    "unit": "teaspoons",
+    "item": "cornstarch"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and pepper to taste"
+   },
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "potatoes (russet or Yukon gold)"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "garlic clove (optional)"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "tablespoons",
+    "item": "melted salted butter"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "milk or cream"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and black pepper to taste"
+   }
+  ],
+  "steps": [
+   "Mashed potatoes: Peel the potatoes, cut them into quarters and put them in a pot of cold salted water (see the baby section if you want to skip the salt here).",
+   "Add the garlic if using and bring to a boil. Cook uncovered about 15 minutes, until a fork slides in easily, then drain well.",
+   "Warm the milk on the stove or in the microwave.",
+   "Add the butter to the potatoes and mash, pouring in the warm milk a little at a time until they are as smooth and loose as you like.",
+   "Season with salt and pepper and serve hot.",
+   "Cube steak and gravy: Mix the flour, garlic powder, onion powder, salt and pepper on a deep plate and coat each steak in it.",
+   "Heat the oil in a large skillet over medium heat. Brown the steaks on both sides until they reach 145°F inside, then move them to a plate.",
+   "Melt the butter in the same skillet over medium-high heat. Add the mushrooms and onion and cook 8 to 10 minutes, until the mushrooms are browned and the onion is soft.",
+   "Turn the heat to low, add the garlic and stir constantly for about 1 minute. Move the vegetables to a plate.",
+   "Pour in the broth (holding back the 2 tablespoons) and scrape up the browned bits from the bottom of the pan. Add the Worcestershire and thyme.",
+   "Whisk the cornstarch into the reserved 2 tablespoons of broth, then whisk it into the skillet. Bring to a low boil and simmer, whisking now and then, until the gravy thickens.",
+   "Put the mushrooms, onion and steaks back in the skillet, cover, and simmer 5 minutes. Season with salt, pepper and extra thyme if you like."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Cube Steak and Gravy by Beth Pierce, Small Town Woman; side: Mashed Potatoes by Holly Nilsson, Spend With Pennies",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1N6eIZsvSELpPuTlaBcxIwlO_iOmHp0pW7urZTPo3gKs/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Meatball Subs with Roasted Broccoli",
+  "protein": "Beef",
+  "servings": 2,
+  "totalMinutes": 35,
+  "ingredients": [
+   {
+    "amount": "5",
+    "unit": "oz",
+    "item": "ground beef"
+   },
+   {
+    "amount": "5",
+    "unit": "oz",
+    "item": "ground pork (or use 10 oz ground beef in total)"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large egg"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "small onion, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "garlic clove, minced"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "Parmesan cheese"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "breadcrumbs"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "salt"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "pepper"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "large onion, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "garlic clove, minced"
+   },
+   {
+    "amount": "1",
+    "unit": "can (15 oz)",
+    "item": "tomato sauce or passata (the whole can; a little extra sauce is fine for dipping)"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "water"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "Italian seasoning"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "salt"
+   },
+   {
+    "amount": "4",
+    "unit": "slices",
+    "item": "mozzarella cheese"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "hoagie rolls"
+   },
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "broccoli crowns (about 1 large head)"
+   },
+   {
+    "amount": "2 1/2",
+    "unit": "tbsp",
+    "item": "extra virgin olive oil"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "garlic cloves, finely grated or pressed"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Small pinch of red pepper flakes"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "kosher salt"
+   },
+   {
+    "amount": "2",
+    "unit": "tbsp",
+    "item": "raw sliced almonds"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "fresh lemon juice"
+   },
+   {
+    "amount": "2",
+    "unit": "tbsp",
+    "item": "freshly grated aged pecorino"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Zest of 1/4 lemon"
+   }
+  ],
+  "steps": [
+   "Meatballs and sauce: Combine all the meatball ingredients in a bowl. Roll the mixture by hand into 1-inch balls and set them on a plate.",
+   "Oil a nonstick pan and heat it over medium. Cook the meatballs 5 to 6 minutes, turning them halfway, then move them to a plate.",
+   "Put the pan back over medium heat with the olive oil, onion and garlic and cook until fragrant. Add the tomato sauce, water, Italian seasoning and salt and bring to a simmer.",
+   "Return the meatballs to the simmering sauce and cook until they are cooked through.",
+   "Assemble the subs: Heat the oven to 400°F (200°C).",
+   "Split the hoagie rolls. Fill each with a generous helping of warm meatballs, spoon marinara over them and top with the mozzarella.",
+   "Set the subs open-faced on a baking sheet and broil 2 to 3 minutes, until the cheese starts to melt.",
+   "Serve immediately.",
+   "Roasted broccoli: Heat the oven to 475°F with a rack in the center (use 425°F to 450°F if your oven runs hot or you want softer florets). Start this before the meatballs.",
+   "Line a sheet pan with foil. Trim the dry ends of the broccoli, leaving about 2 inches of stalk. Cut the crowns into 1/2-inch-thick slabs from the center outward, keep the small and medium florets whole, and halve any big ones lengthwise so the pieces are about the same size.",
+   "Whisk the olive oil, garlic and red pepper flakes in a large bowl, add the broccoli and toss to coat. Lay the pieces cut-side down on the pan with space between them and sprinkle with the salt.",
+   "Roast 10 to 12 minutes. Turn the broccoli over, scatter the almonds on the pan and roast another 8 to 10 minutes, until the broccoli is browned at the edges and tender when poked with a fork and the almonds are golden.",
+   "Move the broccoli to a plate, toss it with the lemon juice, and finish with the pecorino and lemon zest. Serve hot or at room temperature."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Meatball Subs by Arman Liew, The Big Man's World; side: The Best Roasted Broccoli by Laura, A Beautiful Plate",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/16y-nymsEPdqnvCv9u81Zxc0k2XtHP-1ArfknIUQGzYE/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Steak Fajitas",
+  "protein": "Beef",
+  "servings": 2,
+  "totalMinutes": 150,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "tablespoons",
+    "item": "fresh lime juice"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "tablespoons",
+    "item": "unsweetened pineapple juice"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "Worcestershire sauce"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "minced garlic (about 1 large clove)"
+   },
+   {
+    "amount": "3/4",
+    "unit": "teaspoon",
+    "item": "ground cumin"
+   },
+   {
+    "amount": "3/4",
+    "unit": "teaspoon",
+    "item": "chili powder (more to taste)"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "kosher salt"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "smoked paprika"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "black pepper"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "red pepper flakes (more to taste)"
+   },
+   {
+    "amount": "2",
+    "unit": "tablespoons",
+    "item": "chopped cilantro"
+   },
+   {
+    "amount": "3/4",
+    "unit": "pound",
+    "item": "skirt or flank steak"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "high-heat oil"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "medium white onion, sliced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "small poblano, ribs and seeds removed, sliced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large bell pepper (any color), thinly sliced"
+   },
+   {
+    "amount": "6 to 8",
+    "unit": "",
+    "item": "corn or flour tortillas, warmed, for serving"
+   }
+  ],
+  "steps": [
+   "Marinate the steak: Cut off a small piece of the steak (about 2 ounces) for the baby and keep it plain in the fridge.",
+   "Stir all the marinade ingredients together in a shallow dish or a zip-top bag. Taste and adjust the seasoning.",
+   "Add the rest of the steak and turn it to coat. Cover and refrigerate at least 2 to 4 hours; overnight is best.",
+   "Pull the steak out of the fridge 30 minutes before you plan to cook it.",
+   "Cook: Heat a large cast-iron skillet or grill pan over high heat for a couple of minutes.",
+   "Sear the steak about 3 to 5 minutes per side; roughly 3 minutes per side gives medium-rare, longer for more done. Press on it to check firmness as it cooks, and drop the heat to medium-high if the pan gets too hot. Cook the baby's plain piece alongside until well done.",
+   "Move the steak to a plate, tent loosely with foil and let it rest for several minutes.",
+   "Add the tablespoon of high-heat oil to the same pan over high heat. Add the onion, poblano and bell pepper and let them sizzle, tossing now and then, for 2 to 3 minutes total (longer if you like them softer). Before salting, lift out a few strips of bell pepper and onion for the baby. Season the rest with a pinch of salt and pepper.",
+   "Slice the rested steak thinly against the grain, on an angle. Add the slices back to the vegetables if you like.",
+   "Serve in warm corn or flour tortillas, or over cilantro-lime rice, with your favorite toppings."
+  ],
+  "tags": [
+   "marinate-ahead"
+  ],
+  "ease": null,
+  "prepAhead": "Marinate the steak at least 2 to 4 hours before cooking; overnight is best.",
+  "creditName": "Inspired by The BEST Steak Fajitas by Marzia, Little Spice Jar",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1uB3JNzOtY37-IeMAkesxMFw6l4A6munn0ambyV5x0vY/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Chicken Fettuccine Alfredo",
+  "protein": "Chicken",
+  "servings": 2,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large chicken breast (about 3/4 to 1 lb)"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "kosher salt"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "black pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of smoked paprika (about 1/8 tsp)"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1/2",
+    "unit": "Tbsp",
+    "item": "salted butter"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Large pot of water"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "kosher salt, for the pasta water"
+   },
+   {
+    "amount": "8",
+    "unit": "oz",
+    "item": "fettuccine (half a 16 oz box)"
+   },
+   {
+    "amount": "4",
+    "unit": "Tbsp",
+    "item": "salted butter"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1 1/4",
+    "unit": "cups",
+    "item": "heavy cream"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "kosher salt"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "freshly grated Parmesan, divided (2/3 cup for the sauce, the rest for garnish)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of black pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of cayenne pepper"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "chopped fresh Italian parsley"
+   }
+  ],
+  "steps": [
+   "Cook the chicken: Cut the chicken breast in half horizontally into two thinner cutlets so they cook evenly.",
+   "Stir the salt, garlic powder, pepper and smoked paprika together. Pat the chicken dry and season both sides.",
+   "Heat a large skillet over medium-high for 2 to 3 minutes, until very hot. Add the olive oil and wait for it to shimmer, then lay in the chicken and leave it alone.",
+   "Turn the heat to medium and sear 3 to 4 minutes without moving it; it is ready to flip when it releases easily. Flip, add the 1/2 Tbsp butter right away, and cook 2 to 3 minutes more, until an instant-read thermometer shows 160°F.",
+   "Rest the chicken on a plate for 5 minutes (it will climb to about 165°F). Keep it warm and slice just before serving.",
+   "Cook the pasta: While the chicken cooks, bring a large pot of water to a boil and add the 1 Tbsp kosher salt.",
+   "Cook the fettuccine al dente according to the package. Save about 1 cup of the pasta water, then drain. Toss the noodles with a little olive oil so they do not stick.",
+   "Make the sauce and finish: Melt the 4 Tbsp butter in a clean skillet (or the chicken pan).",
+   "When the butter is melted and just bubbling, add the garlic and cook 30 to 60 seconds, until fragrant.",
+   "Slowly pour in the cream, stirring, and season with the 1/2 tsp salt, black pepper and cayenne. Cook over medium heat 2 to 3 minutes, just until the edges start to bubble. Do not let it boil.",
+   "Turn the heat to medium-low and add 2/3 cup of the Parmesan a little at a time, stirring until it melts into the sauce.",
+   "Add the drained pasta and toss to coat. If the sauce gets too thick, loosen it with reserved pasta water, 2 Tbsp at a time.",
+   "Slice the chicken thin and lay it over the pasta. Top with the parsley and the remaining Parmesan."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Chicken Fettucine Alfredo by Amy Nash, House of Nash Eats",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1cGi_41oIIxuIfSuoWhqXwIN035jwMTW1hzWR7hfw8vQ/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Chicken Salad Sandwiches with Fresh Fruit Salad",
+  "protein": "Chicken",
+  "servings": 2,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "1 1/4",
+    "unit": "cups",
+    "item": "cooked, chopped chicken"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "chopped celery"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "red seedless grapes, halved"
+   },
+   {
+    "amount": "2 1/2",
+    "unit": "tbsp",
+    "item": "dried cranberries"
+   },
+   {
+    "amount": "2 1/2",
+    "unit": "tbsp",
+    "item": "roasted pecans, chopped"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "mayonnaise (or Greek yogurt)"
+   },
+   {
+    "amount": "1/8",
+    "unit": "tsp",
+    "item": "kosher salt"
+   },
+   {
+    "amount": "1/8",
+    "unit": "tsp",
+    "item": "ground black pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Chopped celery leaves (optional)"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "green grapes (halved if large)"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "strawberries, quartered or sliced"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "blueberries"
+   },
+   {
+    "amount": "1",
+    "unit": "tbsp",
+    "item": "honey (or agave)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Zest of 1/2 lime (about 1 tsp, optional)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Juice of 1/2 lime (about 1 tbsp)"
+   }
+  ],
+  "steps": [
+   "Chicken salad: Put the chicken, celery, grapes, cranberries, pecans, mayonnaise, salt and pepper in a bowl, along with chopped celery leaves if using.",
+   "Stir gently just until everything is combined, then serve.",
+   "Fresh fruit salad: Put the grapes, strawberries and blueberries in a bowl. Take out the baby's fruit now, before any dressing goes on.",
+   "Drizzle the honey, lime juice and lime zest (if using) over the rest of the fruit.",
+   "Stir gently until the fruit is coated. Taste and add a little more honey or lime juice if you like.",
+   "Serve right away for the best texture, ideally within about 2 hours."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Chicken Salad with Grapes by Robyn Stone, Add A Pinch; side: Honey Lime Fruit Salad by Emily Dixon, One Lovely Life",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1PvePT2aHm1S8hDAijdF8YCv7MVbAhatzyTNwE7vJVCw/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Chicken Thighs with Jalapeno Creamed Corn",
+  "protein": "Chicken",
+  "servings": 2,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "1/2",
+    "unit": "tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tbsp",
+    "item": "butter"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "boneless, skinless chicken thighs"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt, to taste"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pepper, to taste"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "onion powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "dried cilantro"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "chili powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "dried oregano"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "smoked paprika"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of cumin"
+   },
+   {
+    "amount": "2/3",
+    "unit": "cup",
+    "item": "canned corn (about half of a 341 mL / 12 oz can) or thawed frozen kernels"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "small yellow onion, finely chopped"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "jalapenos, finely chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "garlic clove, finely chopped"
+   },
+   {
+    "amount": "2",
+    "unit": "tbsp",
+    "item": "cream cheese"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "sharp cheddar, shredded"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "heavy cream"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "dried cilantro"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of chili powder"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of salt"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Fresh cilantro, chopped"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Ranch or blue cheese dressing"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Fresh lime"
+   }
+  ],
+  "steps": [
+   "Chicken: Pat the thighs dry with paper towel and season both sides generously with salt and pepper.",
+   "Mix the onion powder, dried cilantro, chili powder, oregano, smoked paprika and cumin in a small bowl.",
+   "Rub the spice mix evenly over both sides of each thigh.",
+   "Heat the olive oil and butter in a large pan over medium-high heat.",
+   "When the fat is hot, add the chicken and pan-fry 3 to 4 minutes per side, until cooked through (the source gives no temperature; thick thighs may need longer). Move to a plate and cover with foil to keep warm.",
+   "Creamed corn: In the same pan, cook the onion and jalapenos 3 to 4 minutes.",
+   "Add the garlic, corn, dried cilantro, chili powder and salt and cook 2 minutes more over medium heat.",
+   "Add the heavy cream and cream cheese and stir until the cream cheese melts into the cream.",
+   "Stir in the cheddar and simmer about 2 minutes, until the cheese melts and the corn thickens. If it gets too thick, thin it with a splash more cream.",
+   "Taste and adjust the seasoning.",
+   "Serve: Spoon the creamed corn onto plates, set the chicken on top, and finish with ranch, cilantro and a squeeze of lime. Serve right away."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Chicken Thighs with Jalapeno Creamed Corn by Sammy Montgoms, sammymontgoms.com",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1PlDs_sJc-zL-NE61YBfEfIMRN14e6-HQugILIrrWZSY/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Chicken Tinga Tostadas",
+  "protein": "Chicken",
+  "servings": 2,
+  "totalMinutes": 55,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "boneless chicken breasts"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "About 2 cups water (enough to cover the chicken)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "",
+    "item": "onion"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "garlic clove"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "bay leaf"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "salt"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "black pepper"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large tomato, diced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "chipotle pepper in adobo (keep the rest of the can; it freezes well)"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "chicken broth, reserved from cooking the chicken"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "salt"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "oil"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "medium onion, thinly sliced"
+   },
+   {
+    "amount": "1",
+    "unit": "package",
+    "item": "tostadas (use what you need; the rest keep)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Refried beans"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Lettuce"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Cilantro"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Green onions"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Cotija cheese"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Sour cream"
+   }
+  ],
+  "steps": [
+   "Cook the chicken: Put the chicken, water, onion piece, garlic, bay leaf, salt and pepper in a saucepan and simmer about 25 minutes, until the chicken is no longer pink.",
+   "Lift out the chicken and save about 2/3 cup of the broth (1/3 cup for the sauce plus a little extra). Discard the onion, garlic and bay leaf. When the chicken is cool enough to handle, shred it.",
+   "Make the tinga: Blend the tomato, chipotle, salt and the 1/3 cup reserved broth until smooth.",
+   "Heat the oil in a saucepan and cook the sliced onion, stirring often, until translucent.",
+   "Add the shredded chicken and the blended sauce and simmer about 10 minutes over medium heat. If it looks dry, add up to 1/3 cup more broth.",
+   "Assemble: Spread about 2 tablespoons of refried beans on a tostada, top with about 2 tablespoons of tinga, then add lettuce, sour cream and cotija (plus cilantro and green onions). Repeat with the remaining tostadas."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Chicken Tinga Tostadas by Maggie Unzueta, Mama Maggie's Kitchen",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1zHmv2v9dUQW6fwalKXVTfvtFUaC72WMvnupTJ-Mt430/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Copycat KFC Famous Bowls",
+  "protein": "Chicken",
+  "servings": 2,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "large baking potatoes (such as russets, about 1 1/2 pounds), peeled and cubed"
+   },
+   {
+    "amount": "2",
+    "unit": "tablespoons",
+    "item": "half-and-half"
+   },
+   {
+    "amount": "4",
+    "unit": "oz",
+    "item": "cream cheese (half a block), softened"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and pepper, to taste"
+   },
+   {
+    "amount": "5 to 6",
+    "unit": "",
+    "item": "crispy chicken strips, cooked"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "corn kernels (about half a 15 oz can, or frozen), warmed"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "brown gravy"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   }
+  ],
+  "steps": [
+   "Make the mashed potatoes: Bring a pot of salted water to a boil over high heat. Turn the heat down to medium-high, add the cubed potatoes and cook about 30 minutes, until a fork slides in easily.",
+   "Drain the potatoes and put them back in the hot pot. Mash them as smooth as you can with a potato masher.",
+   "Add the half-and-half and softened cream cheese and mash again until smooth and fully combined. Scoop out the baby's portion now, then season the rest with salt and pepper.",
+   "Build the bowls: Have the chicken strips cooked and hot, the corn warmed and the gravy heated.",
+   "Put one or two scoops of mashed potatoes in a soup bowl and add a spoonful or two of corn.",
+   "Lay a couple of chicken strips on top, drizzle with brown gravy and sprinkle with shredded cheddar.",
+   "Repeat for the second bowl and serve right away."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Copycat KFC Famous Bowls by Meaghan, 4 Sons 'R' Us",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1RzaD66knSA-Mm_KBQ9AkuBtCnEUCUnvAiVT3LTT1aAo/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Hot Honey Chicken Cutlets with Mashed Sweet Potatoes",
+  "protein": "Chicken",
+  "servings": 2,
+  "totalMinutes": 40,
+  "ingredients": [
+   {
+    "amount": "2 1/2",
+    "unit": "cups",
+    "item": "cornflakes (gluten-free if needed)"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "grated Parmesan"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "smoked paprika"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "onion powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of salt"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large egg, beaten"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "hot sauce"
+   },
+   {
+    "amount": "3/4",
+    "unit": "lb",
+    "item": "chicken breast tenderloins"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Extra virgin olive oil, for drizzling"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "honey"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "hot sauce"
+   },
+   {
+    "amount": "1/2 to 1",
+    "unit": "tsp",
+    "item": "cayenne pepper"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "chipotle chili powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "onion powder"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of sea salt"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Fresh thyme, cilantro or parsley, for serving"
+   },
+   {
+    "amount": "1 1/4",
+    "unit": "lb",
+    "item": "sweet potatoes, peeled"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "Tbsp",
+    "item": "butter"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "half-and-half or milk, warmed"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and black pepper to taste"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Dash of cinnamon (optional)"
+   }
+  ],
+  "steps": [
+   "Hot honey chicken: Heat the oven to 425°F and line a baking sheet with parchment paper.",
+   "In a food processor, pulse the cornflakes, Parmesan, smoked paprika, onion powder, garlic powder and a pinch of salt until they become fine crumbs. If you have no processor, seal everything in a zip-top bag and crush it. Tip the crumbs into a shallow dish.",
+   "Beat the egg in a bowl. Dip the baby's piece of chicken in the plain egg, press it into the crumbs and set it at one end of the sheet. Then stir the hot sauce into the egg and add the rest of the chicken, turning it so every piece is coated.",
+   "Press each remaining piece of chicken into the crumbs until fully covered and set it on the lined sheet. For a thicker crust, dip it back in the egg and then the crumbs a second time.",
+   "Drizzle the chicken with olive oil and bake 20 to 25 minutes, until it is crisp on all sides.",
+   "While the chicken is finishing, warm the honey, hot sauce, cayenne, chipotle chili powder, garlic powder, onion powder and a pinch of salt together in a small saucepan.",
+   "Move the baby's piece to a separate plate first. Then spoon the warm hot honey over the adults' chicken and scatter fresh herbs on top. If the honey thickens as it sits, microwave it for about 5 seconds to loosen it.",
+   "Mashed sweet potatoes: Cut the peeled sweet potatoes into 2-inch chunks.",
+   "Boil them in a pot of salted water until tender, about 15 minutes.",
+   "Drain well and leave them in the colander a few minutes so the leftover water steams off.",
+   "Return them to the pot, add the butter and mash, adding the warm half-and-half a little at a time until they are as smooth as you like. You may not need all of it.",
+   "Season with salt and pepper and serve hot, with a dash of cinnamon if you like."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Baked Crunchy Hot Honey Chicken by Tieghan Gerard, Half Baked Harvest; side: Mashed Sweet Potatoes by Holly Nilsson, Spend With Pennies",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1SAw1_6dAflp5JPkqcwof7hsU7y0EtJemfnLFbgXzTR8/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Lemon and Garlic Tahini Chicken and Rice",
+  "protein": "Chicken",
+  "servings": 2,
+  "totalMinutes": 80,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "chicken thighs, bone-in and skin-on (2 marinated for the adults, 1 kept plain for the baby; see the baby section)"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "lemon, juiced"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tbsp",
+    "item": "lemon zest"
+   },
+   {
+    "amount": "1",
+    "unit": "tbsp",
+    "item": "honey"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "garlic cloves, minced"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "salt"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "pepper"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "dried oregano"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "dried parsley"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "lemon pepper seasoning (optional)"
+   },
+   {
+    "amount": "1",
+    "unit": "tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "2",
+    "unit": "tbsp",
+    "item": "tahini"
+   },
+   {
+    "amount": "1 to 2",
+    "unit": "tbsp",
+    "item": "warm water, as needed to thin"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "garlic clove, minced"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "maple syrup"
+   },
+   {
+    "amount": "1/4",
+    "unit": "",
+    "item": "lemon, juiced (about 1/2 tbsp)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of salt"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tbsp",
+    "item": "olive oil, for searing"
+   },
+   {
+    "amount": "1 1/4",
+    "unit": "cups",
+    "item": "salted chicken stock"
+   },
+   {
+    "amount": "1/4",
+    "unit": "",
+    "item": "yellow onion, finely chopped"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "lemon peels"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "uncooked jasmine rice"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "dried oregano"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "chili flakes"
+   }
+  ],
+  "steps": [
+   "Marinate: Whisk all the marinade ingredients except the chicken in a small bowl, then coat the adults' chicken thoroughly. Cover and refrigerate overnight for the best flavor, or at least 20 minutes if pressed for time.",
+   "Cook: Heat the oven to 400 F.",
+   "Heat 1/2 tbsp olive oil in a 10-inch oven-safe skillet over medium-high heat. Sear the chicken 1 to 2 minutes per side, just until lightly golden, and set it aside.",
+   "Turn the heat to medium. Add the onion, oregano, chili flakes and lemon peels and cook 4 to 5 minutes, until the onion is soft and fragrant.",
+   "Stir in the rice, scraping up the browned bits from the pan, and toast 1 to 2 minutes, stirring often.",
+   "Turn off the heat, pour in the stock and nestle the chicken thighs back into the rice.",
+   "Cover and bake 40 to 55 minutes, until the rice is fully tender and the chicken is cooked through.",
+   "Dressing and serving: While the chicken bakes, blend the dressing ingredients until smooth (or whisk until creamy), adding warm water a little at a time until it drizzles easily. Double it if you want extra.",
+   "Take the pan out of the oven, remove the lemon peels, spoon the dressing over the top and serve right away."
+  ],
+  "tags": [
+   "marinate-ahead",
+   "one-pot"
+  ],
+  "ease": null,
+  "prepAhead": "Marinate the chicken overnight for best flavor (at least 20 min minimum).",
+  "creditName": "Inspired by Lemon and Garlic Tahini Chicken and Rice by Sammy Montgoms, sammymontgoms.com",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1iwORAkA1TD7tbnJ7l9KowYppCKlBImnoDkfdlrY5rpo/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Pinchos de Pollo with Arroz con Gandules",
+  "protein": "Chicken",
+  "servings": 2,
+  "totalMinutes": 145,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "boneless, skinless chicken thighs (about 4 to 5 thighs), cut into bite-sized pieces"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "adobo"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "packet sazon con culantro y achiote (about 1/2 tsp; the other half goes in the rice)"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "dried oregano"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of garlic powder (about 1/8 tsp)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "cumin"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "vinegar"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "barbecue sauce, plus extra for brushing and serving"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Toasted baguette slices (optional)"
+   },
+   {
+    "amount": "3 to 4",
+    "unit": "",
+    "item": "bamboo skewers (if using)"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "diced country ham or bacon (optional)"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "sofrito"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "water or low-sodium chicken broth"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "packet sazon con achiote y culantro (about 1/2 tsp)"
+   },
+   {
+    "amount": "1/4 to 1/2",
+    "unit": "",
+    "item": "chicken bouillon cube, to taste"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "tomato paste (or 2 Tbsp tomato sauce)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "dried Italian seasoning or oregano"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "chopped fresh cilantro (optional)"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "bay leaf"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "pimento-stuffed olives (optional)"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "pigeon peas (gandules), drained and rinsed (about a third of a 15 oz can; refrigerate the rest)"
+   },
+   {
+    "amount": "2/3",
+    "unit": "cup",
+    "item": "parboiled rice"
+   }
+  ],
+  "steps": [
+   "Pinchos: If using bamboo skewers, submerge them fully in water for at least 1 hour before grilling so they do not burn.",
+   "Stir the olive oil, adobo, sazon, oregano, garlic powder, cumin and vinegar together in a bowl. Add the chicken and toss until every piece is coated. Cover and refrigerate at least 2 to 3 hours; for the most flavor, marinate from the morning for dinner, or overnight.",
+   "Optional: take the chicken out of the refrigerator about 15 minutes before threading so it is not ice cold.",
+   "Thread the chicken onto the skewers, packing the pieces snugly but leaving a little space between them, and leave some bare skewer at each end to hold.",
+   "Heat the grill to medium. Lay the skewers on the grate in a single layer and cook 5 minutes. Brush the top side with barbecue sauce, then flip.",
+   "Brush the second side with barbecue sauce and cook another 5 minutes.",
+   "Check doneness. Brush on more sauce and keep cooking a few more minutes until the chicken reaches 170 to 175 F inside, which keeps the thigh meat tender and juicy.",
+   "Serve right away with the rice, extra barbecue sauce and toasted baguette slices if you like.",
+   "Arroz con gandules: Start the rice about 35 minutes before you grill. Warm a small heavy pot or caldero over medium heat. Add the oil, the ham or bacon if using, and the sofrito, and stir about 4 minutes until fragrant and soft but not browned.",
+   "Stir in the sazon, tomato paste and bouillon.",
+   "Add the pigeon peas, oregano, bay leaf and water or broth, plus the cilantro and olives if using. Bring to a boil and taste; the liquid should be well seasoned because it flavors the rice. Add a little more bouillon only if it needs it.",
+   "Pour in the rice and stir so every grain is under the liquid and the peas are spread through it.",
+   "Cover and let it cook until the liquid on the surface is mostly gone. Stir once, cover again and turn the heat to low.",
+   "Steam 20 to 25 minutes, until the liquid is absorbed and the rice is fluffy and cooked through. Remove the bay leaf and fluff before serving."
+  ],
+  "tags": [
+   "marinate-ahead",
+   "grill"
+  ],
+  "ease": null,
+  "prepAhead": "Marinate the chicken at least 2 to 3 hours (from the morning, or overnight, for most flavor); soak bamboo skewers at least 1 hour.",
+  "creditName": "Inspired by Pinchos (Puerto Rican Chicken Skewers) by Alpana Beiser, GypsyPlate; side: Arroz Con Gandules (Puerto Rican Rice with Pigeon Peas) by Jannese Torres, Delish D'Lites",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/17SUO-OuRK8GvjHUg3bcMQ73Y2jr-5m_cuTtXvPVpCkg/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Pozole Blanco de Pollo",
+  "protein": "Chicken",
+  "servings": 4,
+  "totalMinutes": 120,
+  "ingredients": [
+   {
+    "amount": "",
+    "unit": "",
+    "item": "About 2 lb bone-in chicken pieces (half a whole chicken, or 4 to 5 thighs and drumsticks)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "",
+    "item": "onion"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "garlic clove"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "teaspoons",
+    "item": "salt"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "ground pepper"
+   },
+   {
+    "amount": "6 to 7",
+    "unit": "cups",
+    "item": "water, divided"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "canned hominy, drained and rinsed (one 25 oz can is about right)"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "teaspoons",
+    "item": "dried oregano"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "cube chicken bouillon (or chicken broth)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Diced onion"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Dried oregano"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Shredded cabbage or lettuce"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Chile de arbol"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Lime"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Cilantro"
+   }
+  ],
+  "steps": [
+   "Put the chicken pieces in a medium stockpot with the onion, garlic, salt and pepper.",
+   "Pour in about 3 to 4 cups of water, enough to cover the chicken.",
+   "Cover and cook over medium-high heat for 1 hour.",
+   "Take the chicken out and let it cool until you can handle it. Keep all of the cooking liquid in the pot and taste it for salt.",
+   "Remove and discard the onion and garlic from the broth.",
+   "Shred the chicken with two forks into small bite-sized pieces, discarding skin and bones.",
+   "Add the drained, rinsed hominy and the shredded chicken to the pot, along with the dried oregano.",
+   "Pour in the rest of the water (add extra water or broth if you ended up with less broth than needed).",
+   "Add the bouillon; skip it if you have plenty of rich homemade broth, or season with salt instead.",
+   "Cover and bring to a boil, then reduce the heat and simmer 45 minutes.",
+   "Ladle into bowls and add toppings as you like."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Pozole Blanco (Chicken Pozole) by Maggie Unzueta, Mama Maggie's Kitchen",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/106afOekkl0CvzSb_z6UkiCGtQMZ6kzUHjn2-YbeP3ck/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Pulled BBQ Chicken with Homemade Coleslaw",
+  "protein": "Chicken",
+  "servings": 4,
+  "totalMinutes": 125,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lbs",
+    "item": "boneless, skinless chicken breasts"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "BBQ sauce (the author uses Sweet Baby Ray's Honey BBQ)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "",
+    "item": "medium onion, grated, with its juice"
+   },
+   {
+    "amount": "1/2",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1/2",
+    "unit": "Tbsp",
+    "item": "Worcestershire sauce"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "brown sugar"
+   },
+   {
+    "amount": "1 2/3",
+    "unit": "cups",
+    "item": "shredded green cabbage"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "shredded red cabbage"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "shredded carrot"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "mayonnaise"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "white vinegar"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "apple cider vinegar"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "granulated sugar"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "celery seed"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and black pepper, to taste"
+   }
+  ],
+  "steps": [
+   "Pulled BBQ chicken: In a slow cooker (a 3 to 4 quart cooker suits this half batch; the source uses 5 to 6 quarts), mix the BBQ sauce, grated onion with its juice, olive oil, Worcestershire sauce and brown sugar.",
+   "Add the chicken breasts and turn them so they are coated in the sauce.",
+   "Cover and cook on high for 2 to 3 hours or on low for 6 to 7 hours. Start checking sooner if your pieces are small, you are making a smaller batch (as here), or your slow cooker runs hot.",
+   "The chicken is ready when it reads 165°F inside and pulls apart easily.",
+   "Move the breasts to a cutting board and shred them with two forks, then put the meat back in the slow cooker and stir until it is coated in the sauce.",
+   "Coleslaw: Whisk the mayonnaise, white vinegar, apple cider vinegar, sugar, celery seed, salt and pepper together in a large bowl.",
+   "Add the green cabbage, red cabbage and carrot and toss until everything is evenly dressed.",
+   "Cover and refrigerate for at least 1 hour so the flavors come together before serving."
+  ],
+  "tags": [
+   "slow-cooker"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by pulled BBQ chicken: Slow Cooker BBQ Chicken Recipe by Natasha Kravchuk, Natasha's Kitchen; coleslaw: The Best Coleslaw Recipe by Holly Nilsson, Spend With Pennies",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1eu3J72XsWd-Kfg5BIJ4SoHFuJtPtxsvnv2K561A4CBY/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Rosemary Chicken and Potatoes",
+  "protein": "Chicken",
+  "servings": 2,
+  "totalMinutes": 55,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "bone-in, skin-on chicken pieces (breasts, thighs, drumsticks or a mix)"
+   },
+   {
+    "amount": "2",
+    "unit": "tbsp",
+    "item": "melted butter"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "hot paprika, divided"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "minced garlic, divided"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "onion powder, divided"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "Italian seasoning, divided"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "kosher salt, divided"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "black pepper"
+   },
+   {
+    "amount": "1",
+    "unit": "tbsp",
+    "item": "chopped fresh rosemary, divided"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "lemon zest"
+   },
+   {
+    "amount": "1",
+    "unit": "tbsp",
+    "item": "avocado oil"
+   },
+   {
+    "amount": "10",
+    "unit": "oz",
+    "item": "baby red potatoes, halved (quartered if larger)"
+   },
+   {
+    "amount": "8",
+    "unit": "oz",
+    "item": "green beans, cleaned and trimmed"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Fresh parsley, for garnish"
+   }
+  ],
+  "steps": [
+   "Set a rack in the center of the oven and heat it to 400°F. Line a baking sheet with heavy-duty foil and then parchment.",
+   "Stir the melted butter with the black pepper, 1/4 tsp paprika, 1 tsp garlic, 1/4 tsp onion powder, 1/4 tsp Italian seasoning, 1/2 tsp salt, 1/2 tbsp rosemary and the lemon zest. Set 2 tsp of this butter aside for the green beans.",
+   "Loosen the chicken skin and rub the rest of the butter mixture both under and over it. Arrange the chicken on the baking sheet.",
+   "In a bowl, toss the potatoes with the avocado oil and the remaining 1/4 tsp paprika, 1 tsp garlic, 1/4 tsp onion powder, 1/4 tsp Italian seasoning, 1/2 tsp salt and 1/2 tbsp rosemary. Spread them on the pan with the chicken.",
+   "Roast 35 minutes. Check the chicken with a thermometer and take off any pieces that have reached 165°F. If a piece is browning too fast but is not done, slide it to one side and tent it loosely with foil.",
+   "Put the green beans in the potato bowl and toss them with the reserved 2 tsp of seasoned butter.",
+   "Spread the green beans on the pan alongside the potatoes and roast about 10 minutes more, until the chicken reads 165°F, the potatoes are tender and the beans are just past crisp-tender.",
+   "Let the pan cool a few minutes, scatter parsley over the top and serve."
+  ],
+  "tags": [
+   "sheet-pan"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Rosemary Chicken with Potatoes and Green Beans by Marzia, Little Spice Jar",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1BTlcaa9E6YjUci33bGf5ELCX7QjwZVXJ1twrmkod2tw/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Slow Cooker Honey Garlic Chicken and Veggies with White Rice",
+  "protein": "Chicken",
+  "servings": 4,
+  "totalMinutes": 420,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "bone-in, skin-on chicken thighs"
+   },
+   {
+    "amount": "8",
+    "unit": "oz",
+    "item": "baby red potatoes, halved"
+   },
+   {
+    "amount": "8",
+    "unit": "oz",
+    "item": "baby carrots"
+   },
+   {
+    "amount": "8",
+    "unit": "oz",
+    "item": "green beans, trimmed"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "chopped fresh parsley leaves (optional)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "reduced sodium soy sauce"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "honey"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "ketchup"
+   },
+   {
+    "amount": "1",
+    "unit": "clove",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "dried basil"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "dried oregano"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of crushed red pepper flakes"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of ground black pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Optional, for a thicker sauce: 1 1/2 tsp cornstarch mixed with 1 1/2 tsp of the cooking liquid"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "long-grain white rice (jasmine or basmati)"
+   },
+   {
+    "amount": "1",
+    "unit": "cup plus 2 Tbsp",
+    "item": "water"
+   }
+  ],
+  "steps": [
+   "Chicken and veggies: Stir the soy sauce, honey, ketchup, garlic, basil, oregano, red pepper flakes and black pepper together in a large bowl.",
+   "Put the chicken thighs, potatoes and carrots in the slow cooker (a 3 to 4 quart cooker suits this half batch) and pour the sauce over them.",
+   "Cover and cook on low for 7 to 8 hours or on high for 3 to 4 hours, basting the chicken with the sauce every hour. In a larger 6-quart cooker, start checking at the early end of the time range.",
+   "For the final 30 minutes of cooking, add the green beans. If you want a thicker sauce, stir in the cornstarch slurry at the same time.",
+   "Optional crisping step: heat the oven broiler. Lay the thighs skin side up on a baking sheet and broil about 3 to 4 minutes, until the skin is crisp. Watch closely so it does not burn.",
+   "Serve the chicken right away with the potatoes, carrots and green beans, sprinkled with parsley if you like.",
+   "White rice: Put the rice in the pot, cover it by about an inch with room-temperature water, swish it around with your fingers and drain it through a fine mesh strainer. Do this three times in total.",
+   "Return the drained rice to the pot and pour in the 1 cup plus 2 Tbsp water, stirring as you add it. Once the pot is on the heat, do not stir again.",
+   "Bring it to a boil over medium heat; do not turn the heat higher to hurry it, or the rice can turn mushy. Keep it boiling until the water level falls below the top of the rice and a few small mounds of rice poke above the surface.",
+   "Drop the heat to the lowest setting. Lay a kitchen towel over the pot, set the lid on top and seal it as tightly as you can, folding the towel corners up over the lid handle so they stay away from the burner.",
+   "Set a timer for 15 minutes and leave the lid and towel in place the whole time.",
+   "Turn off the heat and let the rice sit, still covered, for another 10 minutes.",
+   "Take off the lid and towel, fluff the rice with a fork and serve hot under the chicken and veggies."
+  ],
+  "tags": [
+   "slow-cooker"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by chicken and veggies: Slow Cooker Honey Garlic Chicken and Veggies by Chungah Rhee, Damn Delicious; white rice: How To Cook The Perfect White Rice by Linda, The Wanderlust Kitchen",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1fVjXG_4gKY6q5fDe-JbTOAwX1aFlunFiqnd6wOMHzGQ/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Chicken and Beef Kabobs with Japanese BBQ Sauce and White Rice",
+  "protein": "Chicken and Beef",
+  "servings": 2,
+  "totalMinutes": 135,
+  "ingredients": [
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "soy sauce"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "mirin"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "sugar"
+   },
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "bamboo skewers, soaked in water 30 minutes"
+   },
+   {
+    "amount": "200",
+    "unit": "g (7 oz)",
+    "item": "skinless chicken thigh fillets, cut into 2.5 cm (1 in) cubes"
+   },
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "bamboo skewers, soaked in water 30 minutes"
+   },
+   {
+    "amount": "115",
+    "unit": "g (4 oz)",
+    "item": "skinless chicken thigh fillets, cut into 2.5 cm (1 in) cubes"
+   },
+   {
+    "amount": "8",
+    "unit": "pieces",
+    "item": "green onion, 3 cm (1 1/8 in) long, white and firm green parts only"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "bamboo skewers, soaked in water 30 minutes"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "small onion, cut crosswise into 1.3 to 1.5 cm (1/2 to 5/8 in) slices"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "bamboo skewers, soaked in water 30 minutes"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "thick asparagus spears, ends trimmed (about 15 cm / 6 in long)"
+   },
+   {
+    "amount": "12",
+    "unit": "pieces",
+    "item": "thin streaky bacon, 7 cm (2 3/4 in) long (about 110 g / 4 oz)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Oil, for the grill or rack"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "soy sauce"
+   },
+   {
+    "amount": "4 1/2",
+    "unit": "Tbsp",
+    "item": "Japanese sake"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "Tbsp",
+    "item": "water"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "sweetener of your choice"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "bonito flakes (or 1/8 tsp hondashi)"
+   },
+   {
+    "amount": "1/3",
+    "unit": "lb",
+    "item": "beef (rib roast, chuck or top sirloin)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "salt"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "black pepper"
+   },
+   {
+    "amount": "5 to 7",
+    "unit": "",
+    "item": "garlic cloves (one diced for the sauce, the rest halved for the skewers)"
+   },
+   {
+    "amount": "3 to 4",
+    "unit": "",
+    "item": "wooden skewers"
+   },
+   {
+    "amount": "1/8",
+    "unit": "tsp",
+    "item": "toasted sesame seeds (optional)"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "green onion stalk (optional)"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "lemon wedges (optional)"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "long-grain white rice (jasmine or basmati)"
+   },
+   {
+    "amount": "1",
+    "unit": "cup plus 2 Tbsp",
+    "item": "water"
+   }
+  ],
+  "steps": [
+   "Chicken skewers: make the tare: Put the soy sauce, mirin and sugar in a small pot and bring to a boil.",
+   "Lower the heat to medium or medium-low and simmer until reduced by roughly a third. The source allows about 5 minutes for a full batch; this small amount reduces faster, so start checking after 2 to 3 minutes.",
+   "Chicken skewers: assemble: Momo: thread about 5 chicken cubes onto each skewer.",
+   "Negima: alternate chicken and green onion, using 3 chicken pieces and 2 onion pieces per skewer and starting and ending with chicken.",
+   "Onion rings: push 2 onion slices crosswise onto each skewer.",
+   "Bacon and asparagus: blanch the asparagus in boiling salted water for 30 seconds, then chill it quickly in cold or ice water. Cut each spear into 3 cm (about 1 1/8 in) pieces, giving 5 pieces per spear. Wrap each of the bottom three pieces in its own strip of bacon, then set the tip and the piece next to it side by side and wrap them together. Thread them onto a skewer and repeat with the rest of the spears.",
+   "Chicken skewers: cook on a grill: Set the skewers 5 to 6 cm (2 to 2 1/2 in) above hot charcoal at medium-high to high heat; oil the grate first if using a BBQ.",
+   "Momo, negima and onion: brush both sides lightly with tare and grill about 4 minutes. Turn, baste the cooked side and grill about 4 minutes more. Turn and baste again, cook about 30 seconds, then turn once more for about 30 seconds. Serve right away.",
+   "Bacon and asparagus: grill 3 minutes per side with no sauce, until the bacon is golden.",
+   "Beef skewers: Cut the beef into pieces about 1 by 1 inch, season both sides with the salt and pepper, and let it sit at room temperature for 10 minutes.",
+   "Soak the wooden skewers in water for at least 10 minutes.",
+   "If using the green onion, slice it on a 45-degree angle and set aside.",
+   "Finely dice one garlic clove and cut the remaining cloves in half.",
+   "Make the sauce: combine the soy sauce, sake, water, sweetener, bonito flakes and half of the diced garlic in a pot. Bring to a boil, then lower to a simmer for 7 to 10 minutes, until slightly reduced. Strain it, pressing the bonito flakes to get all the liquid out. A bigger batch takes longer to reduce.",
+   "Thread the beef onto the skewers, tucking a garlic half between every 2 to 3 pieces of meat.",
+   "Preheat the grill to 350°F, then turn it down to medium-low. Lay the skewers on the grill, brush them generously with sauce, cover and cook 2 minutes.",
+   "Flip, baste again, cover and cook another 1 to 2 minutes, until the beef is done the way you like it (the author recommends medium-rare to medium).",
+   "Throw away any leftover basting sauce. Serve topped with sesame seeds, green onion and a lemon wedge if you like.",
+   "Stovetop white rice: Start the rice about 30 minutes before you want to eat. Put the rice in a small saucepan with a tight lid, cover it by about an inch with room-temperature water, swirl it with your fingers and drain it through a fine mesh strainer. Rinse and drain this way three times in all.",
+   "Put the drained rice back in the pan and pour in the 1 cup plus 2 Tbsp water, stirring as you pour. After the pan goes on the heat, do not stir again.",
+   "Bring it to a boil over medium heat without turning the heat up to rush it. Let it boil until the water drops below the top of the rice and small mounds of rice show above the surface.",
+   "Turn the heat to the lowest setting. Drape a kitchen towel over the pan, press the lid on top so it seals as tightly as possible, and fold the towel corners up around the lid handle, away from the burner.",
+   "Cook 15 minutes without lifting the lid or towel.",
+   "Turn off the heat and leave the rice covered for another 10 minutes.",
+   "Uncover, fluff with a fork and serve hot alongside the skewers."
+  ],
+  "tags": [
+   "grill"
+  ],
+  "ease": null,
+  "prepAhead": "Soak the bamboo skewers at least 30 minutes before grilling.",
+  "creditName": "Inspired by chicken skewers: Yakitori (Japanese Skewered Chicken) by Yumiko, RecipeTin Japan; beef skewers: Beef Kushiyaki by Mark Iwadare, LCA Recipes; side: How To Cook The Perfect White Rice by Linda, The Wanderlust Kitchen",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1NnuWOkfbkUlbxVkyVLhFVTuFOvFOjmINNC8lZoc0PqM/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "BBQ Ribs with Baked Mac and Cheese",
+  "protein": "Pork",
+  "servings": 4,
+  "totalMinutes": 150,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "lb",
+    "item": "baby back ribs (1 slab)"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "yellow onion, sliced"
+   },
+   {
+    "amount": "3",
+    "unit": "cloves",
+    "item": "garlic, sliced"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Olive oil, for brushing"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "paprika"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "brown sugar"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "onion powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "black pepper"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "lemon pepper seasoning"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "salt, or to taste"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "barbecue sauce"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "chili sauce (or more barbecue sauce)"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "ketchup"
+   },
+   {
+    "amount": "5",
+    "unit": "oz",
+    "item": "elbow macaroni (about 1 1/4 cups dry)"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "Tbsp",
+    "item": "salted butter"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "Tbsp",
+    "item": "all-purpose flour"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "onion powder"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of garlic powder"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup plus 2 Tbsp",
+    "item": "milk"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "half-and-half or light cream"
+   },
+   {
+    "amount": "4 1/2",
+    "unit": "oz",
+    "item": "sharp cheddar, shredded (about 1 heaping cup, lightly packed)"
+   },
+   {
+    "amount": "2 1/2",
+    "unit": "Tbsp",
+    "item": "shredded Parmesan (about 1/2 oz)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of dry mustard powder"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of seasoned salt, or to taste"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of black pepper"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "panko breadcrumbs"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "melted butter"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "shredded sharp cheddar (about 1/2 oz)"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "shredded Parmesan"
+   }
+  ],
+  "steps": [
+   "Ribs: Heat the oven to 275°F. Stir the spice rub ingredients together in a small bowl, and line a rimmed baking sheet with foil.",
+   "Peel off the thin membrane on the back of the ribs if it is there. Pat the ribs dry, check for any loose bone pieces, and cut the rack into 2 or 3 sections.",
+   "Rub the spice mix (or just salt and pepper) into both sides of the ribs.",
+   "Set the ribs meat side down on the lined pan and scatter the sliced onion and garlic over them.",
+   "Lay a second sheet of foil over the top and crimp the edges to seal tightly.",
+   "Bake for 2 hours. Peel back one corner of the foil and tug off a small bit of meat to test it; if it is not tender yet, reseal and bake another 20 to 30 minutes, then test again.",
+   "While the ribs bake, mix the barbecue sauce, chili sauce and ketchup together.",
+   "Take the ribs out and throw away the pan juices, onion and garlic. Brush the ribs with olive oil, then coat them generously with the sauce.",
+   "Finish them on a grill or under the broiler over medium-high heat for 5 to 10 minutes, until the sauce is charred in spots.",
+   "Baked mac and cheese: When the ribs come out of the oven, raise the oven to 400°F and butter a small baking dish (about 1 quart).",
+   "Boil the macaroni in salted water until just al dente, since it keeps cooking in the oven. Drain, rinse with cold water and set aside.",
+   "In a small bowl, stir the panko, melted butter, cheddar and Parmesan for the topping together.",
+   "Melt the 1 1/2 Tbsp butter in a small saucepan over medium heat. Stir in the flour, onion powder and garlic powder and cook 2 minutes.",
+   "Add the milk and half-and-half a little at a time, whisking until smooth after each pour. Bring the sauce to a simmer and let it simmer 1 minute.",
+   "Take the pan off the heat. Whisk in the cheddar, Parmesan, mustard powder, seasoned salt and pepper until the cheese melts and the sauce is smooth.",
+   "Stir the drained macaroni into the sauce until coated, then spread it in the baking dish.",
+   "Scatter the topping over the top and bake 20 to 22 minutes, until bubbling and browned on top. Do not overbake or it turns dry. Let it cool about 10 minutes before serving."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Oven Baked Ribs by Holly Nilsson, Spend With Pennies; side: Baked Mac and Cheese by Holly Nilsson, Spend With Pennies",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1SaHWNmTs8ucJJYLcpho2OaeTRHckmX-RJrtwQfoRve4/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "BLT Sandwiches with Sweet Potato Fries",
+  "protein": "Pork",
+  "servings": 2,
+  "totalMinutes": 60,
+  "ingredients": [
+   {
+    "amount": "5",
+    "unit": "slices",
+    "item": "bread, cut 1/2 inch thick (4 for the sandwiches, 1 for the baby)"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "unsalted butter, for toasting the bread"
+   },
+   {
+    "amount": "6",
+    "unit": "slices",
+    "item": "regular sliced bacon"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large ripe tomato, thickly sliced"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "green lettuce leaves, rinsed and spun dry"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large avocado, pitted, peeled and sliced"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and black pepper, to taste"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "mayonnaise"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "sour cream"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "yellow mustard"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large sweet potato (about 10 oz), peeled or unpeeled"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "cornstarch"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "onion powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "smoked paprika"
+   },
+   {
+    "amount": "1/4",
+    "unit": "tsp",
+    "item": "salt"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "A pinch of freshly ground black pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Chopped fresh parsley or chives, for garnish (optional)"
+   }
+  ],
+  "steps": [
+   "Sweet potato fries: Wash and dry the sweet potato and cut it into even 1/4-inch strips. Soak the strips in a large bowl of cold water for at least 30 minutes (or up to overnight).",
+   "Heat the oven to 425 F with a rack in the middle and line a baking sheet with parchment paper.",
+   "Drain the strips and pat them completely dry with paper towels or a clean towel.",
+   "Put the strips in a large zip-top bag, drizzle in the oil and toss. Add the cornstarch, onion powder, garlic powder, smoked paprika, salt and pepper and toss until everything is evenly coated.",
+   "Spread the fries on the lined pan in a single layer with space between them.",
+   "Bake 15 minutes. Pull the pan out, shut the oven door to keep the heat in, and flip each fry. Bake another 7 to 10 minutes, until the tips are browned.",
+   "Let the fries sit at room temperature about 2 minutes to crisp, garnish if you like, and serve warm.",
+   "BLT sandwiches: Heat the oven to 400 F (or bake the bacon after the fries come out). Lay the bacon in a single layer on a foil-lined baking sheet and bake 15 to 20 minutes, until browned and crisp. Drain it on a paper-towel-lined plate.",
+   "Stir the mayonnaise, sour cream and mustard together in a small bowl and set aside.",
+   "Butter both sides of each bread slice lightly. Toast the slices in a dry skillet or on a griddle over medium-high heat until golden on both sides.",
+   "Set 2 toast slices on a cutting board and spread each with 1 Tbsp of the sauce. Layer on the lettuce, tomato, bacon and avocado, and season the avocado with salt and pepper.",
+   "Spread 1 Tbsp of sauce on each of 2 more toast slices and set them on top, sauce side down. Cut in half if you like and serve with the fries."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by BLT Sandwich with the Best Sauce by Natasha Kravchuk, Natasha's Kitchen; side: Sweet Potato Fries (Crispy Baked) by Amy Dong, Chew Out Loud",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1tYcEppFbgmCIJV6QUWz8KAKVjY6ouk9-8ExhxMBk5oM/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Charro Beans (Frijoles Charros) with Mexican Rice",
+  "protein": "Pork",
+  "servings": 4,
+  "totalMinutes": 105,
+  "ingredients": [
+   {
+    "amount": "1/2",
+    "unit": "pound",
+    "item": "dried pinto beans (1 cup)"
+   },
+   {
+    "amount": "4",
+    "unit": "cups",
+    "item": "water, or more as needed to keep the beans covered"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "small wedge of onion"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "salt"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "bay leaf"
+   },
+   {
+    "amount": "3",
+    "unit": "slices",
+    "item": "bacon, chopped"
+   },
+   {
+    "amount": "2 1/2",
+    "unit": "ounces",
+    "item": "chorizo (or 1 sausage or hot dog), chopped"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "diced ham or sausages"
+   },
+   {
+    "amount": "1/4",
+    "unit": "",
+    "item": "yellow onion, chopped"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "tomato, diced"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "jalapeno or serrano pepper, seeded and chopped"
+   },
+   {
+    "amount": "1/4 to 1/2",
+    "unit": "",
+    "item": "chipotle pepper in adobo sauce, chopped (optional but recommended)"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "chopped fresh cilantro"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "cumin"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "paprika"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "dried oregano"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and pepper, to taste"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "chicken bouillon"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "tablespoons",
+    "item": "vegetable oil"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "uncooked long grain white rice"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "minced garlic"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "kosher salt"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "ground cumin"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "tomato sauce"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup plus 2 tablespoons",
+    "item": "chicken broth (about half a 14 oz can)"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "tablespoons",
+    "item": "finely chopped fresh cilantro"
+   },
+   {
+    "amount": "4 to 6",
+    "unit": "",
+    "item": "corn or flour tortillas, warmed, for serving"
+   }
+  ],
+  "steps": [
+   "Cook the pinto beans: Rinse the dried beans in a colander and pick out any debris or stones.",
+   "Put the beans in a medium pot with the water (enough to cover by about 2 inches), the wedge of onion, the bay leaf and 1/4 teaspoon salt. Bring to a boil, then lower to a simmer.",
+   "Simmer 1 to 2 hours (often about 1 hour, depending on how old the beans are) until tender but not falling apart. Check now and then and add water if the beans are no longer covered.",
+   "Drain the beans, saving the cooking liquid in a measuring cup. Add water, or simmer the liquid down, so you have 1 1/4 cups. Stir in the chicken bouillon and set aside.",
+   "Make the charro beans: In a medium pot, cook the bacon and chorizo about 5 minutes, until the bacon is done. Spoon off some of the fat.",
+   "Add the chopped onion and garlic and cook until the onion turns translucent.",
+   "Add the ham, tomato, jalapeno or serrano, chipotle, cilantro, oregano, paprika, cumin and black pepper and cook 5 minutes more.",
+   "Add the cooked beans and the 1 1/4 cups of seasoned bean broth and simmer 15 minutes. Taste and adjust with salt, pepper or more spices.",
+   "Garnish with cilantro and serve with the Mexican rice and warm tortillas. For a thicker texture, stir in a slurry of 1/2 tablespoon cornstarch mixed with 1 tablespoon water at the end.",
+   "Mexican rice: Warm the oil in a small heavy saucepan over medium heat. Add the rice and stir it constantly for 5 to 7 minutes, until the grains turn light golden and smell toasty.",
+   "Stir in the garlic, salt and cumin and cook about 30 seconds, until fragrant.",
+   "Pour in the tomato sauce and chicken broth, turn the heat up to medium-high and bring it to a full boil.",
+   "Turn the heat to low, cover the pan tightly and simmer 20 to 25 minutes. Leave the lid on and do not stir while it cooks.",
+   "Take the pan off the heat and let it sit, still covered, for 5 minutes. Then uncover and fluff the rice gently with a fork.",
+   "Fold in the cilantro and serve right away with the beans and warm tortillas."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Mexican Charro Beans (Frijoles Charros) by Lauren Allen, Tastes Better From Scratch; side: Mexican Rice Recipe (Restaurant-Style Mexican Rice) by Emily Walker, Favorite Family Recipes",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1qMk9sEbMisLJiaV9nQrdzGkJ0lpj-y1do-bpxOhQycE/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Hawaiian Ribs with White Rice",
+  "protein": "Pork",
+  "servings": 4,
+  "totalMinutes": 525,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "small red onion, cut into 1-inch slices"
+   },
+   {
+    "amount": "2",
+    "unit": "lb",
+    "item": "ribs, trimmed"
+   },
+   {
+    "amount": "1",
+    "unit": "clove",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "freshly grated ginger"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "brown sugar"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "soy sauce"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "Sriracha sauce"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "apple cider vinegar"
+   },
+   {
+    "amount": "1 1/3",
+    "unit": "cups",
+    "item": "fresh pineapple, diced"
+   },
+   {
+    "amount": "2/3",
+    "unit": "cup",
+    "item": "white rice (short, medium or long grain; not sushi rice)"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "water"
+   }
+  ],
+  "steps": [
+   "Ribs: Lay the red onion slices in an even layer over the bottom of the slow cooker and set the ribs on top of them.",
+   "In a small bowl, whisk the garlic, ginger, brown sugar, soy sauce, Sriracha and apple cider vinegar together, then pour it evenly over the ribs.",
+   "Cover and cook on low for 7 hours.",
+   "Add the diced pineapple, stir it gently into the cooking liquid so it is coated, and cook 1 more hour.",
+   "Carefully lift the ribs, pineapple and onions out of the slow cooker and cover them with foil to keep warm.",
+   "Pour the liquid left in the slow cooker into a small saucepan and skim the fat off the top. Bring it to a boil and let it bubble until it has reduced by half and thickened slightly.",
+   "Brush the reduced sauce all over the ribs.",
+   "Serve the ribs with the pineapple and onions spooned over the rice.",
+   "White rice: About 30 minutes before the ribs are done, put the rice and water in a small saucepan without rinsing the rice.",
+   "Set it over medium-high heat. When the whole surface is bubbling gently and foamy, turn the heat to low and put the lid on.",
+   "Cook 13 minutes without stirring or lifting the lid. Tilt the pan to make sure the water has been absorbed.",
+   "Take the pan off the heat and leave it covered for 10 minutes.",
+   "Fluff the rice with a fork and serve."
+  ],
+  "tags": [
+   "slow-cooker"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Crockpot Hawaiian Ribs by Becky Hardin, The Cookie Rookie; side: How to Cook Rice by Nagi Maehashi, RecipeTin Eats",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1wMlvOjeyfRUQeVChzD2qW7g9gAUc2zXB7YATEr4PUcQ/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Kalua Pulled Pork with Cabbage and White Rice",
+  "protein": "Pork",
+  "servings": 4,
+  "totalMinutes": 485,
+  "ingredients": [
+   {
+    "amount": "4 to 5",
+    "unit": "lb",
+    "item": "bone-in pork butt (or pork shoulder)"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "liquid smoke"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "sea salt (or kosher salt)"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "small head cabbage, cut into large chunks (the source gives no amount; this is a suggested amount)"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "drippings from the slow cooker"
+   },
+   {
+    "amount": "2/3",
+    "unit": "cup",
+    "item": "white rice (short, medium or long grain; not sushi rice)"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "water"
+   }
+  ],
+  "steps": [
+   "Cook the pork: Set the pork roast in the slow cooker with the fat side facing up. Rub the liquid smoke and salt all over it.",
+   "Cover and cook on low for 8 to 10 hours, until it is fall-apart tender (the smaller roast is usually done sooner than the original 7 lb one). Starting it overnight or early in the morning works well.",
+   "Shred the meat right in the slow cooker with two forks, discarding the bone, and keep it warm in the juices.",
+   "Cook the cabbage: Cut the cabbage into large chunks and put them in a saucepan.",
+   "Pour in 1 cup of drippings from the slow cooker.",
+   "Cover and bring to a boil, then turn the heat to medium and cook until the cabbage is soft.",
+   "Serve the shredded pork hot with the cabbage and rice.",
+   "White rice: About 30 minutes before serving, put the rice and water in a small saucepan without rinsing the rice.",
+   "Set it over medium-high heat. When the whole surface is bubbling gently and foamy, turn the heat to low and put the lid on.",
+   "Cook 13 minutes without stirring or lifting the lid. Tilt the pan to make sure the water has been absorbed.",
+   "Take the pan off the heat and leave it covered for 10 minutes.",
+   "Fluff the rice with a fork and serve."
+  ],
+  "tags": [
+   "slow-cooker"
+  ],
+  "ease": null,
+  "prepAhead": "Start the pork 8 to 10 hours ahead (the doc suggests overnight or early morning).",
+  "creditName": "Inspired by Kalua Pork Recipe by Kristyn Merkley, Lil' Luna; side: How to Cook Rice by Nagi Maehashi, RecipeTin Eats",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1UpbhTO0sZWT16Ik1ktzTNderWRCv7J-dYQf7PBR68pM/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Pozole Rojo de Puerco",
+  "protein": "Pork",
+  "servings": 4,
+  "totalMinutes": 165,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "quarts",
+    "item": "water"
+   },
+   {
+    "amount": "1",
+    "unit": "pound",
+    "item": "pork shoulder, cubed"
+   },
+   {
+    "amount": "1/2",
+    "unit": "pound",
+    "item": "pork spare ribs or baby back ribs"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "white onion, cut in half"
+   },
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "large garlic cloves"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt to taste"
+   },
+   {
+    "amount": "1",
+    "unit": "can (25 ounces)",
+    "item": "white hominy, drained and rinsed (about the same as 1 1/2 cans of 15 ounces)"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "guajillo peppers, cleaned, seeded, opened flat and deveined"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "ancho peppers, cleaned, seeded, opened flat and deveined"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "garlic cloves"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "medium white onion, coarsely chopped"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "dried Mexican oregano"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "vegetable or canola oil"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt to taste"
+   },
+   {
+    "amount": "1/2",
+    "unit": "head",
+    "item": "lettuce, finely shredded"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "onion, finely chopped"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Ground chile piquín, to taste"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "radishes, sliced"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Mexican oregano"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Tostadas (deep-fried corn tortillas)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Limes, cut in wedges"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Avocado, chopped (optional)"
+   }
+  ],
+  "steps": [
+   "Cook the pork: Heat the water in a large pot or Dutch oven. Add the pork shoulder, ribs, onion and 4 garlic cloves and cook over medium-high heat.",
+   "Once it boils, turn the heat down and let it simmer with the lid partly on for about 2 1/2 hours, until the meat is almost done. Use a ladle to skim off foam and fat from the surface as it cooks.",
+   "When the meat is nearly done, season the broth with salt.",
+   "Lift the pork out of the broth. Trim off excess fat and pull the meat from the bones. Throw away the onion and garlic.",
+   "Strain the broth and pour it back into the pot. Shred the pork with two forks and put it back in the pot.",
+   "Make the red sauce: While the pork is simmering, cover the ancho and guajillo peppers with just enough water and let them soak 25 to 30 minutes, until soft.",
+   "Put the soaked peppers, 3 garlic cloves, chopped onion and oregano in a blender with about 1/2 cup of the pork cooking broth (or water) and blend until smooth.",
+   "Heat the oil in a skillet over medium-high heat. Add the chile purée and season with salt. Turn the heat to medium and let it simmer about 25 minutes, stirring the whole time. It spatters and stains, so keep an eye on it.",
+   "Finish the pozole: Pour the sauce through a strainer into the pot of broth. Raise the heat to medium-high and bring it to a boil.",
+   "Once it boils, lower the heat, cover, and simmer gently for about 10 minutes. Stir in the hominy and season with salt and pepper.",
+   "Ladle into soup bowls and set the garnishes out in separate dishes so everyone can top their own."
+  ],
+  "tags": [
+   "make-ahead"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Red Pozole | Pozole Rojo by Mely Martínez, Mexico in My Kitchen",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1vFHpof-zU6oOoSxVins-1qhp-lQALglxhOuaCn3F1g4/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Sausage with Peppers and Onions, with Roasted Potatoes",
+  "protein": "Sausage",
+  "servings": 2,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "8",
+    "unit": "oz",
+    "item": "precooked Italian chicken or turkey sausage (about two-thirds of a 12 oz package), cut into 1/2-inch rounds"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "medium bell pepper, red or yellow, sliced into 1/4-inch strips"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "small yellow onion, sliced into 1/4-inch strips"
+   },
+   {
+    "amount": "2",
+    "unit": "tablespoons",
+    "item": "extra virgin olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "red wine vinegar"
+   },
+   {
+    "amount": "1",
+    "unit": "clove",
+    "item": "garlic, minced (about 1 teaspoon)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "kosher salt"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "dried basil"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "dried oregano"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of ground black pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of red pepper flakes, plus more to taste"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Optional for serving: thinly sliced fresh basil, chopped fresh parsley, freshly grated Parmesan"
+   },
+   {
+    "amount": "1 1/4",
+    "unit": "pounds",
+    "item": "small potatoes (baby red, Yukon Gold or a mix), halved or quartered"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Extra-virgin olive oil, for drizzling"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Sea salt and freshly ground black pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Chopped fresh parsley, for garnish"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "extra-virgin olive oil"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "lemon zest"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "fresh lemon juice"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "Dijon mustard"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "garlic clove, minced"
+   },
+   {
+    "amount": "2",
+    "unit": "teaspoons",
+    "item": "minced fresh rosemary or thyme"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of red pepper flakes"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Pinch of sea salt"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Freshly ground black pepper"
+   }
+  ],
+  "steps": [
+   "Roasted potatoes: Heat the oven to 425°F and line a large baking sheet with parchment paper.",
+   "Toss the potatoes with a drizzle of olive oil and some salt and pepper. Spread them out on the sheet with the cut sides facing down.",
+   "Roast 20 to 30 minutes, until tender inside and golden at the edges. Small, fresh potatoes cook faster than large or older ones.",
+   "While they roast, whisk all the dressing ingredients together in a small bowl.",
+   "Pour some of the dressing over the hot potatoes and toss gently; you may not need all of it. Taste, add more salt and pepper if needed, and scatter parsley on top.",
+   "Sausage, peppers and onions: Heat the oven to 400 degrees F. Line a large rimmed baking sheet with parchment for easy cleanup.",
+   "Pile the sausage rounds, pepper strips and onion strips in the middle of the pan.",
+   "Drizzle on the olive oil and red wine vinegar, then sprinkle with the garlic, salt, basil, oregano, black pepper and red pepper flakes. Toss everything together and spread it out into a single layer.",
+   "Roast 25 to 35 minutes, tossing once about halfway, until the peppers are as tender as you like.",
+   "Serve hot with the potatoes, topped with fresh basil, parsley or Parmesan if you like."
+  ],
+  "tags": [
+   "sheet-pan"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Sausage and Peppers (Sheet Pan) by Erin Clarke, Well Plated; side: Oven Roasted Potatoes by Jeanine Donofrio, Love and Lemons",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1u0spCkiKuFGu_W4Z2V4jO1tpO7h0-4gBpOzMG-POBWM/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Sheet Pan Sausage with Corn, Potatoes and Onions",
+  "protein": "Sausage",
+  "servings": 2,
+  "totalMinutes": 50,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "pound",
+    "item": "baby creamer potatoes"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "mini ears of corn, each cut into 3 pieces"
+   },
+   {
+    "amount": "1",
+    "unit": "package (12 to 14 oz)",
+    "item": "smoked sausage, cut into 1-inch chunks"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "small onion"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "Slap Ya Mama seasoning"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "garlic powder"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "black pepper"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "red pepper flakes"
+   },
+   {
+    "amount": "3",
+    "unit": "tablespoons",
+    "item": "butter"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 350 degrees F. Line a baking sheet with aluminum foil, give it a light coat of nonstick spray and set it aside.",
+   "Rinse the potatoes, cut them in half and put them in a large bowl.",
+   "Toss the potatoes with the olive oil until coated, then add the Slap Ya Mama seasoning, garlic powder, black pepper and red pepper flakes and stir.",
+   "Add the sausage, corn pieces and onion to the bowl and stir to combine. Spread everything out on the prepared baking sheet.",
+   "Scatter small pieces of the butter over the top, then cover loosely with a second sheet of foil.",
+   "Bake 40 minutes. Take off the top foil and bake another 5 to 10 minutes, until the potatoes are tender."
+  ],
+  "tags": [
+   "sheet-pan"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Sheet Pan Sausage and Potatoes (with Corn) by Terri Weir, Great Grub, Delicious Treats",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1tVuQjtGajpH3IyC029o51fyVF4zYEtW5YuiCJSFRCuk/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Spaghetti with Chunky Italian Sausage Sauce",
+  "protein": "Sausage",
+  "servings": 2,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "170",
+    "unit": "g (6 oz)",
+    "item": "pasta (the source uses spiral pasta and says any shape works; use spaghetti)"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "good-quality Italian sausage links (about 340 g, 3/4 lb)"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1/2",
+    "unit": "",
+    "item": "small onion, finely chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "clove",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "2",
+    "unit": "cups (about 500 g)",
+    "item": "crushed tomato or tomato passata, a little over half a 28 oz can"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "chilli flakes, adjusted to taste"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and pepper"
+   },
+   {
+    "amount": "1",
+    "unit": "large handful",
+    "item": "baby spinach (optional)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "For garnish: finely sliced fresh basil and Parmesan"
+   }
+  ],
+  "steps": [
+   "Bring a large pot of water to a boil. Cook the pasta for 1 to 2 minutes less than the package time.",
+   "Scoop out and save 1/2 cup of the pasta water, then drain the pasta. Set aside a small handful of plain pasta for the baby.",
+   "Meanwhile, cut the sausages into chunks about 1.5 cm (a generous 1/2 inch). They will look squished and uneven at first but firm up as they cook.",
+   "Heat the oil in a large skillet over high heat. Add the sausage chunks and brown them well on the outside; they do not need to be cooked through yet.",
+   "Add the onion and garlic and cook about 2 minutes, until the onion is translucent and the sausage is deeply browned.",
+   "Stir in the tomato, chilli flakes, a pinch of salt and some pepper. Turn the heat down to medium and let it bubble about 8 minutes, stirring now and then, until clearly thickened.",
+   "Add the spinach if using, the drained pasta and about 1/3 cup of the saved pasta water. Toss for no more than 1 minute.",
+   "Take it off the heat and serve right away with plenty of basil and Parmesan."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Sausage Pasta by Nagi Maehashi, RecipeTin Eats",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/18oxMRvhHcJnbZXoXxPcSFOQnQx1rL9WvNio-MEEzTqQ/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Club Sandwich with Oven Fries",
+  "protein": "Turkey",
+  "servings": 2,
+  "totalMinutes": 80,
+  "ingredients": [
+   {
+    "amount": "6",
+    "unit": "slices",
+    "item": "wheat bread (or bread of choice), plus 1 extra slice for the baby"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "mayo"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Lettuce"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Tomato slices"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and pepper to taste (for the tomatoes)"
+   },
+   {
+    "amount": "4",
+    "unit": "ounces",
+    "item": "sliced deli ham"
+   },
+   {
+    "amount": "4",
+    "unit": "ounces",
+    "item": "sliced turkey"
+   },
+   {
+    "amount": "4",
+    "unit": "slices",
+    "item": "cooked bacon"
+   },
+   {
+    "amount": "2",
+    "unit": "slices",
+    "item": "Colby jack cheese (cheddar or Swiss also work)"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "medium baking potatoes (about 1 1/2 pounds)"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "tablespoons",
+    "item": "olive oil"
+   },
+   {
+    "amount": "2",
+    "unit": "teaspoons",
+    "item": "seasoned salt or lemon pepper"
+   }
+  ],
+  "steps": [
+   "Oven fries: Heat the oven to 375 F and line a baking sheet with parchment paper.",
+   "Wash the potatoes. Peel them or leave the skins on, then cut them into fries of whatever size you like.",
+   "Soak the cut potatoes in cold water for at least 30 minutes. Drain and dry them very well.",
+   "Toss the fries with the oil and seasoned salt and spread them on the lined pan in a single layer.",
+   "Bake 20 minutes. Raise the oven to 425 F and bake another 20 to 25 minutes, until golden. Build the sandwiches while the fries finish.",
+   "Club sandwiches: Toast the bread if you want it toasted, then let it cool a few minutes so it does not wilt the lettuce.",
+   "Spread mayo on the 6 sandwich slices once they have cooled.",
+   "On 2 of the slices, layer lettuce and tomato, then season the tomato with salt and pepper.",
+   "Set a second slice on each, mayo side down, and spread more mayo on its top side.",
+   "Stack the ham, turkey, bacon and cheese on each, then finish with the last slices, mayo side down.",
+   "Cut into triangles with a sharp knife and pin each piece with a toothpick.",
+   "Stand the pieces on their sides to show the layers and serve right away with the fries."
+  ],
+  "tags": [],
+  "ease": null,
+  "prepAhead": null,
+  "creditName": "Inspired by Club Sandwich (Turkey, Ham, Bacon) by Marjorie, A Pinch of Healthy; side: Baked French Fries (Oven Fries) by Holly Nilsson, Spend With Pennies",
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1NZ0p5SJDtx2Ic1bxkF6JUIwe91AXhuQJdeSMIsPg1ys/edit"
+ }
+]
