@@ -359,8 +359,10 @@ async function newRecipeOptions(userId: string, sales: SaleItem[], settings: Set
 /** Trade two nights' dinners, even after shopping ("do Tuesday's on Thursday"). The grocery list doesn't change. */
 export async function moveDinnerTo(planId: string, from: number, to: number): Promise<ActionResult> {
   const userId = await requireUserId();
+  if (!/^[0-9a-f-]{36}$/i.test(planId)) return { error: "Plan not found." };
   const plan = await getPlan(userId, planId);
   if (!plan) return { error: "Plan not found." };
+  if (plan.archivedAt) return { error: "This week was replaced. Refresh the page to see the current plan." };
   if (!Number.isInteger(from) || !Number.isInteger(to)) return { error: "Pick another night." };
   const moved = moveDinner(plan.days, from, to, today());
   if ("error" in moved) return { error: moved.error };

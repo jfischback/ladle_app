@@ -7,3 +7,6 @@ export function cleanChecks(changes: unknown): Record<string, boolean> {
   }
   return out;
 }
+
+/** The tick for a grocery line: by section and item name (not position), so adding or removing lines doesn't move ticks. */
+export const tickKey = (section: string, item: string) => `${section}::${item.trim().toLowerCase()}`;

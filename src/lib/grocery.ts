@@ -92,7 +92,7 @@ export function basicGroceryList(recipes: Recipe[], sales: SaleItem[] = [], make
     if (notBought(e.item)) continue;
     const sale = saleByTerm.get(ingredientTerm(e.item) ?? "");
     const aisle = aisleOf(e.item);
-    bySection.set(aisle, [...(bySection.get(aisle) ?? []), { item: e.item, quantity: addQuantities(e.quantities), note: sale ? saleNote(sale) : "", forRecipes: [...e.forRecipes] }]);
+    bySection.set(aisle, [...(bySection.get(aisle) ?? []), { item: e.item, quantity: e.quantities.length > 1 ? addQuantities(e.quantities) : (e.quantities[0] ?? ""), note: sale ? saleNote(sale) : "", forRecipes: [...e.forRecipes] }]);
   }
   return { sections: AISLES.filter((a) => bySection.has(a)).map((a) => ({ name: a, items: bySection.get(a)! })), source: "basic" };
 }

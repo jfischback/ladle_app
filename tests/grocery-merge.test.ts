@@ -69,3 +69,12 @@ test("eggs in dozens and eggs by count add up", async () => {
   assert.equal(addQuantities(["1 dozen", "2"]), "1 1/2 dozen");
   assert.equal(addQuantities(["1/2 cup", "1/3 cup"]), "3/4 cup");
 });
+
+test("unit words stay real words", async () => {
+  const { addQuantities } = await import("@/lib/grocery-merge");
+  assert.equal(addQuantities(["2 cloves", "1 clove"]), "3 cloves");
+  assert.equal(addQuantities(["2 olives"]), "2 olives");
+  assert.equal(addQuantities(["1 glass", "1 glass"]), "2 glasses");
+  assert.equal(addQuantities(["3 cloves garlic"]), "3 cloves garlic");
+  assert.equal(addQuantities(["1 loaf", "1 loaf"]), "2 loaves");
+});

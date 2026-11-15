@@ -50,7 +50,9 @@ const NO_PLURAL = /^(oz|lb|lbs|tsp|tbsp|ct|dozen|g|kg|ml|l|fl oz|large|medium|sm
 /** "slices" -> "slice", "loaves" -> "loaf", "bunches" -> "bunch", "berries" -> "berry", "cups" -> "cup". */
 export function singular(word: string): string {
   if (NO_PLURAL.test(word)) return word === "lbs" ? "lb" : word;
-  if (/ves$/.test(word)) return word.replace(/ves$/, "f");
+  const irregular: Record<string, string> = { loaves: "loaf", leaves: "leaf", halves: "half", knives: "knife", shelves: "shelf" };
+  if (irregular[word]) return irregular[word];
+  if (/ss$/.test(word)) return word; // glass, bass
   if (/ies$/.test(word)) return word.replace(/ies$/, "y");
   if (/(ch|sh|x|ss)es$/.test(word)) return word.replace(/es$/, "");
   return word.replace(/s$/, "");
@@ -74,7 +76,9 @@ export function addQuantities(parts: string[]): string {
     const m = p.match(/^(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)\s*(.*)$/);
     const n = m ? parseAmount(m[1]) : null;
     if (!m || n == null || /\(/.test(m[2])) { other.push(p); continue; } // "1 (15 oz) can" stays as written
-    const unit = m[2].toLowerCase().split(/\s+/).map((w, i, all) => (i === all.length - 1 ? singular(w) : w)).join(" ");
+    // A one-word unit is counted in the singular ("cups" and "cup" add up); longer ones ("cloves garlic") stay as written.
+    const raw = m[2].toLowerCase().trim();
+    const unit = /\s/.test(raw) ? raw : singular(raw);
     sums.set(unit, (sums.get(unit) ?? 0) + n);
   }
   // "3 dozen + 17 1/2" (eggs from staples and from recipes): count it all in dozens, rounded up to a half dozen.
@@ -84,9 +88,8 @@ export function addQuantities(parts: string[]): string {
     sums.set("dozen", Math.ceil(each / 6) / 2);
   }
   const added = [...sums.entries()].map(([unit, n]) => {
-    const words = unit.split(" ");
-    if (n > 1 && unit) words[words.length - 1] = plural(words[words.length - 1]);
-    return [niceAmount(n), words.join(" ")].filter(Boolean).join(" ");
+    const word = unit && !/\s/.test(unit) && n > 1 ? plural(unit) : unit;
+    return [niceAmount(n), word].filter(Boolean).join(" ");
   });
   return [...added, ...other].join(" + ");
 }

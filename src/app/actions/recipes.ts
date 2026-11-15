@@ -112,6 +112,7 @@ export async function setLeftovers(id: string, good: boolean) {
 /** The family's own notes on a recipe ("we use half the chili powder"); shown on the recipe and while cooking. */
 export async function setRecipeNotes(id: string, notes: string): Promise<{ error?: string } | void> {
   const userId = await requireUserId();
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { error: "Recipe not found." };
   const text = String(notes ?? "").replace(/\r\n/g, "\n").trim();
   if (text.length > 1000) return { error: "Keep notes under 1,000 characters." };
   const db = await getDb();

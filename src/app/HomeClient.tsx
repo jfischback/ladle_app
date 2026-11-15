@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { approvePlan, moveDinnerTo, planUpcomingWeek, rateCookedDinner, startOver, swapDay } from "./actions/plans";
 import { answerPantryCheck } from "./actions/pantry";
 import { addGroceryItem, removeGroceryItem, setGroceryChecks } from "./actions/grocery";
+import { tickKey } from "@/lib/grocery-checks";
 import { ADDED_SECTION } from "@/lib/grocery-add";
 import { useRouter } from "next/navigation";
 import { groceryText } from "@/lib/grocery-text";
@@ -396,6 +397,7 @@ const sectionIcon = (name: string) => SECTION_ICONS.find(([re]) => re.test(name)
 export function GroceryChecklist({ plan, store }: { plan: Plan; store: string }) {
   const list = plan.groceryList;
   const key = `ladle-grocery-${plan.id}`;
+  const pendingKey = `ladle-grocery-unsent-${plan.id}`;
   const [checked, setChecked] = useState<Record<string, boolean>>(plan.groceryChecked ?? {});
   const [shared, setShared] = useState(false);
   const router = useRouter();
@@ -403,35 +405,47 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
   const [addError, setAddError] = useState<string | null>(null);
   const addedNow = (list?.sections.find((s) => s.name === ADDED_SECTION)?.items ?? []).map((i) => `${i.quantity} ${i.item}`).join("|");
   // Ticks not yet saved, laid over whatever the server says until they are.
+  // They're also kept on the phone, so ticks made with no signal survive the app being closed.
   const pending = useRef<Record<string, boolean>>({});
+  // Bumped on every tick, so a sync that started before it can't undo it.
+  const version = useRef(0);
+  const keepPending = useCallback(() => {
+    try {
+      if (Object.keys(pending.current).length) localStorage.setItem(pendingKey, JSON.stringify(pending.current));
+      else localStorage.removeItem(pendingKey);
+    } catch {}
+  }, [pendingKey]);
   const flush = useCallback(async () => {
     const send = { ...pending.current };
     if (!Object.keys(send).length) return;
     try {
       const saved = await setGroceryChecks(plan.id, send);
       for (const [k, v] of Object.entries(send)) if (pending.current[k] === v) delete pending.current[k];
+      keepPending();
       if (saved) setChecked({ ...saved, ...pending.current });
     } catch { /* offline: try again on the next tick */ }
-  }, [plan.id]);
+  }, [plan.id, keepPending]);
   useEffect(() => {
-    // Ticks this phone made before they were shared: send them along once.
+    // Ticks made with no signal last time (or before ticks were shared): send them along.
     try {
-      const old = localStorage.getItem(key);
-      if (old) {
-        const mine = JSON.parse(old) as Record<string, boolean>;
-        const fresh = Object.fromEntries(Object.entries(mine).filter(([k, v]) => v && !(plan.groceryChecked ?? {})[k]));
-        localStorage.removeItem(key);
-        if (Object.keys(fresh).length) { Object.assign(pending.current, fresh); setChecked((c) => ({ ...c, ...fresh })); flush(); }
+      localStorage.removeItem(key); // the old per-phone ticks used keys that no longer match
+      const unsent = localStorage.getItem(pendingKey);
+      if (unsent) {
+        const mine = JSON.parse(unsent) as Record<string, boolean>;
+        Object.assign(pending.current, mine);
+        setChecked((c) => ({ ...c, ...mine }));
+        flush();
       }
     } catch {}
     const pull = async () => {
       if (document.visibilityState !== "visible") return;
       await flush();
+      const startedAt = version.current;
       try {
         const res = await fetch(`/api/plans/${plan.id}/checks`, { cache: "no-store" });
         if (res.ok) {
           const { checked: server, added } = await res.json();
-          setChecked({ ...server, ...pending.current });
+          if (version.current === startedAt) setChecked({ ...server, ...pending.current });
           // Someone else added to the list: show it here too.
           if (Array.isArray(added) && added.join("|") !== addedNow) router.refresh();
         }
@@ -440,18 +454,20 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
     const id = setInterval(pull, 8000);
     document.addEventListener("visibilitychange", pull);
     return () => { clearInterval(id); document.removeEventListener("visibilitychange", pull); };
-  }, [key, plan.id, plan.groceryChecked, flush, addedNow, router]);
+  }, [key, pendingKey, plan.id, flush, addedNow, router]);
   if (!list) return null;
   const toggle = (id: string) => {
     const value = !checked[id];
+    version.current++;
     pending.current[id] = value;
+    keepPending();
     setChecked((prev) => ({ ...prev, [id]: value }));
-    flush();
+    flush().then(() => { version.current++; });
   };
   const buying = list.sections.filter((s) => s.name !== PANTRY_SECTIONS.HAVE_IT);
   // Text the list (what's still to get) to someone, or print it.
   const shareList = async () => {
-    const text = groceryText(list, { title: `Grocery list, week of ${new Date(`${plan.weekOf}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`, isChecked: (s, i, item) => !!checked[`${s}-${i}-${item}`] });
+    const text = groceryText(list, { title: `Grocery list, week of ${new Date(`${plan.weekOf}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`, isChecked: (s, _i, item) => !!checked[tickKey(s, item)] });
     try {
       if (navigator.share) await navigator.share({ title: "Grocery list", text });
       else { await navigator.clipboard.writeText(text); setShared(true); setTimeout(() => setShared(false), 2500); }
@@ -464,7 +480,7 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
     window.print();
   };
   const total = buying.reduce((n, s) => n + s.items.length, 0);
-  const done = Object.values(checked).filter(Boolean).length;
+  const done = buying.reduce((n, s) => n + s.items.filter((it) => checked[tickKey(s.name, it.item)]).length, 0);
 
   return (
     <section id="grocery-print" className="card p-5" aria-labelledby="grocery-title">
@@ -514,8 +530,8 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
           <div key={s.name}>
             <h3 className="mb-2 flex items-center gap-2 font-bold text-terracotta-dark"><span aria-hidden="true">{sectionIcon(s.name)}</span>{s.name}</h3>
             <ul className="space-y-1">
-              {s.items.map((it, i) => {
-                const id = `${s.name}-${i}-${it.item}`;
+              {s.items.map((it) => {
+                const id = tickKey(s.name, it.item);
                 const on = !!checked[id];
                 return (
                   <li key={id} className="flex items-start gap-1">
