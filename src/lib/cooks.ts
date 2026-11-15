@@ -30,6 +30,16 @@ export const SUGGESTED_COOKS: CookSource[] = [
   { name: "Cooking With Destiny", siteUrl: "https://cookingwithdestiny.com", feedUrl: "https://cookingwithdestiny.com/feed/", feedKind: "rss" },
   { name: "Pinch of Yum", siteUrl: "https://pinchofyum.com", feedUrl: "https://pinchofyum.com/feed/", feedKind: "rss" },
   { name: "Sammy Montgoms", siteUrl: "https://sammymontgoms.com", feedUrl: "https://sammymontgoms.com/feed/", feedKind: "rss" },
+  { name: "The Cozy Cook", siteUrl: "https://thecozycook.com", feedUrl: "https://thecozycook.com/feed/", feedKind: "rss" },
+  { name: "Gimme Some Oven", siteUrl: "https://www.gimmesomeoven.com", feedUrl: "https://www.gimmesomeoven.com/feed/", feedKind: "rss" },
+  { name: "Natasha's Kitchen", siteUrl: "https://natashaskitchen.com", feedUrl: "https://natashaskitchen.com/feed/", feedKind: "rss" },
+  { name: "Cafe Delites", siteUrl: "https://cafedelites.com", feedUrl: "https://cafedelites.com/feed/", feedKind: "rss" },
+  { name: "Little Spice Jar", siteUrl: "https://littlespicejar.com", feedUrl: "https://littlespicejar.com/feed/", feedKind: "rss" },
+  { name: "The Chunky Chef", siteUrl: "https://www.thechunkychef.com", feedUrl: "https://www.thechunkychef.com/feed/", feedKind: "rss" },
+  { name: "Spend With Pennies", siteUrl: "https://www.spendwithpennies.com", feedUrl: "https://www.spendwithpennies.com/feed/", feedKind: "rss" },
+  { name: "Chelsea's Messy Apron", siteUrl: "https://www.chelseasmessyapron.com", feedUrl: "https://www.chelseasmessyapron.com/feed/", feedKind: "rss" },
+  { name: "The Recipe Critic", siteUrl: "https://therecipecritic.com", feedUrl: "https://therecipecritic.com/feed/", feedKind: "rss" },
+  { name: "Jo Cooks", siteUrl: "https://www.jocooks.com", feedUrl: "https://www.jocooks.com/feed/", feedKind: "rss" },
   { name: "Magnolia Table", siteUrl: "https://magnolia.com/blogs/recipe", feedUrl: "https://magnolia.com/blogs/recipe.atom", feedKind: "atom" },
 ];
 
@@ -151,7 +161,7 @@ export async function findSource(input: string): Promise<CookSource> {
 
 // ---------- reading one recipe page ----------
 
-const NOT_DINNER = /dessert|cookie|cake|brownie|blondie|\bbars?\b|\bpie\b|tart\b|drinks?\b|cocktail|punch\b|smoothie|breakfast|brunch|appetizer|snack|\bdips?\b|dressing|\bsides?\b|side dish|bread|muffin|frosting|candy|fudge|pinwheel|bites\b|puffs\b|cheese board|charcuterie|granola|pancake|waffle|meal plan|menu|gift guide|round-?up|marshmallow|stuffing|gravy|cranberry sauce|mashed potatoes|seasoning|spice blend|dukkah|condiment/i;
+const NOT_DINNER = /dessert|cookie|cake|brownie|blondie|\bbars?\b|\bpie\b|tart\b|drinks?\b|cocktail|punch\b|smoothie|breakfast|brunch|appetizer|snack|\bdips?\b|dressing|\bsides?\b|side dish|bread|muffin|frosting|candy|fudge|pinwheel|bites\b|puffs\b|cheese board|charcuterie|granola|pancake|waffle|meal plan|menu|gift guide|round-?up|marshmallow|stuffing|gravy|cranberry sauce|mashed potatoes|seasoning|spice blend|dukkah|condiment|cider\b|lemonade|latte|cocoa|hot chocolate|eggnog|sangria|margarita|mocktail|twice baked|mashed|potato casserole|roasted vegetables|coleslaw|rolls\b|biscuits\b|cornbread|\bcrisp\b|cobbler|crumble\b|pur[eé]e|^how to\b/i;
 const DINNER = /main|dinner|entr[eé]e|soup|stew|chili|pasta|casserole|curry|skillet|sheet pan|slow cooker|instant pot|tacos?/i;
 
 function text(v: unknown): string {
