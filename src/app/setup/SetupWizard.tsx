@@ -28,6 +28,15 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
     });
   }
 
+  // Everything that must be filled in before Settings can be saved, with a plain reason when it isn't.
+  const invalidReason =
+    !s.motivation.length ? "Pick at least one priority under Priorities."
+    : s.weeklyBudget < 10 ? "Set a weekly budget of at least $10 under Budget."
+    : !s.storeName.trim() && !s.storeLocationId ? "Pick or type your store under Store."
+    : !s.cookDays.length ? "Pick at least one night under Cooking."
+    : null;
+  const allValid = !invalidReason;
+
   const canNext =
     (step !== 0 || s.motivation.length > 0) &&
     (step !== 4 || s.weeklyBudget >= 10) &&
@@ -157,21 +166,30 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
         {error && <p role="alert" className="mt-4 rounded-xl bg-terracotta-soft px-3 py-2 text-terracotta-dark">{error}</p>}
       </section>
 
-      <div className="mt-4 flex justify-between">
-        <button className={`btn-quiet ${step === 0 ? "invisible" : ""}`} onClick={() => setStep((x) => x - 1)} disabled={step === 0 || pending}>
-          ← Back
-        </button>
-        {step < last && (
-          <button className="btn-warm px-7" onClick={() => setStep((x) => x + 1)} disabled={!canNext}>
-            Next →
+      {isEdit ? (
+        // Settings: save from any section, not just the last one.
+        <div className="sticky bottom-24 z-20 mt-4 sm:bottom-4">
+          <div className="flex items-center justify-between gap-2 rounded-[2rem] bg-card/95 p-2 shadow-lift ring-1 ring-line/60 backdrop-blur">
+            <button className="btn-quiet whitespace-nowrap px-3 text-sm" onClick={() => setStep((x) => Math.max(0, x - 1))} disabled={step === 0 || pending}>← Back</button>
+            {step < last && <button className="btn-secondary whitespace-nowrap px-3 text-sm" onClick={() => setStep((x) => x + 1)} disabled={pending}>Next →</button>}
+            <button className="btn-warm flex-1 whitespace-nowrap px-4 sm:flex-none" onClick={() => finish()} disabled={pending || !allValid}>
+              {pending ? "Saving…" : "✓ Save"}
+            </button>
+          </div>
+          {!allValid && <p className="mt-2 text-center text-sm text-terracotta-dark">{invalidReason}</p>}
+        </div>
+      ) : (
+        <div className="mt-4 flex justify-between">
+          <button className={`btn-quiet ${step === 0 ? "invisible" : ""}`} onClick={() => setStep((x) => x - 1)} disabled={step === 0 || pending}>
+            ← Back
           </button>
-        )}
-        {isEdit && step === last && (
-          <button className="btn-primary" onClick={() => finish()} disabled={pending || !canNext}>
-            {pending ? "Saving…" : "Save settings"}
-          </button>
-        )}
-      </div>
+          {step < last && (
+            <button className="btn-warm px-7" onClick={() => setStep((x) => x + 1)} disabled={!canNext}>
+              Next →
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
