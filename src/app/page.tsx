@@ -5,6 +5,7 @@ import { activePlans, getSettings, myRecipes } from "@/lib/data";
 import { addDays, currentWeekStart, dayName, greeting, money, shortDate, today, upcomingWeekStart } from "@/lib/week";
 import { PlanButton, DayCard, ApproveBar, RatePrompt, StartOverButton, GroceryChecklist, Celebrate } from "./HomeClient";
 import { FoodArt } from "@/components/FoodArt";
+import { Highlight } from "@/components/Highlight";
 import type { Plan } from "@/db/schema";
 import type { SaleItem } from "@/lib/types";
 import { krogerEnabled } from "@/lib/kroger";
@@ -69,6 +70,7 @@ export default async function HomePage() {
         <RatePrompt key={`${p.id}-${i}`} planId={p.id} dayIndex={i} recipeName={d.recipeName ?? ""} label={`How did everyone like ${dayName(d.date)}'s ${d.recipeName}?`} />
       ))}
 
+      {plan?.summary && plan.plannerSource !== "basic" && <WhyThisWeek summary={plan.summary} />}
       <SaleBanner plan={plan} saleThreshold={settings.saleThresholdPct} />
       {!plan && krogerEnabled() && !settings.storeLocationId && (
         <Link href="/setup" className="flex items-center gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft hover:shadow-lift">
@@ -81,7 +83,6 @@ export default async function HomePage() {
         <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} />
       ) : (
         <>
-          {plan.summary && plan.plannerSource !== "basic" && <p className="text-lg text-muted">{plan.summary}</p>}
           <ul className="grid grid-cols-[minmax(0,1fr)] gap-3">
             {plan.days.map((d, i) => (
               <li key={d.date}>
@@ -116,6 +117,22 @@ export default async function HomePage() {
 }
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** The planner's explanation for the week, front and center. */
+function WhyThisWeek({ summary }: { summary: string }) {
+  return (
+    <section aria-labelledby="why-title" className="relative overflow-hidden rounded-3xl bg-blush p-5 pl-6 shadow-lift ring-1 ring-terracotta/20">
+      <div aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5 bg-terracotta" />
+      <h2 id="why-title" className="flex items-center gap-2.5 text-xl font-semibold">
+        <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-card text-lg shadow-soft">💡</span>
+        Why these dinners?
+      </h2>
+      <p className="mt-2.5 text-[1.05rem] leading-relaxed text-ink sm:text-lg">
+        <Highlight text={summary} />
+      </p>
+    </section>
+  );
+}
 
 function SaleRow({ s }: { s: SaleItem }) {
   return (
