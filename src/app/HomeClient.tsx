@@ -140,7 +140,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
           </div>
           {day.recipeId && !day.leftoverOf && (
             <div className="-mt-2 px-5 pb-4">
-              <Link href={`/recipes/${day.recipeId}?cook=1`} className="btn-warm w-full sm:w-auto">👩‍🍳 Start cooking</Link>
+              <Link href={`/recipes/${day.recipeId}?cook=1${(day.batches ?? 1) > 1 ? `&batches=${day.batches}` : ""}`} className="btn-warm w-full sm:w-auto">👩‍🍳 Start cooking</Link>
             </div>
           )}
           <WhyLine reason={reason} sale={day.saleItems} className="-mt-2 px-5 pb-5" />
