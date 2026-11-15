@@ -124,4 +124,7 @@ h2,
   html.printing-grocery #grocery-print, html.printing-grocery #grocery-print * { visibility: visible !important; }
   html.printing-grocery #grocery-print { position: absolute; inset: 0 auto auto 0; width: 100%; box-shadow: none; background: white; color: black; }
   html.printing-grocery .no-print { display: none !important; }
+  /* Printing any page: no app header, tab bar or buttons; plain paper. */
+  .no-print { display: none !important; }
+  body { background: white !important; }
 }

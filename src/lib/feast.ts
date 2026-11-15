@@ -165,6 +165,19 @@ export function withFeast(days: PlanDay[], index: number, feast: Feast): PlanDay
   });
 }
 
+/** Take the feast off: its day and its leftovers night become nights off, and the next-day lunch an open one. */
+export function withoutFeast(days: PlanDay[], index: number): PlanDay[] {
+  const day = days[index];
+  if (!day?.feast) return days;
+  return days.map((d, j) => {
+    if (j === index) return { ...d, feast: null, recipeId: null, recipeName: null, reason: "No-cook night", estimatedCost: null };
+    let next = d;
+    if (d.leftoverOf === day.date && !d.recipeId) next = { ...next, leftoverOf: null, recipeName: null, reason: "No-cook night", estimatedCost: null };
+    if (j === index + 1 && d.lunch?.kind === "leftovers" && !d.lunch.recipeId) next = { ...next, lunch: { ...d.lunch, kind: "open", name: "Lunch: your pick", reason: "No feast leftovers this time" } };
+    return next;
+  });
+}
+
 /** The countdown: thaw, the day before, and the big day. */
 export function feastTimeline(feast: Feast, date: string): { date: string; what: string }[] {
   const t = turkeyFor(feast.guests);

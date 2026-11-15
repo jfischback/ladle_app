@@ -70,3 +70,14 @@ test("the feast list buys whole packages and lists each thing once", async () =>
   assert.ok(!names.some((n) => n.includes(",")), names.join(" | "));
   assert.ok(sec.items.find((i) => i.item === "refrigerated pie crust")!.quantity === "2");
 });
+
+test("taking the feast off clears its leftovers night and next-day lunch", async () => {
+  const { withoutFeast } = await import("@/lib/feast");
+  const d = (date: string, recipeId: string | null, extra: Partial<PlanDay> = {}): PlanDay => ({ date, recipeId, recipeName: recipeId, estimatedCost: 9, reason: "", saleItems: [], alternatives: [], ...extra });
+  const days = withFeast([d("2026-11-26", "chili", { holiday: "Thanksgiving" }), d("2026-11-27", "chili", { leftoverOf: "2026-11-26", lunch: { kind: "leftovers", recipeId: "chili", name: "Leftover chili", reason: "", eaters: "everyone", servings: 4 } })], 0, feast(8));
+  const out = withoutFeast(days, 0);
+  assert.equal(out[0].feast, null);
+  assert.equal(out[1].leftoverOf, null);
+  assert.equal(out[1].recipeName, null);
+  assert.equal(out[1].lunch?.kind, "open");
+});

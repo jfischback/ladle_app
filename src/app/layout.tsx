@@ -33,7 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className={`${nunito.variable} ${fraunces.variable}`}>
       <body className="min-h-screen">
         {signedIn && (
-          <header className="sticky top-0 z-30 border-b border-line/70 bg-cream/90 backdrop-blur">
+          <header className="no-print sticky top-0 z-30 border-b border-line/70 bg-cream/90 backdrop-blur">
             <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-4 py-2.5">
               <Link href="/" aria-label="Ladle home" className="shrink-0">
                 <Wordmark className="h-9 w-auto" />
