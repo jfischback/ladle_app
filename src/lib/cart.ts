@@ -1,5 +1,6 @@
 import type { CartProduct, GroceryList } from "./types";
 import type { KrogerProduct } from "./kroger";
+import { ruleProblems, type FoodRule } from "./diet";
 import { ingredientTerm, productMatches } from "./sales";
 import { pantrySearchTerm, PANTRY_SECTIONS } from "./pantry";
 import { extraSearchTerm } from "./extras";
@@ -116,9 +117,16 @@ const toCart = (p: KrogerProduct): CartProduct => ({ upc: p.upc, description: p.
  * (the store's own order is kept otherwise: its top hit is usually the everyday pick). If nothing truly matches,
  * the store's top results are offered but none is chosen, so the family picks.
  */
-export function pickOptions(term: string, products: KrogerProduct[], preferProduct?: string | null, cheapest = false): { options: CartProduct[]; chosen: number | null } {
+/**
+ * The products to offer for a grocery line, best first, and which one to pick. A product whose name breaks one of the
+ * family's food rules (an allergy, a diet) is never picked for them and is marked, so it can't slip into the cart
+ * unnoticed. (Names don't list every allergen: the label is still the last word.)
+ */
+export function pickOptions(term: string, products: KrogerProduct[], preferProduct?: string | null, cheapest = false, rules: FoodRule[] = []): { options: CartProduct[]; chosen: number | null } {
+  const warnOf = (p: KrogerProduct) => (rules.length ? ruleProblems({ name: `${p.brand} ${p.description}`, ingredients: [] }, rules)[0] ?? null : null);
+  const withWarn = (p: KrogerProduct): CartProduct => ({ ...toCart(p), warn: warnOf(p) });
   const matching = products.filter((p) => productMatches(term, p));
-  if (!matching.length) return { options: products.slice(0, 3).map(toCart), chosen: null };
+  if (!matching.length) return { options: products.slice(0, 3).map(withWarn), chosen: null };
   // "Every dollar counts": the lowest price per ounce wins (store brands usually), whatever the brand.
   const per = (p: KrogerProduct) => unitPrice(p.size, p.promo ?? p.regular)?.per ?? (p.promo ?? p.regular);
   const ranked = cheapest
@@ -127,7 +135,10 @@ export function pickOptions(term: string, products: KrogerProduct[], preferProdu
         .map((p, i) => ({ p, i, score: (preferProduct && p.description === preferProduct ? -100 : 0) + (p.promo != null ? -10 : 0) + i }))
         .sort((a, b) => a.score - b.score)
         .map((x) => x.p);
-  return { options: ranked.slice(0, 3).map(toCart), chosen: 0 };
+  // Safe products first; offer up to three.
+  const options = [...ranked.filter((p) => !warnOf(p)), ...ranked.filter((p) => warnOf(p))].slice(0, 3).map(withWarn);
+  const safe = options.findIndex((o) => !o.warn);
+  return { options, chosen: safe >= 0 ? safe : null };
 }
 
 export { cartTotal } from "./cart-total";

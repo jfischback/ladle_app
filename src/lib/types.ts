@@ -26,7 +26,7 @@ export type PlanDay = {
 };
 
 /** One store product option for a grocery line. */
-export type CartProduct = { upc: string; description: string; size: string; price: number; regular: number; onSale: boolean; aisle?: string | null }; // aisle: where it is in that store, when Kroger says
+export type CartProduct = { upc: string; description: string; size: string; price: number; regular: number; onSale: boolean; aisle?: string | null; warn?: string | null }; // warn: the product's name breaks a food rule ("Has peanuts") // aisle: where it is in that store, when Kroger says
 
 /** A grocery list line matched to a Fry's product, ready to send to the cart. */
 export type CartLine = {
