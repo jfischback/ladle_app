@@ -11,11 +11,12 @@ import { formatMinutes } from "@/lib/format";
 import { FoodArt } from "@/components/FoodArt";
 import { IngredientList } from "./IngredientList";
 import { CookMode } from "./CookMode";
-import { estimateNutrition, trustworthy } from "@/lib/nutrition";
+import { estimateCost, estimateNutrition, estimateSodium, trustworthy } from "@/lib/nutrition";
 
-export default async function RecipePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function RecipePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cook?: string }> }) {
   const userId = await requireUserId();
   const { id } = await params;
+  const sp = await searchParams;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const r = await getRecipe(userId, id);
   const { data: settings } = await getSettings(userId);
@@ -23,6 +24,9 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
   const problems = ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway);
   const mine = r.ownerId === userId;
   const nutrition = estimateNutrition(r);
+  const sodium = estimateSodium(r);
+  const cost = estimateCost(r);
+  const cookNow = sp.cook === "1";
 
   return (
     <article className="space-y-6">
@@ -84,6 +88,27 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
         </div>
       )}
 
+      {trustworthy(nutrition) && (
+        <section aria-label="Per serving" className="card p-4">
+          <p className="mb-2 font-bold">Per serving <span className="font-normal text-muted">(estimated from the ingredients)</span></p>
+          <dl className="grid grid-cols-3 gap-2 text-center sm:grid-cols-6">
+            {[
+              ["Calories", `${nutrition.kcal}`],
+              ["Protein", `${nutrition.protein} g`],
+              ["Carbs", `${nutrition.carbs} g`],
+              ["Fat", `${nutrition.fat} g`],
+              ["Sodium", `${sodium.toLocaleString("en-US")} mg`],
+              ...(cost.coverage >= 0.7 ? [["Cost", `$${cost.perServing.toFixed(2)}`]] : []),
+            ].map(([k, v]) => (
+              <div key={k} className="rounded-2xl bg-cream/80 p-2">
+                <dt className="text-xs font-bold text-muted">{k}</dt>
+                <dd className="font-display text-lg font-semibold">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+
       <section>
         <h2 className="mb-3 text-2xl font-semibold">Ingredients</h2>
         {r.ingredients.length ? <IngredientList recipeId={r.id} ingredients={r.ingredients} servings={r.servings} /> : <p className="text-muted">No ingredients yet.</p>}
@@ -92,7 +117,7 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
       <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-2xl font-semibold">Let&apos;s cook</h2>
-          <CookMode recipeId={r.id} name={r.name} steps={r.steps} ingredients={r.ingredients} />
+          <CookMode recipeId={r.id} name={r.name} steps={r.steps} ingredients={r.ingredients} startOpen={cookNow} />
         </div>
         {!r.steps.length && r.creditUrl ? (
           <a href={r.creditUrl} target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 p-4 font-bold text-olive-dark hover:shadow-lift">

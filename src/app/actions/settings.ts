@@ -12,6 +12,7 @@ import { getSettings } from "@/lib/data";
 import { FOOD_RULES, type FoodRule } from "@/lib/diet";
 import { StaplesSchema } from "@/lib/staples-schema";
 import { copyStarters } from "@/lib/starters";
+import { pickStarters } from "@/lib/starter-pick";
 import { TOO_MANY, under } from "@/lib/rate-limit";
 
 const int = (min: number, max: number) => z.number().int().min(min).max(max);
@@ -88,10 +89,11 @@ export async function saveSettings(input: Partial<Settings>, startWith?: "ours" 
 
   if (startWith === "ours") {
     const starters = await db
-      .select({ id: recipes.id })
+      .select({ id: recipes.id, name: recipes.name, meal: recipes.meal, servings: recipes.servings, tags: recipes.tags, ingredients: recipes.ingredients, steps: recipes.steps })
       .from(recipes)
       .where(and(isNull(recipes.ownerId), isNull(recipes.archivedAt)));
-    await copyStarters(userId, starters.map((s) => s.id));
+    // The starters that fit this family (food rules, kitchen, household size); the rest stay in Starters & packs.
+    await copyStarters(userId, pickStarters(starters, data).map((s) => s.id));
     redirect("/");
   }
   if (startWith === "own") redirect("/recipes/new");

@@ -20,9 +20,9 @@ const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, 
  * Cooking mode: one step at a time in big type, big buttons for messy hands, the screen kept awake,
  * and a one-tap timer when a step says how long.
  */
-export function CookMode({ recipeId, name, steps, ingredients }: { recipeId: string; name: string; steps: string[]; ingredients: Ingredient[] }) {
+export function CookMode({ recipeId, name, steps, ingredients, startOpen = false }: { recipeId: string; name: string; steps: string[]; ingredients: Ingredient[]; startOpen?: boolean }) {
   const factor = useServingsFactor(recipeId);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(startOpen);
   const [at, setAt] = useState(0);
   const [showIngredients, setShowIngredients] = useState(false);
   const [timer, setTimer] = useState<{ left: number; total: number; running: boolean } | null>(null);
