@@ -63,6 +63,7 @@ Rules:
 - Never pick a recipe that appears in the recent weeks' dinners (the no-repeat window is already applied to that list).
 - Never pick a recipe rated 1 or 2 stars. Favor higher-rated recipes. Unrated recipes are fine.
 - Plan around what's on sale: an item counts as on sale only if it is at least saleThresholdPct percent off regular price. Lean on recipes that use sale items.
+- A recipe with servings 1 is a single-serving meal (a mug or microwave meal). Don't pick one for a household of two or more unless nothing else fits.
 - healthNeeds are estimates to lean on, after food rules: with keto people, strongly favor dinners with low carbsPerServing (ideally under 20 g); with diabetes, favor dinners near each person's carbsPerMeal; with low sodium, favor dinners whose sodiumMgPerServing is under each person's perMeal. Never mention diagnoses in reasons; say "lighter on carbs" or "lower in salt".
 - If mealPrepDay is set, the family preps ahead that day: favor dinners that can be made or partly made ahead (casseroles, soups, chili, slow-cooker, marinated or ground-meat dishes) and dinners that share chopped vegetables, so the prep session covers more of the week.
 - pickyEaters are not food rules: a dinner can still have something they won't eat if it can be left off their plate (sauce, onions, toppings). Avoid dinners where the thing they won't eat is the main part of the dish, and favor recipes with kidsAteIt true; avoid kidsAteIt false.
@@ -109,7 +110,7 @@ export async function planWeek(input: {
   const pool = eligible.length >= settings.dinnersPerWeek ? eligible : allowed.filter((r) => !(r.rating != null && r.rating <= 2));
   const cookDays = new Set(settings.cookDays);
 
-  const newOptions = settings.newRecipesPerWeek > 0 ? (input.newRecipes ?? []).filter((n) => !ruleProblems(n, settings.foodRules, settings.dislikes, settings.allowAnyway).length) : [];
+  const newOptions = settings.newRecipesPerWeek > 0 ? (input.newRecipes ?? []).filter((n) => !ruleProblems(n, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook({ name: n.title, ingredients: n.ingredients }, settings.equipment)) : [];
   const lastCooked = lastCookedWeeks(input.history ?? input.recentPlans, weekStart);
   if (!claudeEnabled()) return basicPlan(dates, pool, settings, input.saleItems, newOptions, lastCooked);
 
@@ -282,6 +283,7 @@ type Slot = {
   health?: HealthNeeds; // keto, diabetes, low sodium in the household
   prep?: boolean; // there's a meal prep day: favor dinners that can be made ahead
   picky?: PickyEater[]; // picky eaters: avoid dinners they can't eat at all, favor ones they liked
+  family?: boolean; // two or more people at dinner
   cheap?: number; // how much cost matters: 0 normally, more with a hard cap, most with "every dollar counts"
 };
 
@@ -331,6 +333,8 @@ function score(c: Candidate, slot: Slot, sales: SaleItem[]): number {
   if (slot.health) s += healthScore({ name: c.name, ingredients: c.ingredients, servings: c.recipe?.servings ?? null }, slot.health);
   if (slot.prep && c.recipe && (c.recipe.tags.some((t) => ["make-ahead", "freezer", "slow-cooker", "one-pot", "sheet-pan", "leftovers"].includes(t)) || /casserole|soup|stew|chili|enchilada|lasagna|meatball/i.test(c.name))) s += 0.5;
   if (slot.picky?.length) s += pickyScore({ name: c.name, protein: c.recipe?.protein, ingredients: c.ingredients, tags: c.recipe?.tags, kidVotes: c.recipe?.kidVotes }, slot.picky);
+  // Single-serving recipes (mug and microwave meals) are for one person, not a family dinner.
+  if (slot.family && c.recipe?.servings === 1) s -= 4;
   if (slot.cheap) s += slot.cheap * (3 - Math.min(8, estimateCost({ ingredients: c.ingredients, servings: c.recipe?.servings ?? null }).perServing)); // cheaper is better
   if (slot.athletes) s += Math.min(1.5, estimateNutrition({ ingredients: c.ingredients, servings: c.recipe?.servings ?? null }).protein / 30); // protein for the athlete
   return s + Math.random() * 2.5; // plenty of shuffle so weeks don't feel the same
@@ -358,6 +362,7 @@ function slotsFor(dates: string[], settings: Settings, sales: SaleItem[]): Slot[
         picky: settings.pickyEaters,
         prep: settings.prepDay != null,
         health: hasNeeds(healthNeeds(settings.athletes)) ? healthNeeds(settings.athletes) : undefined,
+        family: settings.adults + settings.kids >= 2,
         cheap: settings.tightBudget ? 1.6 : settings.budgetMode === "hard" ? 0.4 : 0,
         busy: settings.busyDays.includes(weekday(date)),
         daysAfterShopping: index,

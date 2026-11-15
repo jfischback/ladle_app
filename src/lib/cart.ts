@@ -7,16 +7,47 @@ import { extraSearchTerm } from "./extras";
 // Sections that aren't bought: things already on hand, and pantry questions not answered yet.
 const NOT_BOUGHT = new Set([PANTRY_SECTIONS.HAVE_IT, PANTRY_SECTIONS.PANTRY_CHECK]);
 const EXTRA_SECTIONS = /^(snacks|sweets|drinks|baby)$/i;
-const COUNT_UNITS = /^(ct|count|each|whole|cans?|jars?|box(es)?|bags?|bottles?|packs?|packages?|pkgs?|bunch(es)?|heads?|loaf|loaves|dozen|cartons?|containers?|tubs?|pints?|pouches|pouch|cups?\b(?= of yogurt))?$/;
 
-/** How many to put in the cart: "3" or "2 cans" -> 2-3; "1.5 lb" or "1 cup" -> 1 (one package; adjust on review). */
-export function cartQuantity(quantity: string): number {
-  const m = quantity.trim().toLowerCase().match(/^(\d+)(?:\s+(.*))?$/);
-  if (!m) return 1;
-  const n = Number(m[1]);
-  const unit = (m[2] ?? "").replace(/[().]/g, "").trim().split(/\s+/)[0] ?? "";
-  if (unit === "dozen") return Math.min(Math.max(n, 1), 6);
-  return COUNT_UNITS.test(unit) ? Math.min(Math.max(n, 1), 12) : 1;
+// Things sold in packs: how many come in one (12 eggs to a carton, 10 tortillas to a pack...).
+const PACK_OF: [RegExp, number][] = [
+  [/\beggs?\b/, 12], [/tortillas?/, 10], [/taco shells?|tostadas?/, 12], [/hot dog buns?|hamburger buns?|\bbuns?\b|\brolls?\b/, 8],
+  [/hot dogs?|franks?/, 8], [/bagels?|english muffins?/, 6], [/pitas?|naan|flatbreads?/, 5], [/slices?.*(bread|toast)|bread|toast/, 20],
+  [/bacon/, 12], [/string cheese|cheese sticks?/, 12], [/yogurt cups?/, 4], [/juice boxes?/, 8],
+];
+const COUNT_WORD = /^(ct|count|each|whole|large|medium|small|bunch(es)?|heads?|slices?|stalks?|ears?|fillets?|breasts?|thighs?|links?)$/;
+const PACKAGE_WORD = /^(cans?|jars?|box(es)?|bags?|bottles?|packs?|packages?|pkgs?|loaf|loaves|cartons?|containers?|tubs?|pints?|pouch(es)?|half-gallon|gallons?)$/;
+
+/** A leading amount: "3", "1 1/2", "1/2", "2.5" (null if the line doesn't start with one). */
+function leadingAmount(t: string): { n: number; rest: string } | null {
+  const m = t.match(/^(\d+(?:\.\d+)?)(?:\s+(\d+)\/(\d+))?|^(\d+)\/(\d+)/);
+  if (!m) return null;
+  const n = m[4] ? Number(m[4]) / Number(m[5]) : Number(m[1]) + (m[2] ? Number(m[2]) / Number(m[3]) : 0);
+  return { n, rest: t.slice(m[0].length).trim() };
+}
+
+/**
+ * How many to put in the cart, from a grocery line's quantity (and item, for things sold in packs):
+ * "3" onions -> 3; "3 1/2 (10 oz) cans" -> 4; "8 + 4" tortillas -> 2 packs; "18" eggs -> 2 cartons; "2 dozen" eggs -> 2;
+ * weights and cups ("1 1/2 lb", "2 cups") -> 1 package (adjust on review).
+ */
+export function cartQuantity(quantity: string, item = ""): number {
+  const name = item.toLowerCase();
+  const pack = PACK_OF.find(([re]) => re.test(name))?.[1] ?? null;
+  let pieces = 0; // single things: 3 onions, 8 tortillas, 18 eggs
+  let packages = 0; // already counted in store packages: 4 cans, 2 jars, 1 loaf
+  for (const part of quantity.toLowerCase().split(/\s*\+\s*/)) {
+    const a = leadingAmount(part.trim());
+    if (!a) continue;
+    const unit = a.rest.replace(/\([^)]*\)/g, " ").trim().split(/\s+/)[0] ?? "";
+    if (unit === "dozen") pieces += a.n * 12;
+    else if (PACKAGE_WORD.test(unit)) packages += a.n;
+    else if (!unit || COUNT_WORD.test(unit)) pieces += a.n;
+    // lb, oz, cups...: weighed or measured, bought as one package (adjust on review)
+  }
+  // Pieces of something sold in packs become packs (18 eggs -> 2 cartons); other pieces are bought one by one.
+  const fromPieces = pieces > 0 ? (pack ? Math.ceil(pieces / pack) : Math.ceil(pieces)) : 0;
+  const n = fromPieces + Math.ceil(packages);
+  return Math.min(Math.max(n, 1), 12);
 }
 
 /** What to search Fry's for. */
@@ -26,8 +57,8 @@ export function cartSearchTerm(section: string, item: string): string {
 }
 
 /** The grocery list items that go in the cart. */
-export function cartItems(list: GroceryList): { key: string; section: string; item: string; quantity: number; term: string }[] {
-  const out: { key: string; section: string; item: string; quantity: number; term: string }[] = [];
+export function cartItems(list: GroceryList): { key: string; section: string; item: string; quantity: number; raw: string; term: string }[] {
+  const out: { key: string; section: string; item: string; quantity: number; raw: string; term: string }[] = [];
   const seen = new Set<string>();
   for (const sec of list.sections) {
     if (NOT_BOUGHT.has(sec.name)) continue;
@@ -36,7 +67,7 @@ export function cartItems(list: GroceryList): { key: string; section: string; it
       const term = cartSearchTerm(sec.name, it.item);
       if (seen.has(key) || term.length < 2) continue;
       seen.add(key);
-      out.push({ key, section: sec.name, item: it.item, quantity: cartQuantity(it.quantity), term });
+      out.push({ key, section: sec.name, item: it.item, quantity: cartQuantity(it.quantity, it.item), raw: it.quantity, term });
     }
   }
   return out;
@@ -54,6 +85,28 @@ export function unitPrice(size: string, price: number): { per: number; unit: "oz
     : u === "ml" ? n / 29.57 : /^l$|^liter/.test(u) ? n * 33.8 : /^g$|^gram/.test(u) ? n / 28.35 : u === "kg" ? n * 35.27 : null;
   if (oz) return { per: price / oz, unit: "oz" };
   return { per: price / n, unit: "ct" };
+}
+
+/** Ounces in a weight like "1 1/2 lb", "12 oz" (summed over "a + b"), or null if none of it is a weight. */
+export function ouncesNeeded(quantity: string): number | null {
+  let oz = 0;
+  for (const part of quantity.toLowerCase().split(/\s*\+\s*/)) {
+    const a = leadingAmount(part.trim());
+    if (!a) continue;
+    const unit = a.rest.replace(/\([^)]*\)/g, " ").trim().split(/\s+/)[0] ?? "";
+    if (/^(lbs?|pounds?)$/.test(unit)) oz += a.n * 16;
+    else if (/^(oz|ounces?)$/.test(unit)) oz += a.n;
+  }
+  return oz > 0 ? oz : null;
+}
+
+/** How many of a product cover a weighed amount: 4 lb of beef in 1 lb packs -> 4 (a little short is fine). */
+export function packagesForWeight(quantity: string, productSize: string): number | null {
+  const need = ouncesNeeded(quantity);
+  const size = unitPrice(productSize, 1);
+  if (!need || !size || size.unit !== "oz") return null;
+  const perPack = 1 / size.per; // ounces in one package
+  return Math.min(12, Math.max(1, Math.ceil(need / perPack - 0.15)));
 }
 
 const toCart = (p: KrogerProduct): CartProduct => ({ upc: p.upc, description: p.description, size: p.size, price: p.promo ?? p.regular, regular: p.regular, onSale: p.promo != null });

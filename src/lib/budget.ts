@@ -117,7 +117,8 @@ export function enforceCap(
 ): { days: PlanDay[]; swaps: number; over: number } {
   const out = days.map((d) => ({ ...d }));
   const cap = settings.weeklyBudget;
-  const fits = pool.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment) && !(r.rating != null && r.rating <= 2) && !r.trial);
+  const family = settings.adults + settings.kids >= 2;
+  const fits = pool.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment) && !(family && r.servings === 1) && !(r.rating != null && r.rating <= 2) && !r.trial);
   const costOf = new Map(fits.map((r) => [r.id, dinnerCost(r, settings, sales).total]));
   let swaps = 0;
   for (let guard = 0; guard < 14 && dinnersTotal(out) + otherCosts > cap; guard++) {

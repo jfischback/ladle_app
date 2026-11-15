@@ -25,7 +25,7 @@ import { healthGroceryNotes, healthNeeds } from "@/lib/health";
 import { budgetNotes, cookOnceEatTwice, dinnerCost, enforceCap, fillCosts, rebalanceBatches } from "@/lib/budget";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
-import { addDays, upcomingWeekStart, weekDates } from "@/lib/week";
+import { addDays, dayName, upcomingWeekStart, weekDates } from "@/lib/week";
 
 export type ActionResult = { error?: string } | void;
 
@@ -135,7 +135,8 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     let capped = enforceCap(result.days, recipeList, settings, sales, staplesTotal(staples).total + extrasTotal(extraLines), recentIds);
     // Every dollar counts: if dinners alone can't fit, the optional snacks go first (every-trip and running-low items stay).
     if (capped.over > 0 && settings.tightBudget) {
-      extraLines = extraLines.filter((l) => /^Every trip|You're out|Running low/.test(l.reason));
+      // Baby food is never cut.
+      extraLines = extraLines.filter((l) => l.category === "baby" || /^Every trip|You're out|Running low/.test(l.reason));
       capped = enforceCap(capped.days, recipeList, settings, sales, staplesTotal(staples).total + extrasTotal(extraLines), recentIds);
     }
     result.days = capped.days;
@@ -404,21 +405,28 @@ export async function reuseWeek(planId: string): Promise<ActionResult> {
   const dates = weekDates(weekStart);
   const existing = (await activePlans(userId)).find((p) => p.weekOf === weekStart && p.status === "approved");
   if (existing) return { error: "That week is already approved. Tap \"Re-plan this week\" on the home screen first if you want to replace it." };
-  // Only recipes still in the box that fit today's food rules.
-  const live = new Set((await myRecipes(userId)).filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length).map((r) => r.id));
-  const days = dates.map((date, i) => {
+  // Only recipes still in the box that fit today's food rules and kitchen.
+  const box = (await myRecipes(userId)).filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment));
+  const live = new Map(box.map((r) => [r.id, r]));
+  let days: PlanDay[] = dates.map((date, i) => {
     const d = source.days[i];
-    const ok = d?.recipeId && live.has(d.recipeId);
+    const r = d?.recipeId ? live.get(d.recipeId) : undefined;
+    // A leftovers night keeps pointing at its cooking night (same weekday in the new week).
+    const from = d?.leftoverOf ? source.days.findIndex((x) => x.date === d.leftoverOf) : -1;
     return {
       date,
-      recipeId: ok ? d.recipeId : null,
-      recipeName: ok ? d.recipeName : null,
-      estimatedCost: ok ? d.estimatedCost : null,
-      reason: ok ? `Reused from week of ${source.weekOf}` : "No-cook night",
+      recipeId: r ? r.id : null,
+      recipeName: r ? r.name : null,
+      estimatedCost: r && !d.leftoverOf ? dinnerCost(r, settings, []).total : r ? 0 : null,
+      reason: r ? (d.leftoverOf ? `Leftovers from ${dayName(dates[from] ?? date)}: cook once, eat twice` : `Reused from week of ${source.weekOf}`) : "No-cook night",
       saleItems: [],
       alternatives: [],
+      leftoverOf: r && from >= 0 ? dates[from] : null,
     };
   });
+  // Double batches priced again for today's prices and household; breakfasts and lunches planned fresh.
+  days = rebalanceBatches(days, (id) => { const r = live.get(id); return !!r && leftoverKind(r) === "ok"; });
+  days = await withLunches(userId, await withBreakfasts(userId, days, settings, [], null), settings, []);
   const db = await getDb();
   await archiveOthersForWeek(userId, weekStart);
   await db.insert(plans).values({
