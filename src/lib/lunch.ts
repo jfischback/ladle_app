@@ -49,7 +49,7 @@ export function planLunches(days: PlanDay[], settings: Settings, dinners: Map<st
     // The day after a holiday feast (or its leftovers night): feast leftovers.
     const feastDay = prev?.feast ? prev : prev?.leftoverOf && !prev.recipeId ? days.find((d) => d.date === prev.leftoverOf && d.feast) : undefined;
     if (feastDay?.feast) {
-      return { ...day, holiday, lunch: { kind: "leftovers", recipeId: null, name: `${feastDay.feast.holiday} leftovers`, reason: "Turkey sandwiches and leftovers from the feast", eaters: eaters.label, servings: eaters.servings } };
+      return { ...day, holiday, lunch: { kind: "leftovers", recipeId: null, name: `${feastDay.feast.holiday.replace(/ Day$/, "")} leftovers`, reason: "Sandwiches and plates of everything from the feast", eaters: eaters.label, servings: eaters.servings } };
     }
     const prevRecipe = prev?.recipeId ? dinners.get(prev.recipeId) : undefined;
     const reheatOk = !(holidayLunch && prevRecipe && settings.holidayNoReheat.includes(proteinGroup(prevRecipe)));

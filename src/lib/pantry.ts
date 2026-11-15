@@ -101,7 +101,7 @@ export function applyPantry(list: GroceryList, pantry: PantryLike[], stockUp: Sa
   const check: GroceryItem[] = [];
   const sections = list.sections.map((sec) => {
     // Staples, snacks/sweets/drinks/baby and deals have their own buying rules; the pantry check leaves them alone.
-    if (/weekly staples|^snacks$|^sweets$|^drinks$|^baby$|breakfast meat deal|stock up|athlete fuel|^thanksgiving dinner/i.test(sec.name)) return sec; // the holiday feast's list is kept whole: it changes with the guest count
+    if (/weekly staples|^snacks$|^sweets$|^drinks$|^baby$|breakfast meat deal|stock up|athlete fuel|^(thanksgiving|christmas) dinner/i.test(sec.name)) return sec; // the holiday feast's list is kept whole: it changes with the guest count
     const keep: GroceryItem[] = [];
     for (const it of sec.items) {
       const match = pantry.find((p) => sameThing(it.item, p.name));

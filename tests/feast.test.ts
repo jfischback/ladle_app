@@ -136,3 +136,26 @@ test("review fixes: a feast on a leftovers night drops the double batch", () => 
   assert.equal(out[0].estimatedCost, 10);
   assert.equal(out[0].reason, "x");
 });
+
+test("Christmas: a glazed ham sized for the table, warmed not thawed", async () => {
+  const { CHRISTMAS, hamFor, mainFor, feastLabel } = await import("@/lib/feast");
+  const xmas = (guests: number) => ({ holiday: "Christmas Day", guests, dishes: CHRISTMAS.filter((d) => d.default).map((d) => d.key), frozen: true });
+  assert.equal(feastLabel("Christmas Day"), "Christmas");
+  assert.equal(hamFor(10).lb, 6);
+  assert.equal(hamFor(16).lb, 10);
+  assert.ok(hamFor(30).two && hamFor(30).lb <= 12);
+  assert.equal(mainFor(xmas(10))!.thawDays, null);
+  const ham = feastDishes(xmas(10)).find((d) => d.key === "ham")!;
+  assert.ok(ham.steps.some((s) => /140°F/.test(s)));
+  assert.match(`${ham.scaled[0].amount} ${ham.scaled[0].unit} ${ham.scaled[0].item}`, /^1 \(6 lb\) spiral-cut ham$/);
+  const steps = feastTimeline(xmas(10), "2026-12-25", { boughtOn: "2026-12-19", today: "2026-12-01" });
+  assert.ok(!steps.some((s) => /freezer|thaw/i.test(s.what)), "no thawing for a ham");
+  assert.ok(steps.some((s) => s.date === "2026-12-25" && /ham/.test(s.what)));
+  const sec = feastSection(xmas(10));
+  assert.equal(sec.name, "Christmas dinner");
+  assert.ok(sec.items.some((i) => /spiral-cut ham/.test(i.item)));
+  const out = withFeast([{ date: "2026-12-25", recipeId: "chili", recipeName: "chili", estimatedCost: 9, reason: "", saleItems: [], alternatives: [], holiday: "Christmas Day" }, { date: "2026-12-26", recipeId: "chili", recipeName: "chili", estimatedCost: 0, reason: "", saleItems: [], alternatives: [], leftoverOf: "2026-12-25" }], 0, xmas(10));
+  assert.equal(out[0].recipeName, "Christmas dinner");
+  assert.equal(out[1].recipeName, "Christmas leftovers");
+  assert.match(out[1].reason, /^Ham sandwiches/);
+});

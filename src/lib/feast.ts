@@ -12,7 +12,7 @@ export type FeastDish = {
   ingredients: Ingredient[];
   steps: string[];
   ahead?: string; // what can be done the day before
-  main?: boolean; // the turkey: sized by the guest count rather than scaled
+  main?: "turkey" | "ham"; // the centerpiece: sized by the guest count rather than scaled
   whole?: boolean; // made in one pan (a pie): whole recipes only
   default: boolean; // on the menu unless they take it off
 };
@@ -21,7 +21,7 @@ const i = (amount: string, unit: string, item: string): Ingredient => ({ amount,
 
 export const THANKSGIVING: FeastDish[] = [
   {
-    key: "turkey", name: "Roast Turkey", servings: 10, main: true, default: true,
+    key: "turkey", name: "Roast Turkey", servings: 10, main: "turkey", default: true,
     ingredients: [i("1", "", "whole turkey"), i("1/2", "cup", "butter, softened"), i("1", "", "yellow onion, quartered"), i("2", "stalks", "celery, cut in chunks"), i("1", "", "lemon, halved"), i("1", "bunch", "fresh thyme"), i("1", "tbsp", "kosher salt"), i("1", "tsp", "black pepper")],
     steps: [
       "Take the turkey out of the fridge 1 hour before roasting. Heat the oven to 325°F.",
@@ -109,8 +109,54 @@ export const THANKSGIVING: FeastDish[] = [
   },
 ];
 
-export const FEAST_HOLIDAYS = ["Thanksgiving"] as const;
-export const feastMenu = (holiday: string): FeastDish[] | null => (holiday === "Thanksgiving" ? THANKSGIVING : null);
+const dish = (key: string) => THANKSGIVING.find((d) => d.key === key)!;
+
+export const CHRISTMAS: FeastDish[] = [
+  {
+    key: "ham", name: "Brown Sugar Glazed Ham", servings: 12, main: "ham", default: true,
+    ingredients: [i("1", "", "spiral-cut ham"), i("1/2", "cup", "brown sugar"), i("2", "tbsp", "honey"), i("2", "tbsp", "Dijon mustard"), i("1/4", "cup", "orange juice")],
+    steps: [],
+  },
+  dish("potatoes"),
+  dish("green-beans"),
+  {
+    key: "mac", name: "Baked Mac and Cheese", servings: 8, default: true, whole: true,
+    ingredients: [i("1", "lb", "elbow macaroni"), i("4", "tbsp", "butter"), i("1/4", "cup", "all-purpose flour"), i("3", "cups", "milk"), i("3", "cups", "shredded sharp cheddar cheese"), i("1", "tsp", "kosher salt"), i("1/2", "tsp", "dry mustard")],
+    steps: [
+      "Heat the oven to 350°F and butter a 9x13-inch baking dish. Cook the macaroni 2 minutes less than the box says; drain.",
+      "Melt the butter in a big pot, whisk in the flour and cook 1 minute. Slowly whisk in the milk and simmer 5 minutes, whisking, until it thickens.",
+      "Off the heat, stir in 2 1/2 cups of the cheese, the salt and dry mustard until smooth. Stir in the macaroni.",
+      "Spread in the dish, top with the rest of the cheese and bake 25 minutes, until bubbling.",
+    ],
+    ahead: "Make it up to the baking and keep it covered in the fridge; add 10 minutes to the baking.",
+  },
+  {
+    key: "carrots", name: "Honey Roasted Carrots", servings: 8, default: true,
+    ingredients: [i("3", "lb", "carrots, peeled and cut in sticks"), i("3", "tbsp", "olive oil"), i("2", "tbsp", "honey"), i("1", "tsp", "kosher salt")],
+    steps: [
+      "Heat the oven to 425°F. Toss the carrots with the oil and salt on two sheet pans.",
+      "Roast 25 minutes, stirring once. Drizzle with the honey, toss, and roast 5 minutes more.",
+    ],
+    ahead: "Peel and cut the carrots; keep them in a bag in the fridge.",
+  },
+  dish("rolls"),
+  {
+    key: "apple-crisp", name: "Easy Apple Crisp", servings: 8, default: true, whole: true,
+    ingredients: [i("6", "", "apples, peeled and sliced"), i("1/2", "cup", "sugar"), i("1", "tsp", "ground cinnamon"), i("1", "cup", "old-fashioned oats"), i("3/4", "cup", "all-purpose flour"), i("3/4", "cup", "brown sugar"), i("1/2", "cup", "butter, melted")],
+    steps: [
+      "Heat the oven to 350°F. Toss the apples with the sugar and cinnamon in a 9x13-inch baking dish.",
+      "Stir the oats, flour, brown sugar and melted butter together until crumbly; scatter over the apples.",
+      "Bake 45 minutes, until golden and bubbling. Serve warm, with vanilla ice cream if you like.",
+    ],
+    ahead: "Mix the crumble topping and keep it covered in the fridge.",
+  },
+];
+
+export const FEAST_HOLIDAYS = ["Thanksgiving", "Christmas Day"] as const;
+export const feastMenu = (holiday: string): FeastDish[] | null => (holiday === "Thanksgiving" ? THANKSGIVING : holiday === "Christmas Day" ? CHRISTMAS : null);
+/** "Christmas Day" -> "Christmas": how the dinner is named ("Christmas dinner", "Christmas leftovers"). */
+export const feastLabel = (holiday: string) => holiday.replace(/ Day$/, "");
+export const feastIcon = (holiday: string) => (/christmas/i.test(holiday) ? "🎄" : "🦃");
 
 export type Feast = NonNullable<PlanDay["feast"]>;
 
@@ -130,6 +176,26 @@ export function turkeyFor(guests: number): { kind: "whole turkey" | "bone-in tur
   const two = total > 24;
   const lb = Math.min(24, Math.max(10, two ? Math.ceil(total / 2) : total));
   return { kind: "whole turkey", lb, thawDays: Math.ceil(lb / 4), roastHours: hoursFor(WHOLE_HOURS, lb), two };
+}
+
+/** The ham: about 1/2 to 3/4 lb a person bone-in (leftovers included); fully cooked, so it's warmed, not thawed. */
+export function hamFor(guests: number): { kind: "spiral-cut ham"; lb: number; two: boolean; roastHours: number } {
+  const total = Math.max(6, Math.round(guests * 0.6));
+  // Spiral hams come up to about 12 lb: past that, two.
+  const two = total > 12;
+  const lb = Math.min(12, two ? Math.ceil(total / 2) : total);
+  // USDA: a fully cooked spiral ham at 325°F, 10 to 14 minutes a pound (the upper end, to the nearest quarter hour).
+  return { kind: "spiral-cut ham", lb, two, roastHours: Math.ceil(((lb * 14) / 60) * 4) / 4 };
+}
+
+/** The feast's centerpiece, whichever it is: what it is, how big, how long it needs, and whether it thaws. */
+export function mainFor(feast: Feast): { noun: "turkey" | "ham"; kind: string; lb: number; two: boolean; roastHours: number; thawDays: number | null } | null {
+  const menu = feastMenu(feast.holiday) ?? [];
+  const main = menu.find((d) => d.main && feast.dishes.includes(d.key));
+  if (!main) return null;
+  if (main.main === "ham") return { noun: "ham", thawDays: null, ...hamFor(feast.guests) };
+  const t = turkeyFor(feast.guests);
+  return { noun: "turkey", kind: t.kind, lb: t.lb, two: t.two, roastHours: t.roastHours, thawDays: t.thawDays };
 }
 
 const hoursText = (h: number) => {
@@ -155,6 +221,19 @@ function turkeySteps(t: ReturnType<typeof turkeyFor>): string[] {
   ];
 }
 
+/** The ham's steps. */
+function hamSteps(h: ReturnType<typeof hamFor>): string[] {
+  return [
+    `Take the ham out of the fridge 1 hour before. Heat the oven to 325°F.`,
+    "Set the ham cut-side down in a roasting pan, add 1/2 cup water to the pan and cover it tightly with foil.",
+    `Warm it about ${hoursText(h.roastHours)} hours (10 to 14 minutes a pound), until a thermometer in the thickest part (not touching the bone) reads 140°F.`,
+    "Stir the brown sugar, honey, mustard and orange juice together.",
+    "Uncover the ham, turn the oven up to 400°F, brush on the glaze and bake 10 to 15 minutes, brushing once more, until glossy.",
+    "Rest 10 minutes, then slice along the spiral cuts.",
+    ...(h.two ? ["Two hams: warm them side by side in a big oven, or one in each oven."] : []),
+  ];
+}
+
 /** How much of each dish to make: guests / servings, rounded up to a half recipe (at least one whole one; pies whole). */
 export const feastTimes = (dish: FeastDish, guests: number) => {
   const n = guests / dish.servings;
@@ -176,27 +255,29 @@ export function agree(amount: string, unit: string): string {
 export function feastDishes(feast: Feast): (FeastDish & { scaled: Ingredient[]; times: number })[] {
   const menu = feastMenu(feast.holiday) ?? [];
   const t = turkeyFor(feast.guests);
+  const h = hamFor(feast.guests);
   const hasTurkey = feast.dishes.includes("turkey");
   return menu
     // Gravy is made from the turkey's drippings.
     .filter((d) => feast.dishes.includes(d.key) && (d.key !== "gravy" || hasTurkey))
     .map((d) => {
       const times = d.main ? 1 : feastTimes(d, feast.guests);
+      const big = d.main === "ham" ? { ...h, base: 9, item: "spiral-cut ham" } : { ...t, base: 14, item: "whole turkey" };
       const scaled = d.ingredients.map((ing) => {
-        if (d.main && ing.item === "whole turkey") return { amount: t.two ? "2" : "1", unit: `(${t.lb} lb)`, item: t.kind };
-        // The butter, aromatics and seasoning are for a 14 lb bird.
-        const one = d.main ? scaleTo(ing, Math.max(0.5, Math.round((t.lb / 14) * 2) / 2) * (t.two ? 2 : 1)) : scaleTo(ing, times);
+        if (d.main && ing.item === big.item) return { amount: big.two ? "2" : "1", unit: `(${big.lb} lb)`, item: big.kind };
+        // The rest (butter and aromatics, or the glaze) is for a 14 lb bird or a 9 lb ham.
+        const one = d.main ? scaleTo(ing, Math.max(0.5, Math.round((big.lb / big.base) * 2) / 2) * (big.two ? 2 : 1)) : scaleTo(ing, times);
         return { ...one, unit: agree(one.amount, one.unit) };
       });
-      return { ...d, scaled, times, steps: d.main ? turkeySteps(t) : d.steps };
+      return { ...d, scaled, times, steps: d.main === "ham" ? hamSteps(h) : d.main ? turkeySteps(t) : d.steps };
     });
 }
 
 const scaleTo = (ing: Ingredient, m: number): Ingredient => (m === 1 || !ing.amount.trim() ? ing : scaleIngredient(ing, m));
 
 // The section keeps the same name when the guest count changes, so ticks made while shopping stay put.
-export const FEAST_SECTION = (feast: Feast) => `${feast.holiday} dinner`;
-export const isFeastSection = (name: string) => /^thanksgiving dinner( \(\d+ people\))?$/i.test(name);
+export const FEAST_SECTION = (feast: Feast) => `${feastLabel(feast.holiday)} dinner`;
+export const isFeastSection = (name: string) => /^(thanksgiving|christmas) dinner( \(\d+ people\))?$/i.test(name);
 
 /** Lunches that were leftovers of a dinner no longer cooked the night before become open lunches. */
 function fixLeftoverLunches(days: PlanDay[]): PlanDay[] {
@@ -206,7 +287,7 @@ function fixLeftoverLunches(days: PlanDay[]): PlanDay[] {
     const prev = days[i - 1];
     const feastBefore = prev.feast || (prev.leftoverOf && !prev.recipeId && days.some((x) => x.date === prev.leftoverOf && x.feast));
     if (l.recipeId === null ? feastBefore : prev.recipeId === l.recipeId) return d;
-    if (feastBefore) return { ...d, lunch: { ...l, recipeId: null, name: `${feastName(days)} leftovers`, reason: "Turkey sandwiches and leftovers from the feast" } };
+    if (feastBefore) return { ...d, lunch: { ...l, recipeId: null, name: `${feastLabel(feastName(days))} leftovers`, reason: "Sandwiches and plates of everything from the feast" } };
     return { ...d, lunch: { ...l, kind: "open", recipeId: null, name: "Lunch: your pick", reason: "The dinner these leftovers came from changed" } };
   });
 }
@@ -221,10 +302,10 @@ export function withFeast(days: PlanDay[], index: number, feast: Feast): PlanDay
       return {
         ...d,
         feast: { ...feast, replaced: feast.replaced ?? replacing?.name ?? null, replacedId: feast.replacedId ?? replacing?.id ?? null },
-        recipeId: null, recipeName: `${feast.holiday} dinner`, estimatedCost: null, reason: `${feast.holiday} dinner for ${feast.guests}`, saleItems: [], leftoverOf: null, batches: undefined, fromCook: null,
+        recipeId: null, recipeName: `${feastLabel(feast.holiday)} dinner`, estimatedCost: null, reason: `${feastLabel(feast.holiday)} dinner for ${feast.guests}`, saleItems: [], leftoverOf: null, batches: undefined, fromCook: null,
       };
     }
-    if (d.leftoverOf === day.date) return { ...d, recipeId: null, recipeName: `${feast.holiday} leftovers`, estimatedCost: 0, reason: "Turkey sandwiches and plates of everything" };
+    if (d.leftoverOf === day.date) return { ...d, recipeId: null, recipeName: `${feastLabel(feast.holiday)} leftovers`, estimatedCost: 0, reason: `${mainFor(feast)?.noun === "ham" ? "Ham" : "Turkey"} sandwiches and plates of everything` };
     return d;
   });
   return fixLeftoverLunches(dropOrphanBatches(next));
@@ -275,8 +356,12 @@ export function feastTimeline(feast: Feast, date: string, opts: { boughtOn?: str
   }
   const ahead = dishes.filter((d) => d.ahead);
   if (ahead.length) out.push({ date: addDays(date, -1), what: ahead.map((d) => `${d.name}: ${d.ahead!.replace(/\.$/, "")}.`).join(" ") });
-  if (feast.dishes.includes("turkey")) {
+  const main = mainFor(feast);
+  if (main?.noun === "turkey") {
     out.push({ date, what: `Take the ${birds} out of the fridge ${hoursText(t.roastHours + 1.5)} hours before you want to eat, and into the oven an hour later: about ${hoursText(t.roastHours)} hours to roast, then 30 minutes to rest while the sides finish.` });
+  } else if (main?.noun === "ham") {
+    const hams = main.two ? "hams" : "ham";
+    out.push({ date, what: `Take the ${hams} out of the fridge ${hoursText(main.roastHours + 1.5)} hours before you want to eat, and into the oven an hour later: about ${hoursText(main.roastHours)} hours to warm and glaze, then 10 minutes to rest.` });
   }
   return out.sort((a, b) => a.date.localeCompare(b.date));
 }
@@ -288,7 +373,7 @@ export function feastTips(days: PlanDay[], opts: { boughtOn?: string; today?: st
     if (!d.feast) continue;
     for (const step of feastTimeline(d.feast, d.date, opts)) {
       if (step.date === d.date) continue;
-      tips.set(step.date, [...(tips.get(step.date) ?? []), `🦃 For ${dayName(d.date)}: ${step.what}`]);
+      tips.set(step.date, [...(tips.get(step.date) ?? []), `${feastIcon(d.feast.holiday)} For ${dayName(d.date)}: ${step.what}`]);
     }
   }
   return tips;

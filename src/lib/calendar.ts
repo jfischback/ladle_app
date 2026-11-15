@@ -1,4 +1,4 @@
-import { feastTimeline, turkeyFor } from "./feast";
+import { feastIcon, feastLabel, feastTimeline, mainFor } from "./feast";
 import type { PlanDay } from "./types";
 
 /** A calendar event: a date, a start time (minutes after midnight, local), and how long. */
@@ -96,17 +96,21 @@ function feastEvents(planId: string, d: PlanDay, origin: string, index: number, 
   const feast = d.feast!;
   const url = `${origin}/feast/${planId}/${index}`;
   const dinnerAt = 15 * 60;
-  const t = turkeyFor(feast.guests);
+  const main = mainFor(feast);
+  const icon = feastIcon(feast.holiday);
+  const label = feastLabel(feast.holiday);
   const out: CalEvent[] = [];
   for (const step of feastTimeline(feast, d.date, when)) {
     if (step.date === d.date) continue;
     const thaw = /freezer|cold water/.test(step.what);
-    out.push({ uid: `${planId}-${step.date}-${thaw ? "thaw" : "ahead"}@ladle`, date: step.date, startMinutes: thaw ? 9 * 60 : 19 * 60, minutes: thaw ? 15 : 90, title: thaw ? (/cold water/.test(step.what) ? "🦃 Turkey: no time to thaw in the fridge" : `🦃 Move the ${t.two ? "turkeys" : "turkey"} to the fridge`) : `🦃 Get ahead for ${feast.holiday}`, notes: step.what, url });
+    out.push({ uid: `${planId}-${step.date}-${thaw ? "thaw" : "ahead"}@ladle`, date: step.date, startMinutes: thaw ? 9 * 60 : 19 * 60, minutes: thaw ? 15 : 90, title: thaw ? (/cold water/.test(step.what) ? `${icon} Turkey: no time to thaw in the fridge` : `${icon} Move the ${main?.two ? "turkeys" : "turkey"} to the fridge`) : `${icon} Get ahead for ${label}`, notes: step.what, url });
   }
-  if (feast.dishes.includes("turkey")) {
-    const minutes = Math.round((t.roastHours + 0.5) * 60); // in the oven, then resting
-    out.push({ uid: `${planId}-${d.date}-turkey@ladle`, date: d.date, startMinutes: dinnerAt - minutes, minutes, title: "🦃 Turkey in the oven", notes: `Roast about ${t.roastHours} hours to 165°F in the thigh, then rest 30 minutes.`, url });
+  if (main) {
+    const rest = main.noun === "ham" ? 10 / 60 : 0.5;
+    const minutes = Math.round((main.roastHours + rest) * 60); // in the oven, then resting
+    const notes = main.noun === "ham" ? `Warm about ${main.roastHours} hours to 140°F, glaze, then rest 10 minutes.` : `Roast about ${main.roastHours} hours to 165°F (thickest part, not touching the bone), then rest 30 minutes.`;
+    out.push({ uid: `${planId}-${d.date}-${main.noun}@ladle`, date: d.date, startMinutes: dinnerAt - minutes, minutes, title: `${icon} ${main.noun === "ham" ? "Ham" : "Turkey"} in the oven`, notes, url });
   }
-  out.push({ uid: `${planId}-${d.date}-dinner@ladle`, date: d.date, startMinutes: dinnerAt, minutes: 120, title: `🦃 ${feast.holiday} dinner for ${feast.guests}`, notes: `Recipes and countdown: ${url}`, url });
+  out.push({ uid: `${planId}-${d.date}-dinner@ladle`, date: d.date, startMinutes: dinnerAt, minutes: 120, title: `${icon} ${label} dinner for ${feast.guests}`, notes: `Recipes and countdown: ${url}`, url });
   return out;
 }

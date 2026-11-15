@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUserId } from "@/auth";
 import { getPlan } from "@/lib/data";
-import { feastDishes, feastTimeline, turkeyFor } from "@/lib/feast";
+import { feastDishes, feastIcon, feastLabel, feastTimeline, mainFor } from "@/lib/feast";
 import { dayName, shortDate, today } from "@/lib/week";
 import { CookMode } from "@/app/recipes/[id]/CookMode";
 
@@ -17,17 +17,17 @@ export default async function FeastPage({ params }: { params: Promise<{ planId: 
   const feast = day.feast;
   const dishes = feastDishes(feast);
   const steps = feastTimeline(feast, day.date, { boughtOn: plan!.weekOf, today: today() });
-  const t = turkeyFor(feast.guests);
+  const main = mainFor(feast);
 
   return (
     <article className="space-y-6">
       <Link href="/" className="inline-flex items-center gap-1 font-bold text-olive-dark hover:underline">← This week</Link>
       <div>
         <p className="eyebrow">{dayName(day.date)}, {shortDate(day.date)}</p>
-        <h1 className="text-4xl font-semibold">🦃 {feast.holiday} for {feast.guests}</h1>
-        {feast.dishes.includes("turkey") && (
+        <h1 className="text-4xl font-semibold">{feastIcon(feast.holiday)} {feastLabel(feast.holiday)} for {feast.guests}</h1>
+        {main && (
           <p className="mt-1 text-lg text-muted">
-            {t.two ? `Two ${t.lb} lb turkeys` : `A ${t.lb} lb ${t.kind}`}: about 1¼ lb a person, so there are leftovers for sandwiches.
+            {main.two ? `Two ${main.lb} lb ${main.noun}s` : `A ${main.lb} lb ${main.kind}`}: {main.noun === "ham" ? "about ¾ lb a person" : "about 1¼ lb a person"}, so there are leftovers for sandwiches.
           </p>
         )}
       </div>

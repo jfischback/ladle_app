@@ -7,6 +7,7 @@ import { answerPantryCheck } from "./actions/pantry";
 import { addGroceryItem, removeGroceryItem, setGroceryChecks } from "./actions/grocery";
 import { tickKey } from "@/lib/grocery-checks";
 import { FeastCard, FeastPlanner } from "@/components/FeastCard";
+import { feastIcon, feastLabel } from "@/lib/feast";
 import { ADDED_SECTION } from "@/lib/grocery-add";
 import { useRouter } from "next/navigation";
 import { groceryText } from "@/lib/grocery-text";
@@ -208,7 +209,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
           {feasting ? (
             <FeastPlanner planId={planId} index={index} day={day} defaultGuests={feastGuests} onDone={() => setFeasting(false)} />
           ) : (
-            <button type="button" className="btn-warm w-full sm:w-auto" onClick={() => setFeasting(true)}>🦃 Plan {day.holiday} dinner instead</button>
+            <button type="button" className="btn-warm w-full sm:w-auto" onClick={() => setFeasting(true)}>{feastIcon(day.holiday ?? "")} Plan {feastLabel(day.holiday ?? "")} dinner instead</button>
           )}
         </div>
       )}
