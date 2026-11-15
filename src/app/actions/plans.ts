@@ -12,7 +12,8 @@ import { buildGroceryList, saleNote } from "@/lib/grocery";
 import { stapleTerm, staplesTotal } from "@/lib/staples";
 import { FOUND_PREFIX, planWeek, sumCosts, type NewRecipeOption } from "@/lib/planner";
 import { recipeSales, scanSales, type SaleScan } from "@/lib/sales";
-import type { SaleCheck, SaleItem, StapleLine } from "@/lib/types";
+import { leftoverNotes, planLunches } from "@/lib/lunch";
+import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
 import { addDays, upcomingWeekStart, weekDates } from "@/lib/week";
 
@@ -35,7 +36,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   if (recipeList.length < settings.dinnersPerWeek) {
     return { error: `You need at least ${settings.dinnersPerWeek} dinners in My Recipes to plan a week.` };
   }
-  const fitting = recipeList.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes).length && !(r.rating != null && r.rating <= 2)).length;
+  const fitting = recipeList.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && !(r.rating != null && r.rating <= 2)).length;
   if (fitting < settings.dinnersPerWeek) {
     return {
       error: `Only ${fitting} of your recipes fit your food rules, and you cook ${settings.dinnersPerWeek} nights. Add a few more recipes that fit (your cooks are a good place to look), or cook fewer nights in Settings.`,
@@ -100,6 +101,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     }),
   );
   result.estimatedTotal = sumCosts(result.days);
+  result.days = await withLunches(userId, result.days, settings, sales);
 
   await archiveOthersForWeek(userId, weekStart);
   await db.insert(plans).values({
@@ -146,12 +148,24 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
       alternatives: [...previous, ...day.alternatives.filter((a) => a.recipeId !== recipeId)].slice(0, 3),
     };
   }
+  // Lunches depend on the night before, so re-plan them after any dinner change.
+  const { data: settings } = await getSettings(userId);
+  plan.days = await withLunches(userId, plan.days, settings, plan.saleItems.filter((x): x is SaleItem => typeof x !== "string"));
   const db = await getDb();
   await db
     .update(plans)
     .set({ days: plan.days, estimatedTotal: sumCosts(plan.days) })
-    .where(eq(plans.id, planId));
+    .where(and(eq(plans.id, planId), eq(plans.status, "draft")));
   revalidatePath("/");
+}
+
+/** Plan the week's lunches from the dinners (leftovers first, then lunch recipes). */
+async function withLunches(userId: string, days: PlanDay[], settings: Settings, sales: SaleItem[]): Promise<PlanDay[]> {
+  const needsLunch = settings.lunchDays.length > 0 || settings.holidayEveryoneHome;
+  if (!needsLunch) return days.map((d) => ({ ...d, lunch: null }));
+  const dinnerIds = days.map((d) => d.recipeId).filter((x): x is string => !!x);
+  const [dinnerRows, lunchPool] = await Promise.all([recipesByIds(userId, dinnerIds), myRecipes(userId, "lunch")]);
+  return planLunches(days, settings, new Map(dinnerRows.map((r) => [r.id, r])), lunchPool, sales);
 }
 
 /** The human gate: lock the plan and build the grocery list. Cart fill comes later; never checkout. */
@@ -163,11 +177,13 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   if (plan.archivedAt) return { error: "This week was replaced. Refresh the page to see the current plan." };
   const { data: settings } = await getSettings(userId);
   const ids = plan.days.map((d) => d.recipeId).filter((x): x is string => !!x);
-  const chosen = await recipesByIds(userId, ids);
+  // Lunch recipes need shopping too (leftover lunches are covered by cooking extra at dinner).
+  const lunchIds = plan.days.map((d) => (d.lunch?.kind === "recipe" ? d.lunch.recipeId : null)).filter((x): x is string => !!x);
+  const chosen = await recipesByIds(userId, [...new Set([...ids, ...lunchIds])]);
   let groceryList;
   try {
     const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
-    groceryList = await buildGroceryList(chosen, settings, sales);
+    groceryList = await buildGroceryList(chosen, settings, sales, leftoverNotes(plan.days));
     // Weekly staples get their own section, with this week's sale prices where we found them.
     const snap = new Map((plan.staples ?? []).map((l) => [stapleTerm(l.item), l]));
     const items = settings.staples.filter((x) => x.active).map((x) => {
@@ -222,7 +238,7 @@ async function newRecipeOptions(userId: string, sales: SaleItem[], settings: Set
     .limit(150);
   const seen = new Set<string>();
   return rows
-    .filter(({ found }) => found.ingredients.length >= 3 && !ruleProblems(found, settings.foodRules, settings.dislikes).length)
+    .filter(({ found }) => found.ingredients.length >= 3 && !ruleProblems(found, settings.foodRules, settings.dislikes, settings.allowAnyway).length)
     .filter(({ found }) => !seen.has(found.title.toLowerCase()) && seen.add(found.title.toLowerCase()))
     .map(({ found, cookName }, i) => ({ opt: { foundId: found.id, title: found.title, cookName, ingredients: found.ingredients, totalMinutes: found.totalMinutes }, rank: i }))
     .sort((a, b) => recipeSales(b.opt, sales).length - recipeSales(a.opt, sales).length || a.rank - b.rank)
@@ -285,7 +301,7 @@ export async function reuseWeek(planId: string): Promise<ActionResult> {
   const existing = (await activePlans(userId)).find((p) => p.weekOf === weekStart && p.status === "approved");
   if (existing) return { error: "That week is already approved. Tap \"Re-plan this week\" on the home screen first if you want to replace it." };
   // Only recipes still in the box that fit today's food rules.
-  const live = new Set((await myRecipes(userId)).filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes).length).map((r) => r.id));
+  const live = new Set((await myRecipes(userId)).filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length).map((r) => r.id));
   const days = dates.map((date, i) => {
     const d = source.days[i];
     const ok = d?.recipeId && live.has(d.recipeId);

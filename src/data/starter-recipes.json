@@ -3743,5 +3743,737 @@
   "creditName": "Inspired by Club Sandwich (Turkey, Ham, Bacon) by Marjorie, A Pinch of Healthy; side: Baked French Fries (Oven Fries) by Holly Nilsson, Spend With Pennies",
   "creditUrl": null,
   "sourceDocUrl": "https://docs.google.com/document/d/1NZ0p5SJDtx2Ic1bxkF6JUIwe91AXhuQJdeSMIsPg1ys/edit"
+ },
+ {
+  "meal": "lunch",
+  "name": "Veggie Egg Scramble with Spinach and Peppers, with Toast",
+  "protein": "Eggs",
+  "servings": 2,
+  "totalMinutes": 12,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "large eggs (2 for the adult, 2 for the baby)"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "diced bell pepper"
+   },
+   {
+    "amount": "2",
+    "unit": "tablespoons",
+    "item": "diced onion (optional)"
+   },
+   {
+    "amount": "1",
+    "unit": "large handful",
+    "item": "baby spinach"
+   },
+   {
+    "amount": "2",
+    "unit": "teaspoons",
+    "item": "butter or olive oil, divided"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and pepper"
+   },
+   {
+    "amount": "2",
+    "unit": "slices",
+    "item": "bread, for toast"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "shredded cheese (about 1 oz), for the baby"
+   },
+   {
+    "amount": "1/4",
+    "unit": "",
+    "item": "avocado, for the baby"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "extra butter, for the baby"
+   }
+  ],
+  "steps": [
+   "Put the bread in the toaster so it is ready when the eggs are done.",
+   "Heat 1 teaspoon of butter or oil in a nonstick skillet over medium heat. Add the pepper and onion and cook 3 to 4 minutes until soft.",
+   "Add the spinach and stir about 1 minute until it wilts.",
+   "Whisk 2 of the eggs with a pinch of salt and pepper. Pour over the vegetables and gently push the eggs across the pan into soft curds. Cook until set with no runny egg. Serve with the toast.",
+   "Wipe out the pan. Melt the extra teaspoon of butter, add the other 2 eggs with no salt, and scramble until fully cooked. Stir in the cheese until melted.",
+   "For a baby: serve the cheesy eggs in small soft pieces with small pieces of avocado on the side, plus a little finely chopped cooked pepper and spinach if they like it. No added salt; let it cool before serving."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": "https://docs.google.com/document/d/1RkKIBSdJaCg1-F5l8wH2CCQQuUrYcUGuP_pnN-rYJy0/edit"
+ },
+ {
+  "meal": "lunch",
+  "name": "Turkey and Black Bean Quesadilla with Peppers and Salsa",
+  "protein": "Turkey",
+  "servings": 2,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "flour tortillas (8 inch)"
+   },
+   {
+    "amount": "3",
+    "unit": "oz",
+    "item": "deli turkey, chopped (or leftover cooked turkey)"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "canned black beans, rinsed and drained"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "diced bell pepper (red works well)"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "shredded cheese (about 2 oz), plus 1/4 cup extra for the baby"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "chili powder"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "A pinch of cumin"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "olive oil"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salsa, for serving"
+   }
+  ],
+  "steps": [
+   "Heat the olive oil in a skillet over medium heat. Add the pepper and cook 3 to 4 minutes until soft.",
+   "Stir in the beans, turkey, chili powder and cumin and warm through, 1 to 2 minutes. Move to a bowl.",
+   "Put one tortilla in the same skillet. Sprinkle on half the cheese, spread the turkey and bean mix on top, add the rest of the cheese and cover with the second tortilla.",
+   "Cook 2 to 3 minutes per side over medium heat until golden and the cheese melts.",
+   "Slice into wedges and serve with salsa.",
+   "For a baby: use regular full-fat cheese and the extra cheese in their portion. Leave out the salsa and chili powder, lightly mash a few of the beans, and skip the deli turkey or chop it very small since it is salty. Cut into small strips and let it cool before serving."
+  ],
+  "tags": [
+   "quick",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": "Inspired by Turkey and Black Bean Quesadillas, Family Food on the Table",
+  "creditUrl": "https://familyfoodonthetable.com",
+  "sourceDocUrl": "https://docs.google.com/document/d/1PphYHoHZO51TwTMuaTWBe5C7yjZC-Qp7ErHEsqvukZE/edit"
+ },
+ {
+  "meal": "lunch",
+  "name": "Garlic Shrimp and Veggie Stir Fry over Rice",
+  "protein": "Shrimp",
+  "servings": 1,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "6",
+    "unit": "oz",
+    "item": "peeled, deveined shrimp (thawed if frozen), patted dry"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "broccoli florets, cut small"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "sugar snap peas"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "2",
+    "unit": "teaspoons",
+    "item": "oil (olive, vegetable or avocado), divided"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "cooked rice (leftover or a microwave pouch)"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "soy sauce"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "honey"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "rice vinegar"
+   },
+   {
+    "amount": "1/2",
+    "unit": "teaspoon",
+    "item": "cornstarch mixed with 1 tablespoon water"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "A pinch of red pepper flakes (optional)"
+   }
+  ],
+  "steps": [
+   "Start the rice, or warm leftover or pouch rice. Stir the soy sauce, honey, rice vinegar and cornstarch slurry together in a small bowl.",
+   "Heat 1 teaspoon of oil in a large skillet over medium-high heat. Add the broccoli and snap peas and cook 3 to 4 minutes, stirring, until bright green and still crisp. Move to a plate.",
+   "Add the other teaspoon of oil and the shrimp. Cook about 1 minute per side until pink. Add the garlic and red pepper flakes and cook 30 seconds.",
+   "Pour in the sauce and stir 30 to 60 seconds until it thickens. Add the vegetables back and toss.",
+   "Serve over the rice.",
+   "For a baby: shrimp is a common allergen, so introduce it on its own another day rather than at a meal like this. Make the baby a plate of scrambled eggs cooked in butter with a little cheese, plain rice with butter, and a few soft, well-cooked broccoli pieces. No soy sauce; cut everything small and let it cool."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": "Inspired by 15-Minute Garlic Shrimp Stir-Fry, Averie Cooks",
+  "creditUrl": "https://averiecooks.com",
+  "sourceDocUrl": "https://docs.google.com/document/d/1X20zxfQHLc2Z8IBT_VLEW4jcTWYJIsGui23zKTtAf3o/edit"
+ },
+ {
+  "meal": "lunch",
+  "name": "Turkey and Deli Meat Veggie Wrap",
+  "protein": "Turkey",
+  "servings": 2,
+  "totalMinutes": 8,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "large flour or whole wheat tortilla (burrito size)"
+   },
+   {
+    "amount": "3",
+    "unit": "oz",
+    "item": "deli turkey (or a mix of turkey and other deli meat)"
+   },
+   {
+    "amount": "2",
+    "unit": "tablespoons",
+    "item": "hummus, or 1 to 2 teaspoons mustard"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "A few lettuce leaves or a handful of spinach"
+   },
+   {
+    "amount": "1/4",
+    "unit": "",
+    "item": "cucumber, sliced into thin strips"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Optional: bell pepper strips, shredded carrot, thin red onion"
+   },
+   {
+    "amount": "1 to 2",
+    "unit": "slices",
+    "item": "soft bread, for the baby"
+   },
+   {
+    "amount": "1",
+    "unit": "oz",
+    "item": "deli turkey, for the baby"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "cream cheese or 1/4 avocado, for the baby"
+   }
+  ],
+  "steps": [
+   "Lay the tortilla flat and spread the hummus or mustard down the center.",
+   "Add the lettuce first to keep the wrap from getting soggy, then layer the turkey on top in the center.",
+   "Add the cucumber and any other vegetables.",
+   "Fold in the sides, roll up tightly, cut in half and serve.",
+   "For a baby: the wrap is chewy, so spread cream cheese or mashed avocado on soft bread, add the turkey chopped very small, and cut into small strips. Deli meat is salty, so keep the portion small or use leftover cooked chicken or turkey instead. Skip the mustard."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": "Inspired by Turkey Hummus and Veggie Wraps, Jo Cooks",
+  "creditUrl": "https://jocooks.com",
+  "sourceDocUrl": "https://docs.google.com/document/d/1qQmSutK8_TVXEFpqZQUeby47lEyDRGDanRP-dbzQafA/edit"
+ },
+ {
+  "meal": "lunch",
+  "name": "Egg Fried Rice with Peas, Carrots and Diced Deli Ham",
+  "protein": "Eggs",
+  "servings": 2,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "cold cooked rice (day-old rice is best)"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "large eggs, beaten (1 for the adult, 2 for the baby's portion)"
+   },
+   {
+    "amount": "2",
+    "unit": "oz",
+    "item": "diced deli ham (about 1/3 cup)"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "frozen peas and carrots (no need to thaw)"
+   },
+   {
+    "amount": "2",
+    "unit": "tablespoons",
+    "item": "diced onion (optional)"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "oil or butter, divided"
+   },
+   {
+    "amount": "1",
+    "unit": "teaspoon",
+    "item": "extra butter, for the baby"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "soy sauce (adult portion only)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "A pinch of salt and pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Green onion, for garnish (optional)"
+   }
+  ],
+  "steps": [
+   "Break up any clumps in the cold rice with your fingers.",
+   "Heat half the oil in a large skillet over medium-high heat. Add the eggs and scramble gently until just cooked. Move to a bowl.",
+   "Add the rest of the oil, then the onion, peas and carrots, and ham. Cook 2 to 3 minutes until hot.",
+   "Add the rice and stir, pressing it against the pan, 2 to 3 minutes until heated through.",
+   "Scoop out the baby's portion before adding any sauce. Add the soy sauce to the pan, stir in the eggs and cook 1 more minute.",
+   "Top with green onion and serve.",
+   "For a baby: stir the extra teaspoon of butter and most of the egg into their portion. Give only a few small pieces of ham or skip it, since it is salty. Make sure the peas are soft and lightly mashed or cut, and let it cool before serving."
+  ],
+  "tags": [
+   "quick",
+   "leftovers"
+  ],
+  "ease": 4,
+  "prepAhead": "Cook the rice a day ahead and refrigerate it; cold day-old rice fries best.",
+  "creditName": "Inspired by Easy Ham Fried Rice, Tastes Better From Scratch",
+  "creditUrl": "https://tastesbetterfromscratch.com",
+  "sourceDocUrl": "https://docs.google.com/document/d/1bYasv8VxGRr3zgcEmAcU69hJi0h3_HsVbzrkzqczgLE/edit"
+ },
+ {
+  "meal": "lunch",
+  "name": "BLT Sandwich",
+  "protein": "Pork",
+  "servings": 2,
+  "totalMinutes": 10,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "slices",
+    "item": "precooked bacon"
+   },
+   {
+    "amount": "3",
+    "unit": "slices",
+    "item": "bread (2 for the adult, 1 for the baby)"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "lettuce leaves"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "tomato, sliced"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "mayonnaise"
+   }
+  ],
+  "steps": [
+   "Warm the precooked bacon in a skillet or microwave until hot and crisp.",
+   "Toast the bread.",
+   "Spread mayonnaise on 2 slices of toast. Layer lettuce, tomato and 3 slices of bacon between them, then cut in half.",
+   "For a baby: serve a slice of soft untoasted bread cut into strips with small peeled or finely chopped tomato pieces. Bacon is salty and hard to chew, so give only a small amount crumbled very finely, or skip it."
+  ],
+  "tags": [
+   "quick"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Spicy Penne Rosa with Hot Italian Sausage",
+  "protein": "Sausage",
+  "servings": 3,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "150",
+    "unit": "g",
+    "item": "penne, about 5 oz (or a similar small pasta)"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "extra virgin olive oil"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, finely chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "small shallot, finely chopped"
+   },
+   {
+    "amount": "1/4",
+    "unit": "teaspoon",
+    "item": "red pepper flakes"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "hot Italian sausages, casings removed, roughly chopped"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "shredded mozzarella"
+   },
+   {
+    "amount": "1 1/4",
+    "unit": "cups",
+    "item": "spinach, roughly chopped"
+   },
+   {
+    "amount": "2 1/2",
+    "unit": "tablespoons",
+    "item": "tomato paste"
+   },
+   {
+    "amount": "2/3",
+    "unit": "cup",
+    "item": "tomato sauce"
+   },
+   {
+    "amount": "2/3",
+    "unit": "cup",
+    "item": "salted vegetable stock (or chicken broth)"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "heavy cream"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "water"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Fresh basil, for garnish (optional)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Parmesan, for garnish (optional)"
+   }
+  ],
+  "steps": [
+   "Finely chop the garlic, shallot and spinach and set aside.",
+   "Squeeze the sausage out of its casings and break it into bite-sized pieces.",
+   "Heat the olive oil in a large frying pan over medium-high heat. Add the sausage and fry 4 to 5 minutes until it starts to brown.",
+   "Lower the heat to medium, add the garlic, shallot and red pepper flakes, and cook 1 to 2 minutes until the shallot softens.",
+   "Stir in the tomato paste and cook about 3 minutes, until it darkens to a deep red.",
+   "Add the uncooked penne, tomato sauce, stock, cream and water.",
+   "Bring to a boil, then cover, lower to a simmer and cook about 10 minutes, stirring every few minutes so the pasta does not stick, until the pasta is cooked and most of the liquid is absorbed.",
+   "Turn off the heat, uncover and stir in the spinach and mozzarella.",
+   "Top with basil and grated Parmesan if you like, and serve.",
+   "For a baby: the pan is spicy, so set aside a spoonful of plain tomato sauce and a little cream first. Boil a small handful of penne in unsalted water until very soft, then toss with the reserved sauce, cream, some chopped spinach and a pinch of mozzarella. Skip the sausage. Cut the penne small or serve whole as finger food, and let it cool."
+  ],
+  "tags": [
+   "quick",
+   "one-pot"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": "Inspired by Spicy Penne Rose with Sausage and Spinach by Sammy Montgoms, sammymontgoms.com",
+  "creditUrl": "https://sammymontgoms.com/?p=3169",
+  "sourceDocUrl": "https://docs.google.com/document/d/1J9MO7Raw6Hs6snOaj_H0_iF-t6YKvkz0ftgSc2hpo7U/edit"
+ },
+ {
+  "meal": "dinner",
+  "name": "Grilled Hot Dogs",
+  "protein": "Beef",
+  "servings": 3,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "5",
+    "unit": "",
+    "item": "all-beef hot dogs"
+   },
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "hot dog buns"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Toppings: ketchup, mustard, relish, diced onion"
+   }
+  ],
+  "steps": [
+   "Heat the grill to medium, about 10 minutes.",
+   "Grill the hot dogs 5 to 7 minutes, turning often, until browned and hot all the way through.",
+   "Toast the buns cut side down on the grill for the last 30 to 60 seconds.",
+   "Put the hot dogs in the buns and add toppings.",
+   "For a baby: whole or coin-shaped hot dog pieces are a choking hazard. Cut one hot dog lengthwise into quarters, then into very small pieces. Hot dogs are salty, so keep the portion small and skip the toppings. Let it cool before serving."
+  ],
+  "tags": [
+   "grill",
+   "quick",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Grilled Hamburgers",
+  "protein": "Beef",
+  "servings": 3,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "pre-made all-beef burger patties (about 1/4 lb each)"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "hamburger buns"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Salt and pepper"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Toppings: cheese slices, lettuce, tomato, onion, pickles, ketchup, mustard"
+   }
+  ],
+  "steps": [
+   "Heat the grill to medium-high, about 10 minutes.",
+   "Season 2 patties with salt and pepper. Leave 1 patty plain for the baby.",
+   "Grill the patties 4 to 5 minutes per side, without pressing them, until they reach 160 degrees F inside. Add cheese in the last minute if you like.",
+   "Toast the buns cut side down on the grill for about 1 minute.",
+   "Build the burgers with your toppings.",
+   "For a baby: crumble or cut the plain fully cooked patty into small soft pieces, with a little soft bun on the side. No added salt; let it cool before serving."
+  ],
+  "tags": [
+   "grill",
+   "quick",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Grilled Chicken Thighs with Kinder's Seasoning",
+  "protein": "Chicken",
+  "servings": 3,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "lb",
+    "item": "boneless skinless chicken thighs"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1 to 2",
+    "unit": "tablespoons",
+    "item": "Kinder's seasoning or a similar BBQ rub"
+   }
+  ],
+  "steps": [
+   "Heat the grill to medium-high, about 10 minutes.",
+   "Pat the chicken dry and coat with the oil. Set 1 thigh aside plain for the baby, and season the rest on both sides with the rub.",
+   "Grill 5 to 7 minutes per side, until the chicken reaches at least 165 degrees F inside.",
+   "Rest 5 minutes, then serve.",
+   "For a baby: the rub is salty, so cook the plain thigh alongside and cut it into small soft pieces or shreds. Let it cool before serving."
+  ],
+  "tags": [
+   "grill",
+   "quick"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Grilled Steak",
+  "protein": "Beef",
+  "servings": 3,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "New York strip or ribeye steaks, about 1 inch thick (about 3/4 lb each)"
+   },
+   {
+    "amount": "",
+    "unit": "",
+    "item": "Kosher salt and black pepper"
+   },
+   {
+    "amount": "1",
+    "unit": "tablespoon",
+    "item": "butter"
+   }
+  ],
+  "steps": [
+   "Take the steaks out of the fridge about 20 minutes before grilling and pat dry. Heat the grill to high, about 10 minutes.",
+   "Cut a small piece off one steak for the baby and leave it unseasoned. Season the rest well on both sides with salt and pepper.",
+   "Grill 4 to 5 minutes per side for medium-rare (130 to 135 degrees F inside), or longer for more done. Grill the baby's piece until it reaches at least 145 degrees F.",
+   "Move to a plate, top with the butter and rest 5 to 10 minutes before slicing against the grain.",
+   "For a baby: slice the plain piece very thin or chop it finely, or give a long thin strip to suck and chew. Let it cool before serving."
+  ],
+  "tags": [
+   "grill"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Store-Bought Sushi Night",
+  "protein": "Seafood",
+  "servings": 3,
+  "totalMinutes": 10,
+  "ingredients": [
+   {
+    "amount": "2 to 3",
+    "unit": "packs",
+    "item": "store-bought sushi rolls from the sushi counter (cooked or veggie rolls if anyone avoids raw fish)"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "cucumber"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "avocado"
+   }
+  ],
+  "steps": [
+   "Order or pick up the sushi the same day you eat it; store sushi is made fresh and does not keep.",
+   "Keep it cold until dinner and eat it within a few hours.",
+   "Slice the cucumber and avocado to serve on the side.",
+   "For a baby: no raw fish. Offer soft pieces of the plain rice, avocado and cucumber instead."
+  ],
+  "tags": [
+   "store-bought",
+   "quick",
+   "no-leftovers"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
  }
 ]

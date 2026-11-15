@@ -82,6 +82,17 @@ export async function archiveRecipe(id: string) {
   redirect("/recipes");
 }
 
+/** "Good for leftovers?" switch: tags the recipe so the planner knows (overrides the automatic guess). */
+export async function setLeftovers(id: string, good: boolean) {
+  const userId = await requireUserId();
+  const db = await getDb();
+  const [r] = await db.select({ tags: recipes.tags }).from(recipes).where(and(eq(recipes.id, id), eq(recipes.ownerId, userId)));
+  if (!r) return;
+  const tags = r.tags.filter((t) => t !== "leftovers" && t !== "no-leftovers").concat(good ? "leftovers" : "no-leftovers");
+  await db.update(recipes).set({ tags, updatedAt: new Date() }).where(and(eq(recipes.id, id), eq(recipes.ownerId, userId)));
+  revalidatePath(`/recipes/${id}`);
+}
+
 export async function rateRecipe(id: string, stars: number) {
   const userId = await requireUserId();
   if (!Number.isInteger(stars) || stars < 1 || stars > 5) return;

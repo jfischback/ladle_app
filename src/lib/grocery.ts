@@ -36,10 +36,12 @@ Rules:
 - foodRules are strict (allergies, diets). If a product could hide a problem (e.g. broth with gluten, sauces with soy or dairy), add a short note like "check label: gluten-free".
 - If an item matches one of saleItems (same ingredient), make its note "On sale $X.XX (N% off)" using that sale's salePrice and pctOff, plus the product name when it helps pick the right one.
 - weeklyStaples are added to the list separately. Don't list them again; if the dinners need more than the staple amount, list only the extra with the note "plus your weekly staple".
+- cookExtra lists dinners to cook with extra portions for the next day's lunch. Scale those dinners' ingredients up for the extra people.
+- Some recipes are lunches (meal "lunch"); include their ingredients too.
 - Keep notes short; use an empty string when there is nothing to say.`;
 
-export async function buildGroceryList(recipes: Recipe[], settings: Settings, sales: SaleItem[] = []): Promise<GroceryList> {
-  if (!claudeEnabled()) return basicGroceryList(recipes, sales);
+export async function buildGroceryList(recipes: Recipe[], settings: Settings, sales: SaleItem[] = [], extraNotes: string[] = []): Promise<GroceryList> {
+  if (!claudeEnabled()) return { ...basicGroceryList(recipes, sales), notes: extraNotes };
   const pkg = {
     household: {
       adults: settings.adults,
@@ -49,13 +51,14 @@ export async function buildGroceryList(recipes: Recipe[], settings: Settings, sa
     preferPremiumOnSale: settings.preferPremiumOnSale,
     premiumDeeperPoints: settings.premiumDeeperPoints,
     limitFreezer: settings.limitFreezer,
-    dinners: recipes.map((r) => ({ name: r.name, servings: r.servings, ingredients: r.ingredients })),
+    dinners: recipes.map((r) => ({ name: r.name, meal: r.meal, servings: r.servings, ingredients: r.ingredients })),
     saleItems: sales,
-    foodRules: rulesSummary(settings.foodRules, settings.dislikes) || "none",
+    cookExtra: extraNotes,
+    foodRules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway) || "none",
     weeklyStaples: settings.staples.filter((x) => x.active).map((x) => `${x.item} (${x.quantity})`),
   };
   const out = await askClaude({ system: SYSTEM, content: JSON.stringify(pkg), schema: GrocerySchema, effort: "low" });
-  return { sections: out.sections, source: "claude" };
+  return { sections: out.sections, source: "claude", notes: extraNotes };
 }
 
 /** Fallback: merge identical items without unit conversion. */

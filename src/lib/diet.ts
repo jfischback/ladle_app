@@ -171,17 +171,22 @@ export function ruleProblems(
   recipe: { name?: string | null; title?: string | null; ingredients: Ingredient[] },
   rules: FoodRule[] = [],
   dislikes: string[] = [],
+  allowAnyway: string[] = [],
 ): string[] {
   const lines = [recipe.name ?? recipe.title ?? "", ...recipe.ingredients.map((i) => i.item)].map(plain);
   const problems: string[] = [];
+  // "Allowed anyway" (e.g. sushi with No seafood) lifts diet rules and dislikes for that dish, never allergies.
+  const title = plain(recipe.name ?? recipe.title ?? "");
+  const excepted = allowAnyway.some((w) => w && new RegExp(`\\b${wordPattern(plain(w))}\\b`).test(title));
   for (const key of rules) {
     const def = FOOD_RULES[key];
     if (!def) continue;
+    if (excepted && def.group !== "allergy") continue;
     const cleaned = lines.map((l) => (def.except ? l.replace(new RegExp(def.except.source, "g"), " ") : l));
     const hit = cleaned.map((l) => l.match(def.hits)?.[0]).find(Boolean) ?? def.check?.(cleaned);
     if (hit) problems.push(`${problemLabel(key)} (${hit})`);
   }
-  for (const word of dislikes) {
+  for (const word of excepted ? [] : dislikes) {
     const re = new RegExp(`\\b${wordPattern(plain(word))}\\b`);
     if (lines.some((l) => re.test(l))) problems.push(`Has ${word}`);
   }
@@ -214,8 +219,9 @@ function problemLabel(key: FoodRule): string {
 }
 
 /** Plain-words summary for the planner and the grocery list, e.g. "No bones; Peanut allergy; won't eat: mushrooms". */
-export function rulesSummary(rules: FoodRule[] = [], dislikes: string[] = []): string {
+export function rulesSummary(rules: FoodRule[] = [], dislikes: string[] = [], allowAnyway: string[] = []): string {
   const parts = rules.map((r) => (FOOD_RULES[r] ? `${FOOD_RULES[r].label}${FOOD_RULES[r].note ? ` (${FOOD_RULES[r].note})` : ""}` : "")).filter(Boolean);
   if (dislikes.length) parts.push(`won't eat: ${dislikes.join(", ")}`);
+  if (allowAnyway.length) parts.push(`exceptions allowed anyway: ${allowAnyway.join(", ")}`);
   return parts.join("; ");
 }

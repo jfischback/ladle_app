@@ -17,10 +17,22 @@ export type PlanDay = {
   alternatives: PlanAlternative[];
   ratedAt?: string | null;
   fromCook?: string | null; // set when this is a new recipe from a followed cook
+  lunch?: PlanLunch | null; // the next-day-style lunch planned for this date, if someone's home
+  holiday?: string | null; // federal holiday on this date
+};
+
+/** Lunch for one day: last night's leftovers, a lunch recipe, or an open slot. */
+export type PlanLunch = {
+  kind: "leftovers" | "recipe" | "open";
+  recipeId: string | null;
+  name: string;
+  reason: string;
+  eaters: string; // e.g. "1 adult + kids"
+  servings: number; // adult-sized portions needed
 };
 
 export type GroceryItem = { item: string; quantity: string; note?: string; forRecipes: string[] };
-export type GroceryList = { sections: { name: string; items: GroceryItem[] }[]; source: "claude" | "basic" };
+export type GroceryList = { sections: { name: string; items: GroceryItem[] }[]; source: "claude" | "basic"; notes?: string[] };
 
 /** One sale found at the store: the ingredient it covers, the product on the shelf, and the prices. */
 export type SaleItem = {

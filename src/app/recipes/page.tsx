@@ -12,10 +12,10 @@ import { CooksTab } from "./CooksTab";
 export default async function RecipesPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const userId = await requireUserId();
   const t = (await searchParams).tab;
-  const tab = t === "browse" ? "browse" : t === "cooks" ? "cooks" : "mine";
-  const [mine, browse, { data: settings }] = await Promise.all([myRecipes(userId), browseStarters(userId), getSettings(userId)]);
-  const problemsOf = (r: Recipe) => ruleProblems(r, settings.foodRules, settings.dislikes);
-  const list = tab === "mine" ? mine : browse;
+  const tab = t === "browse" ? "browse" : t === "cooks" ? "cooks" : t === "lunch" ? "lunch" : "mine";
+  const [mine, lunches, browse, { data: settings }] = await Promise.all([myRecipes(userId), myRecipes(userId, "lunch"), browseStarters(userId), getSettings(userId)]);
+  const problemsOf = (r: Recipe) => ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway);
+  const list = tab === "mine" ? mine : tab === "lunch" ? lunches : browse;
 
   return (
     <div>
@@ -28,7 +28,8 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
       </div>
 
       <div role="tablist" className="mb-5 inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-oat p-1">
-        <Tab href="/recipes" active={tab === "mine"}>Mine ({mine.length})</Tab>
+        <Tab href="/recipes" active={tab === "mine"}>Dinners ({mine.length})</Tab>
+        <Tab href="/recipes?tab=lunch" active={tab === "lunch"}>Lunches ({lunches.length})</Tab>
         <Tab href="/recipes?tab=cooks" active={tab === "cooks"}>✨ Your cooks</Tab>
         {(browse.length > 0 || tab === "browse") && <Tab href="/recipes?tab=browse" active={tab === "browse"}>Starters ({browse.length})</Tab>}
       </div>
@@ -44,7 +45,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
       {tab === "cooks" ? null : list.length === 0 ? (
         <div className="card flex flex-col items-center gap-3 p-8 text-center">
           <FoodArt kind={tab === "mine" ? "pot" : "nightoff"} className="h-24 w-24" rounded="rounded-full" />
-          {tab === "mine" ? (
+          {tab === "mine" || tab === "lunch" ? (
             <>
               <p className="font-display text-2xl font-semibold">Your recipe box is empty</p>
               <p className="text-lg text-muted">Start with our family favorites, or add the dinners you already love.</p>

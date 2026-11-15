@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
@@ -36,6 +36,12 @@ const SettingsSchema = z.object({
   busyDays: z.array(int(0, 6)).max(7),
   busyMaxMinutes: int(10, 120),
   maxSameProtein: int(1, 7),
+  lunchDays: z.array(int(0, 6)).max(7),
+  lunchAdults: int(0, 12),
+  lunchKids: z.boolean(),
+  holidayEveryoneHome: z.boolean(),
+  holidayNoReheat: z.array(z.string().max(20)).max(10),
+  allowAnyway: z.array(z.string().trim().min(2).max(40)).max(20),
   noRepeatWeeks: int(0, 12),
   favorQuickWeeknights: z.boolean(),
   saleThresholdPct: int(1, 90),
@@ -60,7 +66,7 @@ export async function saveSettings(input: Partial<Settings>, startWith?: "ours" 
     const starters = await db
       .select({ id: recipes.id })
       .from(recipes)
-      .where(and(isNull(recipes.ownerId), isNull(recipes.archivedAt), eq(recipes.meal, "dinner")));
+      .where(and(isNull(recipes.ownerId), isNull(recipes.archivedAt)));
     await copyStarters(userId, starters.map((s) => s.id));
     redirect("/");
   }

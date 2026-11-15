@@ -4,9 +4,11 @@ import type { Recipe, Plan } from "@/db/schema";
 import { MOTIVATIONS, type Settings } from "./settings";
 import type { PlanDay } from "./types";
 import { askClaude, claudeEnabled } from "./claude";
-import { dayName, weekDates, weekday } from "./week";
+import { addDays, dayName, weekDates, weekday } from "./week";
 import { ruleProblems, rulesSummary } from "./diet";
 import { isPerishable, proteinGroup, type ProteinGroup } from "./protein";
+import { leftoverKind } from "./leftovers";
+import { holidayOn } from "./holidays";
 import { recipeSales, type SaleItem, type StorePrice } from "./sales";
 import type { Ingredient } from "./types";
 
@@ -62,7 +64,9 @@ Rules:
 - Budget: weeklyBudget covers the dinners plus the household's weekly staples (staplesCost, already known). Keep the dinners' estimated total near weeklyBudget minus staplesCost. If budgetMode is "hard", the total must not go over it. If "target", it may go slightly over when that keeps a good week.
 - If a recipe has a prepAhead note, avoid putting it on the first day of the week (there is no day before to prep).
 - Busy nights (busy.maxMinutes) need a dinner with totalMinutes at or under that limit. Say so in the reason, e.g. "Quick for soccer night: 25 minutes".
-- Variety: use the same mainProtein on at most maxSameProteinPerWeek nights, and never on two nights in a row (Vegetarian doesn't count).
+- Variety: use the same mainProtein on at most maxSameProteinPerWeek nights, and never on two nights in a row (Vegetarian doesn't count). Exception: a protein in saleProteins (this week's protein deal) may go up to two nights over the cap; build the week around it.
+- Leftovers: when lunchNext is true, prefer a dinner whose makesLeftovers is true (tomorrow's lunch is the leftovers). Dinners with makesLeftovers false are one night only.
+- If beforeHoliday is true, don't pick a dinner whose mainProtein is in holidayNoReheat (everyone eats its leftovers tomorrow).
 - Freshness: Fish and Seafood dinners go in the first three days after shopping (daysAfterShopping 0-2).
 - Bring back favorites: a recipe rated 4 or 5 with lastCookedWeeksAgo of 4 or more (or never planned) deserves a spot; mention it, e.g. "A favorite you haven't had in 5 weeks".
 - Costs: estimate what the ingredients for each dinner cost for this household's size. When an ingredient is in storePrices, use that real shelf price at their Fry's (sale prices are already applied there); otherwise estimate typical Phoenix-area Fry's prices. Pantry staples they likely have count as zero. These are labeled estimates in the app, so be reasonable rather than precise.
@@ -91,12 +95,12 @@ export async function planWeek(input: {
   );
   // Section 5: skip 1-2 star meals; no-repeat window.
   // Food rules are hard: a recipe that breaks one is never planned.
-  const allowed = input.recipes.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes).length);
+  const allowed = input.recipes.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length);
   const eligible = allowed.filter((r) => !(r.rating != null && r.rating <= 2) && !recentRecipeIds.has(r.id));
   const pool = eligible.length >= settings.dinnersPerWeek ? eligible : allowed.filter((r) => !(r.rating != null && r.rating <= 2));
   const cookDays = new Set(settings.cookDays);
 
-  const newOptions = settings.newRecipesPerWeek > 0 ? (input.newRecipes ?? []).filter((n) => !ruleProblems(n, settings.foodRules, settings.dislikes).length) : [];
+  const newOptions = settings.newRecipesPerWeek > 0 ? (input.newRecipes ?? []).filter((n) => !ruleProblems(n, settings.foodRules, settings.dislikes, settings.allowAnyway).length) : [];
   const lastCooked = lastCookedWeeks(input.history ?? input.recentPlans, weekStart);
   if (!claudeEnabled()) return basicPlan(dates, pool, settings, input.saleItems, newOptions, lastCooked);
 
@@ -112,9 +116,12 @@ export async function planWeek(input: {
       cook: cookDays.has(weekday(d)),
       busy: settings.busyDays.includes(weekday(d)) ? { maxMinutes: settings.busyMaxMinutes } : false,
       daysAfterShopping: i,
+      lunchNext: settings.lunchDays.includes(weekday(addDays(d, 1))),
+      beforeHoliday: !!holidayOn(addDays(d, 1)) && settings.holidayEveryoneHome,
+      holiday: holidayOn(d),
     })),
     maxSameProteinPerWeek: settings.maxSameProtein,
-    foodRules: rulesSummary(settings.foodRules, settings.dislikes) || "none",
+    foodRules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway) || "none",
     household: {
       adults: settings.adults,
       kids: settings.kids,
@@ -129,6 +136,8 @@ export async function planWeek(input: {
     saleThresholdPct: settings.saleThresholdPct,
     store: settings.storeName || "Fry's",
     saleItems: input.saleItems,
+    saleProteins: [...saleProteinsOf(input.saleItems)],
+    holidayNoReheat: settings.holidayNoReheat,
     salePricesAvailable: input.saleItems.length > 0,
     storePrices: input.storePrices ?? [],
     recentDinners: input.recentPlans.map((p) => ({
@@ -146,6 +155,7 @@ export async function planWeek(input: {
       ease: r.ease,
       prepAhead: r.prepAhead || null,
       mainProtein: proteinGroup(r),
+      makesLeftovers: leftoverKind(r) === "ok",
       lastCookedWeeksAgo: lastCooked.get(r.id) ?? null,
       ingredients: r.ingredients.map((i) => [i.amount, i.unit, i.item].filter(Boolean).join(" ")),
     })),
@@ -229,6 +239,7 @@ function daySales(recipe: Recipe, named: string[], sales: SaleItem[]): string[] 
 // ---------- rules every plan must follow (shared by the basic planner and the check on Claude's plan) ----------
 
 type Candidate = {
+  leftovers: boolean; // makes good leftovers for tomorrow's lunch
   key: string; // recipe id, or found:<id> for a new recipe from a followed cook
   name: string;
   minutes: number | null;
@@ -240,14 +251,23 @@ type Candidate = {
   recipe: Recipe | null;
 };
 
-type Slot = { index: number; date: string; busy: boolean; daysAfterShopping: number };
+type Slot = {
+  index: number;
+  date: string;
+  busy: boolean;
+  daysAfterShopping: number;
+  lunchNext: boolean; // someone eats lunch at home tomorrow, so leftovers help
+  beforeHoliday: boolean; // tomorrow is a federal holiday and everyone's home for lunch
+  saleProteins: Set<ProteinGroup>; // proteins with a real deal this week (they may go over the weekly cap)
+};
 
 const toCandidate = (r: Recipe, lastCooked: Map<string, number>): Candidate => ({
-  key: r.id, name: r.name, minutes: r.totalMinutes, protein: proteinGroup(r), ingredients: r.ingredients,
+  key: r.id, name: r.name, minutes: r.totalMinutes, protein: proteinGroup(r), ingredients: r.ingredients, leftovers: leftoverKind(r) === "ok",
   rating: r.rating, weeksSince: lastCooked.get(r.id) ?? null, isNew: null, recipe: r,
 });
 const newCandidate = (n: NewRecipeOption): Candidate => ({
   key: `${FOUND_PREFIX}${n.foundId}`, name: n.title, minutes: n.totalMinutes, protein: proteinGroup({ title: n.title, ingredients: n.ingredients }),
+  leftovers: leftoverKind({ title: n.title, ingredients: n.ingredients }) === "ok",
   ingredients: n.ingredients, rating: null, weeksSince: null, isNew: n, recipe: null,
 });
 
@@ -259,7 +279,11 @@ const newCandidate = (n: NewRecipeOption): Candidate => ({
 function fitsNight(c: Candidate, slot: Slot, planned: { slot: Slot; c: Candidate }[], settings: Settings, relax = 0): boolean {
   if (planned.some((p) => p.c.key === c.key)) return false;
   if (relax < 3 && slot.busy && c.minutes != null && c.minutes > settings.busyMaxMinutes) return false;
-  if (relax < 2 && c.protein !== "Vegetarian" && planned.filter((p) => p.c.protein === c.protein).length >= settings.maxSameProtein) return false;
+  // The week's protein deal may go over the cap (beef on sale → more beef nights), up to two extra nights.
+  const cap = settings.maxSameProtein + (slot.saleProteins.has(c.protein) ? 2 : 0);
+  if (relax < 2 && c.protein !== "Vegetarian" && planned.filter((p) => p.c.protein === c.protein).length >= cap) return false;
+  // Before a holiday everyone eats tomorrow's leftovers; skip proteins someone won't eat reheated.
+  if (relax < 3 && slot.beforeHoliday && c.leftovers && settings.holidayNoReheat.includes(c.protein)) return false;
   if (relax < 1) {
     const neighbors = planned.filter((p) => Math.abs(p.slot.index - slot.index) === 1);
     if (c.protein !== "Vegetarian" && neighbors.some((p) => p.c.protein === c.protein)) return false;
@@ -275,13 +299,37 @@ function score(c: Candidate, slot: Slot, sales: SaleItem[]): number {
   else if (c.rating == null) s += 0.3;
   if ((c.rating ?? 0) >= 4 && c.weeksSince != null && c.weeksSince >= 4) s += 1.5; // a favorite that's due
   if (c.isNew) s += 0.8;
+  if (slot.lunchNext && c.leftovers) s += 0.8; // tomorrow's lunch is covered
+  if (slot.saleProteins.has(c.protein)) s += 0.7; // build the week around the protein deal
   if (slot.busy && c.minutes != null) s += Math.max(0, (30 - c.minutes) / 60); // a little nudge to the quickest
   return s + Math.random() * 2.5; // plenty of shuffle so weeks don't feel the same
 }
 
-function slotsFor(dates: string[], settings: Settings): Slot[] {
+/** Proteins with a real deal this week. Burger patties and hot dogs don't count as the week's protein deal. */
+export function saleProteinsOf(sales: SaleItem[]): Set<ProteinGroup> {
+  const out = new Set<ProteinGroup>();
+  for (const s of sales) {
+    if (/patt(y|ies)|hot dogs?|burgers?|franks?|deli|lunch meat|jerky|broth|stock/i.test(`${s.item} ${s.product}`)) continue;
+    const g = proteinGroup({ title: s.item, ingredients: [] });
+    if (g !== "Vegetarian") out.add(g);
+  }
+  return out;
+}
+
+function slotsFor(dates: string[], settings: Settings, sales: SaleItem[]): Slot[] {
+  const saleProteins = saleProteinsOf(sales);
   return dates
-    .map((date, index) => ({ index, date, busy: settings.busyDays.includes(weekday(date)), daysAfterShopping: index }))
+    .map((date, index) => {
+      const tomorrow = addDays(date, 1);
+      const holidayTomorrow = !!holidayOn(tomorrow) && weekday(tomorrow) >= 1 && weekday(tomorrow) <= 5;
+      return {
+        index, date, saleProteins,
+        busy: settings.busyDays.includes(weekday(date)),
+        daysAfterShopping: index,
+        lunchNext: settings.lunchDays.includes(weekday(tomorrow)) || (holidayTomorrow && settings.holidayEveryoneHome),
+        beforeHoliday: holidayTomorrow && settings.holidayEveryoneHome,
+      };
+    })
     .filter((s) => settings.cookDays.includes(weekday(s.date)));
 }
 
@@ -325,7 +373,7 @@ function whyLine(c: Candidate, slot: Slot, sales: SaleItem[]): string {
 
 /** Used when no Claude key is configured: picks that follow every rule, leaning on sales and favorites; no costs. */
 function basicPlan(dates: string[], pool: Recipe[], settings: Settings, sales: SaleItem[], newOptions: NewRecipeOption[], lastCooked: Map<string, number>): PlanResult {
-  const slots = slotsFor(dates, settings);
+  const slots = slotsFor(dates, settings, sales);
   const candidates = pool.map((r) => toCandidate(r, lastCooked));
   const planned = pickWeek(slots, candidates, newOptions.map(newCandidate), settings, sales);
   const used = new Set(planned.map((p) => p.c.key));
@@ -353,7 +401,7 @@ function basicPlan(dates: string[], pool: Recipe[], settings: Settings, sales: S
  * time limit, the protein cap, back-to-back proteins or fish freshness is re-picked with the same checks.
  */
 export function enforceRules(days: PlanDay[], dates: string[], pool: Recipe[], settings: Settings, sales: SaleItem[], lastCooked: Map<string, number>, newOptions: NewRecipeOption[]): PlanDay[] {
-  const slots = slotsFor(dates, settings);
+  const slots = slotsFor(dates, settings, sales);
   const byKey = new Map<string, Candidate>([...pool.map((r) => toCandidate(r, lastCooked)), ...newOptions.map(newCandidate)].map((c) => [c.key, c]));
   const planned: { slot: Slot; c: Candidate }[] = [];
   const broken: Slot[] = [];
