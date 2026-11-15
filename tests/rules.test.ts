@@ -74,3 +74,17 @@ test("cooking-mode timers read the time from a step", async () => {
   assert.equal(stepMinutes("Cook on low 6 hours or high 4 hours."), 360);
   assert.equal(stepMinutes("Season with salt."), null);
 });
+
+test("the first recipe box fits the family", async () => {
+  const { pickStarters } = await import("@/lib/starter-pick");
+  const { settings, starterBox } = await import("./helpers");
+  const all = [...starterBox("dinner"), ...starterBox("breakfast")];
+  const family = pickStarters(all, settings({ adults: 2, kids: 2, foodRules: ["no-seafood"] }));
+  assert.ok(family.length > 60, `family gets plenty (${family.length})`);
+  assert.ok(!family.some((r) => r.meal === "dinner" && r.servings === 1), "no single-serving dinners for a family");
+  assert.ok(!family.some((r) => /shrimp|salmon|tuna|fish/i.test(r.name)), "no seafood with that rule");
+  const solo = pickStarters(all, settings({ adults: 1, kids: 0 }));
+  assert.ok(solo.some((r) => r.servings === 1), "someone cooking alone gets single servings");
+  const dorm = pickStarters(all, settings({ adults: 1, kids: 0, equipment: ["microwave"] }));
+  assert.ok(dorm.length >= 8 && dorm.every((r) => r.meal !== "dinner" || /microwave|mug|ramen|sandwich|sushi/i.test(r.name) || r.tags.includes("microwave")), `dorm gets microwave meals (${dorm.length})`);
+});

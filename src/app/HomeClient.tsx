@@ -100,6 +100,11 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
             </div>
             {swapButton}
           </div>
+          {day.recipeId && !day.leftoverOf && (
+            <div className="-mt-2 px-5 pb-4">
+              <Link href={`/recipes/${day.recipeId}?cook=1`} className="btn-warm w-full sm:w-auto">👩‍🍳 Start cooking</Link>
+            </div>
+          )}
           <WhyLine reason={reason} sale={day.saleItems} className="-mt-2 px-5 pb-5" />
           <PickyLines tips={picky} className="-mt-3 px-5 pb-5" />
           <LunchLine day={day} className="-mt-3 px-5 pb-5" />

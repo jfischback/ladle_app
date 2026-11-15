@@ -167,7 +167,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
             <button className="btn-warm min-h-14 text-lg" disabled={pending} onClick={() => finish("ours")}>
               {pending ? "Setting things up…" : "Start with our recipes"}
             </button>
-            <p className="text-center text-sm text-muted">Adds our 30 family-tested dinners to your list. You can remove any later.</p>
+            <p className="text-center text-sm text-muted">Adds our family-tested recipes that fit your family&apos;s food rules, kitchen and size. You can add recipe packs or remove any later.</p>
             <button className="btn-secondary" disabled={pending} onClick={() => finish("own")}>
               Add my own
             </button>
