@@ -34,6 +34,7 @@ export default async function HouseholdPage() {
           members={members.map((m) => ({ id: m.id, label: m.name || m.email, email: m.email, owner: m.owner || !m.householdId }))}
           invites={invites.map((i) => ({ code: i.code, expires: i.expiresAt.toISOString(), kind: i.kind }))}
           canLeave={!me.isOwner}
+          isOwner={me.isOwner}
         />
       )}
     </div>

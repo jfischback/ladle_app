@@ -92,6 +92,13 @@
       "when": 1794755860944,
       "tag": "0012_wonderful_the_captain",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794757245537,
+      "tag": "0013_chief_havok",
+      "breakpoints": true
     }
   ]
 }

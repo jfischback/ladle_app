@@ -224,3 +224,12 @@ export const rateLimits = pgTable(
   },
   (t) => [uniqueIndex("rate_limits_key_window").on(t.key, t.windowStart)],
 );
+
+/** Password reset links: one use, short-lived. Only a hash of the token is stored. */
+export const passwordResets = pgTable("password_resets", {
+  tokenHash: text("token_hash").primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+});
