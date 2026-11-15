@@ -1,3 +1,4 @@
+import { feastTimeline, turkeyFor } from "./feast";
 import type { PlanDay } from "./types";
 
 /** A calendar event: a date, a start time (minutes after midnight, local), and how long. */
@@ -65,6 +66,14 @@ export function weekEvents(
   const dinnerAt = opts.dinnerAt ?? 18 * 60;
   const out: CalEvent[] = [];
   for (const d of days) {
+    if (d.feast) {
+      out.push(...feastEvents(planId, d, origin, days.indexOf(d)));
+      continue;
+    }
+    if (!d.recipeId && d.leftoverOf && d.recipeName) {
+      out.push({ uid: `${planId}-${d.date}-dinner@ladle`, date: d.date, startMinutes: dinnerAt - 15, minutes: 15, title: `♻️ ${d.recipeName}`, notes: d.reason, url: `${origin}/` });
+      continue;
+    }
     if (!d.recipeId || !d.recipeName) continue;
     const r = recipes.get(d.recipeId);
     const url = `${origin}/recipes/${d.recipeId}`;
@@ -80,4 +89,24 @@ export function weekEvents(
   }
   if (opts.prep) out.push({ uid: `${planId}-${opts.prep.date}-mealprep@ladle`, date: opts.prep.date, startMinutes: 14 * 60, minutes: opts.prep.minutes, title: "🥡 Meal prep for the week", notes: "Your prep checklist is on Ladle's This Week page.", url: `${origin}/` });
   return out.sort((a, b) => a.date.localeCompare(b.date) || a.startMinutes - b.startMinutes);
+}
+
+/** A holiday dinner's countdown: thaw in the morning, the day-before cooking in the evening, the turkey, then dinner (at 3 PM). */
+function feastEvents(planId: string, d: PlanDay, origin: string, index: number): CalEvent[] {
+  const feast = d.feast!;
+  const url = `${origin}/feast/${planId}/${index}`;
+  const dinnerAt = 15 * 60;
+  const t = turkeyFor(feast.guests);
+  const out: CalEvent[] = [];
+  for (const step of feastTimeline(feast, d.date)) {
+    if (step.date === d.date) continue;
+    const thaw = /freezer/.test(step.what);
+    out.push({ uid: `${planId}-${step.date}-${thaw ? "thaw" : "ahead"}@ladle`, date: step.date, startMinutes: thaw ? 9 * 60 : 19 * 60, minutes: thaw ? 15 : 90, title: thaw ? "🦃 Move the turkey to the fridge" : `🦃 Get ahead for ${feast.holiday}`, notes: step.what, url });
+  }
+  if (feast.dishes.includes("turkey")) {
+    const minutes = Math.round((t.roastHours + 1) * 60);
+    out.push({ uid: `${planId}-${d.date}-turkey@ladle`, date: d.date, startMinutes: dinnerAt - minutes, minutes, title: "🦃 Turkey in the oven", notes: `Roast about ${t.roastHours} hours to 165°F in the thigh, then rest 30 minutes.`, url });
+  }
+  out.push({ uid: `${planId}-${d.date}-dinner@ladle`, date: d.date, startMinutes: dinnerAt, minutes: 120, title: `🦃 ${feast.holiday} dinner for ${feast.guests}`, notes: `Recipes and countdown: ${url}`, url });
+  return out;
 }
