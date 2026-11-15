@@ -65,6 +65,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
             <a href="/staples" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🧺</span> Staples</a>
             <a href="/pantry" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🥫</span> Pantry</a>
             <a href="/extras" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🍿</span> Snacks &amp; more</a>
+            <a href="/athletes" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">💪</span> Athlete mode</a>
           </nav>
         )}
       </div>

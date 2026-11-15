@@ -1,4 +1,5 @@
 import type { FoodRule } from "./diet";
+import type { Athlete } from "./athletes";
 import type { ExtraCategory, ExtrasRule, Staple } from "./types";
 
 export const MOTIVATIONS = {
@@ -50,6 +51,7 @@ export type Settings = {
   breakfastMustHave: string[]; // e.g. ["omelet"]: at least one of each, every week
   breakfastMeatDeal: boolean; // find the week's best breakfast-meat sale and use it in egg breakfasts
   extras: Record<ExtraCategory, ExtrasRule>; // snacks, sweets, drinks and baby: how many to rotate, targets, never-buy words
+  athletes: Athlete[]; // athlete mode: people with their own calorie and protein goals
   noRepeatWeeks: number;
   favorQuickWeeknights: boolean;
   newRecipesPerWeek: number; // 0-2 new dinners from followed cooks, picked by the planner
@@ -104,6 +106,7 @@ export const DEFAULT_SETTINGS: Settings = {
     // Safety defaults for babies: no honey under 12 months, nothing labeled for toddlers or 12+ months.
     baby: { rotateCount: 2, servingsTarget: 5, neverWords: ["honey", "toddler", "12+ months", "12 months+"] },
   },
+  athletes: [],
   noRepeatWeeks: 3,
   favorQuickWeeknights: true,
   newRecipesPerWeek: 1,

@@ -16,6 +16,8 @@ import { leftoverNotes, planLunches } from "@/lib/lunch";
 import { BREAKFAST_MEAT_TERMS, breakfastDeal, planBreakfasts } from "@/lib/breakfast";
 import { CATEGORIES, extraSearchTerm, extrasTotal, neverRegex, planExtras, termsToCheck } from "@/lib/extras";
 import { applyPantry, pantrySearchTerm, sameThing } from "@/lib/pantry";
+import { fuelGroceries, fuelTerms, portionNotes } from "@/lib/athletes";
+import { athleteWeeks } from "@/lib/athlete-week";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
 import { addDays, upcomingWeekStart, weekDates } from "@/lib/week";
@@ -56,7 +58,8 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   const wantsBreakfastDeal = settings.breakfastMeatDeal && settings.breakfastDays.length > 0;
   // Snacks, sweets, drinks and baby items: what to price-check, and never-buy words for "any brand" items.
   const extras = await myExtras(userId);
-  const extraTerms = termsToCheck(extras);
+  // Athlete mode: price-check the high-protein snacks too, so on-sale ones come first.
+  const extraTerms = [...termsToCheck(extras), ...fuelTerms(settings.athletes, settings.foodRules, settings.dislikes, settings.allowAnyway)];
   const exclude = new Map<string, RegExp>();
   for (const x of extras) {
     const re = x.anyBrand ? neverRegex(settings.extras[x.category]?.neverWords ?? []) : null;
@@ -210,7 +213,8 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   let groceryList;
   try {
     const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
-    groceryList = await buildGroceryList(chosen, settings, sales, leftoverNotes(plan.days));
+    const athletes = await athleteWeeks(userId, plan, settings);
+    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...portionNotes(athletes)]);
     // Weekly staples get their own section, with this week's sale prices where we found them.
     const snap = new Map((plan.staples ?? []).map((l) => [stapleTerm(l.item), l]));
     const items = settings.staples.filter((x) => x.active).map((x) => {
@@ -223,6 +227,9 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
       const lines = (plan.extras ?? []).filter((l) => l.category === c.key);
       if (lines.length) groceryList = { ...groceryList, sections: [...groceryList.sections, { name: c.label, items: lines.map((l) => ({ item: l.item, quantity: String(l.quantity), note: [l.product && l.product.toLowerCase() !== l.item.toLowerCase() ? l.product : "", l.sale ? saleNote(l.sale) : "", l.reason.replace(/(^| · )on sale$/i, "").replace(/^On sale$/, "")].filter(Boolean).join(" · "), forRecipes: [] })) }] };
     }
+    // Athlete mode: the high-protein snacks and shakes for the week.
+    const fuel = fuelGroceries(athletes, sales);
+    if (fuel.length) groceryList = { ...groceryList, sections: [...groceryList.sections, { name: "Athlete fuel", items: fuel }] };
     // This week's breakfast-meat deal, for the egg breakfasts.
     if (plan.breakfastDeal && plan.days.some((d) => d.breakfast?.withDeal)) {
       const d = plan.breakfastDeal;

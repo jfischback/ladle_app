@@ -300,6 +300,7 @@ export function Celebrate() {
 }
 
 const SECTION_ICONS: [RegExp, string][] = [
+  [/athlete/i, "💪"],
   [/staple/i, "🧺"],
   [/stock up/i, "⭐"],
   [/^snacks$/i, "🍿"],

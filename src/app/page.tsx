@@ -12,6 +12,8 @@ import { staplesTotal } from "@/lib/staples";
 import { extrasTotal } from "@/lib/extras";
 import { krogerEnabled } from "@/lib/kroger";
 import { ruleProblems } from "@/lib/diet";
+import { athleteWeeks } from "@/lib/athlete-week";
+import { AthleteWeekCard } from "@/components/AthleteWeekCard";
 
 export default async function HomePage() {
   const userId = await requireUserId();
@@ -48,6 +50,7 @@ export default async function HomePage() {
   const store = settings.storeName ? settings.storeName.split(" · ")[0] : "your Fry's";
   const approved = plan?.status === "approved";
   const dinners = plan?.days.filter((d) => d.recipeId).length ?? 0;
+  const athletes = plan ? await athleteWeeks(userId, plan, settings) : [];
 
   return (
     <div className="space-y-6">
@@ -107,6 +110,7 @@ export default async function HomePage() {
           <StaplesCard plan={plan} staples={settings.staples} />
           <PantryCard plan={plan} />
           <ExtrasCard plan={plan} />
+          {athletes.map((w) => <AthleteWeekCard key={w.athlete.id} week={w} />)}
           {approved ? (
             <>
               <Celebrate />

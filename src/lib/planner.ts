@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import type { Recipe, Plan } from "@/db/schema";
 import { MOTIVATIONS, type Settings } from "./settings";
+import { estimateNutrition } from "./nutrition";
 import type { PlanDay } from "./types";
 import { askClaude, claudeEnabled } from "./claude";
 import { addDays, dayName, weekDates, weekday } from "./week";
@@ -59,6 +60,7 @@ Rules:
 - Never pick a recipe that appears in the recent weeks' dinners (the no-repeat window is already applied to that list).
 - Never pick a recipe rated 1 or 2 stars. Favor higher-rated recipes. Unrated recipes are fine.
 - Plan around what's on sale: an item counts as on sale only if it is at least saleThresholdPct percent off regular price. Lean on recipes that use sale items.
+- If athletes is not empty, someone is training hard: lean toward dinners with more proteinPerServing (an estimate), while keeping every other rule.
 - Weigh choices by the household's ranked priorities: "save money" leans on sale items and cheaper dinners; "eat healthier" leans on protein and vegetables; "try new things" leans on recipes not cooked recently or never cooked.
 - If favorQuickWeeknights is true, prefer quicker recipes (shorter totalMinutes, "quick" tag) Monday through Thursday.
 - Budget: weeklyBudget covers the dinners plus the household's weekly staples (staplesCost, already known). Keep the dinners' estimated total near weeklyBudget minus staplesCost. If budgetMode is "hard", the total must not go over it. If "target", it may go slightly over when that keeps a good week.
@@ -128,6 +130,7 @@ export async function planWeek(input: {
       baby: settings.hasBaby ? { ageMonths: settings.babyAgeMonths } : null,
     },
     priorities: settings.motivation.map((m) => MOTIVATIONS[m]),
+    athletes: settings.athletes.map((a) => ({ name: a.name, goal: a.goal, proteinGramsPerDay: a.protein, caloriesPerDay: a.calories })),
     dinnersPerWeek: settings.dinnersPerWeek,
     weeklyBudget: settings.weeklyBudget,
     staplesCost: Math.round(input.staplesCost ?? 0),
@@ -155,6 +158,7 @@ export async function planWeek(input: {
       ease: r.ease,
       prepAhead: r.prepAhead || null,
       mainProtein: proteinGroup(r),
+      proteinPerServing: estimateNutrition(r).protein,
       makesLeftovers: leftoverKind(r) === "ok",
       lastCookedWeeksAgo: lastCooked.get(r.id) ?? null,
       ingredients: r.ingredients.map((i) => [i.amount, i.unit, i.item].filter(Boolean).join(" ")),
@@ -259,6 +263,7 @@ type Slot = {
   lunchNext: boolean; // someone eats lunch at home tomorrow, so leftovers help
   beforeHoliday: boolean; // tomorrow is a federal holiday and everyone's home for lunch
   saleProteins: Set<ProteinGroup>; // proteins with a real deal this week (they may go over the weekly cap)
+  athletes?: boolean; // athlete mode is on: lean toward protein-rich dinners
 };
 
 const toCandidate = (r: Recipe, lastCooked: Map<string, number>): Candidate => ({
@@ -302,6 +307,7 @@ function score(c: Candidate, slot: Slot, sales: SaleItem[]): number {
   if (slot.lunchNext && c.leftovers) s += 0.8; // tomorrow's lunch is covered
   if (slot.saleProteins.has(c.protein)) s += 0.7; // build the week around the protein deal
   if (slot.busy && c.minutes != null) s += Math.max(0, (30 - c.minutes) / 60); // a little nudge to the quickest
+  if (slot.athletes) s += Math.min(1.5, estimateNutrition({ ingredients: c.ingredients, servings: c.recipe?.servings ?? null }).protein / 30); // protein for the athlete
   return s + Math.random() * 2.5; // plenty of shuffle so weeks don't feel the same
 }
 
@@ -323,7 +329,7 @@ function slotsFor(dates: string[], settings: Settings, sales: SaleItem[]): Slot[
       const tomorrow = addDays(date, 1);
       const holidayTomorrow = !!holidayOn(tomorrow) && weekday(tomorrow) >= 1 && weekday(tomorrow) <= 5;
       return {
-        index, date, saleProteins,
+        index, date, saleProteins, athletes: settings.athletes.length > 0,
         busy: settings.busyDays.includes(weekday(date)),
         daysAfterShopping: index,
         lunchNext: settings.lunchDays.includes(weekday(tomorrow)) || (holidayTomorrow && settings.holidayEveryoneHome),

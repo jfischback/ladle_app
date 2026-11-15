@@ -10,6 +10,7 @@ import { leftoverKind, leftoverWhy } from "@/lib/leftovers";
 import { formatMinutes } from "@/lib/format";
 import { FoodArt } from "@/components/FoodArt";
 import { IngredientList } from "./IngredientList";
+import { estimateNutrition, trustworthy } from "@/lib/nutrition";
 
 export default async function RecipePage({ params }: { params: Promise<{ id: string }> }) {
   const userId = await requireUserId();
@@ -20,6 +21,7 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
   if (!r) notFound();
   const problems = ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway);
   const mine = r.ownerId === userId;
+  const nutrition = estimateNutrition(r);
 
   return (
     <article className="space-y-6">
@@ -33,6 +35,7 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
             {r.totalMinutes && <span className="tag">⏱ {formatMinutes(r.totalMinutes)}</span>}
             {r.servings && <span className="tag">🍽 Serves {r.servings}</span>}
             {r.protein && <span className="tag">{r.protein}</span>}
+            {trustworthy(nutrition) && <span className="tag bg-olive-soft text-olive-dark" title="Estimated from the ingredients">💪 ~{nutrition.protein} g protein · {nutrition.kcal} cal a serving</span>}
             {r.ease && <span className="tag">{r.ease >= 4 ? "Easy" : r.ease >= 3 ? "Medium" : "A bit of work"}</span>}
             {r.meal !== "dinner" && <span className="tag bg-olive-soft font-bold text-olive-dark">{r.meal === "lunch" ? "🥪 Lunch" : "☕ Breakfast"}</span>}
             {r.tags.filter((t) => t !== "leftovers" && t !== "no-leftovers").map((t) => <span key={t} className="tag">{t}</span>)}
