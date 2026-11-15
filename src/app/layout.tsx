@@ -5,6 +5,7 @@ import { auth, loginRequired } from "@/auth";
 import { logout } from "./actions/auth";
 import { Wordmark } from "@/components/Logo";
 import { NavLinks, TabBar, GearIcon } from "@/components/Nav";
+import { ServiceWorker } from "@/components/ServiceWorker";
 import "./globals.css";
 
 const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito", display: "swap" });
@@ -13,6 +14,8 @@ const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", dis
 export const metadata: Metadata = {
   title: "Ladle",
   description: "Plan the week around what's on sale, then approve the cart.",
+  // Added to an iPhone home screen, Ladle opens full screen like an app.
+  appleWebApp: { capable: true, title: "Ladle", statusBarStyle: "default" },
 };
 
 // Every page shows today's plan and live data, so build it fresh on each visit (never frozen at build time).
@@ -52,6 +55,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
         <main className={`mx-auto max-w-3xl px-4 pt-5 sm:pt-8 ${signedIn ? "pb-32 sm:pb-12" : "pb-12"}`}>{children}</main>
         {signedIn && <TabBar />}
+        <ServiceWorker clear={!signedIn} />
       </body>
     </html>
   );
