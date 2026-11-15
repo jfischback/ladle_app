@@ -42,7 +42,7 @@ export default async function HomePage() {
 
   // Swap choices only offer recipes that fit the household's food rules.
   const recipeInfo = recipes
-    .filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes).length)
+    .filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length)
     .map((r) => ({ id: r.id, name: r.name, protein: r.protein, totalMinutes: r.totalMinutes }));
   const store = settings.storeName ? settings.storeName.split(" · ")[0] : "your Fry's";
   const approved = plan?.status === "approved";

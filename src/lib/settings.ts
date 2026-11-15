@@ -33,6 +33,15 @@ export type Settings = {
   foodRules: FoodRule[]; // allergies, diets, "no bones"
   dislikes: string[]; // foods the family won't eat, e.g. ["mushroom", "olive"]
   staples: Staple[]; // weekly staples, added to every grocery list
+  busyDays: number[]; // nights that need a quick dinner (subset of cookDays)
+  busyMaxMinutes: number; // "quick" on a busy night, e.g. 30
+  maxSameProtein: number; // most nights a week with the same main protein (chicken, beef…); sale proteins may go over
+  lunchDays: number[]; // weekdays someone eats lunch at home (leftovers first, then a lunch recipe)
+  lunchAdults: number; // adults eating those lunches
+  lunchKids: boolean; // kids and the baby eat those lunches too
+  holidayEveryoneHome: boolean; // on federal holidays everyone eats lunch at home
+  holidayNoReheat: string[]; // proteins someone won't eat reheated on those days (e.g. "Chicken")
+  allowAnyway: string[]; // exceptions to diet rules, e.g. "sushi" with No seafood (never allergies)
   noRepeatWeeks: number;
   favorQuickWeeknights: boolean;
   newRecipesPerWeek: number; // 0-2 new dinners from followed cooks, picked by the planner
@@ -64,6 +73,15 @@ export const DEFAULT_SETTINGS: Settings = {
   foodRules: [],
   dislikes: [],
   staples: [],
+  busyDays: [],
+  busyMaxMinutes: 30,
+  maxSameProtein: 2,
+  lunchDays: [],
+  lunchAdults: 1,
+  lunchKids: true,
+  holidayEveryoneHome: true,
+  holidayNoReheat: [],
+  allowAnyway: [],
   noRepeatWeeks: 3,
   favorQuickWeeknights: true,
   newRecipesPerWeek: 1,

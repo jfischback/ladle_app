@@ -65,7 +65,18 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
 
   return (
     <div className={`card overflow-hidden transition-opacity ${isToday ? "ring-2 ring-terracotta shadow-lift" : ""} ${pending ? "opacity-60" : ""}`}>
-      {isToday ? (
+      {!isToday && !day.recipeId && !day.lunch && !day.holiday ? (
+        // A plain night off is one slim row, so the week's dinners show sooner.
+        <div className="flex items-center gap-3 px-4 py-2.5">
+          <span className="text-lg" aria-hidden="true">🍕</span>
+          <p className="min-w-0 flex-1"><span className="font-extrabold text-terracotta">{dayName(day.date)} {Number(day.date.slice(8))}</span> <span className="text-muted">· Night off</span></p>
+          {!locked && (
+            <button className="btn-quiet min-h-9 shrink-0 px-3 text-sm" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+              {open ? "Close" : "Plan a dinner"}
+            </button>
+          )}
+        </div>
+      ) : isToday ? (
         // Tonight gets the big hero treatment.
         <div>
           <div className="relative">
@@ -87,6 +98,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
             {swapButton}
           </div>
           <WhyLine reason={reason} sale={day.saleItems} className="-mt-2 px-5 pb-5" />
+          <LunchLine day={day} className="-mt-3 px-5 pb-5" />
         </div>
       ) : (
         <div>
@@ -107,6 +119,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
           {swapButton}
         </div>
         <WhyLine reason={reason} sale={day.saleItems} className="px-3 pb-3" />
+        <LunchLine day={day} className="px-3 pb-3" />
         </div>
       )}
       {open && !locked && (
@@ -161,6 +174,28 @@ function Details({ cookTime, cost, noCook }: { cookTime: string | null; cost: nu
 }
 
 /** Why this dinner, plus its sale tags: full width under the dinner so it's easy to read. */
+/** Tomorrow-style lunch for this day: leftovers, a lunch recipe, or an open slot. */
+function LunchLine({ day, className = "" }: { day: PlanDay; className?: string }) {
+  const l = day.lunch;
+  if (!l && !day.holiday) return null;
+  return (
+    <div className={`space-y-1.5 ${className}`}>
+      {day.holiday && <span className="inline-flex rounded-full bg-olive-soft px-2.5 py-0.5 text-xs font-extrabold text-olive-dark">🎉 {day.holiday}</span>}
+      {l && (
+        <div className="flex items-start gap-2 rounded-2xl border border-line px-3 py-2 text-sm">
+          <span aria-hidden="true">🥪</span>
+          <span className="min-w-0">
+            <span className="font-bold">Lunch: </span>
+            {l.recipeId ? <Link href={`/recipes/${l.recipeId}`} className="font-semibold hover:underline">{l.name}</Link> : <span className="font-semibold">{l.name}</span>}
+            <span className="text-muted"> · {l.eaters}</span>
+            <span className="block text-xs text-muted">{l.reason}</span>
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function WhyLine({ reason, sale, className = "" }: { reason: string | null; sale: string[]; className?: string }) {
   if (!reason && !sale.length) return null;
   return (
@@ -288,6 +323,11 @@ export function GroceryChecklist({ plan }: { plan: Plan }) {
         <h2 id="grocery-title" className="flex items-center gap-2 text-2xl font-semibold"><span aria-hidden="true">🛒</span> Grocery list</h2>
         <span className="tag bg-olive-soft text-olive-dark">{done} of {total} got</span>
       </div>
+      {list.notes && list.notes.length > 0 && (
+        <ul className="mb-4 space-y-1.5 rounded-2xl bg-ochre-soft p-3 text-sm">
+          {list.notes.map((n) => <li key={n} className="flex gap-2"><span aria-hidden="true">🍲</span><span>{n}</span></li>)}
+        </ul>
+      )}
       <div className="space-y-5">
         {list.sections.map((s) => (
           <div key={s.name}>

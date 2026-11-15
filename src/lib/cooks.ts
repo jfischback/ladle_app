@@ -190,8 +190,10 @@ export async function findSource(input: string): Promise<CookSource> {
 
 // ---------- reading one recipe page ----------
 
-const NOT_DINNER = /dessert|cookie|cake|brownie|blondie|\bbars?\b|\bpie\b|tart\b|drinks?\b|cocktail|punch\b|smoothie|breakfast|brunch|appetizer|snack|\bdips?\b|dressing|\bsides?\b|side dish|bread|muffin|frosting|candy|fudge|pinwheel|bites\b|puffs\b|cheese board|charcuterie|granola|pancake|waffle|meal plan|menu|gift guide|round-?up|marshmallow|stuffing|gravy|cranberry sauce|mashed potatoes|seasoning|spice blend|dukkah|condiment|cider\b|lemonade|latte|cocoa|hot chocolate|eggnog|sangria|margarita|mocktail|twice baked|mashed|potato casserole|roasted vegetables|coleslaw|rolls\b|biscuits\b|cornbread|\bcrisp\b|cobbler|crumble\b|sticky buns|cinnamon rolls?|scones?\b|pur[eé]e|^how to\b/i;
-const DINNER = /main|dinner|entr[eé]e|soup|stew|chili|pasta|casserole|curry|skillet|sheet pan|slow cooker|instant pot|tacos?/i;
+const NOT_DINNER = /dessert|cookie|cake|brownie|blondie|\bbars?\b|\bpie\b|tart\b|drinks?\b|cocktail|punch\b|smoothie|breakfast|brunch|appetizer|snack|\bdips?\b|dressing|\bsides?\b|side dish|\bbreads?\b|muffin|frosting|candy|fudge|pinwheel|bites\b|puffs\b|cheese board|charcuterie|granola|pancake|waffle|meal plan|menu|gift guide|round-?up|marshmallow|stuffing|gravy|cranberry sauce|mashed potatoes|seasoning|spice blend|dukkah|condiment|cider\b|lemonade|latte|cocoa|hot chocolate|eggnog|sangria|margarita|mocktail|twice baked|mashed|potato casserole|roasted vegetables|coleslaw|rolls\b|biscuits\b|cornbread|\bcrisp\b|cobbler|crumble\b|sticky buns|cinnamon rolls?|scones?\b|pur[eé]e|^how to\b/i;
+const DINNER = /main|dinner|entr[eé]e|soup|stew|chili|pasta|casserole|curry|skillet|sheet pan|slow cooker|instant pot|tacos?|chicken|beef|pork|steak|salmon|shrimp|turkey|sausage|meatballs?|seafood|fish/i;
+// Real dinners whose names trip the not-dinner words ("pie", "cake", "bread", "rolls", "mashed").
+const DINNER_PHRASES = /pot pie|shepherd'?s pie|cottage pie|tamale pie|crab cakes?|fish cakes?|salmon cakes?|tuna cakes?|cabbage rolls?|egg rolls?|spring rolls?|breaded|(with|and|&) mashed|bread bowls?|naan pizza|flatbread pizza/gi;
 
 function text(v: unknown): string {
   if (typeof v === "string") return v;
@@ -219,6 +221,14 @@ export function parseIngredient(raw: string): Ingredient {
   return { amount: m[1].trim(), unit, item: (m[4] || s).trim() };
 }
 
+/** Is this a dinner? Not-dinner words win, except in known dinner phrases; a category that says nothing either way falls back to keywords and size. */
+export function looksLikeDinner(title: string, category: string, keywords = "", ingredientCount = 0): boolean {
+  const scrub = (t: string) => t.replace(DINNER_PHRASES, " dinner ");
+  if (NOT_DINNER.test(scrub(`${category} ${title}`))) return false;
+  if (DINNER.test(category) || DINNER.test(scrub(title))) return true;
+  return DINNER.test(keywords) || ingredientCount >= 5;
+}
+
 export type PageRecipe = {
   title: string;
   imageUrl: string | null;
@@ -242,9 +252,7 @@ export function pageRecipe(html: string): PageRecipe | null {
   const yieldNum = Number(String(text(r.recipeYield) || "").match(/\d+/)?.[0]);
   const category = text(r.recipeCategory);
   const keywords = text(r.keywords);
-  const isDinner =
-    !NOT_DINNER.test(`${category} ${title}`) &&
-    (DINNER.test(category) || (!category.trim() && (DINNER.test(keywords) || ingredients.length >= 5)));
+  const isDinner = looksLikeDinner(title, category, keywords, ingredients.length);
   return {
     title,
     imageUrl: imageUrl && /^https:\/\//.test(imageUrl) ? imageUrl : null,
@@ -312,7 +320,7 @@ export async function refreshCooks(userId: string, opts: { budgetMs?: number; mi
         // Pages without recipe data (e.g. Magnolia) keep the feed title; they can still be saved by reading the page.
         const title = page?.title || link.title;
         if (!title) continue;
-        const isDinner = page ? page.isDinner : !NOT_DINNER.test(title);
+        const isDinner = page ? page.isDinner : looksLikeDinner(title, "", "", 5);
         await db
           .insert(foundRecipes)
           .values({

@@ -5,6 +5,8 @@ import { getRecipe, getSettings } from "@/lib/data";
 import { ruleProblems } from "@/lib/diet";
 import { addStarter, archiveRecipe } from "@/app/actions/recipes";
 import { RecipeRating } from "./RecipeRating";
+import { LeftoversSwitch } from "./LeftoversSwitch";
+import { leftoverKind, leftoverWhy } from "@/lib/leftovers";
 import { formatMinutes } from "@/lib/format";
 import { FoodArt } from "@/components/FoodArt";
 import { IngredientList } from "./IngredientList";
@@ -16,7 +18,7 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
   const r = await getRecipe(userId, id);
   const { data: settings } = await getSettings(userId);
   if (!r) notFound();
-  const problems = ruleProblems(r, settings.foodRules, settings.dislikes);
+  const problems = ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway);
   const mine = r.ownerId === userId;
 
   return (
@@ -32,7 +34,8 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
             {r.servings && <span className="tag">🍽 Serves {r.servings}</span>}
             {r.protein && <span className="tag">{r.protein}</span>}
             {r.ease && <span className="tag">{r.ease >= 4 ? "Easy" : r.ease >= 3 ? "Medium" : "A bit of work"}</span>}
-            {r.tags.map((t) => <span key={t} className="tag">{t}</span>)}
+            {r.meal !== "dinner" && <span className="tag bg-olive-soft font-bold text-olive-dark">🥪 {r.meal === "lunch" ? "Lunch" : "Breakfast"}</span>}
+            {r.tags.filter((t) => t !== "leftovers" && t !== "no-leftovers").map((t) => <span key={t} className="tag">{t}</span>)}
           </div>
           {r.creditName && (
             <p className="text-sm text-muted">
@@ -58,7 +61,10 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
 
       {mine ? (
         <div className="card flex flex-wrap items-center justify-between gap-3 p-4">
-          <RecipeRating id={r.id} rating={r.rating} />
+          <div className="space-y-3">
+            <RecipeRating id={r.id} rating={r.rating} />
+            {r.meal === "dinner" && <LeftoversSwitch id={r.id} good={leftoverKind(r) === "ok"} why={leftoverWhy(r)} />}
+          </div>
           <Link href={`/recipes/${r.id}/edit`} className="btn-secondary">Edit</Link>
         </div>
       ) : (

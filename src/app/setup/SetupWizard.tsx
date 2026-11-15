@@ -80,10 +80,11 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
                 </select>
               </div>
             )}
+            <LunchSection s={s} set={set} />
           </div>
         )}
 
-        {step === 2 && <FoodRulesStep rules={s.foodRules} dislikes={s.dislikes} onRules={(v) => set("foodRules", v)} onDislikes={(v) => set("dislikes", v)} />}
+        {step === 2 && <FoodRulesStep rules={s.foodRules} dislikes={s.dislikes} allow={s.allowAnyway ?? []} onRules={(v) => set("foodRules", v)} onDislikes={(v) => set("dislikes", v)} onAllow={(v) => set("allowAnyway", v)} />}
 
         {step === 3 && <StoreStep s={s} set={set} krogerEnabled={krogerEnabled} />}
 
@@ -110,7 +111,12 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
 
         {step === 5 && (
           <div className="space-y-5">
-            <DayPicker value={s.cookDays} onChange={(v) => { set("cookDays", v); set("dinnersPerWeek", v.length); }} />
+            <DayPicker value={s.cookDays} onChange={(v) => { set("cookDays", v); set("dinnersPerWeek", v.length); set("busyDays", (s.busyDays ?? []).filter((d) => v.includes(d))); }} />
+            <BusyPicker cookDays={s.cookDays} value={s.busyDays ?? []} minutes={s.busyMaxMinutes ?? 30} onChange={(v) => set("busyDays", v)} onMinutes={(m) => set("busyMaxMinutes", m)} />
+            <div>
+              <Counter label="Same main protein, at most" value={s.maxSameProtein ?? 2} min={1} max={4} onChange={(v) => set("maxSameProtein", v)} />
+              <p className="mt-1 text-sm text-muted">Nights a week with the same main protein (chicken, beef…). It&apos;s never two nights in a row either.</p>
+            </div>
             <Counter label="Weeks before a dinner can repeat" value={s.noRepeatWeeks} min={0} max={12} onChange={(v) => set("noRepeatWeeks", v)} />
             <YesNo label="Favor quick meals on weeknights?" value={s.favorQuickWeeknights} onChange={(v) => set("favorQuickWeeknights", v)} />
             <div>
@@ -365,8 +371,9 @@ function DayPicker({ value, onChange }: { value: number[]; onChange: (v: number[
   );
 }
 
-function FoodRulesStep({ rules, dislikes, onRules, onDislikes }: { rules: FoodRule[]; dislikes: string[]; onRules: (v: FoodRule[]) => void; onDislikes: (v: string[]) => void }) {
+function FoodRulesStep({ rules, dislikes, allow, onRules, onDislikes, onAllow }: { rules: FoodRule[]; dislikes: string[]; allow: string[]; onRules: (v: FoodRule[]) => void; onDislikes: (v: string[]) => void; onAllow: (v: string[]) => void }) {
   const [text, setText] = useState(dislikes.join(", "));
+  const [allowText, setAllowText] = useState(allow.join(", "));
   const toggle = (r: FoodRule) => {
     let next = rules.includes(r) ? rules.filter((x) => x !== r) : [...rules, r];
     // Vegetarian already covers pescatarian.
@@ -399,7 +406,100 @@ function FoodRulesStep({ rules, dislikes, onRules, onDislikes }: { rules: FoodRu
           onChange={(e) => { setText(e.target.value); onDislikes(parseDislikes(e.target.value)); }} />
         <p className="mt-1 text-sm text-muted">Separate with commas. Dinners with these are skipped too.</p>
       </div>
+      {rules.some((r) => FOOD_RULES[r].group !== "allergy") && (
+        <div>
+          <label htmlFor="allowAnyway" className="label">Allowed anyway</label>
+          <input id="allowAnyway" className="field" placeholder="e.g. sushi" value={allowText}
+            onChange={(e) => { setAllowText(e.target.value); onAllow(e.target.value.split(",").map((w) => w.trim()).filter((w) => w.length >= 2)); }} />
+          <p className="mt-1 text-sm text-muted">Dishes that are fine even though they break a diet rule above, like store-bought sushi with No seafood. Allergies always apply.</p>
+        </div>
+      )}
       {rules.length === 0 && dislikes.length === 0 && <p className="text-sm text-muted">No rules? That&apos;s fine, just tap Next.</p>}
+    </div>
+  );
+}
+
+function BusyPicker({ cookDays, value, minutes, onChange, onMinutes }: { cookDays: number[]; value: number[]; minutes: number; onChange: (v: number[]) => void; onMinutes: (m: number) => void }) {
+  if (!cookDays.length) return null;
+  const toggle = (d: number) => onChange(value.includes(d) ? value.filter((x) => x !== d) : [...value, d].sort());
+  return (
+    <fieldset>
+      <legend className="text-lg font-semibold">Busy nights?</legend>
+      <p className="mb-2 text-sm text-muted">Practice, late work, church… We&apos;ll only plan quick dinners on these.</p>
+      <div className="flex flex-wrap gap-1.5">
+        {cookDays.map((d) => {
+          const on = value.includes(d);
+          return (
+            <button key={d} type="button" aria-pressed={on} aria-label={`Busy: ${DAY_NAMES[d]}`} onClick={() => toggle(d)}
+              className={`flex min-h-10 items-center gap-1 rounded-full border-2 px-3 text-sm font-bold transition-all active:scale-95 ${on ? "border-ochre bg-ochre-soft text-ochre-dark" : "border-line bg-card text-ink hover:border-ochre"}`}>
+              {on ? "⚡" : ""} {DAY_NAMES[d]}
+            </button>
+          );
+        })}
+      </div>
+      {value.length > 0 && (
+        <label className="mt-3 flex flex-wrap items-center gap-2 text-sm font-semibold">
+          Quick means
+          <select className="field w-auto py-1" value={minutes} onChange={(e) => onMinutes(Number(e.target.value))}>
+            {[20, 30, 45, 60].map((m) => <option key={m} value={m}>{m} minutes or less</option>)}
+          </select>
+        </label>
+      )}
+    </fieldset>
+  );
+}
+
+const PROTEIN_CHOICES = ["Chicken", "Beef", "Pork", "Sausage", "Turkey", "Fish", "Seafood"];
+
+function LunchSection({ s, set }: { s: Settings; set: <K extends keyof Settings>(k: K, v: Settings[K]) => void }) {
+  const days = s.lunchDays ?? [];
+  const toggleDay = (d: number) => set("lunchDays", days.includes(d) ? days.filter((x) => x !== d) : [...days, d].sort());
+  const noReheat = s.holidayNoReheat ?? [];
+  const hasLittleOnes = s.kids > 0 || s.hasBaby;
+  return (
+    <div className="space-y-4 border-t border-line pt-5">
+      <fieldset>
+        <legend className="text-lg font-semibold">Lunch at home on weekdays?</legend>
+        <p className="mb-2 text-sm text-muted">We&apos;ll plan last night&apos;s leftovers first, and a quick lunch when there aren&apos;t any.</p>
+        <div className="flex flex-wrap gap-1.5">
+          {[1, 2, 3, 4, 5].map((d) => {
+            const on = days.includes(d);
+            return (
+              <button key={d} type="button" aria-pressed={on} aria-label={`Lunch at home: ${DAY_NAMES[d]}`} onClick={() => toggleDay(d)}
+                className={`min-h-10 rounded-full border-2 px-3 text-sm font-bold transition-all active:scale-95 ${on ? "border-terracotta bg-blush text-terracotta-dark" : "border-line bg-card text-ink hover:border-terracotta/60"}`}>
+                {on ? "🥪 " : ""}{DAY_NAMES[d].slice(0, 3)}
+              </button>
+            );
+          })}
+          <button type="button" className="rounded-full bg-oat px-3 text-sm font-bold text-olive-dark hover:bg-olive-soft" onClick={() => set("lunchDays", days.length === 5 ? [] : [1, 2, 3, 4, 5])}>
+            {days.length === 5 ? "None" : "Mon–Fri"}
+          </button>
+        </div>
+      </fieldset>
+      {days.length > 0 && (
+        <div className="space-y-3">
+          <Counter label="Adults at lunch" value={s.lunchAdults ?? 1} min={0} max={s.adults} onChange={(v) => set("lunchAdults", v)} />
+          {hasLittleOnes && <YesNo label={s.kids > 0 ? "Kids eat lunch at home too?" : "Baby eats lunch at home too?"} value={s.lunchKids ?? true} onChange={(v) => set("lunchKids", v)} />}
+        </div>
+      )}
+      <YesNo label="On federal holidays, is everyone home for lunch?" value={s.holidayEveryoneHome ?? true} onChange={(v) => set("holidayEveryoneHome", v)} />
+      {(s.holidayEveryoneHome ?? true) && (
+        <fieldset>
+          <legend className="text-sm font-semibold">Leftovers someone won&apos;t eat reheated on those days</legend>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {PROTEIN_CHOICES.map((p) => {
+              const on = noReheat.includes(p);
+              return (
+                <button key={p} type="button" aria-pressed={on} onClick={() => set("holidayNoReheat", on ? noReheat.filter((x) => x !== p) : [...noReheat, p])}
+                  className={`min-h-9 rounded-full border-2 px-3 text-sm font-bold ${on ? "border-ochre bg-ochre-soft text-ochre-dark" : "border-line bg-card text-ink"}`}>
+                  {on ? "✓ " : ""}{p}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1 text-xs text-muted">We won&apos;t plan these the night before a holiday.</p>
+        </fieldset>
+      )}
     </div>
   );
 }

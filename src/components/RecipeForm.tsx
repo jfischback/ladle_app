@@ -5,6 +5,7 @@ import { saveRecipe, type RecipeInputType } from "@/app/actions/recipes";
 import type { Ingredient } from "@/lib/types";
 
 export type RecipeFormValues = {
+  meal?: string;
   name: string;
   protein: string | null;
   servings: number | null;
@@ -22,7 +23,7 @@ const TAGS = ["quick", "one-pot", "kid-friendly", "slow-cooker", "sheet-pan", "g
 const PROTEINS = ["Chicken", "Beef", "Pork", "Sausage", "Turkey", "Fish", "Shrimp", "Vegetarian", "Beans (no meat)"];
 
 const blank: RecipeFormValues = {
-  name: "", protein: null, servings: null, totalMinutes: null,
+  meal: "dinner", name: "", protein: null, servings: null, totalMinutes: null,
   ingredients: [{ amount: "", unit: "", item: "" }], steps: [""], tags: [], ease: null, prepAhead: null, creditName: null, creditUrl: null,
 };
 
@@ -38,7 +39,7 @@ export function RecipeForm({ id, initial }: { id?: string; initial?: Partial<Rec
     setError(null);
     const input: RecipeInputType = {
       ...v,
-      meal: "dinner",
+      meal: v.meal === "lunch" ? "lunch" : "dinner",
       creditName: v.creditName?.trim() || null,
       creditUrl: v.creditUrl?.trim() || null,
       prepAhead: v.prepAhead?.trim() || null,
@@ -57,6 +58,17 @@ export function RecipeForm({ id, initial }: { id?: string; initial?: Partial<Rec
           <label htmlFor="name" className="label">Recipe name</label>
           <input id="name" required className="field text-lg" value={v.name} onChange={(e) => set("name", e.target.value)} />
         </div>
+        <fieldset>
+          <legend className="label">Is it a dinner or a lunch?</legend>
+          <div className="flex gap-2">
+            {(["dinner", "lunch"] as const).map((m) => (
+              <button key={m} type="button" aria-pressed={(v.meal ?? "dinner") === m} onClick={() => set("meal", m)}
+                className={`btn min-h-10 border-2 px-4 text-sm ${(v.meal ?? "dinner") === m ? "border-olive bg-olive text-cream" : "border-line bg-card text-ink"}`}>
+                {m === "dinner" ? "🍽 Dinner" : "🥪 Lunch"}
+              </button>
+            ))}
+          </div>
+        </fieldset>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label htmlFor="protein" className="label">Main protein</label>

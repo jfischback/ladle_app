@@ -19,7 +19,7 @@ function ago(d: Date | null): string {
 export async function CooksTab({ userId }: { userId: string }) {
   const [following, allShelf, plans, { data: settings }] = await Promise.all([myCooks(userId), cookShelf(userId, 150), activePlans(userId), getSettings(userId)]);
   // Recipes that break the household's food rules never show up.
-  const fits = allShelf.filter(({ found }) => !ruleProblems(found, settings.foodRules, settings.dislikes).length);
+  const fits = allShelf.filter(({ found }) => !ruleProblems(found, settings.foodRules, settings.dislikes, settings.allowAnyway).length);
   const hidden = allShelf.length - fits.length;
   const shelf = fits.slice(0, 60);
   // Sales from the newest plan, so the shelf can show what's on sale right now.

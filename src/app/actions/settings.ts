@@ -1,16 +1,17 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
 import { recipes, settings as settingsTable } from "@/db/schema";
 import { findFrysStores, krogerEnabled, type StoreLocation } from "@/lib/kroger";
 import { DEFAULT_SETTINGS, type Settings } from "@/lib/settings";
+import { getSettings } from "@/lib/data";
 import { FOOD_RULES, type FoodRule } from "@/lib/diet";
 import { StaplesSchema } from "@/lib/staples-schema";
-import { copyStarters } from "./recipes";
+import { copyStarters } from "@/lib/starters";
 
 const int = (min: number, max: number) => z.number().int().min(min).max(max);
 
@@ -32,6 +33,15 @@ const SettingsSchema = z.object({
   foodRules: z.array(z.enum(Object.keys(FOOD_RULES) as [FoodRule, ...FoodRule[]])).max(20),
   dislikes: z.array(z.string().trim().min(2).max(40)).max(30),
   staples: StaplesSchema,
+  busyDays: z.array(int(0, 6)).max(7),
+  busyMaxMinutes: int(10, 120),
+  maxSameProtein: int(1, 7),
+  lunchDays: z.array(int(0, 6)).max(7),
+  lunchAdults: int(0, 12),
+  lunchKids: z.boolean(),
+  holidayEveryoneHome: z.boolean(),
+  holidayNoReheat: z.array(z.string().max(20)).max(10),
+  allowAnyway: z.array(z.string().trim().min(2).max(40)).max(20),
   noRepeatWeeks: int(0, 12),
   favorQuickWeeknights: z.boolean(),
   saleThresholdPct: int(1, 90),
@@ -42,7 +52,9 @@ export async function saveSettings(input: Partial<Settings>, startWith?: "ours" 
   const userId = await requireUserId();
   const parsed = SettingsSchema.parse(input);
   const cookDays = [...new Set(parsed.cookDays)].sort();
-  const data: Settings = { ...DEFAULT_SETTINGS, ...parsed, cookDays, dinnersPerWeek: cookDays.length };
+  // Keep settings the wizard doesn't show (e.g. prepReminders) instead of resetting them to defaults.
+  const { data: current } = await getSettings(userId);
+  const data: Settings = { ...DEFAULT_SETTINGS, ...current, ...parsed, cookDays, dinnersPerWeek: cookDays.length };
   const db = await getDb();
   const now = new Date();
   await db
@@ -54,7 +66,7 @@ export async function saveSettings(input: Partial<Settings>, startWith?: "ours" 
     const starters = await db
       .select({ id: recipes.id })
       .from(recipes)
-      .where(and(isNull(recipes.ownerId), isNull(recipes.archivedAt), eq(recipes.meal, "dinner")));
+      .where(and(isNull(recipes.ownerId), isNull(recipes.archivedAt)));
     await copyStarters(userId, starters.map((s) => s.id));
     redirect("/");
   }
