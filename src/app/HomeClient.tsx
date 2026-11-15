@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { approvePlan, planUpcomingWeek, rateCookedDinner, startOver, swapDay } from "./actions/plans";
 import { StarPicker } from "@/components/Stars";
 import { FoodArt } from "@/components/FoodArt";
+import { Highlight } from "@/components/Highlight";
 import type { Plan } from "@/db/schema";
 import type { PlanDay } from "@/lib/types";
 import { formatMinutes } from "@/lib/format";
@@ -80,12 +81,14 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
               ) : (
                 <p className="font-display text-2xl font-semibold">Night off tonight!</p>
               )}
-              <Details reason={reason} cookTime={cookTime} cost={day.recipeId ? day.estimatedCost : null} sale={day.saleItems} noCook={!day.recipeId} />
+              <Details cookTime={cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} />
             </div>
             {swapButton}
           </div>
+          <WhyLine reason={reason} sale={day.saleItems} className="-mt-2 px-5 pb-5" />
         </div>
       ) : (
+        <div>
         <div className="flex items-center gap-3 p-3 pr-4">
           <FoodArt name={day.recipeName} protein={recipe?.protein} className="h-[4.5rem] w-[4.5rem]" />
           <div className="min-w-0 flex-1">
@@ -95,9 +98,11 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
             ) : (
               <p className="font-bold text-olive-dark">Night off</p>
             )}
-            <Details reason={reason} cookTime={cookTime} cost={day.recipeId ? day.estimatedCost : null} sale={day.saleItems} noCook={!day.recipeId} />
+            <Details cookTime={cookTime} cost={day.recipeId ? day.estimatedCost : null} noCook={!day.recipeId} />
           </div>
           {swapButton}
+        </div>
+        <WhyLine reason={reason} sale={day.saleItems} className="px-3 pb-3" />
         </div>
       )}
       {open && !locked && (
@@ -135,21 +140,32 @@ export function DayCard({ planId, index, day, isToday, locked, recipes }: {
   );
 }
 
-function Details({ reason, cookTime, cost, sale, noCook }: { reason: string | null; cookTime: string | null; cost: number | null; sale: string[]; noCook: boolean }) {
+function Details({ cookTime, cost, noCook }: { cookTime: string | null; cost: number | null; noCook: boolean }) {
   if (noCook) return <p className="text-sm text-muted">Leftovers or takeout. No judgment.</p>;
+  if (!cookTime && cost == null) return null;
   return (
-    <>
-      {(cookTime || cost != null) && (
-        <p className="mt-0.5 flex flex-wrap gap-x-3 text-sm font-semibold text-muted">
-          {cookTime && <span>⏱ {cookTime}</span>}
-          {cost != null && <span>{money(cost)}</span>}
+    <p className="mt-0.5 flex flex-wrap gap-x-3 text-sm font-semibold text-muted">
+      {cookTime && <span>⏱ {cookTime}</span>}
+      {cost != null && <span>{money(cost)}</span>}
+    </p>
+  );
+}
+
+/** Why this dinner, plus its sale tags: full width under the dinner so it's easy to read. */
+function WhyLine({ reason, sale, className = "" }: { reason: string | null; sale: string[]; className?: string }) {
+  if (!reason && !sale.length) return null;
+  return (
+    <div className={className}>
+      {reason && (
+        <p className="flex items-start gap-2 rounded-2xl bg-blush px-3 py-2 leading-snug text-ink">
+          <span aria-hidden="true">💡</span>
+          <span><Highlight text={reason} /></span>
         </p>
       )}
-      {reason && <p className="mt-1 text-muted">{reason}</p>}
       {sale.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">{sale.map((s) => <span key={s} className="tag-sale">🏷️ {s} on sale</span>)}</div>
       )}
-    </>
+    </div>
   );
 }
 
