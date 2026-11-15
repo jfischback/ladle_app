@@ -132,7 +132,7 @@ function Line({ planId, line }: { planId: string; line: CartLine }) {
                   className={`rounded-2xl border-2 p-3 text-left text-sm transition-colors ${on ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive/50"}`}
                 >
                   <span className="block font-semibold">{o.description}</span>
-                  <span className="text-muted">{o.size}</span>
+                  <span className="text-muted">{o.size}{o.aisle ? ` · ${o.aisle}` : ""}</span>
                   <span className="mt-1 flex flex-wrap items-center gap-1.5">
                     <b>{money(o.price)}</b>
                     {o.onSale && <><s className="text-muted">{money(o.regular)}</s><span className="tag-sale">Sale</span></>}

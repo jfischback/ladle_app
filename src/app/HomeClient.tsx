@@ -483,6 +483,11 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
     flush().then(() => { version.current++; });
   };
   const buying = list.sections.filter((s) => s.name !== PANTRY_SECTIONS.HAVE_IT);
+  // Where each item is in the store, from the products matched for the cart (when Kroger says).
+  const aisleOf = new Map((plan.cart?.lines ?? []).flatMap((l) => {
+    const a = l.chosen != null ? l.options[l.chosen]?.aisle : null;
+    return a ? [[l.key, a] as const] : [];
+  }));
   // Text the list (what's still to get) to someone, or print it.
   const shareList = async () => {
     const text = groceryText(list, { title: `Grocery list, week of ${new Date(`${plan.weekOf}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`, isChecked: (s, _i, item) => !!checked[tickKey(s, item)] });
@@ -561,6 +566,7 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
                       <span>
                         <span className={`font-semibold ${on ? "line-through" : ""}`}>{it.item}</span>
                         {it.quantity && <span> · {it.quantity}</span>}
+                        {aisleOf.get(`${s.name}::${it.item}`) && <span className="ml-1.5 rounded-full bg-oat px-2 py-0.5 text-xs font-bold text-olive-dark">{aisleOf.get(`${s.name}::${it.item}`)}</span>}
                         {it.note && <span className="text-muted"> · {it.note}</span>}
                         {it.forRecipes.length > 0 && (
                           <>
