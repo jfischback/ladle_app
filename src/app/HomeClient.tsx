@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { approvePlan, planUpcomingWeek, rateCookedDinner, startOver, swapDay } from "./actions/plans";
+import { answerPantryCheck } from "./actions/pantry";
+import { PANTRY_SECTIONS } from "@/lib/pantry";
 import { StarPicker } from "@/components/Stars";
 import { FoodArt } from "@/components/FoodArt";
 import { Highlight } from "@/components/Highlight";
@@ -287,6 +289,9 @@ export function Celebrate() {
 
 const SECTION_ICONS: [RegExp, string][] = [
   [/staple/i, "🧺"],
+  [/stock up/i, "⭐"],
+  [/pantry check/i, "❓"],
+  [/already in your pantry/i, "✅"],
   [/produce|fruit|veg/i, "🥕"],
   [/meat|seafood|protein|butcher/i, "🥩"],
   [/dairy|egg|cheese|milk/i, "🧀"],
@@ -314,7 +319,8 @@ export function GroceryChecklist({ plan }: { plan: Plan }) {
       try { localStorage.setItem(key, JSON.stringify(next)); } catch {}
       return next;
     });
-  const total = list.sections.reduce((n, s) => n + s.items.length, 0);
+  const buying = list.sections.filter((s) => s.name !== PANTRY_SECTIONS.HAVE_IT);
+  const total = buying.reduce((n, s) => n + s.items.length, 0);
   const done = Object.values(checked).filter(Boolean).length;
 
   return (
@@ -329,7 +335,17 @@ export function GroceryChecklist({ plan }: { plan: Plan }) {
         </ul>
       )}
       <div className="space-y-5">
-        {list.sections.map((s) => (
+        {list.sections.map((s) => s.name === PANTRY_SECTIONS.PANTRY_CHECK ? (
+          <PantryCheck key={s.name} planId={plan.id} items={s.items} />
+        ) : s.name === PANTRY_SECTIONS.HAVE_IT ? (
+          <details key={s.name} className="rounded-2xl bg-cream/70 p-3">
+            <summary className="cursor-pointer font-bold text-olive-dark">✅ {s.items.length} item{s.items.length === 1 ? "" : "s"} already in your pantry</summary>
+            <ul className="mt-2 space-y-1 text-sm text-muted">
+              {s.items.map((it) => <li key={it.item}>{it.item}{it.quantity ? ` · ${it.quantity}` : ""}</li>)}
+            </ul>
+            <p className="mt-2 text-xs text-muted">Out of something? Mark it in your <Link href="/pantry" className="underline">pantry</Link> and it comes back next week.</p>
+          </details>
+        ) : (
           <div key={s.name}>
             <h3 className="mb-2 flex items-center gap-2 font-bold text-terracotta-dark"><span aria-hidden="true">{sectionIcon(s.name)}</span>{s.name}</h3>
             <ul className="space-y-1">
@@ -363,6 +379,33 @@ export function GroceryChecklist({ plan }: { plan: Plan }) {
         ))}
       </div>
     </section>
+  );
+}
+
+/** "Do you have these?" for long-lasting items: each answer updates the pantry and the list. */
+function PantryCheck({ planId, items }: { planId: string; items: { item: string; quantity: string; note?: string; forRecipes: string[] }[] }) {
+  const [pending, start] = useTransition();
+  return (
+    <div className="rounded-2xl border-2 border-dashed border-ochre/60 p-3">
+      <h3 className="flex items-center gap-2 font-bold text-ochre-dark"><span aria-hidden="true">❓</span> Pantry check: do you have these?</h3>
+      <p className="mb-2 text-sm text-muted">They last a while, so you may already have them. We&apos;ll remember your answers, so this list gets shorter every week.</p>
+      {items.length > 2 && (
+        <button className="btn-secondary mb-2 min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(() => answerPantryCheck(planId, null, true))}>
+          ✓ I have all {items.length}
+        </button>
+      )}
+      <ul className={`space-y-2 ${pending ? "opacity-60" : ""}`}>
+        {items.map((it) => (
+          <li key={it.item} className="flex flex-wrap items-center gap-2">
+            <span className="min-w-0 flex-1"><span className="font-semibold">{it.item}</span>{it.quantity && <span className="text-muted"> · {it.quantity}</span>}</span>
+            <span className="flex shrink-0 gap-1.5">
+              <button className="btn-primary min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(() => answerPantryCheck(planId, it.item, true))}>Have it</button>
+              <button className="btn-secondary min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(() => answerPantryCheck(planId, it.item, false))}>Need it</button>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

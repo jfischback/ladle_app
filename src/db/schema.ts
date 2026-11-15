@@ -67,6 +67,7 @@ export const plans = pgTable(
     saleItems: jsonb("sale_items").$type<(string | SaleItem)[]>().notNull().default([]),
     saleCheck: jsonb("sale_check").$type<SaleCheck>(),
     staples: jsonb("staples").$type<StapleLine[]>(), // weekly staples with this week's prices
+    stockUp: jsonb("stock_up").$type<SaleItem[]>(), // "buy on sale" pantry items that are on sale and running low
     summary: text("summary"),
     plannerSource: text("planner_source").notNull(), // claude | basic
     estimatedTotal: real("estimated_total"),
@@ -124,9 +125,31 @@ export const foundRecipes = pgTable(
   (t) => [uniqueIndex("found_user_url_idx").on(t.userId, t.url)],
 );
 
+/**
+ * What a household has on hand. Long-lasting things only (pantry, fridge, freezer); the grocery list skips what's
+ * here, and "buy on sale" items are only bought when they're on sale and running low.
+ */
+export const pantryItems = pgTable(
+  "pantry_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    name: text("name").notNull(),
+    place: text("place").$type<"pantry" | "fridge" | "freezer">().notNull().default("pantry"),
+    status: text("status").$type<"have" | "low" | "out">().notNull().default("have"),
+    onSaleOnly: boolean("on_sale_only").notNull().default(false), // premium stock-up: buy only on sale, only when low/out
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("pantry_user_name_idx").on(t.userId, t.name)],
+);
+
 export type User = typeof users.$inferSelect;
 export type Recipe = typeof recipes.$inferSelect;
 export type NewRecipe = typeof recipes.$inferInsert;
 export type Plan = typeof plans.$inferSelect;
 export type Cook = typeof cooks.$inferSelect;
 export type FoundRecipe = typeof foundRecipes.$inferSelect;
+export type PantryItem = typeof pantryItems.$inferSelect;

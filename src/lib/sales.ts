@@ -63,7 +63,7 @@ function productMatches(term: string, p: KrogerProduct): boolean {
   // Cut words ("boneless", "bone-in") don't change what's on sale, so they're optional here.
   const optional = new Set(["boneless", "skinless", "bone", "in", "skin", "on", "lean", "extra", "regular", "thin", "streaky", "precooked"]);
   return term.split(/[\s-]+/).every((w) => {
-    const s = stem(w);
+    const s = stem(w.replace(/'s?$/, "")); // "rao's" -> "rao"
     // Short words must match a whole word ("egg" isn't "Eggo", "ham" isn't "Hamburger"); longer ones may be a prefix.
     return s.length < 3 || optional.has(w) || nameSet.has(s) || (s.length >= 5 && name.some((n) => n.startsWith(s)));
   });
@@ -108,12 +108,13 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
  * Check this week's prices at the household's Fry's for the ingredients in their recipes.
  * An item counts as on sale only when it's at least saleThresholdPct off its regular price.
  */
-export async function scanSales(recipes: Recipe[], settings: Settings): Promise<SaleScan> {
+export async function scanSales(recipes: Recipe[], settings: Settings, extraTerms: string[] = []): Promise<SaleScan> {
   if (!krogerEnabled()) return { status: "off", reason: "not-connected" };
   if (!settings.storeLocationId) return { status: "off", reason: "no-store" };
   const locationId = settings.storeLocationId;
   // Weekly staples are bought every week, so they're always checked (first).
-  const stapleTerms = [...new Set(settings.staples.filter((x) => x.active).map((x) => stapleTerm(x.item)).filter(Boolean))];
+  // Weekly staples and "buy on sale" pantry items are always checked (first).
+  const stapleTerms = [...new Set([...settings.staples.filter((x) => x.active).map((x) => stapleTerm(x.item)), ...extraTerms].filter(Boolean))];
   const terms = [...new Set([...stapleTerms, ...termsForRecipes(recipes, Math.max(20, 70 - stapleTerms.length))])];
   const staplePrices = new Map<string, { price: number; product: string }>();
 
