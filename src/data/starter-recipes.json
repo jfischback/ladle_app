@@ -9151,5 +9151,1076 @@
   "creditName": null,
   "creditUrl": null,
   "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Black Bean and Sweet Potato Tacos",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 35,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "medium sweet potatoes, peeled and cut in 1/2-inch cubes"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "chili powder"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "ground cumin"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "black beans, drained and rinsed"
+   },
+   {
+    "amount": "12",
+    "unit": "",
+    "item": "corn tortillas"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "avocado, sliced"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "salsa"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "lime, cut in wedges"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "salt"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 425°F. Toss the sweet potatoes with the oil, chili powder, cumin and salt on a sheet pan.",
+   "Roast 20 to 25 minutes, stirring once, until tender and browned at the edges.",
+   "Warm the black beans in a small pot. Warm the tortillas in a dry skillet.",
+   "Fill the tortillas with sweet potatoes and beans; top with avocado and salsa, and squeeze lime over."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "budget",
+   "kid-friendly",
+   "low-sodium"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Red Lentil Dal with Rice",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 35,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "white rice"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "yellow onion, chopped"
+   },
+   {
+    "amount": "3",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "grated fresh ginger"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "curry powder"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "ground turmeric"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "red lentils, rinsed"
+   },
+   {
+    "amount": "1",
+    "unit": "(14.5 oz) can",
+    "item": "diced tomatoes"
+   },
+   {
+    "amount": "4",
+    "unit": "cups",
+    "item": "vegetable broth"
+   },
+   {
+    "amount": "1",
+    "unit": "(13.5 oz) can",
+    "item": "coconut milk"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "baby spinach"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "salt"
+   }
+  ],
+  "steps": [
+   "Cook the rice.",
+   "Soften the onion in the oil 5 minutes. Stir in the garlic, ginger, curry powder and turmeric for 1 minute.",
+   "Add the lentils, tomatoes and broth. Simmer 20 minutes, stirring now and then, until the lentils fall apart.",
+   "Stir in the coconut milk and spinach until the spinach wilts. Season with the salt and serve over rice."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "budget",
+   "one-pot",
+   "leftovers",
+   "freezer",
+   "low-sodium"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Veggie Fried Rice with Tofu",
+  "protein": "Tofu",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "(14 oz) block",
+    "item": "extra-firm tofu, drained and cubed"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   },
+   {
+    "amount": "4",
+    "unit": "cups",
+    "item": "cooked rice, cold (day-old is best)"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "frozen peas and carrots"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "green onions, sliced"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "tamari"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "toasted sesame oil"
+   }
+  ],
+  "steps": [
+   "Pat the tofu dry. Brown it in 1 Tbsp oil in a big skillet over medium-high heat, 8 minutes, turning. Move to a plate.",
+   "Add the rest of the oil, the garlic and the white parts of the green onions for 30 seconds.",
+   "Add the rice and peas and carrots; stir-fry 5 minutes until hot and a little crisp.",
+   "Stir in the tofu, tamari and sesame oil. Top with the green onion tops."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "quick",
+   "budget",
+   "kid-friendly"
+  ],
+  "ease": 4,
+  "prepAhead": "Cook the rice a day ahead: cold rice fries best.",
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Chickpea Shawarma Bowls",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "(15 oz) cans",
+    "item": "chickpeas, drained and patted dry"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "red onion, cut in wedges"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "ground cumin"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "smoked paprika"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "ground cinnamon"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "salt"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "quinoa"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "cucumber, diced"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "cherry tomatoes, halved"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "lemon"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "hummus"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 425°F. Toss the chickpeas and onion with the oil, spices and salt on a sheet pan.",
+   "Roast 20 minutes, shaking the pan once, until the chickpeas are crisp.",
+   "Meanwhile, cook the quinoa.",
+   "Fill bowls with quinoa, chickpeas and onion, cucumber and tomatoes. Thin the hummus with lemon juice and water and drizzle over."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "quick",
+   "sheet-pan"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Three-Bean Vegetable Chili",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "yellow onion, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "green bell pepper, chopped"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "carrots, diced"
+   },
+   {
+    "amount": "3",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "chili powder"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "ground cumin"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "black beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "kidney beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "pinto beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "(28 oz) can",
+    "item": "crushed tomatoes"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "frozen corn"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "vegetable broth"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "salt"
+   }
+  ],
+  "steps": [
+   "Soften the onion, pepper and carrots in the oil 8 minutes. Stir in the garlic, chili powder and cumin for 1 minute.",
+   "Add the beans, tomatoes, corn and broth. Simmer 25 minutes, stirring now and then.",
+   "Season with the salt. Serve with tortilla chips or over rice."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "budget",
+   "one-pot",
+   "leftovers",
+   "freezer",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Peanut Sweet Potato Stew",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 40,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "yellow onion, chopped"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "grated fresh ginger"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "medium sweet potatoes, peeled and cubed"
+   },
+   {
+    "amount": "1",
+    "unit": "(14.5 oz) can",
+    "item": "diced tomatoes"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "chickpeas, drained"
+   },
+   {
+    "amount": "3",
+    "unit": "cups",
+    "item": "vegetable broth"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "creamy peanut butter"
+   },
+   {
+    "amount": "3",
+    "unit": "cups",
+    "item": "chopped kale"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "white rice"
+   }
+  ],
+  "steps": [
+   "Cook the rice.",
+   "Soften the onion in the oil 5 minutes; stir in the garlic and ginger for 1 minute.",
+   "Add the sweet potatoes, tomatoes, chickpeas and broth. Simmer 20 minutes, until the sweet potatoes are tender.",
+   "Whisk the peanut butter with a ladle of the hot broth, then stir it in with the kale. Simmer 5 minutes. Serve over rice."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "one-pot",
+   "leftovers",
+   "freezer",
+   "budget"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Stuffed Peppers with Rice and Black Beans",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 50,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "large bell peppers, tops cut off and seeded"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "cooked rice"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "black beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "frozen corn"
+   },
+   {
+    "amount": "1",
+    "unit": "(10 oz) can",
+    "item": "diced tomatoes with green chiles"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "ground cumin"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "chili powder"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "salt"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "avocado, diced"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 375°F. Stand the peppers in a baking dish.",
+   "Stir together the rice, beans, corn, tomatoes, cumin, chili powder and salt. Pack into the peppers.",
+   "Add 1/4 cup water to the dish, cover with foil and bake 35 minutes, until the peppers are tender.",
+   "Top with avocado."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "kid-friendly",
+   "make-ahead"
+  ],
+  "ease": 3,
+  "prepAhead": "Stuff the peppers the night before and keep them covered in the fridge.",
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Coconut Chickpea Spinach Curry with Potatoes",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 35,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "vegetable oil"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "yellow onion, chopped"
+   },
+   {
+    "amount": "3",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "curry powder"
+   },
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "Yukon gold potatoes, cubed"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "chickpeas, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "(13.5 oz) can",
+    "item": "coconut milk"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "vegetable broth"
+   },
+   {
+    "amount": "4",
+    "unit": "cups",
+    "item": "baby spinach"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "salt"
+   }
+  ],
+  "steps": [
+   "Soften the onion in the oil 5 minutes. Stir in the garlic and curry powder for 1 minute.",
+   "Add the potatoes, chickpeas, coconut milk and broth. Simmer 20 minutes, until the potatoes are tender.",
+   "Stir in the spinach until wilted; season with the salt."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "one-pot",
+   "budget",
+   "leftovers"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Mexican Rice and Bean Skillet",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "yellow onion, chopped"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "long-grain white rice"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "pinto beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "(10 oz) can",
+    "item": "diced tomatoes with green chiles"
+   },
+   {
+    "amount": "1 3/4",
+    "unit": "cups",
+    "item": "vegetable broth"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "ground cumin"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "chili powder"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "frozen corn"
+   },
+   {
+    "amount": "1/4",
+    "unit": "cup",
+    "item": "chopped cilantro"
+   }
+  ],
+  "steps": [
+   "Soften the onion in the oil 4 minutes. Add the rice and stir 2 minutes until it smells toasty.",
+   "Stir in the beans, tomatoes, broth, cumin and chili powder. Bring to a boil, cover and simmer on low 18 minutes.",
+   "Stir in the corn, cover 5 minutes off the heat. Top with cilantro."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "one-pot",
+   "quick",
+   "budget",
+   "kid-friendly"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Lentil Shepherd's Pie",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 60,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "lb",
+    "item": "russet potatoes, peeled and cubed"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "unsweetened oat milk"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "yellow onion, chopped"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "carrots, diced"
+   },
+   {
+    "amount": "2",
+    "unit": "stalks",
+    "item": "celery, diced"
+   },
+   {
+    "amount": "2",
+    "unit": "cloves",
+    "item": "garlic, minced"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "brown or green lentils, rinsed"
+   },
+   {
+    "amount": "2 1/2",
+    "unit": "cups",
+    "item": "vegetable broth"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "tomato paste"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "dried thyme"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "frozen peas"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "salt"
+   }
+  ],
+  "steps": [
+   "Boil the potatoes 15 minutes until tender; drain and mash with the oat milk, 1 Tbsp oil and half the salt.",
+   "Soften the onion, carrots and celery in the rest of the oil 8 minutes; add the garlic.",
+   "Add the lentils, broth, tomato paste and thyme. Simmer 25 minutes, until the lentils are tender and the sauce thick. Stir in the peas and the rest of the salt.",
+   "Heat the oven to 400°F. Spread the lentils in a baking dish, top with the potatoes and bake 20 minutes, until golden on top."
+  ],
+  "tags": [
+   "vegetarian",
+   "vegan",
+   "leftovers",
+   "freezer",
+   "make-ahead"
+  ],
+  "ease": 3,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Cheesy Black Bean Enchilada Bake",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 45,
+  "ingredients": [
+   {
+    "amount": "12",
+    "unit": "",
+    "item": "corn tortillas"
+   },
+   {
+    "amount": "2",
+    "unit": "(15 oz) cans",
+    "item": "black beans, drained"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "frozen corn"
+   },
+   {
+    "amount": "1",
+    "unit": "(10 oz) can",
+    "item": "red enchilada sauce"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "ground cumin"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "shredded Monterey Jack cheese"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "sour cream"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 375°F. Mash half the beans and stir in the rest with the corn and cumin.",
+   "Spread a little sauce in a 9x13 dish. Layer tortillas, beans, sauce and cheese; repeat twice, ending with sauce and cheese.",
+   "Cover with foil and bake 20 minutes; uncover and bake 10 minutes more. Serve with sour cream."
+  ],
+  "tags": [
+   "vegetarian",
+   "kid-friendly",
+   "freezer"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Veggie Frittata with Potatoes",
+  "protein": "Eggs",
+  "servings": 4,
+  "totalMinutes": 35,
+  "ingredients": [
+   {
+    "amount": "10",
+    "unit": "",
+    "item": "eggs"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "milk"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "Yukon gold potatoes, thinly sliced"
+   },
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "red bell pepper, chopped"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "baby spinach"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "salt"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 400°F. Cook the potatoes in the oil in an oven-safe skillet 10 minutes, until tender. Add the pepper and spinach for 2 minutes.",
+   "Whisk the eggs, milk, salt and half the cheese; pour over the vegetables. Top with the rest of the cheese.",
+   "Cook on the stove 3 minutes, until the edges set, then bake 12 to 15 minutes until the center is set."
+  ],
+  "tags": [
+   "vegetarian",
+   "budget",
+   "quick"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Baked Potato Bar with Broccoli and Cheese",
+  "protein": "Dairy",
+  "servings": 4,
+  "totalMinutes": 60,
+  "ingredients": [
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "large russet potatoes"
+   },
+   {
+    "amount": "3",
+    "unit": "cups",
+    "item": "broccoli florets"
+   },
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "shredded cheddar cheese"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "sour cream"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "chili beans"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "green onions, sliced"
+   },
+   {
+    "amount": "1",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "salt"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 425°F. Rub the potatoes with the oil and salt, prick them and bake 50 to 60 minutes, until soft.",
+   "Steam the broccoli 5 minutes. Warm the beans.",
+   "Split the potatoes and let everyone top their own with broccoli, beans, cheese, sour cream and green onions."
+  ],
+  "tags": [
+   "vegetarian",
+   "kid-friendly",
+   "budget"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dinner",
+  "name": "Caprese Quinoa Bowls with White Beans",
+  "protein": "Beans (no meat)",
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "1 1/2",
+    "unit": "cups",
+    "item": "quinoa"
+   },
+   {
+    "amount": "1",
+    "unit": "(15 oz) can",
+    "item": "cannellini beans, drained"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "cherry tomatoes, halved"
+   },
+   {
+    "amount": "8",
+    "unit": "oz",
+    "item": "fresh mozzarella pearls"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "fresh basil leaves"
+   },
+   {
+    "amount": "3",
+    "unit": "Tbsp",
+    "item": "olive oil"
+   },
+   {
+    "amount": "2",
+    "unit": "Tbsp",
+    "item": "balsamic vinegar"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "salt"
+   }
+  ],
+  "steps": [
+   "Cook the quinoa and let it cool a few minutes.",
+   "Toss with the beans, tomatoes, mozzarella and basil.",
+   "Drizzle with the oil and balsamic, season with the salt and toss again."
+  ],
+  "tags": [
+   "vegetarian",
+   "quick"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
  }
 ]
