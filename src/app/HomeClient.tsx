@@ -49,6 +49,16 @@ export function PlanButton({ label, big, thisWeek = false, quiet = false }: { la
   );
 }
 
+/** A dinner's recipe page, sized like the grocery list: tonight's batches and who's eating. */
+function recipeHref(day: PlanDay, cook = false): string {
+  const q = new URLSearchParams();
+  if (cook) q.set("cook", "1");
+  if ((day.batches ?? 1) > 1 && !day.leftoverOf) q.set("batches", String(day.batches));
+  if (day.eating && !day.leftoverOf) q.set("for", `${day.eating.adults}-${day.eating.kids}`);
+  const qs = q.toString();
+  return `/recipes/${day.recipeId}${qs ? `?${qs}` : ""}`;
+}
+
 export function DayCard({ planId, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [], canFeast = false, feastGuests = 4, feastWhen = {}, household }: {
   planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number; picky?: string[];
   moveTargets?: { index: number; label: string }[];
@@ -134,7 +144,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
           <div className="flex items-start justify-between gap-3 p-5">
             <div className="min-w-0">
               {day.recipeId ? (
-                <Link href={`/recipes/${day.recipeId}${(day.batches ?? 1) > 1 && !day.leftoverOf ? `?batches=${day.batches}` : ""}`} className="font-display text-2xl font-semibold leading-snug hover:underline">{day.recipeName}</Link>
+                <Link href={recipeHref(day)} className="font-display text-2xl font-semibold leading-snug hover:underline">{day.recipeName}</Link>
               ) : (
                 <p className="font-display text-2xl font-semibold">{dinnerName ?? "Night off tonight!"}</p>
               )}
@@ -144,11 +154,11 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
           </div>
           {day.recipeId && !day.leftoverOf && (
             <div className="-mt-2 px-5 pb-4">
-              <Link href={`/recipes/${day.recipeId}?cook=1${(day.batches ?? 1) > 1 ? `&batches=${day.batches}` : ""}`} className="btn-warm w-full sm:w-auto">👩‍🍳 Start cooking</Link>
+              <Link href={recipeHref(day, true)} className="btn-warm w-full sm:w-auto">👩‍🍳 Start cooking</Link>
             </div>
           )}
           <WhyLine reason={reason} sale={day.saleItems} className="-mt-2 px-5 pb-5" />
-          {day.eating && <p className="-mt-3 px-5 pb-5 text-sm font-bold text-olive-dark">👥 For {day.eating.adults} adult{day.eating.adults === 1 ? "" : "s"}{day.eating.kids ? ` and ${day.eating.kids} kid${day.eating.kids === 1 ? "" : "s"}` : ""} tonight</p>}
+          {day.eating && day.recipeId && !day.leftoverOf && <p className="-mt-3 px-5 pb-5 text-sm font-bold text-olive-dark">👥 For {day.eating.adults} adult{day.eating.adults === 1 ? "" : "s"}{day.eating.kids ? ` and ${day.eating.kids} kid${day.eating.kids === 1 ? "" : "s"}` : ""} tonight</p>}
           <PickyLines tips={picky} className="-mt-3 px-5 pb-5" />
           <LunchLine day={day} className="-mt-3 px-5 pb-5" />
         </div>
@@ -162,7 +172,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
               {day.fromCook && <NewBadge className="ml-1.5 align-middle" label="✨ New" />}
             </p>
             {day.recipeId ? (
-              <Link href={`/recipes/${day.recipeId}${(day.batches ?? 1) > 1 && !day.leftoverOf ? `?batches=${day.batches}` : ""}`} className="block font-bold leading-snug hover:underline">{day.recipeName}</Link>
+              <Link href={recipeHref(day)} className="block font-bold leading-snug hover:underline">{day.recipeName}</Link>
             ) : (
               <p className="font-bold text-olive-dark">{dinnerName ?? "Night off"}</p>
             )}
@@ -171,7 +181,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
           {swapButton}
         </div>
         <WhyLine reason={reason} sale={day.saleItems} className="px-3 pb-3" />
-        {day.eating && <p className="px-3 pb-3 text-sm font-bold text-olive-dark">👥 For {day.eating.adults} adult{day.eating.adults === 1 ? "" : "s"}{day.eating.kids ? ` and ${day.eating.kids} kid${day.eating.kids === 1 ? "" : "s"}` : ""} tonight</p>}
+        {day.eating && day.recipeId && !day.leftoverOf && <p className="px-3 pb-3 text-sm font-bold text-olive-dark">👥 For {day.eating.adults} adult{day.eating.adults === 1 ? "" : "s"}{day.eating.kids ? ` and ${day.eating.kids} kid${day.eating.kids === 1 ? "" : "s"}` : ""} tonight</p>}
         <PickyLines tips={picky} className="px-3 pb-3" />
         <LunchLine day={day} className="px-3 pb-3" />
         </div>
@@ -205,7 +215,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
             {day.recipeId && <button className="btn-quiet" disabled={pending} onClick={() => swap(null)}>Take the night off 🍕</button>}
           </div>
           {movePicker && <div className="border-t border-line pt-3">{movePicker}</div>}
-          {household && day.recipeId && !day.leftoverOf && <div className="border-t border-line pt-3"><EatingPicker planId={planId} index={index} eating={day.eating} household={household} /></div>}
+          {household && day.recipeId && !day.leftoverOf && <div className="border-t border-line pt-3"><EatingPicker key={`${day.eating?.adults ?? "-"}-${day.eating?.kids ?? "-"}-${household.adults}-${household.kids}`} planId={planId} index={index} eating={day.eating} household={household} /></div>}
           <ErrorNote error={error} />
         </div>
       )}

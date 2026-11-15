@@ -2,7 +2,7 @@ import type { PlanDay, PlanLunch } from "./types";
 import { dayName } from "./week";
 
 // What belongs to the dinner (and moves with it); the date, lunch, breakfast and holiday stay with the day.
-const DINNER_KEYS = ["recipeId", "recipeName", "estimatedCost", "reason", "saleItems", "alternatives", "ratedAt", "fromCook", "leftoverOf", "batches"] as const;
+const DINNER_KEYS = ["recipeId", "recipeName", "estimatedCost", "reason", "saleItems", "alternatives", "ratedAt", "fromCook", "leftoverOf", "batches", "eating"] as const;
 
 /** Nights that can still change: not past, and not already rated as cooked. */
 export const movable = (d: PlanDay, today: string) => d.date >= today && !d.ratedAt && !d.feast; // a holiday feast stays on its holiday

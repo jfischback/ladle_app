@@ -61,7 +61,8 @@ export async function planUpcomingWeek(thisWeek = false): Promise<ActionResult> 
     if ((await activePlans(userId)).some((p) => p.weekOf === weekStart && p.status === "approved")) return { error: "This week is already planned." };
   }
   // A short week needs only as many dinners as it has cooking nights.
-  const needed = fromDate ? Math.max(1, weekDates(weekStart).filter((d) => d >= fromDate && settings.cookDays.includes(weekday(d))).length) : settings.dinnersPerWeek;
+  const needed = fromDate ? weekDates(weekStart).filter((d) => d >= fromDate && settings.cookDays.includes(weekday(d))).length : settings.dinnersPerWeek;
+  if (needed === 0) return { error: "None of your cooking nights are left this week: plan the next one instead." };
   const recipeList = await myRecipes(userId);
   if (recipeList.length < needed) {
     return { error: `You need at least ${needed} dinners in My Recipes to plan a week.` };
@@ -69,7 +70,7 @@ export async function planUpcomingWeek(thisWeek = false): Promise<ActionResult> 
   const fitting = recipeList.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment) && !(r.rating != null && r.rating <= 2)).length;
   if (fitting < needed) {
     return {
-      error: `Only ${fitting} of your recipes fit your food rules, and you cook ${settings.dinnersPerWeek} nights. Add a few more recipes that fit (your cooks are a good place to look), or cook fewer nights in Settings.`,
+      error: `Only ${fitting} of your recipes fit your food rules, and you cook ${needed} nights. Add a few more recipes that fit (your cooks are a good place to look), or cook fewer nights in Settings.`,
     };
   }
   const windowStart = addDays(weekStart, -7 * settings.noRepeatWeeks);
@@ -193,7 +194,7 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
   const { data: settings } = await getSettings(userId);
   const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
   if (recipeId === null) {
-    plan.days[dayIndex] = { ...day, recipeId: null, recipeName: null, estimatedCost: null, reason: "No-cook night", saleItems: [], fromCook: null, leftoverOf: null, batches: undefined };
+    plan.days[dayIndex] = { ...day, recipeId: null, recipeName: null, estimatedCost: null, reason: "No-cook night", saleItems: [], fromCook: null, leftoverOf: null, batches: undefined, eating: null };
   } else {
     const [recipe] = await recipesByIds(userId, [recipeId]);
     if (!recipe) return { error: "Recipe not found." };
@@ -207,7 +208,8 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
       ...day,
       recipeId,
       recipeName: recipe.name,
-      estimatedCost: alt?.estimatedCost ?? dinnerCost(recipe, settings, sales).total,
+      // Priced for whoever is eating that night (company, or someone away), like the grocery list will be.
+      estimatedCost: forTable(alt?.estimatedCost ?? dinnerCost(recipe, settings, sales).total, day.eating, settings),
       reason: alt?.reason ?? "Your pick",
       leftoverOf: null,
       batches: undefined, // priced as one batch here; rebalanced below if it feeds a leftovers night
@@ -274,8 +276,9 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
     const makeTimes = recipeMultipliers(plan.days, (id) => servingsById.get(id) ?? null, settings, extraPortions);
     // Say which recipes the list buys at half size, so nobody cooks the full recipe from half the groceries.
     const halves = chosen.filter((r) => makeTimes.get(r.id) === 0.5).map((r) => r.name);
+    const tableNotes = plan.days.filter((d) => d.eating && d.recipeId && !d.leftoverOf).map((d) => `${dayName(d.date)}'s ${d.recipeName} is sized for ${d.eating!.adults} adult${d.eating!.adults === 1 ? "" : "s"}${d.eating!.kids ? ` and ${d.eating!.kids} kid${d.eating!.kids === 1 ? "" : "s"}` : ""}.`);
     const halfNote = halves.length ? [`Half batches for your household (the amounts on this list are for half the recipe): ${halves.join(", ")}.`] : [];
-    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days), ...healthGroceryNotes(healthNeeds(settings.athletes)), ...portionNotes(athletes), ...halfNote], makeTimes);
+    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days), ...healthGroceryNotes(healthNeeds(settings.athletes)), ...portionNotes(athletes), ...halfNote, ...tableNotes], makeTimes);
     // A holiday feast (Thanksgiving) gets its own section, sized for the guests.
     groceryList = withFeastSections(groceryList, plan.days, sales);
     // Weekly staples get their own section, with this week's sale prices where we found them.
@@ -388,6 +391,12 @@ export async function moveDinnerTo(planId: string, from: number, to: number): Pr
   revalidatePath("/");
 }
 
+/** A dinner's cost for whoever is at the table that night (the usual household when no one's set). */
+function forTable(cost: number, eating: PlanDay["eating"], settings: Settings): number {
+  if (!eating) return cost;
+  return Math.round(((cost * dinnerServings(eating)) / dinnerServings(settings)) * 100) / 100;
+}
+
 /**
  * "Who's eating tonight?": a night with company, or someone away. Before the list is made, that night's dinner
  * (and its cost) is sized for them; null goes back to the usual household.
@@ -405,11 +414,15 @@ export async function setEating(planId: string, dayIndex: number, eating: { adul
     if (plan.status !== "draft") return { error: "The grocery list is already made. Change who's eating before you approve the week." };
     const day = plan.days[dayIndex];
     if (!day) return { error: "Day not found." };
+    if (!day.recipeId || day.leftoverOf || day.feast) return { error: "Only a night with a dinner to cook can change who's eating." };
     const before = dinnerServings(day.eating ?? settings);
     const after = dinnerServings(usual || !want ? settings : want);
     const days = plan.days.map((d, j) => {
       if (j !== dayIndex) return d;
-      const cost = d.estimatedCost != null && d.recipeId && !d.leftoverOf ? Math.round(((d.estimatedCost * after) / before) * 100) / 100 : d.estimatedCost;
+      // On a double-batch night only tonight's batch changes; the leftovers night is still the usual table.
+      const batches = d.batches ?? 1;
+      const perBatch = d.estimatedCost != null ? d.estimatedCost / batches : null;
+      const cost = perBatch != null ? Math.round((perBatch * (batches - 1) + (perBatch * after) / before) * 100) / 100 : d.estimatedCost;
       return { ...d, eating: usual || !want ? null : want, estimatedCost: cost };
     });
     return { days, estimatedTotal: sumCosts(days) };
@@ -459,12 +472,13 @@ export async function rateCookedDinner(planId: string, dayIndex: number, stars: 
 export async function readReceiptTotal(planId: string, form: FormData): Promise<{ total?: number; saved?: number | null; error?: string }> {
   const userId = await requireUserId();
   if (!/^[0-9a-f-]{36}$/i.test(planId)) return { error: "Week not found." };
-  if (!(await under("receipt", userId))) return { error: TOO_MANY };
   const file = form.get("photo");
   if (!(file instanceof File) || !file.size) return { error: "Take or choose a photo of the receipt." };
-  if (file.size > 5 * 1024 * 1024) return { error: "That photo is over 5 MB. Try a smaller one." };
+  // The AI takes images up to 5 MB once encoded (about a third bigger than the file).
+  if (file.size > 3.7 * 1024 * 1024) return { error: "That photo is too big. Try a closer, smaller one (under about 3.5 MB)." };
   const plan = await getPlan(userId, planId);
-  if (!plan) return { error: "Week not found." };
+  if (!plan || plan.status !== "approved" || plan.archivedAt) return { error: "Week not found." };
+  if (!(await under("receipt", userId))) return { error: TOO_MANY };
   try {
     const read = await readReceipt(Buffer.from(await file.arrayBuffer()).toString("base64"), file.type);
     const total = usableTotal(read);
@@ -472,9 +486,11 @@ export async function readReceiptTotal(planId: string, form: FormData): Promise<
     const db = await getDb();
     await db.update(plans).set({ actualSpend: total }).where(and(eq(plans.id, planId), eq(plans.userId, userId)));
     revalidatePath("/history");
-    return { total, saved: read.saved };
+    return { total, saved: read.saved != null && read.saved > 0 && read.saved < total * 2 ? read.saved : null };
   } catch (e) {
-    return { error: (e as Error).message };
+    // Our own messages are written for people; anything else (the AI or the database) isn't.
+    const msg = (e as Error).message ?? "";
+    return { error: /^(Reading receipts|Please use)/.test(msg) ? msg : "We couldn't read that receipt just now. Try again, or type the total." };
   }
 }
 
@@ -510,7 +526,9 @@ export async function reuseWeek(planId: string): Promise<ActionResult> {
     const r = d?.recipeId ? live.get(d.recipeId) : undefined;
     // A leftovers night keeps pointing at its cooking night (same weekday in the new week).
     const origin = d?.leftoverOf ? source.days.find((x) => x.date === d.leftoverOf) : undefined;
-    const from = origin ? dates.findIndex((x) => weekday(x) === weekday(origin.date)) : -1;
+    const at = origin ? dates.findIndex((x) => weekday(x) === weekday(origin.date)) : -1;
+    // If the week now starts on a different day, a leftovers night could land before its cooking night: cook it fresh.
+    const from = at >= 0 && dates[at] < date ? at : -1;
     return {
       date,
       recipeId: r ? r.id : null,
