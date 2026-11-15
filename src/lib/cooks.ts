@@ -29,6 +29,7 @@ export const SUGGESTED_COOKS: CookSource[] = [
   { name: "Salt & Lavender", siteUrl: "https://www.saltandlavender.com", feedUrl: "https://www.saltandlavender.com/feed/", feedKind: "rss" },
   { name: "Cooking With Destiny", siteUrl: "https://cookingwithdestiny.com", feedUrl: "https://cookingwithdestiny.com/feed/", feedKind: "rss" },
   { name: "Pinch of Yum", siteUrl: "https://pinchofyum.com", feedUrl: "https://pinchofyum.com/feed/", feedKind: "rss" },
+  { name: "Sammy Montgoms", siteUrl: "https://sammymontgoms.com", feedUrl: "https://sammymontgoms.com/feed/", feedKind: "rss" },
   { name: "Magnolia Table", siteUrl: "https://magnolia.com/blogs/recipe", feedUrl: "https://magnolia.com/blogs/recipe.atom", feedKind: "atom" },
 ];
 
@@ -221,7 +222,7 @@ export function pageRecipe(html: string): PageRecipe | null {
 export function proteinOf(title: string, ingredients: Ingredient[]): string | null {
   const list: [RegExp, string][] = [
     [/turkey/, "Turkey"], [/sausage|chorizo|kielbasa/, "Sausage"], [/chicken/, "Chicken"],
-    [/ground beef|steak|beef|brisket|chuck|oxtail|meatball|salisbury/, "Beef"], [/pork|bacon|\bham\b|carnitas/, "Pork"],
+    [/ground beef|steak|beef|brisket|chuck|oxtail|meatball|salisbury/, "Beef"], [/pork|bacon|\bham\b|carnitas|pancetta|prosciutto/, "Pork"],
     [/shrimp|salmon|\bcod\b|tilapia|fish|tuna|scallop/, "Fish"],
   ];
   const t = title.toLowerCase();
