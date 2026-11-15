@@ -211,3 +211,14 @@ export type Cook = typeof cooks.$inferSelect;
 export type FoundRecipe = typeof foundRecipes.$inferSelect;
 export type PantryItem = typeof pantryItems.$inferSelect;
 export type ExtraItem = typeof extraItems.$inferSelect;
+
+/** Rate limits: how many times a key (an action + a household, an email or an address) was used in a time window. */
+export const rateLimits = pgTable(
+  "rate_limits",
+  {
+    key: text("key").notNull(),
+    windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (t) => [uniqueIndex("rate_limits_key_window").on(t.key, t.windowStart)],
+);

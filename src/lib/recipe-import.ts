@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import { askClaude, claudeEnabled } from "./claude";
 import type Anthropic from "@anthropic-ai/sdk";
+import { safeFetchText } from "./safe-fetch";
 
 export const RecipeDraftSchema = z.object({
   name: z.string(),
@@ -34,14 +35,14 @@ function requireClaude() {
 export async function draftFromUrl(url: string): Promise<RecipeDraft & { creditUrl: string }> {
   requireClaude();
   const u = new URL(url);
-  if (!/^https?:$/.test(u.protocol)) throw new Error("That doesn't look like a web link.");
-  const res = await fetch(u, {
+  // Public web pages only (never the server's own network), redirects re-checked, size capped.
+  const res = await safeFetchText(u, {
     headers: { "User-Agent": "Mozilla/5.0 (compatible; LadleRecipeSaver/1.0)", Accept: "text/html" },
-    signal: AbortSignal.timeout(15000),
-    redirect: "follow",
+    timeoutMs: 15000,
+    maxBytes: 2_000_000,
   });
   if (!res.ok) throw new Error(`Couldn't open that page (${res.status}).`);
-  const html = (await res.text()).slice(0, 2_000_000);
+  const html = res.text;
   const source = extractRecipeSource(html);
   const draft = await askClaude({
     system: SYSTEM,

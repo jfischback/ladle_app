@@ -5,6 +5,9 @@ import { dayName, money, shortDate } from "@/lib/week";
 import { FoodArt } from "@/components/FoodArt";
 import { ReuseButton } from "./ReuseButton";
 
+// Planning, approving and importing can take a while (the AI, store prices): give them a minute.
+export const maxDuration = 60;
+
 export default async function HistoryPage() {
   const userId = await requireUserId();
   const [plans, { data: settings }] = await Promise.all([activePlans(userId), getSettings(userId)]);

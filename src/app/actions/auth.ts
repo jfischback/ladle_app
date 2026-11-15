@@ -7,6 +7,7 @@ import { z } from "zod";
 import { claimSharedDataIfFirst, signIn, signOut } from "@/auth";
 import { getDb } from "@/db";
 import { users } from "@/db/schema";
+import { TOO_MANY, clientAddress, under } from "@/lib/rate-limit";
 
 export type FormState = { error?: string } | undefined;
 
@@ -19,6 +20,7 @@ const SignupSchema = z.object({
 export async function signup(_: FormState, form: FormData): Promise<FormState> {
   const parsed = SignupSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  if (!(await under("signupPerAddress", await clientAddress()))) return { error: TOO_MANY };
   const db = await getDb();
   const { email, password, name } = parsed.data;
   const [existing] = await db.select().from(users).where(eq(users.email, email));
@@ -34,6 +36,9 @@ export async function signup(_: FormState, form: FormData): Promise<FormState> {
 
 export async function login(_: FormState, form: FormData): Promise<FormState> {
   const next = String(form.get("next") ?? "");
+  // Slow down password guessing: per email and per address.
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
+  if (!(await under("loginPerEmail", email)) || !(await under("loginPerAddress", await clientAddress()))) return { error: TOO_MANY };
   try {
     await signIn("credentials", {
       email: form.get("email"),

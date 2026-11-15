@@ -12,6 +12,7 @@ import { getSettings } from "@/lib/data";
 import { FOOD_RULES, type FoodRule } from "@/lib/diet";
 import { StaplesSchema } from "@/lib/staples-schema";
 import { copyStarters } from "@/lib/starters";
+import { TOO_MANY, under } from "@/lib/rate-limit";
 
 const int = (min: number, max: number) => z.number().int().min(min).max(max);
 
@@ -98,7 +99,8 @@ export async function saveSettings(input: Partial<Settings>, startWith?: "ours" 
 }
 
 export async function lookupStores(zip: string): Promise<{ stores?: StoreLocation[]; error?: string; disabled?: boolean }> {
-  await requireUserId();
+  const userId = await requireUserId();
+  if (!(await under("stores", userId))) return { error: TOO_MANY };
   if (!krogerEnabled()) return { disabled: true };
   if (!/^\d{5}$/.test(zip.trim())) return { error: "Enter a 5-digit zip code." };
   try {

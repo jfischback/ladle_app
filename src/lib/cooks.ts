@@ -5,6 +5,7 @@ import { cooks, foundRecipes, recipes, type Cook, type FoundRecipe } from "@/db/
 import type { Ingredient } from "./types";
 import { claudeEnabled } from "./claude";
 import { draftFromUrl, recipeJsonLd } from "./recipe-import";
+import { safeFetchText } from "./safe-fetch";
 
 /**
  * Favorite cooks: follow a food creator's website and pick up their new recipes.
@@ -73,14 +74,15 @@ export const SUGGESTED_COOKS: CookSource[] = [
 ];
 
 async function get(url: string, ms = 10000): Promise<string> {
-  const res = await fetch(url, {
+  // Cooks' sites are typed in by families: public web pages only, redirects re-checked, size capped.
+  const res = await safeFetchText(url, {
     headers: { "User-Agent": UA, Accept: "text/html,application/xhtml+xml,application/xml,application/rss+xml,application/atom+xml" },
-    signal: AbortSignal.timeout(ms),
-    redirect: "follow",
+    timeoutMs: ms,
+    maxBytes: 3_000_000,
   });
   if (res.status === 401 || res.status === 403) throw new Error("This site doesn't let apps read it.");
   if (!res.ok) throw new Error(`The site answered ${res.status}.`);
-  return (await res.text()).slice(0, 3_000_000);
+  return res.text;
 }
 
 const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", rsquo: "’", lsquo: "‘", rdquo: "”", ldquo: "“", ndash: "–", mdash: "—", frac12: "½", frac14: "¼", frac34: "¾", deg: "°" };

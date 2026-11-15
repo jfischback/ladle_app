@@ -1,6 +1,9 @@
 import { claudeEnabled } from "@/lib/claude";
 import { NewRecipe } from "./NewRecipe";
 
+// Planning, approving and importing can take a while (the AI, store prices): give them a minute.
+export const maxDuration = 60;
+
 export default function NewRecipePage() {
   return (
     <div>

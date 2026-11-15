@@ -7,6 +7,7 @@ import { and, eq, gt, isNull } from "drizzle-orm";
 import { currentAccount, loginRequired } from "@/auth";
 import { getDb } from "@/db";
 import { householdInvites, users } from "@/db/schema";
+import { TOO_MANY, under } from "@/lib/rate-limit";
 
 const DAY = 86400000;
 
@@ -14,6 +15,7 @@ const DAY = 86400000;
 export async function createInvite(): Promise<{ code?: string; error?: string }> {
   if (!loginRequired) return { error: "Turn on sign-in first, so each person has their own account." };
   const me = await currentAccount();
+  if (!(await under("invite", me.accountId))) return { error: TOO_MANY };
   const code = randomBytes(9).toString("base64url");
   const db = await getDb();
   await db.insert(householdInvites).values({ code, householdId: me.householdId, createdBy: me.accountId, expiresAt: new Date(Date.now() + 7 * DAY) });

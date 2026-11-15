@@ -11,6 +11,7 @@ import { cartItems, packagesForWeight, pickOptions } from "@/lib/cart";
 import { open, seal } from "@/lib/secret-box";
 import type { CartLine, CartState } from "@/lib/types";
 import { storeBrand, yourStore } from "@/lib/stores";
+import { TOO_MANY, under } from "@/lib/rate-limit";
 
 async function saveCart(userId: string, planId: string, cart: CartState) {
   const db = await getDb();
@@ -21,6 +22,7 @@ async function saveCart(userId: string, planId: string, cart: CartState) {
 /** Find a store product for each item on this week's approved grocery list. */
 export async function matchCart(planId: string): Promise<{ error?: string }> {
   const userId = await requireUserId();
+  if (!(await under("cartMatch", userId))) return { error: TOO_MANY };
   const [plan, { data: settings }] = await Promise.all([getPlan(userId, planId), getSettings(userId)]);
   if (!plan?.groceryList || plan.status !== "approved") return { error: "Approve this week's plan first, so there's a grocery list." };
   const brand = storeBrand(settings.storeName);
@@ -93,6 +95,7 @@ async function userAccessToken(userId: string): Promise<string | null> {
 /** Put the chosen products in the family's store cart. It never checks out: they finish on the store's site. */
 export async function sendCart(planId: string): Promise<{ error?: string; reconnect?: boolean; sent?: number }> {
   const userId = await requireUserId();
+  if (!(await under("cartSend", userId))) return { error: TOO_MANY };
   const [plan, { data: settings }] = await Promise.all([getPlan(userId, planId), getSettings(userId)]);
   if (!plan?.cart) return { error: "Find products first." };
   const items = plan.cart.lines
