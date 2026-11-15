@@ -58,6 +58,7 @@ export const recipes = pgTable(
     tags: jsonb("tags").$type<string[]>().notNull().default([]),
     rating: integer("rating"), // 1-5, set by the user
     kidVotes: jsonb("kid_votes").$type<Record<string, number>>(), // picky eater id -> +1 ate it / -1 didn't
+    familyNotes: text("family_notes"), // the family's own tweaks ("half the chili powder for the kids"), shown while cooking
     ease: integer("ease"), // 1-5
     prepAhead: text("prep_ahead"), // e.g. "Marinate the steak overnight"
     // A new recipe from a followed cook that the planner put in a draft week. It joins the

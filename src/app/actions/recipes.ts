@@ -109,6 +109,19 @@ export async function setLeftovers(id: string, good: boolean) {
   revalidatePath(`/recipes/${id}`);
 }
 
+/** The family's own notes on a recipe ("we use half the chili powder"); shown on the recipe and while cooking. */
+export async function setRecipeNotes(id: string, notes: string): Promise<{ error?: string } | void> {
+  const userId = await requireUserId();
+  const text = String(notes ?? "").replace(/\r\n/g, "\n").trim();
+  if (text.length > 1000) return { error: "Keep notes under 1,000 characters." };
+  const db = await getDb();
+  await db
+    .update(recipes)
+    .set({ familyNotes: text || null, updatedAt: new Date() })
+    .where(and(eq(recipes.id, id), eq(recipes.ownerId, userId)));
+  revalidatePath(`/recipes/${id}`);
+}
+
 export async function rateRecipe(id: string, stars: number) {
   const userId = await requireUserId();
   if (!Number.isInteger(stars) || stars < 1 || stars > 5) return;

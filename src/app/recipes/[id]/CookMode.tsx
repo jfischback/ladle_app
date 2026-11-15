@@ -20,7 +20,7 @@ const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, 
  * Cooking mode: one step at a time in big type, big buttons for messy hands, the screen kept awake,
  * and a one-tap timer when a step says how long.
  */
-export function CookMode({ recipeId, name, steps, ingredients, startOpen = false }: { recipeId: string; name: string; steps: string[]; ingredients: Ingredient[]; startOpen?: boolean }) {
+export function CookMode({ recipeId, name, steps, ingredients, startOpen = false, notes = null }: { recipeId: string; name: string; steps: string[]; ingredients: Ingredient[]; startOpen?: boolean; notes?: string | null }) {
   const factor = useServingsFactor(recipeId);
   const [open, setOpen] = useState(startOpen);
   const [at, setAt] = useState(0);
@@ -77,6 +77,12 @@ export function CookMode({ recipeId, name, steps, ingredients, startOpen = false
             <button type="button" className="btn-quiet min-h-10 px-3" onClick={() => setOpen(false)}>Done</button>
           </div>
           <div className="flex-1 overflow-y-auto px-5 py-6">
+            {notes && (
+              <details className="mb-4 rounded-2xl bg-ochre-soft px-4 py-2" open={at === 0}>
+                <summary className="cursor-pointer font-bold">📝 Our notes</summary>
+                <p className="mt-1 whitespace-pre-line">{notes}</p>
+              </details>
+            )}
             <p className="eyebrow">Step {at + 1} of {steps.length}</p>
             <p className="mt-3 text-2xl leading-relaxed sm:text-3xl">{steps[at]}</p>
             {minutes && (

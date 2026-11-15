@@ -11,6 +11,7 @@ import { formatMinutes } from "@/lib/format";
 import { FoodArt } from "@/components/FoodArt";
 import { IngredientList } from "./IngredientList";
 import { CookMode } from "./CookMode";
+import { RecipeNotes } from "./RecipeNotes";
 import { estimateCost, estimateNutrition, estimateSodium, trustworthy } from "@/lib/nutrition";
 
 export default async function RecipePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cook?: string }> }) {
@@ -81,6 +82,8 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
         </form>
       )}
 
+      {mine && <RecipeNotes id={r.id} notes={r.familyNotes} />}
+
       {r.prepAhead && (
         <div className="flex items-start gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft">
           <span className="text-2xl" aria-hidden="true">⏰</span>
@@ -117,7 +120,7 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
       <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-2xl font-semibold">Let&apos;s cook</h2>
-          <CookMode recipeId={r.id} name={r.name} steps={r.steps} ingredients={r.ingredients} startOpen={cookNow} />
+          <CookMode recipeId={r.id} name={r.name} steps={r.steps} ingredients={r.ingredients} startOpen={cookNow} notes={mine ? r.familyNotes : null} />
         </div>
         {!r.steps.length && r.creditUrl ? (
           <a href={r.creditUrl} target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 p-4 font-bold text-olive-dark hover:shadow-lift">
