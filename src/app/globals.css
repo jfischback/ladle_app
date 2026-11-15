@@ -116,3 +116,12 @@ h2,
   .animate-pop, .animate-wiggle, .confetti-piece { animation: none !important; }
   .confetti-piece { display: none; }
 }
+
+/* Printing the grocery list: only the list, in plain black and white. */
+@media print {
+  /* No transitions while printing: buttons animate visibility and could print mid-fade. */
+  html.printing-grocery body * { visibility: hidden !important; transition: none !important; }
+  html.printing-grocery #grocery-print, html.printing-grocery #grocery-print * { visibility: visible !important; }
+  html.printing-grocery #grocery-print { position: absolute; inset: 0 auto auto 0; width: 100%; box-shadow: none; background: white; color: black; }
+  html.printing-grocery .no-print { display: none !important; }
+}
