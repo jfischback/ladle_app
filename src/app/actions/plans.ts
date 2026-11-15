@@ -20,7 +20,8 @@ export type ActionResult = { error?: string } | void;
 
 async function archiveOthersForWeek(userId: string, weekOf: string, keepId?: string) {
   const db = await getDb();
-  const conds = [eq(plans.userId, userId), eq(plans.weekOf, weekOf), isNull(plans.archivedAt)];
+  // Only drafts: an approved week (and its grocery list) is only ever replaced on purpose, through "Re-plan".
+  const conds = [eq(plans.userId, userId), eq(plans.weekOf, weekOf), isNull(plans.archivedAt), eq(plans.status, "draft")];
   if (keepId) conds.push(ne(plans.id, keepId));
   await db.update(plans).set({ archivedAt: new Date() }).where(and(...conds));
 }
@@ -34,14 +35,15 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   if (recipeList.length < settings.dinnersPerWeek) {
     return { error: `You need at least ${settings.dinnersPerWeek} dinners in My Recipes to plan a week.` };
   }
-  const fitting = recipeList.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes).length).length;
+  const fitting = recipeList.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes).length && !(r.rating != null && r.rating <= 2)).length;
   if (fitting < settings.dinnersPerWeek) {
     return {
       error: `Only ${fitting} of your recipes fit your food rules, and you cook ${settings.dinnersPerWeek} nights. Add a few more recipes that fit (your cooks are a good place to look), or cook fewer nights in Settings.`,
     };
   }
   const windowStart = addDays(weekStart, -7 * settings.noRepeatWeeks);
-  const recent = (await activePlans(userId)).filter(
+  const allPlans = await activePlans(userId);
+  const recent = allPlans.filter(
     (p) => p.status === "approved" && p.weekOf >= windowStart && p.weekOf < weekStart,
   );
 
@@ -64,7 +66,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   let result;
   try {
     result = await planWeek({
-      settings, weekStart, recipes: recipeList, recentPlans: recent,
+      settings, weekStart, recipes: recipeList, recentPlans: recent, history: allPlans.filter((p) => p.status === "approved"),
       saleItems: sales, storePrices: scan.status === "ok" ? scan.prices : [], newRecipes,
       staplesCost: staplesTotal(staples).total,
     });
@@ -127,6 +129,7 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
   } else {
     const [recipe] = await recipesByIds(userId, [recipeId]);
     if (!recipe) return { error: "Recipe not found." };
+    if (plan.days.some((d, i) => i !== dayIndex && d.recipeId === recipeId)) return { error: `${recipe.name} is already on another night this week.` };
     const alt = day.alternatives.find((a) => a.recipeId === recipeId);
     const previous =
       day.recipeId && day.recipeName
@@ -157,6 +160,7 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   const plan = await getPlan(userId, planId);
   if (!plan) return { error: "Plan not found." };
   if (plan.status === "approved") return;
+  if (plan.archivedAt) return { error: "This week was replaced. Refresh the page to see the current plan." };
   const { data: settings } = await getSettings(userId);
   const ids = plan.days.map((d) => d.recipeId).filter((x): x is string => !!x);
   const chosen = await recipesByIds(userId, ids);
@@ -178,7 +182,7 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   await db
     .update(plans)
     .set({ status: "approved", approvedAt: new Date(), groceryList })
-    .where(eq(plans.id, planId));
+    .where(and(eq(plans.id, planId), eq(plans.status, "draft"), isNull(plans.archivedAt)));
   // New recipes in an approved week join My Recipes for good.
   const trialIds = chosen.filter((r) => r.trial).map((r) => r.id);
   if (trialIds.length) {
@@ -278,7 +282,10 @@ export async function reuseWeek(planId: string): Promise<ActionResult> {
   const { data: settings } = await getSettings(userId);
   const weekStart = upcomingWeekStart(settings.shoppingDay);
   const dates = weekDates(weekStart);
-  const live = new Set((await myRecipes(userId)).map((r) => r.id));
+  const existing = (await activePlans(userId)).find((p) => p.weekOf === weekStart && p.status === "approved");
+  if (existing) return { error: "That week is already approved. Tap \"Re-plan this week\" on the home screen first if you want to replace it." };
+  // Only recipes still in the box that fit today's food rules.
+  const live = new Set((await myRecipes(userId)).filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes).length).map((r) => r.id));
   const days = dates.map((date, i) => {
     const d = source.days[i];
     const ok = d?.recipeId && live.has(d.recipeId);

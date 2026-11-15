@@ -110,7 +110,12 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
 
         {step === 5 && (
           <div className="space-y-5">
-            <DayPicker value={s.cookDays} onChange={(v) => { set("cookDays", v); set("dinnersPerWeek", v.length); }} />
+            <DayPicker value={s.cookDays} onChange={(v) => { set("cookDays", v); set("dinnersPerWeek", v.length); set("busyDays", (s.busyDays ?? []).filter((d) => v.includes(d))); }} />
+            <BusyPicker cookDays={s.cookDays} value={s.busyDays ?? []} minutes={s.busyMaxMinutes ?? 30} onChange={(v) => set("busyDays", v)} onMinutes={(m) => set("busyMaxMinutes", m)} />
+            <div>
+              <Counter label="Same main protein, at most" value={s.maxSameProtein ?? 2} min={1} max={4} onChange={(v) => set("maxSameProtein", v)} />
+              <p className="mt-1 text-sm text-muted">Nights a week with the same main protein (chicken, beef…). It&apos;s never two nights in a row either.</p>
+            </div>
             <Counter label="Weeks before a dinner can repeat" value={s.noRepeatWeeks} min={0} max={12} onChange={(v) => set("noRepeatWeeks", v)} />
             <YesNo label="Favor quick meals on weeknights?" value={s.favorQuickWeeknights} onChange={(v) => set("favorQuickWeeknights", v)} />
             <div>
@@ -401,5 +406,35 @@ function FoodRulesStep({ rules, dislikes, onRules, onDislikes }: { rules: FoodRu
       </div>
       {rules.length === 0 && dislikes.length === 0 && <p className="text-sm text-muted">No rules? That&apos;s fine, just tap Next.</p>}
     </div>
+  );
+}
+
+function BusyPicker({ cookDays, value, minutes, onChange, onMinutes }: { cookDays: number[]; value: number[]; minutes: number; onChange: (v: number[]) => void; onMinutes: (m: number) => void }) {
+  if (!cookDays.length) return null;
+  const toggle = (d: number) => onChange(value.includes(d) ? value.filter((x) => x !== d) : [...value, d].sort());
+  return (
+    <fieldset>
+      <legend className="text-lg font-semibold">Busy nights?</legend>
+      <p className="mb-2 text-sm text-muted">Practice, late work, church… We&apos;ll only plan quick dinners on these.</p>
+      <div className="flex flex-wrap gap-1.5">
+        {cookDays.map((d) => {
+          const on = value.includes(d);
+          return (
+            <button key={d} type="button" aria-pressed={on} aria-label={`Busy: ${DAY_NAMES[d]}`} onClick={() => toggle(d)}
+              className={`flex min-h-10 items-center gap-1 rounded-full border-2 px-3 text-sm font-bold transition-all active:scale-95 ${on ? "border-ochre bg-ochre-soft text-ochre-dark" : "border-line bg-card text-ink hover:border-ochre"}`}>
+              {on ? "⚡" : ""} {DAY_NAMES[d]}
+            </button>
+          );
+        })}
+      </div>
+      {value.length > 0 && (
+        <label className="mt-3 flex flex-wrap items-center gap-2 text-sm font-semibold">
+          Quick means
+          <select className="field w-auto py-1" value={minutes} onChange={(e) => onMinutes(Number(e.target.value))}>
+            {[20, 30, 45, 60].map((m) => <option key={m} value={m}>{m} minutes or less</option>)}
+          </select>
+        </label>
+      )}
+    </fieldset>
   );
 }
