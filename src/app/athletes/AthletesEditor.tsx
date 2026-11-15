@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { saveAthletes } from "../actions/athletes";
 import { CONDITIONS, PHASES, SPORTS, newAthlete, portionFor, suggestTargets, type Athlete, type Condition, type Phase, type Sport } from "@/lib/athletes";
@@ -220,7 +221,7 @@ function HealthNeeds({ a, change }: { a: Athlete; change: (p: Partial<Athlete>) 
           </div>
         </div>
       )}
-      {has("keto") && <p className="text-sm text-muted">We&apos;ll favor low-carb dinners for everyone and tell {a.name || "them"} which sides to skip. Add the low-carb recipe pack for more choices.</p>}
+      {has("keto") && <p className="text-sm text-muted">We&apos;ll favor low-carb dinners for everyone and tell {a.name || "them"} which sides to skip. <Link href="/recipes?tab=browse" className="font-bold underline">Add the low-carb recipe pack</Link> for more choices.</p>}
       {has("pregnant") && (
         <div>
           <span className="label">Trimester</span>

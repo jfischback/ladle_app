@@ -23,7 +23,7 @@ export function equipmentNeeded(r: RecipeLike): Set<Equipment> {
   const tags = r.tags ?? [];
   const need = new Set<Equipment>();
   if (/\b(oven|bake[sd]?|baking|roast(ed|ing)?|broil)\b/.test(text) || tags.includes("sheet-pan")) need.add("oven");
-  if (/\b(skillet|saucepan|pot|boil|simmer|saute|fry|frying|griddle|stir-fry|wok)\b/.test(text)) need.add("stovetop");
+  if (/\b(skillet|saucepan|pot|boil|simmer|saute|fry|frying|griddle|stir-fry|wok|sear|brown the|scramble|toast in|cook the (rice|pasta|spaghetti|noodles|shells|ziti|penne|macaroni|lentils|quinoa))\b/.test(text) && !/^microwave/.test(plain(r.name))) need.add("stovetop");
   if (/slow cooker|crock ?pot/.test(text) || tags.includes("slow-cooker")) need.add("slow cooker");
   if (/instant pot|pressure cook/.test(text)) need.add("pressure cooker");
   if (/\bgrill(ed|ing)?\b/.test(text) || tags.includes("grill")) need.add("grill");

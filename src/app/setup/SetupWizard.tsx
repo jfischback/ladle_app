@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { lookupStores, saveSettings } from "@/app/actions/settings";
 import { addRecipePack } from "@/app/actions/recipes";
@@ -371,6 +372,9 @@ function PrepSection({ s, set }: { s: Settings; set: <K extends keyof Settings>(
             );
           })}
         </div>
+        {!have.includes("stovetop") && !have.includes("oven") && have.length > 0 && (
+          <p className="mt-2 text-sm"><Link href="/recipes?tab=browse" className="font-bold text-olive-dark underline">Add the microwave-only recipe pack</Link> so there&apos;s plenty to plan.</p>
+        )}
       </fieldset>
     </section>
   );
