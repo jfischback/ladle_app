@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { approvePlan, moveDinnerTo, planUpcomingWeek, rateCookedDinner, startOver, swapDay } from "./actions/plans";
 import { answerPantryCheck } from "./actions/pantry";
-import { setGroceryChecks } from "./actions/grocery";
+import { addGroceryItem, removeGroceryItem, setGroceryChecks } from "./actions/grocery";
+import { ADDED_SECTION } from "@/lib/grocery-add";
+import { useRouter } from "next/navigation";
 import { groceryText } from "@/lib/grocery-text";
 import { PANTRY_SECTIONS } from "@/lib/pantry";
 import { StarPicker } from "@/components/Stars";
@@ -359,6 +361,7 @@ export function Celebrate() {
 }
 
 const SECTION_ICONS: [RegExp, string][] = [
+  [/^added by you$/i, "📝"],
   [/^produce$/i, "🥬"],
   [/^meat/i, "🥩"],
   [/^deli$/i, "🥪"],
@@ -395,6 +398,10 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
   const key = `ladle-grocery-${plan.id}`;
   const [checked, setChecked] = useState<Record<string, boolean>>(plan.groceryChecked ?? {});
   const [shared, setShared] = useState(false);
+  const router = useRouter();
+  const [adding, startAdding] = useTransition();
+  const [addError, setAddError] = useState<string | null>(null);
+  const addedNow = (list?.sections.find((s) => s.name === ADDED_SECTION)?.items ?? []).map((i) => `${i.quantity} ${i.item}`).join("|");
   // Ticks not yet saved, laid over whatever the server says until they are.
   const pending = useRef<Record<string, boolean>>({});
   const flush = useCallback(async () => {
@@ -422,13 +429,18 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
       await flush();
       try {
         const res = await fetch(`/api/plans/${plan.id}/checks`, { cache: "no-store" });
-        if (res.ok) { const { checked: server } = await res.json(); setChecked({ ...server, ...pending.current }); }
+        if (res.ok) {
+          const { checked: server, added } = await res.json();
+          setChecked({ ...server, ...pending.current });
+          // Someone else added to the list: show it here too.
+          if (Array.isArray(added) && added.join("|") !== addedNow) router.refresh();
+        }
       } catch { /* offline */ }
     };
     const id = setInterval(pull, 8000);
     document.addEventListener("visibilitychange", pull);
     return () => { clearInterval(id); document.removeEventListener("visibilitychange", pull); };
-  }, [key, plan.id, plan.groceryChecked, flush]);
+  }, [key, plan.id, plan.groceryChecked, flush, addedNow, router]);
   if (!list) return null;
   const toggle = (id: string) => {
     const value = !checked[id];
@@ -465,6 +477,18 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
         <button type="button" className="btn-quiet min-h-10 px-4 text-sm" onClick={printList}>🖨️ Print</button>
       </div>
       <p className="no-print -mt-2 mb-4 text-xs text-muted">Ticks show up on every phone in your household, so you can split up the store.</p>
+      <form
+        className="no-print mb-4 flex gap-2"
+        action={(form) => startAdding(async () => {
+          setAddError(null);
+          const r = await addGroceryItem(plan.id, String(form.get("item") ?? ""));
+          if (r?.error) setAddError(r.error);
+        })}
+      >
+        <input name="item" aria-label="Add to the list" placeholder="Add something: paper towels, 2 lemons…" maxLength={80} className="field" disabled={adding} />
+        <button className="btn-secondary shrink-0" disabled={adding}>{adding ? "Adding…" : "+ Add"}</button>
+      </form>
+      {addError && <p role="alert" className="-mt-2 mb-4 text-sm font-bold text-terracotta-dark">{addError}</p>}
       {plan.status === "approved" && (
         <Link href={`/cart?plan=${plan.id}`} className="no-print btn-warm mb-4 w-full sm:w-auto">
           <span aria-hidden="true">🛒</span> {plan.cart?.sentAt ? `${store} cart sent · review` : `Send to my ${store} cart`}
@@ -494,8 +518,8 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
                 const id = `${s.name}-${i}-${it.item}`;
                 const on = !!checked[id];
                 return (
-                  <li key={id}>
-                    <label className={`flex cursor-pointer items-start gap-3 rounded-2xl p-2 transition-colors hover:bg-cream ${on ? "opacity-55" : ""}`}>
+                  <li key={id} className="flex items-start gap-1">
+                    <label className={`flex min-w-0 flex-1 cursor-pointer items-start gap-3 rounded-2xl p-2 transition-colors hover:bg-cream ${on ? "opacity-55" : ""}`}>
                       <input type="checkbox" className="peer sr-only" checked={on} onChange={() => toggle(id)} />
                       <span aria-hidden="true" className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold peer-focus-visible:ring-2 peer-focus-visible:ring-olive ${on ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>
                         {on ? "✓" : ""}
@@ -512,6 +536,9 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
                         )}
                       </span>
                     </label>
+                    {it.added && (
+                      <button type="button" className="no-print btn-quiet min-h-9 shrink-0 px-2.5 text-sm" aria-label={`Remove ${it.item}`} disabled={adding} onClick={() => startAdding(async () => { await removeGroceryItem(plan.id, it.item); })}>✕</button>
+                    )}
                   </li>
                 );
               })}

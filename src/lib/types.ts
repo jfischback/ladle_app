@@ -75,7 +75,7 @@ export type PlanLunch = {
   servings: number; // adult-sized portions needed
 };
 
-export type GroceryItem = { item: string; quantity: string; note?: string; forRecipes: string[] };
+export type GroceryItem = { item: string; quantity: string; note?: string; forRecipes: string[]; added?: boolean }; // added: typed in by the family
 export type GroceryList = { sections: { name: string; items: GroceryItem[] }[]; source: "claude" | "basic"; notes?: string[] };
 
 /** One sale found at the store: the ingredient it covers, the product on the shelf, and the prices. */
