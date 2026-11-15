@@ -251,7 +251,10 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
     }, 0);
     const servingsById = new Map(chosen.map((r) => [r.id, r.servings]));
     const makeTimes = recipeMultipliers(plan.days, (id) => servingsById.get(id) ?? null, settings, extraPortions);
-    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days, settings), ...healthGroceryNotes(healthNeeds(settings.athletes)), ...portionNotes(athletes)], makeTimes);
+    // Say which recipes the list buys at half size, so nobody cooks the full recipe from half the groceries.
+    const halves = chosen.filter((r) => makeTimes.get(r.id) === 0.5).map((r) => r.name);
+    const halfNote = halves.length ? [`Half batches for your household (the amounts on this list are for half the recipe): ${halves.join(", ")}.`] : [];
+    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days), ...healthGroceryNotes(healthNeeds(settings.athletes)), ...portionNotes(athletes), ...halfNote], makeTimes);
     // Weekly staples get their own section, with this week's sale prices where we found them.
     const snap = new Map((plan.staples ?? []).map((l) => [stapleTerm(l.item), l]));
     const items = settings.staples.filter((x) => x.active).map((x) => {

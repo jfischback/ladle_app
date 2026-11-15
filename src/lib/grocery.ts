@@ -28,7 +28,7 @@ const SYSTEM = `You build the grocery list inside Ladle, a meal-planning app. Yo
 
 Rules:
 - Combine the same ingredient across dinners into one line with a total quantity. Convert to sensible store units (e.g. "2 lb", "1 bunch", "1 can (15 oz)").
-- Each recipe has makeTimes: how many times to buy its ingredients as written. It already covers the household's size, double batches for leftovers nights, leftover lunches and bigger athlete portions. Multiply each recipe's ingredients by its makeTimes; don't scale again.
+- Each recipe has makeTimes: how many times to buy its ingredients as written (0.5 means a half batch). It already covers the household's size, double batches for leftovers nights, leftover lunches and bigger athlete portions. Multiply each recipe's ingredients by its makeTimes; don't scale again.
 - Only list ingredients from the recipes. Do not add extra items.
 - Common pantry staples (salt, pepper, cooking oil, basic dried spices) go in a "Pantry - check first" section, since the household may already have them.
 - If preferPremiumOnSale is true, add the note "premium if on sale" to items where brand quality matters (olive oil, cheese, meat). The cheap version only wins when it is at least premiumDeeperPoints percentage points deeper on sale.

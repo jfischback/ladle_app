@@ -87,16 +87,12 @@ export function rebalanceBatches(days: PlanDay[], keepsWell: (recipeId: string) 
 }
 
 /** Grocery list notes for the week's portions: double batches, and small households. */
-export function budgetNotes(days: PlanDay[], settings: Settings): string[] {
+export function budgetNotes(days: PlanDay[]): string[] {
   const notes: string[] = [];
   for (const d of days) {
     if (!d.leftoverOf) continue;
     const cook = days.find((x) => x.date === d.leftoverOf);
     if (cook) notes.push(`Make a double batch of ${cook.recipeName} on ${dayName(cook.date)}: ${dayName(d.date)} is leftovers night.`);
-  }
-  const people = settings.adults + settings.kids;
-  if (people <= 2 && !settings.cookOnceEatTwice) {
-    notes.push(`Cooking for ${people === 1 ? "one" : "two"}: most recipes serve 4. Make half, or cook it all and freeze the extra portions for a night off.`);
   }
   return notes;
 }
