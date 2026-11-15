@@ -3,19 +3,21 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { removeFeast, setFeast } from "@/app/actions/feast";
-import { feastMenu, feastTimeline, turkeyFor } from "@/lib/feast";
+import { feastHolidayOn, feastIcon, feastLabel, feastMenu, feastTimeline, mainFor } from "@/lib/feast";
 import type { PlanDay } from "@/lib/types";
 import { dayName, shortDate } from "@/lib/week";
 
 /** Pick the guests and dishes for a holiday dinner (Thanksgiving). */
 export function FeastPlanner({ planId, index, day, defaultGuests, onDone }: { planId: string; index: number; day: PlanDay; defaultGuests: number; onDone?: () => void }) {
-  const menu = feastMenu(day.holiday ?? "") ?? [];
+  const holiday = day.feast?.holiday ?? feastHolidayOn(day.date, day.holiday) ?? "";
+  const menu = feastMenu(holiday) ?? [];
   const [guests, setGuests] = useState(day.feast?.guests ?? Math.max(2, defaultGuests));
   const [dishes, setDishes] = useState<string[]>(day.feast?.dishes ?? menu.filter((d) => d.default).map((d) => d.key));
   const [frozen, setFrozen] = useState(day.feast?.frozen ?? true);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
-  const t = turkeyFor(guests);
+  const main = mainFor({ holiday, guests, dishes, frozen });
+  const mainKey = menu.find((d) => d.main)?.key;
   const save = () =>
     start(async () => {
       setError(null);
@@ -39,12 +41,12 @@ export function FeastPlanner({ planId, index, day, defaultGuests, onDone }: { pl
           {menu.map((d) => (
             <label key={d.key} className="flex items-center gap-2 rounded-xl bg-card px-3 py-2">
               <input type="checkbox" checked={dishes.includes(d.key)} onChange={(e) => setDishes((x) => (e.target.checked ? [...x, d.key] : x.filter((k) => k !== d.key)))} />
-              <span>{d.name}{d.key === "turkey" ? ` (${t.two ? "2 × " : ""}${t.lb} lb ${t.kind})` : ""}</span>
+              <span>{d.name}{d.key === mainKey && main ? ` (${main.two ? "2 × " : ""}${main.lb} lb ${main.kind})` : ""}</span>
             </label>
           ))}
         </div>
       </fieldset>
-      {dishes.includes("turkey") && (
+      {main?.thawDays != null && (
         <label className="flex items-center gap-2">
           <input type="checkbox" checked={frozen} onChange={(e) => setFrozen(e.target.checked)} />
           <span>The turkey will be frozen (we&apos;ll tell you when to start thawing it)</span>
@@ -52,12 +54,12 @@ export function FeastPlanner({ planId, index, day, defaultGuests, onDone }: { pl
       )}
       {error && <p role="alert" className="text-sm font-bold text-terracotta-dark">{error}</p>}
       <div className="flex flex-wrap gap-2">
-        <button type="button" className="btn-primary" disabled={pending || !dishes.length} onClick={save}>{pending ? "Saving…" : day.feast ? "Save changes" : `Plan ${day.holiday} dinner`}</button>
+        <button type="button" className="btn-primary" disabled={pending || !dishes.length} onClick={save}>{pending ? "Saving…" : day.feast ? "Save changes" : `Plan ${feastLabel(holiday)} dinner`}</button>
         {day.feast && (
           <button type="button" className="btn-quiet" disabled={pending} onClick={() => start(async () => { await removeFeast(planId, index); onDone?.(); })}>Take it off the plan</button>
         )}
       </div>
-      <p className="text-xs text-muted">Everything goes on your grocery list in its own section, sized for {guests} people{dishes.includes("turkey") ? ", leftovers included" : ""}.</p>
+      <p className="text-xs text-muted">Everything goes on your grocery list in its own section, sized for {guests} people{main ? ", leftovers included" : ""}.</p>
     </div>
   );
 }
@@ -67,18 +69,19 @@ export function FeastCard({ planId, index, day, isToday, canChange, locked, defa
   const [editing, setEditing] = useState(false);
   const feast = day.feast!;
   const menu = feastMenu(feast.holiday) ?? [];
-  const t = turkeyFor(feast.guests);
+  const main = mainFor(feast);
+  const mainKey = menu.find((d) => d.main)?.key;
   const steps = feastTimeline(feast, day.date, when);
   return (
     <div className={`card overflow-hidden ${isToday ? "ring-2 ring-terracotta shadow-lift" : ""}`}>
       <div className="bg-ochre-soft p-4">
         <p className="text-sm font-extrabold text-terracotta">{isToday ? "Today" : dayName(day.date)} {Number(day.date.slice(8))} · {feast.holiday}</p>
         <div className="flex items-start justify-between gap-3">
-          <p className="font-display text-2xl font-semibold leading-snug">🦃 {feast.holiday} dinner for {feast.guests}</p>
+          <p className="font-display text-2xl font-semibold leading-snug">{feastIcon(feast.holiday)} {feastLabel(feast.holiday)} dinner for {feast.guests}</p>
           {canChange && <button type="button" className="btn-secondary min-h-10 shrink-0 px-3.5 text-sm" aria-expanded={editing} onClick={() => setEditing((e) => !e)}>{editing ? "Close" : "Change"}</button>}
         </div>
         <p className="mt-1 text-sm">
-          {menu.filter((d) => feast.dishes.includes(d.key)).map((d) => (d.key === "turkey" ? `${d.name} (${t.two ? "2 × " : ""}${t.lb} lb)` : d.name)).join(" · ")}
+          {menu.filter((d) => feast.dishes.includes(d.key)).map((d) => (d.key === mainKey && main ? `${d.name} (${main.two ? "2 × " : ""}${main.lb} lb)` : d.name)).join(" · ")}
         </p>
       </div>
       {editing ? (

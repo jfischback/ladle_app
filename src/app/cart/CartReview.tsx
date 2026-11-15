@@ -133,6 +133,7 @@ function Line({ planId, line }: { planId: string; line: CartLine }) {
                 >
                   <span className="block font-semibold">{o.description}</span>
                   <span className="text-muted">{o.size}{o.aisle ? ` · ${o.aisle}` : ""}</span>
+                  {o.warn && <span className="mt-1 block font-bold text-terracotta-dark">⚠︎ {o.warn.replace(/ \(.*\)$/, "")}: not picked for you</span>}
                   <span className="mt-1 flex flex-wrap items-center gap-1.5">
                     <b>{money(o.price)}</b>
                     {o.onSale && <><s className="text-muted">{money(o.regular)}</s><span className="tag-sale">Sale</span></>}

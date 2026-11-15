@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUserId } from "@/auth";
-import { feastMenu, withFeast, withoutFeast } from "@/lib/feast";
+import { feastHolidayOn, feastMenu, withFeast, withoutFeast } from "@/lib/feast";
 import { withFeastSections } from "@/lib/feast-grocery";
 import { updatePlanLocked } from "@/lib/plan-list";
 import { today } from "@/lib/week";
@@ -26,12 +26,13 @@ export async function setFeast(planId: string, dayIndex: number, input: { guests
   const r = await updatePlanLocked(userId, planId, (plan) => {
     const day = plan.days[dayIndex];
     if (!day) return { error: "Day not found." };
-    const menu = day.holiday ? feastMenu(day.holiday) : null;
+    const holiday = feastHolidayOn(day.date, day.holiday);
+    const menu = holiday ? feastMenu(holiday) : null;
     if (!menu) return { error: "There's no holiday menu for this day." };
     if (day.date < today()) return { error: "That day has passed." };
     const dishes = menu.map((d) => d.key).filter((k) => Array.isArray(input.dishes) && input.dishes.includes(k));
     if (!dishes.length) return { error: "Pick at least one dish." };
-    const days = withFeast(plan.days, dayIndex, { holiday: day.holiday!, guests, dishes, frozen: !!input.frozen, replaced: day.feast?.replaced, replacedId: day.feast?.replacedId });
+    const days = withFeast(plan.days, dayIndex, { holiday: holiday!, guests, dishes, frozen: !!input.frozen, replaced: day.feast?.replaced, replacedId: day.feast?.replacedId });
     const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
     // After approval the feast's groceries go on the list right away (in their own section).
     return { days, estimatedTotal: total(days), ...(plan.status === "approved" && plan.groceryList ? { groceryList: withFeastSections(plan.groceryList, days, sales) } : {}) };

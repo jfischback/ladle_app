@@ -60,7 +60,8 @@ await step("tick an item and add one", async () => {
   await page.locator("#grocery-print input[type=checkbox]").first().check({ force: true });
   await page.fill("input[name=item]", "2 paper towels");
   await page.getByRole("button", { name: "+ Add" }).click();
-  await page.getByText("paper towels", { exact: false }).first().waitFor();
+  await page.locator("#grocery-print h3", { hasText: "Added by you" }).waitFor();
+  await page.locator("#grocery-print li", { hasText: "paper towels" }).first().waitFor();
 });
 
 await step("a recipe opens, and cooking mode", async () => {

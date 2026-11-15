@@ -34,3 +34,24 @@ test("aisle labels from Kroger's aisle locations", async () => {
   assert.equal(aisleLabel(undefined), null);
   assert.equal(aisleLabel([{ number: "0", description: "" }]), null);
 });
+
+test("a product that breaks a food rule is never picked, and is marked", async () => {
+  const { pickOptions } = await import("@/lib/cart");
+  const prod = (description: string, price: number) => ({ productId: description, upc: description, description, brand: "Kroger", size: "12 oz", regular: price, promo: null });
+  const products = [prod("Peanut Butter Crackers", 2), prod("Cheese Crackers", 3), prod("Butter Crackers", 2.5)];
+  const r = pickOptions("crackers", products, null, false, ["no-peanuts"]);
+  assert.equal(r.options[r.chosen!].description, "Cheese Crackers");
+  const pb = r.options.find((o) => o.description === "Peanut Butter Crackers")!;
+  assert.ok(pb.warn && /peanut/i.test(pb.warn), String(pb.warn));
+  const none = pickOptions("crackers", [prod("Peanut Butter Crackers", 2)], null, false, ["no-peanuts"]);
+  assert.equal(none.chosen, null, "nothing safe: nothing picked");
+  assert.equal(pickOptions("crackers", products).chosen, 0, "no rules: as before");
+});
+
+test("aisle labels survive odd shapes", async () => {
+  const { aisleLabel } = await import("@/lib/kroger");
+  assert.equal(aisleLabel([{ number: 7 }]), "Aisle 7");
+  assert.equal(aisleLabel([{ number: "0" }, { number: "14" }]), "Aisle 14");
+  assert.equal(aisleLabel({ number: "3" }), null);
+  assert.equal(aisleLabel([null, "x"]), null);
+});

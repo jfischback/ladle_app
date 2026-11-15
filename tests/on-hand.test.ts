@@ -63,3 +63,10 @@ test("pantry names still match", async () => {
   const r = { ingredients: [ing("shredded cheddar cheese"), ing("olive oil"), ing("kosher salt"), ing("grated parmesan cheese")] } as never;
   assert.deepEqual(onHandMatch(r, ["Shredded cheddar", "Good olive oil, like California Olive Ranch", "parmesan"]).need, []);
 });
+
+test("review fixes: halves, leaves, chops and links; cream isn't cream cheese", async () => {
+  const { onHandMatch } = await import("@/lib/on-hand");
+  const ing = (item: string) => ({ item, amount: "1", unit: "" });
+  const r = { ingredients: [ing("boneless skinless chicken breast halves"), ing("fresh basil leaves"), ing("pork chops"), ing("italian sausage links"), ing("cream cheese")] } as never;
+  assert.deepEqual(onHandMatch(r, ["chicken", "basil", "pork", "sausage", "cream"]).need, ["cream cheese"]);
+});

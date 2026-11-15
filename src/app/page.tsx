@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { moveTargets } from "@/lib/move-dinner";
-import { feastMenu, feastTips } from "@/lib/feast";
+import { feastHolidayOn, feastTips } from "@/lib/feast";
 import { redirect } from "next/navigation";
 import { requireUserId } from "@/auth";
 import { activePlans, getSettings, myRecipes } from "@/lib/data";
@@ -138,7 +138,7 @@ export default async function HomePage() {
                   picky={[...(feastTipsByDate.get(d.date) ?? []), ...(prep?.finish[d.date] ? [`🥡 Prepped ${dayName(prep.date)}: about ${prep.finish[d.date]} minutes to finish tonight.`] : []), ...pickyFor(d)]}
                   plates={settings.tightBudget ? Math.max(1, settings.adults + settings.kids * 0.7) : undefined}
                   moveTargets={moveTargets(plan.days, i, todayStr)}
-                  canFeast={!!d.holiday && !!feastMenu(d.holiday) && d.date >= todayStr}
+                  canFeast={!!feastHolidayOn(d.date, d.holiday) && d.date >= todayStr}
                   feastGuests={settings.adults + settings.kids}
                   feastWhen={{ boughtOn: plan.weekOf, today: todayStr }}
                 />
