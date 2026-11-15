@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
-import { auth } from "@/auth";
+import { auth, loginRequired } from "@/auth";
 import { logout } from "./actions/auth";
 import { Wordmark } from "@/components/Logo";
 import { NavLinks } from "@/components/Nav";
@@ -14,11 +14,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: "#5E6B47", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
+  const signedIn = loginRequired ? !!(await auth())?.user : true;
   return (
     <html lang="en">
       <body className="min-h-screen">
-        {session?.user && (
+        {signedIn && (
           <header className="border-b border-line bg-oat">
             <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 px-4 py-3">
               <Link href="/" aria-label="Ladle home">
@@ -29,9 +29,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <Link href="/setup" className="btn-quiet min-h-9 px-3 text-sm">
                   Settings
                 </Link>
-                <form action={logout}>
-                  <button className="btn-quiet min-h-9 px-3 text-sm">Sign out</button>
-                </form>
+                {loginRequired && (
+                  <form action={logout}>
+                    <button className="btn-quiet min-h-9 px-3 text-sm">Sign out</button>
+                  </form>
+                )}
               </div>
             </div>
           </header>

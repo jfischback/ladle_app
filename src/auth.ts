@@ -49,8 +49,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 });
 
-/** Returns the signed-in user's id or throws (use in server actions / pages behind middleware). */
+export const loginRequired = process.env.REQUIRE_LOGIN === "true";
+
+const GUEST_EMAIL = "guest@ladle.local";
+
+/** While login is off, everyone shares this one built-in account. */
+async function guestUserId(): Promise<string> {
+  const db = await getDb();
+  const [found] = await db.select().from(users).where(eq(users.email, GUEST_EMAIL));
+  if (found) return found.id;
+  const [row] = await db
+    .insert(users)
+    .values({ email: GUEST_EMAIL, name: "Guest" })
+    .onConflictDoNothing()
+    .returning();
+  if (row) return row.id;
+  const [again] = await db.select().from(users).where(eq(users.email, GUEST_EMAIL));
+  return again.id;
+}
+
+/** Returns the current user's id or throws (use in server actions / pages behind middleware). */
 export async function requireUserId(): Promise<string> {
+  if (!loginRequired) return guestUserId();
   const session = await auth();
   const id = session?.user?.id;
   if (!id) throw new Error("Not signed in");
