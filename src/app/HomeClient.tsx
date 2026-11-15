@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { approvePlan, moveDinnerTo, planUpcomingWeek, rateCookedDinner, startOver, swapDay } from "./actions/plans";
 import { answerPantryCheck } from "./actions/pantry";
+import { setGroceryChecks } from "./actions/grocery";
 import { groceryText } from "@/lib/grocery-text";
 import { PANTRY_SECTIONS } from "@/lib/pantry";
 import { StarPicker } from "@/components/Stars";
@@ -384,25 +385,57 @@ const SECTION_ICONS: [RegExp, string][] = [
 ];
 const sectionIcon = (name: string) => SECTION_ICONS.find(([re]) => re.test(name))?.[1] ?? "🛒";
 
-/** The grocery list, with ticks remembered on this phone. */
+/**
+ * The grocery list. Ticks are shared by the whole household: they're saved with the week, and every phone
+ * with the list open picks up the others' ticks every few seconds (so two people can split the store).
+ * Ticks made with no signal are kept and sent when the phone is back online.
+ */
 export function GroceryChecklist({ plan, store }: { plan: Plan; store: string }) {
   const list = plan.groceryList;
   const key = `ladle-grocery-${plan.id}`;
-  const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [checked, setChecked] = useState<Record<string, boolean>>(plan.groceryChecked ?? {});
   const [shared, setShared] = useState(false);
-  useEffect(() => {
+  // Ticks not yet saved, laid over whatever the server says until they are.
+  const pending = useRef<Record<string, boolean>>({});
+  const flush = useCallback(async () => {
+    const send = { ...pending.current };
+    if (!Object.keys(send).length) return;
     try {
-      const saved = localStorage.getItem(key);
-      if (saved) setChecked(JSON.parse(saved));
+      const saved = await setGroceryChecks(plan.id, send);
+      for (const [k, v] of Object.entries(send)) if (pending.current[k] === v) delete pending.current[k];
+      if (saved) setChecked({ ...saved, ...pending.current });
+    } catch { /* offline: try again on the next tick */ }
+  }, [plan.id]);
+  useEffect(() => {
+    // Ticks this phone made before they were shared: send them along once.
+    try {
+      const old = localStorage.getItem(key);
+      if (old) {
+        const mine = JSON.parse(old) as Record<string, boolean>;
+        const fresh = Object.fromEntries(Object.entries(mine).filter(([k, v]) => v && !(plan.groceryChecked ?? {})[k]));
+        localStorage.removeItem(key);
+        if (Object.keys(fresh).length) { Object.assign(pending.current, fresh); setChecked((c) => ({ ...c, ...fresh })); flush(); }
+      }
     } catch {}
-  }, [key]);
+    const pull = async () => {
+      if (document.visibilityState !== "visible") return;
+      await flush();
+      try {
+        const res = await fetch(`/api/plans/${plan.id}/checks`, { cache: "no-store" });
+        if (res.ok) { const { checked: server } = await res.json(); setChecked({ ...server, ...pending.current }); }
+      } catch { /* offline */ }
+    };
+    const id = setInterval(pull, 8000);
+    document.addEventListener("visibilitychange", pull);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", pull); };
+  }, [key, plan.id, plan.groceryChecked, flush]);
   if (!list) return null;
-  const toggle = (id: string) =>
-    setChecked((prev) => {
-      const next = { ...prev, [id]: !prev[id] };
-      try { localStorage.setItem(key, JSON.stringify(next)); } catch {}
-      return next;
-    });
+  const toggle = (id: string) => {
+    const value = !checked[id];
+    pending.current[id] = value;
+    setChecked((prev) => ({ ...prev, [id]: value }));
+    flush();
+  };
   const buying = list.sections.filter((s) => s.name !== PANTRY_SECTIONS.HAVE_IT);
   // Text the list (what's still to get) to someone, or print it.
   const shareList = async () => {
@@ -431,6 +464,7 @@ export function GroceryChecklist({ plan, store }: { plan: Plan; store: string })
         <button type="button" className="btn-secondary min-h-10 px-4 text-sm" onClick={shareList}>{shared ? "✓ Copied" : "📤 Text the list"}</button>
         <button type="button" className="btn-quiet min-h-10 px-4 text-sm" onClick={printList}>🖨️ Print</button>
       </div>
+      <p className="no-print -mt-2 mb-4 text-xs text-muted">Ticks show up on every phone in your household, so you can split up the store.</p>
       {plan.status === "approved" && (
         <Link href={`/cart?plan=${plan.id}`} className="no-print btn-warm mb-4 w-full sm:w-auto">
           <span aria-hidden="true">🛒</span> {plan.cart?.sentAt ? `${store} cart sent · review` : `Send to my ${store} cart`}

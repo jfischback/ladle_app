@@ -55,3 +55,10 @@ test("plurals read right", () => {
   assert.equal(addQuantities(["2 large", "1 large"]), "3 large");
   for (const w of ["slice", "loaf", "bunch", "berry", "cup", "box", "leaf", "glass"]) assert.equal(singular(plural(w)), w, w);
 });
+
+test("grocery ticks are cleaned before saving", async () => {
+  const { cleanChecks } = await import("@/lib/grocery-checks");
+  assert.deepEqual(cleanChecks({ "Produce-0-onion": true, bad: "yes", ["x".repeat(400)]: true, "": true }), { "Produce-0-onion": true });
+  assert.deepEqual(cleanChecks(null), {});
+  assert.deepEqual(cleanChecks([true]), {});
+});
