@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { moveTargets } from "@/lib/move-dinner";
 import { redirect } from "next/navigation";
 import { requireUserId } from "@/auth";
 import { activePlans, getSettings, myRecipes } from "@/lib/data";
@@ -124,6 +125,7 @@ export default async function HomePage() {
                   recipes={recipeInfo}
                   picky={[...(prep?.finish[d.date] ? [`🥡 Prepped ${dayName(prep.date)}: about ${prep.finish[d.date]} minutes to finish tonight.`] : []), ...pickyFor(d)]}
                   plates={settings.tightBudget ? Math.max(1, settings.adults + settings.kids * 0.7) : undefined}
+                  moveTargets={moveTargets(plan.days, i, todayStr)}
                 />
               </li>
             ))}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
-import { approvePlan, planUpcomingWeek, rateCookedDinner, startOver, swapDay } from "./actions/plans";
+import { approvePlan, moveDinnerTo, planUpcomingWeek, rateCookedDinner, startOver, swapDay } from "./actions/plans";
 import { answerPantryCheck } from "./actions/pantry";
 import { groceryText } from "@/lib/grocery-text";
 import { PANTRY_SECTIONS } from "@/lib/pantry";
@@ -42,10 +42,12 @@ export function PlanButton({ label, big }: { label: string; big?: boolean }) {
   );
 }
 
-export function DayCard({ planId, index, day, isToday, locked, recipes, plates, picky = [] }: {
+export function DayCard({ planId, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [] }: {
   planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number; picky?: string[];
+  moveTargets?: { index: number; label: string }[];
 }) {
   const [open, setOpen] = useState(false);
+  const [moving, setMoving] = useState(false);
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const swap = (recipeId: string | null) =>
@@ -60,10 +62,34 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
   const reason = day.reason && !FILLER_REASONS.has(day.reason) ? day.reason : null;
   const cookTime = recipe?.totalMinutes ? formatMinutes(recipe.totalMinutes) : null;
 
-  const swapButton = !locked && (
+  const move = (to: number) =>
+    start(async () => {
+      setError(null);
+      const r = await moveDinnerTo(planId, index, to);
+      if (r?.error) setError(r.error);
+      else { setOpen(false); setMoving(false); }
+    });
+  // After shopping, dinners can't be swapped for new ones, but they can trade nights.
+  const canMove = moveTargets.length > 0;
+  const swapButton = !locked ? (
     <button className="btn-secondary min-h-10 shrink-0 px-3.5 text-sm" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
       {open ? "Close" : "Swap"}
     </button>
+  ) : canMove ? (
+    <button className="btn-quiet min-h-10 shrink-0 px-3 text-sm" aria-expanded={moving} onClick={() => setMoving((o) => !o)}>
+      {moving ? "Close" : "Move"}
+    </button>
+  ) : null;
+  const movePicker = canMove && (
+    <div className="space-y-2">
+      <p className="font-bold">{day.recipeId ? (day.leftoverOf ? "Have these leftovers on…" : `Make ${day.recipeName} on…`) : `Trade this night off with…`}</p>
+      <div className="flex flex-wrap gap-2">
+        {moveTargets.map((t) => (
+          <button key={t.index} className="btn-secondary min-h-10 px-3 text-sm" disabled={pending} onClick={() => move(t.index)}>{t.label}</button>
+        ))}
+      </div>
+      <p className="text-xs text-muted">The two nights trade dinners. Your grocery list stays the same.</p>
+    </div>
   );
 
   return (
@@ -73,11 +99,11 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
         <div className="flex items-center gap-3 px-4 py-2.5">
           <span className="text-lg" aria-hidden="true">🍕</span>
           <p className="min-w-0 flex-1"><span className="font-extrabold text-terracotta">{dayName(day.date)} {Number(day.date.slice(8))}</span> <span className="text-muted">· Night off</span></p>
-          {!locked && (
+          {!locked ? (
             <button className="btn-quiet min-h-9 shrink-0 px-3 text-sm" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
               {open ? "Close" : "Plan a dinner"}
             </button>
-          )}
+          ) : swapButton}
         </div>
       ) : isToday ? (
         // Tonight gets the big hero treatment.
@@ -160,6 +186,13 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
             </select>
             {day.recipeId && <button className="btn-quiet" disabled={pending} onClick={() => swap(null)}>Take the night off 🍕</button>}
           </div>
+          {movePicker && <div className="border-t border-line pt-3">{movePicker}</div>}
+          <ErrorNote error={error} />
+        </div>
+      )}
+      {moving && locked && (
+        <div className="space-y-2 border-t border-line bg-cream/60 p-4">
+          {movePicker}
           <ErrorNote error={error} />
         </div>
       )}

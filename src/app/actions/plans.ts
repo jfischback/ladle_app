@@ -28,6 +28,8 @@ import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
 import { addDays, dayName, upcomingWeekStart, weekDates } from "@/lib/week";
 import { TOO_MANY, under } from "@/lib/rate-limit";
+import { moveDinner } from "@/lib/move-dinner";
+import { today } from "@/lib/week";
 
 export type ActionResult = { error?: string } | void;
 
@@ -352,6 +354,19 @@ async function newRecipeOptions(userId: string, sales: SaleItem[], settings: Set
     .sort((a, b) => recipeSales(b.opt, sales).length - recipeSales(a.opt, sales).length || a.rank - b.rank)
     .slice(0, 8)
     .map((x) => x.opt);
+}
+
+/** Trade two nights' dinners, even after shopping ("do Tuesday's on Thursday"). The grocery list doesn't change. */
+export async function moveDinnerTo(planId: string, from: number, to: number): Promise<ActionResult> {
+  const userId = await requireUserId();
+  const plan = await getPlan(userId, planId);
+  if (!plan) return { error: "Plan not found." };
+  if (!Number.isInteger(from) || !Number.isInteger(to)) return { error: "Pick another night." };
+  const moved = moveDinner(plan.days, from, to, today());
+  if ("error" in moved) return { error: moved.error };
+  const db = await getDb();
+  await db.update(plans).set({ days: moved.days }).where(and(eq(plans.id, planId), eq(plans.userId, userId)));
+  revalidatePath("/");
 }
 
 /** Archive this week's plan so the user can plan again. Nothing is deleted. */
