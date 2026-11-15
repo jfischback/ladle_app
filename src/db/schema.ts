@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, timestamp, jsonb, integer, real, index, boolean, uniqueIndex } from "drizzle-orm/pg-core";
 import type { Settings } from "@/lib/settings";
-import type { Ingredient, PlanDay, GroceryList, SaleItem, SaleCheck, StapleLine } from "@/lib/types";
+import type { Ingredient, PlanDay, GroceryList, SaleItem, SaleCheck, StapleLine, ExtraLine } from "@/lib/types";
 
 // Nothing is ever deleted: recipes and plans are archived via archivedAt.
 
@@ -69,6 +69,7 @@ export const plans = pgTable(
     staples: jsonb("staples").$type<StapleLine[]>(), // weekly staples with this week's prices
     stockUp: jsonb("stock_up").$type<SaleItem[]>(), // "buy on sale" pantry items that are on sale and running low
     breakfastDeal: jsonb("breakfast_deal").$type<SaleItem>(), // this week's breakfast-meat deal, if any
+    extras: jsonb("extras").$type<ExtraLine[]>(), // snacks, sweets, drinks and baby items picked for this week
     summary: text("summary"),
     plannerSource: text("planner_source").notNull(), // claude | basic
     estimatedTotal: real("estimated_total"),
@@ -147,6 +148,31 @@ export const pantryItems = pgTable(
   (t) => [uniqueIndex("pantry_user_name_idx").on(t.userId, t.name)],
 );
 
+/**
+ * Snacks, sweets, drinks and baby items a household buys, each with a buying rule:
+ * "always" (every trip), "on-sale" (only when on sale), "rotate" (a few from the list each week) or "when-low".
+ */
+export const extraItems = pgTable(
+  "extra_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    category: text("category").$type<"snacks" | "sweets" | "drinks" | "baby">().notNull(),
+    name: text("name").notNull(),
+    mode: text("mode").$type<"always" | "on-sale" | "rotate" | "when-low">().notNull().default("on-sale"),
+    qty: integer("qty").notNull().default(1),
+    saleQty: integer("sale_qty"), // how many when it's on sale (e.g. 3 instead of 2)
+    anyBrand: boolean("any_brand").notNull().default(false), // any brand counts; never-buy words apply
+    servings: integer("servings"), // servings per pack, for a weekly servings target (baby)
+    status: text("status").$type<"have" | "low" | "out">().notNull().default("have"), // for "when-low"
+    lastPickedAt: timestamp("last_picked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("extra_user_cat_name_idx").on(t.userId, t.category, t.name)],
+);
+
 export type User = typeof users.$inferSelect;
 export type Recipe = typeof recipes.$inferSelect;
 export type NewRecipe = typeof recipes.$inferInsert;
@@ -154,3 +180,4 @@ export type Plan = typeof plans.$inferSelect;
 export type Cook = typeof cooks.$inferSelect;
 export type FoundRecipe = typeof foundRecipes.$inferSelect;
 export type PantryItem = typeof pantryItems.$inferSelect;
+export type ExtraItem = typeof extraItems.$inferSelect;

@@ -100,7 +100,8 @@ export function applyPantry(list: GroceryList, pantry: PantryLike[], stockUp: Sa
   const have: GroceryItem[] = [];
   const check: GroceryItem[] = [];
   const sections = list.sections.map((sec) => {
-    if (/weekly staples/i.test(sec.name)) return sec;
+    // Staples, snacks/sweets/drinks/baby and deals have their own buying rules; the pantry check leaves them alone.
+    if (/weekly staples|^snacks$|^sweets$|^drinks$|^baby$|breakfast meat deal|stock up/i.test(sec.name)) return sec;
     const keep: GroceryItem[] = [];
     for (const it of sec.items) {
       const match = pantry.find((p) => sameThing(it.item, p.name));

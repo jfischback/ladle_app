@@ -43,6 +43,13 @@
       "when": 1794744625400,
       "tag": "0005_odd_kang",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794745848893,
+      "tag": "0006_careful_wolverine",
+      "breakpoints": true
     }
   ]
 }

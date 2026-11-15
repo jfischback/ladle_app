@@ -302,6 +302,10 @@ export function Celebrate() {
 const SECTION_ICONS: [RegExp, string][] = [
   [/staple/i, "🧺"],
   [/stock up/i, "⭐"],
+  [/^snacks$/i, "🍿"],
+  [/^sweets$/i, "🍬"],
+  [/^drinks$/i, "🥤"],
+  [/^baby$/i, "🍼"],
   [/pantry check/i, "❓"],
   [/already in your pantry/i, "✅"],
   [/produce|fruit|veg/i, "🥕"],

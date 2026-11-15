@@ -22,6 +22,22 @@ export type PlanDay = {
   holiday?: string | null; // federal holiday on this date
 };
 
+export type ExtraCategory = "snacks" | "sweets" | "drinks" | "baby";
+
+/** One snack/sweet/drink/baby item on this week's list, with why it's there. */
+export type ExtraLine = {
+  category: ExtraCategory;
+  item: string; // the household's name for it
+  product: string | null; // what we found at the store
+  quantity: number;
+  price: number | null; // per unit
+  sale: SaleItem | null;
+  reason: string; // "Every trip", "On sale", "This week's pick", "Running low"
+};
+
+/** Per-category rules for snacks, sweets, drinks and baby items. */
+export type ExtrasRule = { rotateCount: number; servingsTarget: number | null; neverWords: string[] };
+
 /** Breakfast for one day. */
 export type PlanBreakfast = {
   recipeId: string | null;

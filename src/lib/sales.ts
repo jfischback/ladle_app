@@ -56,16 +56,21 @@ export function ingredientTerm(i: Ingredient | string): string | null {
 // Rough singular: berries -> berry, tomatoes -> tomato, sausages -> sausage, thighs -> thigh.
 const stem = (w: string) => (/ies$/.test(w) ? w.replace(/ies$/, "y") : /oes$/.test(w) ? w.replace(/oes$/, "o") : w.replace(/s$/, ""));
 
+// Same thing, different spelling on the package.
+const SPELLINGS: [RegExp, string][] = [[/\bgummi(e?s)?\b/g, "gummy"], [/\bgummies\b/g, "gummy"], [/\byoghurt/g, "yogurt"], [/\bdoughnut/g, "donut"], [/\bcheez\b/g, "cheese"]];
+const spellings = (t: string) => SPELLINGS.reduce((acc, [re, to]) => acc.replace(re, to), t);
+
 /** Does this store product really match the ingredient? Every main word of the term must appear in the name. */
-function productMatches(term: string, p: KrogerProduct): boolean {
-  const name = p.description.toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/).map(stem);
+export function productMatches(term: string, p: KrogerProduct): boolean {
+  const name = spellings(p.description.toLowerCase()).replace(/[^a-z\s]/g, " ").split(/\s+/).map(stem);
   const nameSet = new Set(name);
   // Cut words ("boneless", "bone-in") don't change what's on sale, so they're optional here.
   const optional = new Set(["boneless", "skinless", "bone", "in", "skin", "on", "lean", "extra", "regular", "thin", "streaky", "precooked"]);
   return term.split(/[\s-]+/).every((w) => {
-    const s = stem(w.replace(/'s?$/, "")); // "rao's" -> "rao"
-    // Short words must match a whole word ("egg" isn't "Eggo", "ham" isn't "Hamburger"); longer ones may be a prefix.
-    return s.length < 3 || optional.has(w) || nameSet.has(s) || (s.length >= 5 && name.some((n) => n.startsWith(s)));
+    const t = stem(spellings(w.replace(/'s?$/, ""))); // "rao's" -> "rao", "gummi" -> "gummy"
+    // Whole word; or a 5+ letter prefix (short words must be whole: "egg" isn't "Eggo", "ham" isn't "Hamburger");
+    // or the end of a compound word with a real word in front ("goldbears" has "bears", but "popcorn" isn't "corn").
+    return t.length < 3 || optional.has(w) || nameSet.has(t) || (t.length >= 5 && name.some((n) => n.startsWith(t))) || (t.length >= 4 && name.some((n) => n.length >= t.length + 4 && n.endsWith(t)));
   });
 }
 
@@ -108,7 +113,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
  * Check this week's prices at the household's Fry's for the ingredients in their recipes.
  * An item counts as on sale only when it's at least saleThresholdPct off its regular price.
  */
-export async function scanSales(recipes: Recipe[], settings: Settings, extraTerms: string[] = []): Promise<SaleScan> {
+export async function scanSales(recipes: Recipe[], settings: Settings, extraTerms: string[] = [], exclude: Map<string, RegExp> = new Map()): Promise<SaleScan> {
   if (!krogerEnabled()) return { status: "off", reason: "not-connected" };
   if (!settings.storeLocationId) return { status: "off", reason: "no-store" };
   const locationId = settings.storeLocationId;
@@ -128,7 +133,9 @@ export async function scanSales(recipes: Recipe[], settings: Settings, extraTerm
   const sales: SaleItem[] = [];
   const prices: StorePrice[] = [];
   for (const { value: { term, products } } of ok) {
-    const matches = products.filter((p) => productMatches(term, p));
+    // "Any brand" items skip products with a never-buy word (e.g. cola gummies, dark chocolate, anything with honey for a baby).
+    const never = exclude.get(term);
+    const matches = products.filter((p) => productMatches(term, p) && !(never && never.test(p.description)));
     if (!matches.length) continue;
     // For a staple, the store's top match is the usual pick (cheapest could be a tiny size).
     if (stapleTerms.includes(term)) staplePrices.set(term, { price: round2(matches[0].promo ?? matches[0].regular), product: matches[0].description });
