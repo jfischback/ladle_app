@@ -46,3 +46,13 @@ test("60 planned weeks follow every hard rule", async () => {
     }
   }
 });
+
+test("this week's check-in nudges the picks: things to use up and a craving", async () => {
+  const { wishScore } = await import("@/lib/planner");
+  const r = (name: string, items: string[], tags: string[] = []) => ({ name, ingredients: items.map((item) => ({ amount: "1", unit: "", item })), tags });
+  const w = { useUp: ["chicken", "rice"], craving: "tacos" };
+  assert.ok(wishScore(r("Chicken and Rice Bowls", ["chicken thighs", "white rice"]), w) >= 3);
+  assert.ok(wishScore(r("Beef Tacos", ["ground beef", "taco shells"]), w) >= 3);
+  assert.equal(wishScore(r("Pasta Primavera", ["penne", "zucchini"]), w), 0);
+  assert.equal(wishScore(r("Beef Tacos", ["ground beef"]), undefined), 0);
+});

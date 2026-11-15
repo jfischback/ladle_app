@@ -9,6 +9,7 @@ import { hasNeeds, healthNeeds, healthScore, type HealthNeeds } from "./health";
 import type { PlanDay } from "./types";
 import { askClaude, claudeEnabled } from "./claude";
 import { addDays, dayName, weekDates, weekday } from "./week";
+import { usesUp } from "./on-hand";
 import { ruleProblems, rulesSummary } from "./diet";
 import { isPerishable, proteinGroup, type ProteinGroup } from "./protein";
 import { leftoverKind } from "./leftovers";
@@ -83,6 +84,7 @@ Rules:
 - When a reason mentions a sale, name the item and the discount, e.g. "Chicken thighs are 35% off".
 - Each pick gets a one-line reason a tired parent can read in two seconds.
 - Give two or three alternatives for each cooking night, from the same recipe list, not already used that week and following the same rules.
+- thisWeek comes from the family's check-in for this week. useUp: ingredients they want to use up, so prefer dinners that use them (say so in the reason, e.g. "Uses up the chicken"). craving: something they're in the mood for; if a recipe fits it, plan it on a suitable night (reason e.g. "You were craving tacos").
 - newRecipes are new dinners from food creators the family follows. Use at most newRecipesPerWeek of them (their keys start with "n"), and only on a night that suits them. Prefer ones that use sale items. Their reason must start with "New from <cookName>" and say why, e.g. "New from Pinch of Yum: ground beef is 30% off". Never use newRecipes as alternatives.`;
 
 export async function planWeek(input: {
@@ -97,6 +99,8 @@ export async function planWeek(input: {
   storePrices?: StorePrice[];
   staplesCost?: number;
   newRecipes?: NewRecipeOption[];
+  /** This week's check-in: things to use up, and something they're in the mood for. */
+  wishes?: Wishes;
 }): Promise<PlanResult> {
   const { settings, weekStart } = input;
   const dates = weekDates(weekStart).filter((d) => !input.fromDate || d >= input.fromDate);
@@ -113,7 +117,7 @@ export async function planWeek(input: {
 
   const newOptions = settings.newRecipesPerWeek > 0 ? (input.newRecipes ?? []).filter((n) => !ruleProblems(n, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook({ name: n.title, ingredients: n.ingredients }, settings.equipment)) : [];
   const lastCooked = lastCookedWeeks(input.history ?? input.recentPlans, weekStart);
-  if (!claudeEnabled()) return basicPlan(dates, pool, settings, input.saleItems, newOptions, lastCooked);
+  if (!claudeEnabled()) return basicPlan(dates, pool, settings, input.saleItems, newOptions, lastCooked, input.wishes);
 
   const keyed = pool.map((r, i) => ({ key: `r${i + 1}`, recipe: r }));
   const byKey = new Map(keyed.map((k) => [k.key, k.recipe]));
@@ -132,6 +136,7 @@ export async function planWeek(input: {
       holiday: holidayOn(d),
     })),
     maxSameProteinPerWeek: settings.maxSameProtein,
+    thisWeek: { useUp: input.wishes?.useUp ?? [], craving: input.wishes?.craving || null },
     foodRules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway) || "none",
     household: {
       adults: settings.adults,
@@ -271,7 +276,31 @@ type Candidate = {
   weeksSince: number | null; // weeks since it was last cooked, if ever
   isNew: NewRecipeOption | null;
   recipe: Recipe | null;
+  wish?: number; // a nudge from this week's check-in (uses something up, matches a craving)
+  wishWhy?: string; // and the reason to show for it
 };
+
+export type Wishes = { useUp: string[]; craving: string };
+
+/** "Uses up the chicken" / "You were in the mood for tacos", for a pick the check-in nudged. */
+function wishReason(c: { name: string; ingredients: Recipe["ingredients"]; tags?: string[]; protein?: string | null }, w: Wishes | undefined): string | undefined {
+  if (!w) return undefined;
+  const used = w.useUp.filter((t) => usesUp(c.ingredients, [t]) > 0);
+  if (wishScore({ ...c, ingredients: [] }, { useUp: [], craving: w.craving }) > 0) return `You were in the mood for ${w.craving.trim().toLowerCase()}`;
+  if (used.length) return `Uses up the ${used.slice(0, 2).join(" and ")}`;
+  return undefined;
+}
+
+/** How much a dinner suits this week's check-in: each thing it uses up, and the craving (by name, tag or protein). */
+export function wishScore(c: { name: string; ingredients: Recipe["ingredients"]; tags?: string[]; protein?: string | null }, w: Wishes | undefined): number {
+  if (!w) return 0;
+  let s = Math.min(3, usesUp(c.ingredients, w.useUp) * 1.5);
+  const words = w.craving.toLowerCase().split(/[^a-z]+/).filter((x) => x.length >= 3 && !CRAVE_FILLER.has(x));
+  const text = [c.name, ...(c.tags ?? []), c.protein ?? ""].join(" ").toLowerCase();
+  if (words.length && words.some((x) => text.includes(x.replace(/s$/, "")))) s += 3;
+  return s;
+}
+const CRAVE_FILLER = new Set(["something", "night", "dinner", "food", "want", "like", "the", "and", "with", "some"]);
 
 type Slot = {
   index: number;
@@ -329,6 +358,7 @@ function score(c: Candidate, slot: Slot, sales: SaleItem[]): number {
   else if (c.rating == null) s += 0.3;
   if ((c.rating ?? 0) >= 4 && c.weeksSince != null && c.weeksSince >= 4) s += 1.5; // a favorite that's due
   if (c.isNew) s += 0.8;
+  s += c.wish ?? 0;
   if (slot.lunchNext && c.leftovers) s += 0.8; // tomorrow's lunch is covered
   if (slot.saleProteins.has(c.protein)) s += 0.7; // build the week around the protein deal
   if (slot.busy && c.minutes != null) s += Math.max(0, (30 - c.minutes) / 60); // a little nudge to the quickest
@@ -405,6 +435,7 @@ function pickWeek(slots: Slot[], pool: Candidate[], newPool: Candidate[], settin
 }
 
 function whyLine(c: Candidate, slot: Slot, sales: SaleItem[]): string {
+  if (c.wishWhy) return c.wishWhy;
   if (c.isNew) return newDay(slot.date, c.isNew, sales, undefined, null, []).reason;
   const onSale = recipeSales(c, sales);
   if (onSale.length) return saleReason(c.recipe!, sales);
@@ -414,10 +445,19 @@ function whyLine(c: Candidate, slot: Slot, sales: SaleItem[]): string {
 }
 
 /** Used when no Claude key is configured: picks that follow every rule, leaning on sales and favorites; no costs. */
-function basicPlan(dates: string[], pool: Recipe[], settings: Settings, sales: SaleItem[], newOptions: NewRecipeOption[], lastCooked: Map<string, number>): PlanResult {
+function basicPlan(dates: string[], pool: Recipe[], settings: Settings, sales: SaleItem[], newOptions: NewRecipeOption[], lastCooked: Map<string, number>, wishes?: Wishes): PlanResult {
   const slots = slotsFor(dates, settings, sales);
-  const candidates = pool.map((r) => toCandidate(r, lastCooked));
-  const planned = pickWeek(slots, candidates, newOptions.map(newCandidate), settings, sales);
+  // The craving is one dinner, not a theme: only the best match (favorites first) gets that nudge.
+  const crave = (c: Candidate) => !!wishes?.craving && wishScore({ name: c.name, ingredients: [], tags: c.recipe?.tags, protein: c.recipe?.protein }, { useUp: [], craving: wishes.craving }) > 0;
+  const all = [...pool.map((r) => toCandidate(r, lastCooked)), ...newOptions.map(newCandidate)];
+  const craved = all.filter(crave).sort((a, b) => (b.rating ?? 3) - (a.rating ?? 3) || Math.random() - 0.5)[0];
+  const withWish = (c: Candidate): Candidate => {
+    const useUp = wishes ? wishScore({ name: c.name, ingredients: c.ingredients }, { useUp: wishes.useUp, craving: "" }) : 0;
+    const isCraved = !!craved && c.key === craved.key;
+    return { ...c, wish: useUp + (isCraved ? 3 : 0), wishWhy: isCraved ? `You were in the mood for ${wishes!.craving.trim().toLowerCase()}` : wishReason({ ...c, name: "", tags: [], protein: null }, wishes) };
+  };
+  const candidates = pool.map((r) => withWish(toCandidate(r, lastCooked)));
+  const planned = pickWeek(slots, candidates, newOptions.map(newCandidate).map(withWish), settings, sales);
   const used = new Set(planned.map((p) => p.c.key));
   const spare = candidates.filter((c) => !used.has(c.key));
   const days: PlanDay[] = dates.map((date, i) => {

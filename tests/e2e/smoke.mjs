@@ -44,6 +44,10 @@ await step("setup: a store, then start with Ladle's recipes", async () => {
 });
 
 await step("plan the week", async () => {
+  // "Plan my week" asks a few questions about this week first; the defaults are fine.
+  await page.getByRole("link", { name: "Plan my week" }).click();
+  await page.waitForURL(/\/plan/);
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: /^Next/ }).click();
   await page.getByRole("button", { name: "Plan my week" }).click();
   await page.getByRole("button", { name: "Looks yummy, make my list!" }).waitFor();
   await noCrash();

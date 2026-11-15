@@ -168,7 +168,7 @@ export default async function HomePage() {
             <ApproveBar planId={plan.id} />
           )}
           <div className="flex flex-wrap justify-center gap-2 pt-2">
-            {plan.weekOf !== upcoming && approved && <PlanButton label={`Plan the week of ${shortDate(upcoming)}`} />}
+            {plan.weekOf !== upcoming && approved && <Link href="/plan" className="btn-secondary">Plan the week of {shortDate(upcoming)}</Link>}
             <a href={`/api/plans/${plan.id}/calendar`} className="btn-quiet text-sm" download>📅 Add to my calendar</a>
             <Link href={`/menu/${plan.id}`} className="btn-quiet text-sm">🖨️ Fridge menu</Link>
             <StartOverButton planId={plan.id} approved={approved} />
@@ -308,10 +308,12 @@ function EmptyState({ weekOf, recipeCount, needed, checksSales, yours, startNow,
         <h2 className="text-2xl font-semibold">What&apos;s for dinner this week?</h2>
         <p className="mt-1 text-lg text-muted">We&apos;ll pick dinners for the week of {shortDate(weekOf)} from the recipes your family likes{checksSales ? `, built around what's on sale at ${yours}` : ""}. You can swap anything.</p>
       </div>
-      <PlanButton label="Plan my week" big />
+      <Link href="/plan" className="btn-warm min-h-14 px-8 text-lg">Plan my week</Link>
+      <p className="-mt-1 text-sm text-muted">A few quick questions about this week first: busy nights, company, what to use up.</p>
+      <PlanButton label="Or plan with my usual settings" quiet />
       {startNow && (
         // Starting mid-week: no need to wait for the next shopping day.
-        <PlanButton label={`Or start now: plan ${startNow}`} thisWeek quiet />
+        <Link href="/plan?now=1" className="btn-quiet">Or start now: plan {startNow}</Link>
       )}
       <div className="w-full pt-4 text-left">
         <FeatureCards creators={creators} athletes={athletes} title="Make Ladle yours" />

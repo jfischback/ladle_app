@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { and, desc, eq, inArray, isNull, ne } from "drizzle-orm";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
@@ -49,10 +50,26 @@ async function archiveOthersForWeek(userId: string, weekOf: string, keepId?: str
  * `thisWeek`: someone just starting mid-week plans the rest of the current week (today to the day before
  * the next shopping day) instead of waiting for the next one.
  */
-export async function planUpcomingWeek(thisWeek = false): Promise<ActionResult> {
+export async function planUpcomingWeek(thisWeek = false, checkIn?: unknown): Promise<ActionResult> {
   const userId = await requireUserId();
   if (!(await under("plan", userId))) return { error: TOO_MANY };
-  const { data: settings } = await getSettings(userId);
+  const { data: saved } = await getSettings(userId);
+  // This week's check-in (from "Plan my week"): it changes this plan only; Settings stay as they are.
+  const parsed = checkIn == null ? null : WeekCheckIn.safeParse(checkIn);
+  if (parsed && !parsed.success) return { error: "Something in this week's answers didn't look right. Try again." };
+  const week = parsed?.data ?? null;
+  if (week && !week.cookDays.length) return { error: "Pick at least one night to cook." };
+  const settings: Settings = week
+    ? {
+        ...saved,
+        cookDays: week.cookDays,
+        dinnersPerWeek: week.cookDays.length,
+        busyDays: week.busyDays.filter((d) => week.cookDays.includes(d)),
+        weeklyBudget: week.budget ?? saved.weeklyBudget,
+        newRecipesPerWeek: week.tryNew ? Math.max(1, saved.newRecipesPerWeek) : 0,
+      }
+    : saved;
+  const wishes = week ? { useUp: week.useUp.split(/,|\band\b|\n/).map((x) => x.trim()).filter((x) => x.length >= 2).slice(0, 10), craving: week.craving.trim() } : undefined;
   const fromDate = thisWeek === true ? today() : undefined;
   const weekStart = fromDate ? currentWeekStart(settings.shoppingDay) : upcomingWeekStart(settings.shoppingDay);
   if (fromDate) {
@@ -116,6 +133,7 @@ export async function planUpcomingWeek(thisWeek = false): Promise<ActionResult> 
       settings, weekStart, fromDate, recipes: recipeList, recentPlans: recent, history: allPlans.filter((p) => p.status === "approved"),
       saleItems: sales, storePrices: scan.status === "ok" ? scan.prices : [], newRecipes,
       staplesCost: staplesTotal(staples).total + extrasTotal(extraLines),
+      wishes,
     });
   } catch (e) {
     return { error: `The planner hit a problem: ${(e as Error).message}` };
@@ -161,6 +179,13 @@ export async function planUpcomingWeek(thisWeek = false): Promise<ActionResult> 
       capped = enforceCap(capped.days, recipeList, settings, sales, staplesTotal(staples).total + extrasTotal(extraLines), recentIds);
     }
     result.days = capped.days;
+  }
+  // Who's eating on the nights the check-in changed (company, or someone away).
+  if (week?.eating.length) {
+    result.days = result.days.map((d) => {
+      const e = week.eating.find((x) => x.weekday === weekday(d.date));
+      return e && d.recipeId && !d.leftoverOf && !(e.adults === settings.adults && e.kids === settings.kids) ? withEating(d, { adults: e.adults, kids: e.kids }, settings) : d;
+    });
   }
   result.estimatedTotal = sumCosts(result.days);
   result.days = await withLunches(userId, await withBreakfasts(userId, result.days, settings, sales, bDeal), settings, sales);
@@ -391,6 +416,30 @@ export async function moveDinnerTo(planId: string, from: number, to: number): Pr
   revalidatePath("/");
 }
 
+/** This week's check-in, from "Plan my week". */
+const WeekCheckIn = z.object({
+  cookDays: z.array(z.number().int().min(0).max(6)).max(7),
+  busyDays: z.array(z.number().int().min(0).max(6)).max(7),
+  budget: z.number().min(10).max(5000).nullable(),
+  useUp: z.string().max(300),
+  craving: z.string().max(80),
+  tryNew: z.boolean(),
+  eating: z.array(z.object({ weekday: z.number().int().min(0).max(6), adults: z.number().int().min(0).max(30), kids: z.number().int().min(0).max(30) }).refine((e) => e.adults + e.kids >= 1)).max(7),
+});
+
+/**
+ * A night's dinner sized for who's eating (null: the usual household). On a double-batch night only tonight's
+ * batch changes; the leftovers night is still the usual table.
+ */
+function withEating(d: PlanDay, eating: { adults: number; kids: number } | null, settings: Settings): PlanDay {
+  const before = dinnerServings(d.eating ?? settings);
+  const after = dinnerServings(eating ?? settings);
+  const batches = d.batches ?? 1;
+  const perBatch = d.estimatedCost != null ? d.estimatedCost / batches : null;
+  const cost = perBatch != null ? Math.round((perBatch * (batches - 1) + (perBatch * after) / before) * 100) / 100 : d.estimatedCost;
+  return { ...d, eating, estimatedCost: cost };
+}
+
 /** A dinner's cost for whoever is at the table that night (the usual household when no one's set). */
 function forTable(cost: number, eating: PlanDay["eating"], settings: Settings): number {
   if (!eating) return cost;
@@ -415,16 +464,7 @@ export async function setEating(planId: string, dayIndex: number, eating: { adul
     const day = plan.days[dayIndex];
     if (!day) return { error: "Day not found." };
     if (!day.recipeId || day.leftoverOf || day.feast) return { error: "Only a night with a dinner to cook can change who's eating." };
-    const before = dinnerServings(day.eating ?? settings);
-    const after = dinnerServings(usual || !want ? settings : want);
-    const days = plan.days.map((d, j) => {
-      if (j !== dayIndex) return d;
-      // On a double-batch night only tonight's batch changes; the leftovers night is still the usual table.
-      const batches = d.batches ?? 1;
-      const perBatch = d.estimatedCost != null ? d.estimatedCost / batches : null;
-      const cost = perBatch != null ? Math.round((perBatch * (batches - 1) + (perBatch * after) / before) * 100) / 100 : d.estimatedCost;
-      return { ...d, eating: usual || !want ? null : want, estimatedCost: cost };
-    });
+    const days = plan.days.map((d, j) => (j === dayIndex ? withEating(d, usual || !want ? null : want, settings) : d));
     return { days, estimatedTotal: sumCosts(days) };
   });
   if (!r.error) revalidatePath("/");
