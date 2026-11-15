@@ -64,6 +64,13 @@
       "when": 1794749522559,
       "tag": "0008_closed_yellow_claw",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794750622858,
+      "tag": "0009_ambitious_stranger",
+      "breakpoints": true
     }
   ]
 }
