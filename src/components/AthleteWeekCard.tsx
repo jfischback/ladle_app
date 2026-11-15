@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PHASES, SPORTS, type AthleteWeek } from "@/lib/athletes";
+import { CONDITIONS, PHASES, SPORTS, type AthleteWeek } from "@/lib/athletes";
 
 const DAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const weekday = (date: string) => new Date(`${date}T12:00:00Z`).getUTCDay();
@@ -9,12 +9,15 @@ const n = (x: number) => x.toLocaleString("en-US");
 export function AthleteWeekCard({ week }: { week: AthleteWeek }) {
   const a = week.athlete;
   const hit = week.days.filter((d) => d.short.protein <= 10).length;
+  const carbs = a.conditions.includes("keto") || a.conditions.includes("diabetes");
+  const salt = a.conditions.includes("lowsodium");
+  const athlete = a.sport !== "weightloss" && a.sport !== "active";
   return (
     <section className="card p-5" aria-label={`${a.name || "Athlete"}'s week`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="flex items-center gap-2 text-2xl font-semibold"><span aria-hidden="true">{SPORTS[a.sport].icon}</span> {a.name || "Athlete"}&apos;s fuel</h2>
-          <p className="text-sm font-bold text-terracotta-dark">{SPORTS[a.sport].label}{a.phase !== "maintain" ? ` · ${PHASES[a.phase].label.toLowerCase()}` : ""}{a.youth ? " · teen" : ""}</p>
+          <h2 className="flex items-center gap-2 text-2xl font-semibold"><span aria-hidden="true">{SPORTS[a.sport].icon}</span> {a.name || "Athlete"}&apos;s {athlete ? "fuel" : "week"}</h2>
+          <p className="text-sm font-bold text-terracotta-dark">{SPORTS[a.sport].label}{a.phase !== "maintain" ? ` · ${PHASES[a.phase].label.toLowerCase()}` : ""}{a.youth ? " · teen" : ""}{a.conditions.map((c) => ` · ${CONDITIONS[c].label.toLowerCase()}`).join("")}</p>
           <p className="text-muted">{n(a.protein)} g protein · {n(a.calories)} cal on training days · protein goal hit {hit} of {week.days.length} days</p>
         </div>
         <Link href="/athletes" className="btn-quiet min-h-9 px-3 text-sm">Edit</Link>
@@ -41,16 +44,16 @@ export function AthleteWeekCard({ week }: { week: AthleteWeek }) {
           <li key={d.date}>
             <details className="rounded-2xl bg-cream/70 p-3">
               <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                <span className="font-bold">{DAY[weekday(d.date)]}{d.training ? " · training" : " · rest"}{d.event ? ` · ${d.event.label}` : ""}</span>
+                <span className="font-bold">{DAY[weekday(d.date)]}{d.training ? " · training" : a.trainingDays.length ? " · rest" : ""}{d.event ? ` · ${d.event.label}` : ""}</span>
                 <span className={`text-sm font-bold ${d.short.protein > 10 ? "text-terracotta-dark" : "text-olive-dark"}`}>
-                  {n(d.total.protein)}/{n(d.target.protein)} g · {n(d.total.kcal)} cal
+                  {n(d.total.protein)}/{n(d.target.protein)} g · {n(d.total.kcal)} cal{carbs ? ` · ${n(d.total.carbs)} g carbs` : ""}{salt ? ` · ${n(d.total.sodium)} mg sodium` : ""}
                 </span>
               </summary>
               <ul className="mt-2 space-y-1 text-sm">
                 {d.meals.map((m) => (
                   <li key={m.meal} className="flex justify-between gap-3">
                     <span><b>{m.meal}:</b> {m.name}{m.portion > 1 ? <span className="font-bold text-terracotta-dark"> ×{m.portion}</span> : null}</span>
-                    <span className="shrink-0 text-muted">{m.estimated ? "~" : ""}{m.protein} g</span>
+                    <span className="shrink-0 text-muted">{m.estimated ? "~" : ""}{m.protein} g{carbs ? ` · ${m.carbs} g carbs` : ""}</span>
                   </li>
                 ))}
                 {d.fuel.map((f, i) => (
@@ -64,11 +67,12 @@ export function AthleteWeekCard({ week }: { week: AthleteWeek }) {
               {d.total.kcal - d.target.kcal > 300 && (a.phase === "cut" || d.event?.phase === "lighten") && <p className="mt-2 text-sm font-semibold text-ochre-dark">About {n(Math.round((d.total.kcal - d.target.kcal) / 50) * 50)} cal over: take a smaller portion, or go light on bread, rice and sauces.</p>}
               {d.short.protein <= 10 && d.short.kcal > 500 && <p className="mt-2 text-sm font-semibold text-ochre-dark">About {n(Math.round(d.short.kcal / 50) * 50)} cal short: add extra rice, pasta or potatoes at dinner.</p>}
               {d.tip && <p className="mt-2 rounded-xl bg-ochre-soft p-2 text-sm">{d.tip}</p>}
+              {salt && d.total.sodium > a.sodiumPerDay && <p className="mt-2 text-sm font-semibold text-terracotta-dark">About {n(d.total.sodium - a.sodiumPerDay)} mg over your sodium goal: see the dinner tip for easy swaps.</p>}
             </details>
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-xs text-muted">Estimates from your recipes&apos; ingredients. Not medical advice. Fuel snacks go on the grocery list under &ldquo;Athlete fuel&rdquo;.</p>
+      <p className="mt-3 text-xs text-muted">Estimates from your recipes&apos; ingredients. Not medical advice: your doctor or dietitian&apos;s plan comes first. Fuel snacks go on the grocery list under &ldquo;Athlete fuel&rdquo;.</p>
     </section>
   );
 }

@@ -3,7 +3,8 @@ import { ruleProblems } from "./diet";
 import type { Nutrition, NutritionEstimate } from "./nutrition";
 import type { PlanDay, SaleItem, GroceryItem } from "./types";
 
-export type Sport = "strongman" | "powerlifting" | "bodybuilding" | "crossfit" | "endurance" | "combat" | "team" | "gym" | "active";
+export type Sport = "strongman" | "powerlifting" | "bodybuilding" | "crossfit" | "endurance" | "combat" | "team" | "gym" | "active" | "weightloss";
+export type Condition = "diabetes" | "keto" | "lowsodium" | "pregnant" | "breastfeeding";
 export type Phase = "bulk" | "maintain" | "cut";
 type EventKind = "lift" | "show" | "race" | "weighin" | "game";
 
@@ -21,6 +22,18 @@ export type Athlete = {
   trainingDays: number[]; // 0 = Sunday
   competitionDate: string | null; // YYYY-MM-DD: the next meet, show, race, weigh-in or game
   shakes: boolean; // happy to drink protein shakes
+  conditions: Condition[]; // health needs that shape meals (not medical advice)
+  carbsPerMeal: number; // diabetes: a meal's carb limit in grams (from their care team)
+  sodiumPerDay: number; // low sodium: mg a day (often 1,500 or 2,300)
+  trimester: 1 | 2 | 3 | null; // pregnant
+};
+
+export const CONDITIONS: Record<Condition, { label: string; icon: string; blurb: string }> = {
+  diabetes: { label: "Diabetes / blood sugar", icon: "🩸", blurb: "Steady carbs at each meal" },
+  keto: { label: "Keto / low-carb", icon: "🥑", blurb: "Very few carbs, more fat" },
+  lowsodium: { label: "Low sodium", icon: "🧂", blurb: "Blood pressure or heart health" },
+  pregnant: { label: "Pregnant", icon: "🤰", blurb: "Extra calories and protein, food safety" },
+  breastfeeding: { label: "Breastfeeding", icon: "🍼", blurb: "Extra calories, protein and water" },
 };
 
 type SportInfo = {
@@ -42,6 +55,7 @@ export const SPORTS: Record<Sport, SportInfo> = {
   team: { label: "Team sports / teen athlete", icon: "⚽", blurb: "Practice most days, growing", kcalPerLb: 18, proteinPerLb: 0.8, meals: 5, carbs: 1.5, event: "game", eventLabel: "game", likes: ["chocmilk", "pbbanana", "bagelpb", "yogurt", "rollups"] },
   gym: { label: "Gym regular", icon: "💪", blurb: "A few workouts a week", kcalPerLb: 15, proteinPerLb: 0.9, meals: 4, carbs: 0.5, event: "lift", eventLabel: "competition", likes: ["shake", "yogurt", "bar", "rollups"] },
   active: { label: "Just active", icon: "🙂", blurb: "Mostly balance, a little extra", kcalPerLb: 14, proteinPerLb: 0.7, meals: 4, carbs: 0.5, event: "game", eventLabel: "event", likes: ["yogurt", "eggs", "cottage"] },
+  weightloss: { label: "Weight loss", icon: "⚖️", blurb: "Not training, just losing weight", kcalPerLb: 14, proteinPerLb: 0.7, meals: 4, carbs: 0, event: "game", eventLabel: "check-in", likes: ["yogurt", "eggwhites", "cottage", "eggs"], avoids: ["pbbanana", "chocmilk", "bagelpb", "wholemilk", "oats"] },
 };
 
 export const PHASES: Record<Phase, { label: string; blurb: string; kcal: number; protein: number }> = {
@@ -53,24 +67,32 @@ export const PHASES: Record<Phase, { label: string; blurb: string; kcal: number;
 const round = (n: number, to: number) => Math.round(n / to) * to;
 
 /** Starting numbers from body weight, type and phase (common rules of thumb, not medical advice). */
-export function suggestTargets(a: Pick<Athlete, "sport" | "phase" | "youth" | "milesPerWeek">, weightLb: number): { calories: number; protein: number } {
+export function suggestTargets(a: Pick<Athlete, "sport" | "phase" | "youth" | "milesPerWeek"> & Partial<Pick<Athlete, "conditions" | "trimester">>, weightLb: number): { calories: number; protein: number } {
   const s = SPORTS[a.sport];
   let kcalPerLb = s.kcalPerLb;
   // Runners: about 14 a pound plus more for every 10 miles a week.
   if (a.sport === "endurance" && a.milesPerWeek) kcalPerLb = Math.min(22, 14 + a.milesPerWeek / 10);
   // Bodybuilders swing harder between off-season and prep.
   const phaseK = a.sport === "bodybuilding" ? { bulk: 17 / 15.5, maintain: 1, cut: 12 / 15.5 }[a.phase] : PHASES[a.phase].kcal;
-  let proteinPerLb = s.proteinPerLb + PHASES[a.phase].protein;
+  // A cut keeps a little more protein to hold on to muscle (not during pregnancy or breastfeeding).
+  const caring = a.conditions?.includes("pregnant") || a.conditions?.includes("breastfeeding");
+  let proteinPerLb = s.proteinPerLb + (caring ? 0 : PHASES[a.phase].protein);
   // Growing teens: plenty of food, and protein from meals rather than big targets.
   if (a.youth) { kcalPerLb += 1; proteinPerLb = Math.min(proteinPerLb, 0.8); }
+  // Pregnancy and breastfeeding add on top (and never with a cut).
+  const pregnant = a.conditions?.includes("pregnant");
+  const nursing = a.conditions?.includes("breastfeeding");
+  const k = pregnant || nursing ? Math.max(1, phaseK) : phaseK;
+  const extraKcal = pregnant ? (a.trimester === 3 ? 450 : a.trimester === 2 ? 340 : 0) : nursing ? 400 : 0;
+  const extraProtein = (pregnant && (a.trimester ?? 1) > 1) || nursing ? 25 : 0;
   return {
-    calories: Math.min(7000, Math.max(1400, round(weightLb * kcalPerLb * phaseK, 50))),
-    protein: Math.min(400, Math.max(50, round(weightLb * proteinPerLb, 5))),
+    calories: Math.min(7000, Math.max(1400, round(weightLb * kcalPerLb * k + extraKcal, 50))),
+    protein: Math.min(400, Math.max(50, round(weightLb * proteinPerLb + extraProtein, 5))),
   };
 }
 
 export function newAthlete(name = ""): Athlete {
-  return { id: Math.random().toString(36).slice(2, 10), name, sport: "gym", phase: "maintain", youth: false, weightLb: null, milesPerWeek: null, calories: 2600, protein: 160, mealsPerDay: 4, trainingDays: [1, 3, 5], competitionDate: null, shakes: true };
+  return { id: Math.random().toString(36).slice(2, 10), name, sport: "gym", phase: "maintain", youth: false, weightLb: null, milesPerWeek: null, calories: 2600, protein: 160, mealsPerDay: 4, trainingDays: [1, 3, 5], competitionDate: null, shakes: true, conditions: [], carbsPerMeal: 45, sodiumPerDay: 1500, trimester: null };
 }
 
 const LEGACY_GOAL: Record<string, { sport: Sport; phase: Phase }> = {
@@ -84,7 +106,7 @@ export function normalizeAthlete(raw: Partial<Athlete> & { goal?: string }): Ath
   const legacy = raw.goal ? LEGACY_GOAL[raw.goal] : undefined;
   const { goal: _goal, ...rest } = raw;
   void _goal;
-  return { ...base, ...legacy, ...rest, sport: raw.sport && raw.sport in SPORTS ? raw.sport : legacy?.sport ?? base.sport, phase: raw.phase ?? legacy?.phase ?? "maintain", youth: raw.youth ?? false, milesPerWeek: raw.milesPerWeek ?? null } as Athlete;
+  return { ...base, ...legacy, ...rest, sport: raw.sport && raw.sport in SPORTS ? raw.sport : legacy?.sport ?? base.sport, phase: raw.phase ?? legacy?.phase ?? "maintain", youth: raw.youth ?? false, milesPerWeek: raw.milesPerWeek ?? null, conditions: raw.conditions ?? [], carbsPerMeal: raw.carbsPerMeal ?? 45, sodiumPerDay: raw.sodiumPerDay ?? 1500, trimester: raw.trimester ?? null } as Athlete;
 }
 
 /** How many family-size servings this person eats at a meal: a bigger appetite gets 1.5 or 2 portions. */
@@ -155,10 +177,18 @@ export const FUEL: Fuel[] = [
   { id: "bar", name: "Protein bar", kcal: 220, protein: 20, carbs: false, buys: [{ item: "Protein bars", per: 1, unit: "ct", term: "protein bars" }] },
 ];
 
-/** Fuel this family can have, given their food rules and dislikes. */
+// Rough carbs (g) and sodium (mg) per fuel serving, for keto, diabetes and low-sodium plans.
+export const FUEL_CARBS_SODIUM: Record<string, [number, number]> = {
+  shake: [15, 250], yogurt: [7, 60], cottage: [20, 700], eggs: [2, 190], jerky: [6, 1000], rollups: [3, 1100], chickenrice: [45, 200],
+  tuna: [18, 600], pbbanana: [60, 450], oats: [55, 150], chocmilk: [52, 300], bar: [22, 200], wholemilk: [24, 210], bagelpb: [60, 650], eggwhites: [6, 400],
+};
+
+/** Fuel this person can have, given the family's food rules and their own health needs. */
 export function allowedFuel(a: Athlete, rules: FoodRule[], dislikes: string[], allowAnyway: string[]): Fuel[] {
+  const [carbsOf, sodiumOf] = [(f: Fuel) => FUEL_CARBS_SODIUM[f.id]?.[0] ?? 20, (f: Fuel) => FUEL_CARBS_SODIUM[f.id]?.[1] ?? 300];
   // Teens without the shake OK: real food only (no protein powder or bars).
-  return FUEL.filter((f) => (a.shakes || !f.shake) && !(a.youth && !a.shakes && f.id === "bar") && !ruleProblems({ name: f.name, ingredients: f.buys.map((b) => ({ amount: "1", unit: "", item: b.item })) }, rules, dislikes, allowAnyway).length);
+  return FUEL.filter((f) => (a.shakes || !f.shake) && !(a.youth && !a.shakes && f.id === "bar") &&
+    !(a.conditions.includes("keto") && carbsOf(f) > 10) && !(a.conditions.includes("lowsodium") && sodiumOf(f) > 500) && !ruleProblems({ name: f.name, ingredients: f.buys.map((b) => ({ amount: "1", unit: "", item: b.item })) }, rules, dislikes, allowAnyway).length);
 }
 
 /** Search terms for the price check, so on-sale fuel can come first. */
@@ -169,7 +199,7 @@ export function fuelTerms(athletes: Athlete[], rules: FoodRule[], dislikes: stri
 
 // ---------- one athlete's week ----------
 
-export type MealLine = { meal: "Breakfast" | "Lunch" | "Dinner"; name: string; portion: number; kcal: number; protein: number; estimated: boolean };
+export type MealLine = { meal: "Breakfast" | "Lunch" | "Dinner"; name: string; portion: number; kcal: number; protein: number; carbs: number; sodium: number; estimated: boolean };
 export type AthleteDay = {
   date: string;
   training: boolean;
@@ -177,7 +207,7 @@ export type AthleteDay = {
   target: { kcal: number; protein: number };
   meals: MealLine[];
   fuel: { id: string; name: string; kcal: number; protein: number; onSale: boolean }[];
-  total: { kcal: number; protein: number };
+  total: { kcal: number; protein: number; carbs: number; sodium: number };
   short: { kcal: number; protein: number }; // still missing after fuel (0 when on target)
   tip: string | null;
 };
@@ -198,7 +228,7 @@ const weekdayOf = (date: string) => new Date(`${date}T12:00:00Z`).getUTCDay();
 export function planAthleteWeek(
   a: Athlete,
   days: PlanDay[],
-  nutrition: Map<string, NutritionEstimate>,
+  nutrition: Map<string, NutritionEstimate & { sodium?: number }>,
   fuel: Fuel[],
   sales: SaleItem[],
 ): AthleteWeek {
@@ -223,14 +253,14 @@ export function planAthleteWeek(
       const base = good ? n! : TYPICAL[meal];
       // Size each meal to the recipe: a light omelet gets 2 portions, a heavy chicken-fried steak stays at 1.
       const p = Math.min(portion, Math.max(1, round((target.kcal * SHARE[meal]) / base.kcal, 0.5)));
-      meals.push({ meal, name, portion: p, kcal: Math.round(base.kcal * p), protein: Math.round(base.protein * p), estimated: !good });
+      meals.push({ meal, name, portion: p, kcal: Math.round(base.kcal * p), protein: Math.round(base.protein * p), carbs: Math.round(base.carbs * p), sodium: Math.round((good ? n!.sodium ?? 700 : 700) * p), estimated: !good });
     };
     add("Breakfast", d.breakfast?.name, d.breakfast?.recipeId);
     if (d.lunch && d.lunch.kind !== "open") add("Lunch", d.lunch.name, d.lunch.recipeId);
     add("Dinner", d.recipeName, d.recipeId);
     // Meals Ladle doesn't plan (a packed lunch, a night off) still happen: count a typical one so fuel isn't overdone.
     for (const m of ["Breakfast", "Lunch", "Dinner"] as const) {
-      if (!meals.some((x) => x.meal === m)) meals.push({ meal: m, name: m === "Dinner" ? "Night off (your own dinner)" : `Your own ${m.toLowerCase()}`, portion: 1, kcal: Math.round(target.kcal * SHARE[m]), protein: Math.round(target.protein * SHARE[m]), estimated: true });
+      if (!meals.some((x) => x.meal === m)) meals.push({ meal: m, name: m === "Dinner" ? "Night off (your own dinner)" : `Your own ${m.toLowerCase()}`, portion: 1, kcal: Math.round(target.kcal * SHARE[m]), protein: Math.round(target.protein * SHARE[m]), carbs: Math.round(TYPICAL[m].carbs), sodium: 700, estimated: true });
     }
     meals.sort((x, y) => ["Breakfast", "Lunch", "Dinner"].indexOf(x.meal) - ["Breakfast", "Lunch", "Dinner"].indexOf(y.meal));
 
@@ -256,6 +286,7 @@ export function planAthleteWeek(
         if (sport.likes.includes(f.id)) s += 0.8; // suits this kind of athlete
         if (sport.avoids?.includes(f.id)) s -= 1.5;
         if (a.phase === "cut") s -= f.kcal / 600; // fewer calories per gram of protein on a cut
+        if (a.conditions.includes("diabetes")) s -= (FUEL_CARBS_SODIUM[f.id]?.[0] ?? 20) / 25; // steady blood sugar: fewer carb-heavy snacks
         if (onSale(f)) s += 1;
         s -= (used[f.id] ?? 0) * 0.6; // variety across the week
         return { f, s };
@@ -273,7 +304,11 @@ export function planAthleteWeek(
       : null;
     out.push({
       date: d.date, training, event, target, meals, fuel: picks,
-      total: { kcal, protein },
+      total: {
+        kcal, protein,
+        carbs: meals.reduce((n, m) => n + m.carbs, 0) + picks.reduce((n, f) => n + (FUEL_CARBS_SODIUM[f.id]?.[0] ?? 20), 0),
+        sodium: meals.reduce((n, m) => n + m.sodium, 0) + picks.reduce((n, f) => n + (FUEL_CARBS_SODIUM[f.id]?.[1] ?? 300), 0),
+      },
       short: { kcal: Math.max(0, target.kcal - kcal), protein: Math.max(0, target.protein - protein) },
       tip,
     });

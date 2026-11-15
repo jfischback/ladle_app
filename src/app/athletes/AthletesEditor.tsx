@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { saveAthletes } from "../actions/athletes";
-import { PHASES, SPORTS, newAthlete, portionFor, suggestTargets, type Athlete, type Phase, type Sport } from "@/lib/athletes";
+import { CONDITIONS, PHASES, SPORTS, newAthlete, portionFor, suggestTargets, type Athlete, type Condition, type Phase, type Sport } from "@/lib/athletes";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const EVENT_HINT: Record<string, string> = {
@@ -27,7 +27,7 @@ export function AthletesEditor({ initial }: { initial: Athlete[] }) {
     start(async () => {
       const r = await saveAthletes(list);
       if (!r.error) setSaved(JSON.stringify(list));
-      setMsg(r.error ? { ok: false, text: r.error } : { ok: true, text: list.length ? "Saved! Re-plan the week to use these goals." : "Athlete mode is off." });
+      setMsg(r.error ? { ok: false, text: r.error } : { ok: true, text: list.length ? `Saved! Re-plan the week to use these goals.${r.addedPregnancyRule ? " Pregnancy food safety is now on for family dinners." : ""}` : "No one's goals are set." });
     });
 
   return (
@@ -35,7 +35,7 @@ export function AthletesEditor({ initial }: { initial: Athlete[] }) {
       {list.map((a) => <AthleteCard key={a.id} a={a} onChange={(p) => update(a.id, p)} onRemove={() => setList((l) => l.filter((x) => x.id !== a.id))} />)}
 
       <button type="button" className="btn-secondary w-full" onClick={() => setList((l) => [...l, newAthlete()])}>
-        <span aria-hidden="true">💪</span> {list.length ? "Add another athlete" : "Add an athlete"}
+        <span aria-hidden="true">💪</span> {list.length ? "Add another person" : "Add a person"}
       </button>
 
       {(dirty || msg) && (
@@ -68,12 +68,12 @@ function AthleteCard({ a, onChange, onRemove }: { a: Athlete; onChange: (p: Part
       </div>
 
       <fieldset>
-        <legend className="label">What kind of athlete?</legend>
+        <legend className="label">What&apos;s their goal?</legend>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {(Object.keys(SPORTS) as Sport[]).map((k) => {
             const on = a.sport === k;
             return (
-              <button key={k} type="button" aria-pressed={on} onClick={() => change({ sport: k, mealsPerDay: SPORTS[k].meals })}
+              <button key={k} type="button" aria-pressed={on} onClick={() => change({ sport: k, mealsPerDay: SPORTS[k].meals, ...(k === "weightloss" ? { phase: "cut" as const, trainingDays: [] } : {}) })}
                 className={`flex flex-col items-start gap-0.5 rounded-2xl border-2 p-3 text-left transition-colors ${on ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive/50"}`}>
                 <span className="text-2xl" aria-hidden="true">{SPORTS[k].icon}</span>
                 <span className="font-bold leading-tight">{SPORTS[k].label}</span>
@@ -104,6 +104,8 @@ function AthleteCard({ a, onChange, onRemove }: { a: Athlete; onChange: (p: Part
         <input type="checkbox" className="mt-1 h-5 w-5 accent-olive" checked={a.youth} onChange={(e) => change({ youth: e.target.checked, ...(e.target.checked ? { shakes: false } : {}) })} />
         <span><b>Under 18</b> <span className="text-muted">Growing kids need plenty of food. We use real-food snacks instead of protein powder and bars (you can still allow shakes below).</span></span>
       </label>
+
+      <HealthNeeds a={a} change={change} />
 
       <div className={`grid gap-3 ${a.sport === "endurance" ? "sm:grid-cols-2" : ""}`}>
         <label>
@@ -162,7 +164,7 @@ function AthleteCard({ a, onChange, onRemove }: { a: Athlete; onChange: (p: Part
           <p className="mt-1 text-sm text-muted">3 meals + {Math.max(0, a.mealsPerDay - 3)} snack{a.mealsPerDay - 3 === 1 ? "" : "s"} or shake{a.mealsPerDay - 3 === 1 ? "" : "s"}</p>
         </div>
         <label>
-          <span className="label">Next {sport.eventLabel} <span className="font-normal text-muted">(optional)</span></span>
+          <span className="label">{a.sport === "weightloss" ? "Next check-in or goal date" : `Next ${sport.eventLabel}`} <span className="font-normal text-muted">(optional)</span></span>
           <input type="date" className="field" value={a.competitionDate ?? ""} onChange={(e) => onChange({ competitionDate: e.target.value || null })} />
           <span className="mt-1 block text-sm text-muted">{EVENT_HINT[sport.event]}</span>
         </label>
@@ -177,5 +179,60 @@ function AthleteCard({ a, onChange, onRemove }: { a: Athlete; onChange: (p: Part
         🍽 At meals, {a.name || "they"} get{a.name ? "s" : ""} up to <b>{portion} portion{portion === 1 ? "" : "s"}</b>, sized to each recipe, and the grocery list buys enough.
       </p>
     </section>
+  );
+}
+
+/** Health needs: they shape this person's portions and snacks, and nudge the family's dinners. */
+function HealthNeeds({ a, change }: { a: Athlete; change: (p: Partial<Athlete>) => void }) {
+  const has = (c: Condition) => a.conditions.includes(c);
+  const toggle = (c: Condition) => {
+    const on = !has(c);
+    const conditions = on ? [...a.conditions.filter((x) => !(c === "pregnant" && x === "breastfeeding") && !(c === "breastfeeding" && x === "pregnant")), c] : a.conditions.filter((x) => x !== c);
+    change({ conditions, ...(c === "pregnant" && on ? { trimester: a.trimester ?? 2, phase: "maintain" as const } : {}), ...(c === "breastfeeding" && on ? { phase: "maintain" as const } : {}) });
+  };
+  return (
+    <fieldset className="space-y-3">
+      <legend className="label">Health needs <span className="font-normal text-muted">(optional)</span></legend>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {(Object.keys(CONDITIONS) as Condition[]).map((c) => (
+          <button key={c} type="button" aria-pressed={has(c)} onClick={() => toggle(c)}
+            className={`flex flex-col items-start rounded-2xl border-2 p-2.5 text-left ${has(c) ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive/50"}`}>
+            <span className="font-bold"><span aria-hidden="true">{CONDITIONS[c].icon}</span> {CONDITIONS[c].label}</span>
+            <span className="text-xs text-muted">{CONDITIONS[c].blurb}</span>
+          </button>
+        ))}
+      </div>
+      {has("diabetes") && (
+        <label className="block">
+          <span className="label">Carbs per meal (grams)</span>
+          <input className="field" inputMode="numeric" value={a.carbsPerMeal} onChange={(e) => change({ carbsPerMeal: Number(e.target.value.replace(/\D/g, "")) || 0 })} />
+          <span className="mt-1 block text-sm text-muted">Use the number from your doctor or diabetes educator; 45 to 60 g is common. We&apos;ll flag dinners that go well over it.</span>
+        </label>
+      )}
+      {has("lowsodium") && (
+        <div>
+          <span className="label">Sodium a day</span>
+          <div className="flex flex-wrap gap-1.5">
+            {[1500, 2000, 2300].map((v) => (
+              <button key={v} type="button" aria-pressed={a.sodiumPerDay === v} onClick={() => change({ sodiumPerDay: v })}
+                className={`rounded-full border-2 px-3 py-1 text-sm font-bold ${a.sodiumPerDay === v ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>{v.toLocaleString("en-US")} mg</button>
+            ))}
+          </div>
+        </div>
+      )}
+      {has("keto") && <p className="text-sm text-muted">We&apos;ll favor low-carb dinners for everyone and tell {a.name || "them"} which sides to skip. Add the low-carb recipe pack for more choices.</p>}
+      {has("pregnant") && (
+        <div>
+          <span className="label">Trimester</span>
+          <div className="flex gap-1.5">
+            {([1, 2, 3] as const).map((t) => (
+              <button key={t} type="button" aria-pressed={a.trimester === t} onClick={() => change({ trimester: t })}
+                className={`rounded-full border-2 px-4 py-1 text-sm font-bold ${a.trimester === t ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>{t === 1 ? "First" : t === 2 ? "Second" : "Third"}</button>
+            ))}
+          </div>
+          <p className="mt-1 text-sm text-muted">Adds calories and protein for the trimester, and turns on pregnancy food safety for the family&apos;s dinners (no raw fish, cold deli meat or soft unpasteurized cheese).</p>
+        </div>
+      )}
+    </fieldset>
   );
 }

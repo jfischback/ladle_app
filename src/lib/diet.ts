@@ -8,7 +8,7 @@ import type { Ingredient } from "./types";
 export type FoodRule =
   | "no-bones" | "no-nuts" | "no-peanuts" | "no-dairy" | "no-gluten" | "no-eggs" | "no-shellfish" | "no-fish" | "no-soy"
   | "no-sesame" | "vegetarian" | "pescatarian" | "no-seafood" | "no-pork" | "no-beef" | "not-spicy"
-  | "no-alcohol" | "halal" | "kosher" | "pregnancy";
+  | "no-alcohol" | "halal" | "kosher" | "pregnancy" | "vegan";
 
 type RuleDef = {
   label: string;
@@ -76,6 +76,12 @@ export const FOOD_RULES: Record<FoodRule, RuleDef> = {
     label: "Vegetarian", group: "diet", icon: "🥦",
     hits: new RegExp(`${MEAT.source}|${FISH.source}|${SHELLFISH.source}|\\b(chicken|beef|bone) (broth|stock|bouillon|base)\\b`),
     except: /vegetarian|plant-based|vegan|beyond meat|impossible|meatless|veggie (burger|sausage)|goat cheese|celery ribs?|ribs (and|&) seeds|vegetable (broth|stock)/,
+  },
+  vegan: {
+    label: "Vegan", group: "diet", icon: "🌱",
+    hits: new RegExp(`${MEAT.source}|${FISH.source}|${SHELLFISH.source}|\\b(chicken|beef|bone) (broth|stock|bouillon|base)\\b|\\bmilk\\b|cheese|\\bbutter\\b|cream\\b|yogh?urt|\\bghee\\b|parmesan|mozzarella|cheddar|ricotta|half-and-half|buttermilk|feta|alfredo|queso|sour cream|cream cheese|cotija|\\beggs?\\b|egg (yolks?|whites?|noodles)|\\bmayo(nnaise)?\\b|aioli|\\bhoney\\b|gelatin|whey`),
+    except: /vegetarian|plant-based|vegan|beyond meat|impossible|meatless|veggie (burger|sausage)|celery ribs?|ribs (and|&) seeds|vegetable (broth|stock)|coconut (milk|cream)|(almond|oat|soy|rice|cashew|coconut|plant-based|non-dairy|dairy-free) (milk|cheese|butter|yogurt|cream)|peanut butter|nut butter|almond butter|apple butter|butternut|butter beans?|butter lettuce|cocoa butter|eggplant|egg-free|cream of tartar/,
+    note: "No meat, fish, dairy, eggs or honey.",
   },
   pescatarian: {
     label: "Pescatarian", group: "diet", icon: "🐠",
@@ -211,6 +217,7 @@ function problemLabel(key: FoodRule): string {
     case "pregnancy": return "Not pregnancy-safe";
     case "vegetarian": return "Not vegetarian";
     case "pescatarian": return "Has meat";
+    case "vegan": return "Not vegan";
     case "no-seafood": return "Has seafood";
     case "no-pork": return "Has pork";
     case "no-beef": return "Has beef";
