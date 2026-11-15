@@ -144,6 +144,7 @@ export default async function HomePage() {
           )}
           <div className="flex flex-wrap justify-center gap-2 pt-2">
             {plan.weekOf !== upcoming && approved && <PlanButton label={`Plan the week of ${shortDate(upcoming)}`} />}
+            <a href={`/api/plans/${plan.id}/calendar`} className="btn-quiet text-sm" download>📅 Add to my calendar</a>
             <StartOverButton planId={plan.id} approved={approved} />
           </div>
         </>
