@@ -73,7 +73,7 @@ await step("a recipe opens, and cooking mode", async () => {
   await noCrash();
 });
 
-for (const [name, path] of [["recipes: use what I have", "/recipes?f=have&have=chicken%2C+rice"], ["starters & packs", "/recipes?tab=browse"], ["pantry", "/pantry"], ["history", "/history"], ["settings", "/setup"], ["household", "/household"], ["staples", "/staples"], ["extras", "/extras"]]) {
+for (const [name, path] of [["recipes: use what I have", "/recipes?f=have&have=chicken%2C+rice"], ["starters & packs", "/recipes?tab=browse"], ["pantry", "/pantry"], ["history", "/history"], ["settings", "/setup"], ["household", "/household"], ["staples", "/staples"], ["extras", "/extras"], ["what's new", "/whats-new"]]) {
   await step(`page: ${name}`, async () => {
     const r = await page.goto(BASE + path);
     if (!r || r.status() >= 400) throw new Error(`status ${r?.status()}`);
