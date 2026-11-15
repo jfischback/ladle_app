@@ -48,3 +48,18 @@ test("what to buy reads as the thing, not the prep", async () => {
   const m = onHandMatch({ ingredients: [{ item: "boneless, skinless chicken thighs, cut in strips", amount: "1", unit: "lb" }, { item: "yellow onion, diced (about 1 cup)", amount: "1", unit: "" }] } as never, []);
   assert.deepEqual(m.need, ["boneless skinless chicken thighs", "yellow onion"]);
 });
+
+test("the thing itself has to match: tortillas, not corn; potatoes, not sweet potatoes", async () => {
+  const { onHandMatch } = await import("@/lib/on-hand");
+  const ing = (item: string) => ({ item, amount: "1", unit: "" });
+  const r = { ingredients: [ing("corn tortillas"), ing("frozen corn"), ing("sweet potatoes, cubed"), ing("russet potatoes"), ing("boneless, skinless chicken thighs, cut in strips"), ing("broccoli florets")] } as never;
+  assert.deepEqual(onHandMatch(r, ["tortillas", "potatoes", "chicken", "broccoli"]).need, ["frozen corn", "sweet potatoes"]);
+  assert.deepEqual(onHandMatch(r, ["corn"]).need.includes("corn tortillas"), true, "corn isn't corn tortillas");
+});
+
+test("pantry names still match", async () => {
+  const { onHandMatch } = await import("@/lib/on-hand");
+  const ing = (item: string) => ({ item, amount: "1", unit: "" });
+  const r = { ingredients: [ing("shredded cheddar cheese"), ing("olive oil"), ing("kosher salt"), ing("grated parmesan cheese")] } as never;
+  assert.deepEqual(onHandMatch(r, ["Shredded cheddar", "Good olive oil, like California Olive Ranch", "parmesan"]).need, []);
+});
