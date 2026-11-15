@@ -10,6 +10,7 @@ import { addToCart, krogerEnabled, refreshUserTokens, searchProducts } from "@/l
 import { cartItems, pickOptions } from "@/lib/cart";
 import { open, seal } from "@/lib/secret-box";
 import type { CartLine, CartState } from "@/lib/types";
+import { storeBrand, yourStore } from "@/lib/stores";
 
 async function saveCart(userId: string, planId: string, cart: CartState) {
   const db = await getDb();
@@ -17,13 +18,14 @@ async function saveCart(userId: string, planId: string, cart: CartState) {
   revalidatePath("/cart");
 }
 
-/** Find a Fry's product for each item on this week's approved grocery list. */
+/** Find a store product for each item on this week's approved grocery list. */
 export async function matchCart(planId: string): Promise<{ error?: string }> {
   const userId = await requireUserId();
   const [plan, { data: settings }] = await Promise.all([getPlan(userId, planId), getSettings(userId)]);
   if (!plan?.groceryList || plan.status !== "approved") return { error: "Approve this week's plan first, so there's a grocery list." };
-  if (!krogerEnabled()) return { error: "Fry's isn't connected to Ladle yet." };
-  if (!settings.storeLocationId) return { error: "Pick your Fry's store in Settings first." };
+  const brand = storeBrand(settings.storeName);
+  if (!krogerEnabled()) return { error: "Store prices aren't connected to Ladle yet." };
+  if (!settings.storeLocationId) return { error: "Pick your store in Settings first." };
   const store = settings.storeLocationId;
 
   const items = cartItems(plan.groceryList);
@@ -46,7 +48,7 @@ export async function matchCart(planId: string): Promise<{ error?: string }> {
       lines.push({ key: x.key, section: x.section, item: x.item, quantity: prev ? prev.quantity : x.quantity, chosen: keepChoice >= 0 ? keepChoice : chosen, options });
     });
   }
-  if (lines.length && lines.every((l) => !l.options.length)) return { error: "Fry's didn't answer. Try again in a minute." };
+  if (lines.length && lines.every((l) => !l.options.length)) return { error: `${brand.name ?? "The store"} didn't answer. Try again in a minute.` };
   await saveCart(userId, planId, { matchedAt: new Date().toISOString(), lines, sentAt: plan.cart?.sentAt ?? null, sentCount: plan.cart?.sentCount });
   return {};
 }
@@ -65,7 +67,7 @@ export async function updateCartLine(planId: string, key: string, patch: { quant
   await saveCart(userId, planId, { ...plan.cart, lines });
 }
 
-/** A fresh access token for this family's Fry's account (renewed when it's about to run out). */
+/** A fresh access token for this family's store account (renewed when it's about to run out). */
 async function userAccessToken(userId: string): Promise<string | null> {
   const db = await getDb();
   const [acct] = await db.select().from(krogerAccounts).where(eq(krogerAccounts.userId, userId));
@@ -85,7 +87,7 @@ async function userAccessToken(userId: string): Promise<string | null> {
   }
 }
 
-/** Put the chosen products in the family's Fry's cart. It never checks out: they finish on Fry's. */
+/** Put the chosen products in the family's store cart. It never checks out: they finish on the store's site. */
 export async function sendCart(planId: string): Promise<{ error?: string; reconnect?: boolean; sent?: number }> {
   const userId = await requireUserId();
   const [plan, { data: settings }] = await Promise.all([getPlan(userId, planId), getSettings(userId)]);
@@ -95,14 +97,14 @@ export async function sendCart(planId: string): Promise<{ error?: string; reconn
     .map((l) => ({ upc: l.options[l.chosen!].upc, quantity: l.quantity }));
   if (!items.length) return { error: "Nothing picked to send." };
   const token = await userAccessToken(userId);
-  if (!token) return { reconnect: true, error: "Connect your Fry's account first." };
+  if (!token) return { reconnect: true, error: `Connect ${yourStore(storeBrand(settings.storeName))} account first.` };
   try {
     await addToCart(token, items, settings.fulfillment === "delivery" ? "DELIVERY" : "PICKUP");
   } catch (e) {
     if ((e as Error).message === "NEEDS_RECONNECT") {
       const db = await getDb();
       await db.delete(krogerAccounts).where(eq(krogerAccounts.userId, userId));
-      return { reconnect: true, error: "Fry's asked you to sign in again." };
+      return { reconnect: true, error: "The store asked you to sign in again." };
     }
     return { error: (e as Error).message };
   }

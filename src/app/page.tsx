@@ -12,6 +12,7 @@ import { staplesTotal } from "@/lib/staples";
 import { extrasTotal } from "@/lib/extras";
 import { krogerEnabled } from "@/lib/kroger";
 import { ruleProblems } from "@/lib/diet";
+import { storeBrand } from "@/lib/stores";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { AthleteWeekCard } from "@/components/AthleteWeekCard";
 
@@ -47,7 +48,9 @@ export default async function HomePage() {
   const recipeInfo = recipes
     .filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length)
     .map((r) => ({ id: r.id, name: r.name, protein: r.protein, totalMinutes: r.totalMinutes }));
-  const store = settings.storeName ? settings.storeName.split(" · ")[0] : "your Fry's";
+  const store = settings.storeName ? settings.storeName.split(" · ")[0] : "your store";
+  const brand = storeBrand(settings.storeName);
+  const yours = `your ${brand.name ?? "store"}`;
   const approved = plan?.status === "approved";
   const dinners = plan?.days.filter((d) => d.recipeId).length ?? 0;
   const athletes = plan ? await athleteWeeks(userId, plan, settings) : [];
@@ -80,16 +83,16 @@ export default async function HomePage() {
       ))}
 
       {plan?.summary && plan.plannerSource !== "basic" && <WhyThisWeek summary={plan.summary} />}
-      <SaleBanner plan={plan} saleThreshold={settings.saleThresholdPct} />
+      <SaleBanner plan={plan} saleThreshold={settings.saleThresholdPct} yours={yours} />
       {!plan && krogerEnabled() && !settings.storeLocationId && (
         <Link href="/setup" className="flex items-center gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft hover:shadow-lift">
           <span className="text-3xl" aria-hidden="true">🏷️</span>
-          <span><span className="font-bold">Want sale prices?</span> Pick your Fry&apos;s in Settings first, and we&apos;ll plan around what&apos;s on sale. →</span>
+          <span><span className="font-bold">Want sale prices?</span> Pick your store in Settings first, and we&apos;ll plan around what&apos;s on sale. →</span>
         </Link>
       )}
 
       {!plan ? (
-        <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} />
+        <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} yours={yours} />
       ) : (
         <>
           <ul className="grid grid-cols-[minmax(0,1fr)] gap-3">
@@ -114,7 +117,7 @@ export default async function HomePage() {
           {approved ? (
             <>
               <Celebrate />
-              <GroceryChecklist plan={plan} />
+              <GroceryChecklist plan={plan} store={brand.name ?? "store"} />
             </>
           ) : (
             <ApproveBar planId={plan.id} />
@@ -166,7 +169,7 @@ function SaleRow({ s }: { s: SaleItem }) {
   );
 }
 
-function SaleBanner({ plan, saleThreshold }: { plan: Plan | null; saleThreshold: number }) {
+function SaleBanner({ plan, saleThreshold, yours }: { plan: Plan | null; saleThreshold: number; yours: string }) {
   if (!plan) return null;
   const check = plan.saleCheck;
   // Recipes word things differently ("chicken thighs", "boneless skinless chicken thighs"), so one deal can cover
@@ -184,21 +187,21 @@ function SaleBanner({ plan, saleThreshold }: { plan: Plan | null; saleThreshold:
     return (
       <Link href="/setup" className="flex items-center gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft hover:shadow-lift">
         <span className="text-3xl" aria-hidden="true">🏷️</span>
-        <span><span className="font-bold">See what&apos;s on sale.</span> Pick your Fry&apos;s in Settings and we&apos;ll check prices each week. →</span>
+        <span><span className="font-bold">See what&apos;s on sale.</span> Pick your store in Settings and we&apos;ll check prices each week. →</span>
       </Link>
     );
   }
   if (check?.status === "failed") {
     return (
       <p className="rounded-3xl bg-oat p-4">
-        <span className="font-bold">We couldn&apos;t get prices from Fry&apos;s this time,</span> so this week was planned without sales. Tap &quot;Start over&quot; later to try again.
+        <span className="font-bold">We couldn&apos;t get prices from {yours.replace(/^your /, "")} this time,</span> so this week was planned without sales. Tap &quot;Start over&quot; later to try again.
       </p>
     );
   }
   if (check?.status === "ok" && !sales.length) {
     return (
       <p className="rounded-3xl bg-oat p-4">
-        <span className="font-bold">No big sales on your ingredients this week.</span> We checked {check.checked} items at your Fry&apos;s; none were {saleThreshold}% off or more.
+        <span className="font-bold">No big sales on your ingredients this week.</span> We checked {check.checked} items at {yours}; none were {saleThreshold}% off or more.
       </p>
     );
   }
@@ -209,7 +212,7 @@ function SaleBanner({ plan, saleThreshold }: { plan: Plan | null; saleThreshold:
   return (
     <section aria-labelledby="sale-title" className="rounded-3xl bg-ochre-soft p-4 shadow-soft">
       <h2 id="sale-title" className="flex items-center gap-2 text-xl font-semibold">
-        <span aria-hidden="true">🏷️</span> On sale at your Fry&apos;s
+        <span aria-hidden="true">🏷️</span> On sale at {yours}
       </h2>
       {sales.length > 0 ? (
         <>
@@ -232,7 +235,7 @@ function SaleBanner({ plan, saleThreshold }: { plan: Plan | null; saleThreshold:
   );
 }
 
-function EmptyState({ weekOf, recipeCount, needed, checksSales }: { weekOf: string; recipeCount: number; needed: number; checksSales: boolean }) {
+function EmptyState({ weekOf, recipeCount, needed, checksSales, yours }: { weekOf: string; recipeCount: number; needed: number; checksSales: boolean; yours: string }) {
   if (recipeCount < needed) {
     return (
       <div className="card flex flex-col items-center gap-4 p-8 text-center">
@@ -256,7 +259,7 @@ function EmptyState({ weekOf, recipeCount, needed, checksSales }: { weekOf: stri
       </div>
       <div>
         <h2 className="text-2xl font-semibold">What&apos;s for dinner this week?</h2>
-        <p className="mt-1 text-lg text-muted">We&apos;ll pick dinners for the week of {shortDate(weekOf)} from the recipes your family likes{checksSales ? ", built around what's on sale at your Fry's" : ""}. You can swap anything.</p>
+        <p className="mt-1 text-lg text-muted">We&apos;ll pick dinners for the week of {shortDate(weekOf)} from the recipes your family likes{checksSales ? `, built around what's on sale at ${yours}` : ""}. You can swap anything.</p>
       </div>
       <PlanButton label="Plan my week" big />
     </div>

@@ -102,7 +102,7 @@ export function StaplesEditor({ initial, priceInfo }: { initial: Staple[]; price
         </section>
       )}
 
-      <p className="text-sm text-muted">Prices show after you plan a week with your Fry&apos;s connected.</p>
+      <p className="text-sm text-muted">Prices show after you plan a week with your store picked in Settings.</p>
     </div>
   );
 }
