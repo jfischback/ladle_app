@@ -4,6 +4,7 @@ import { setActualSpend } from "@/app/actions/plans";
 import { dayName, money, shortDate } from "@/lib/week";
 import { FoodArt } from "@/components/FoodArt";
 import { ReuseButton } from "./ReuseButton";
+import { cartTotal } from "@/lib/cart-total";
 
 // Planning, approving and importing can take a while (the AI, store prices): give them a minute.
 export const maxDuration = 60;
@@ -19,6 +20,10 @@ export default async function HistoryPage() {
   // Oldest to newest, last 8 weeks with a receipt total, for the little chart.
   const chart = weeks.filter((w) => w.actualSpend != null).slice(0, 8).reverse();
   const chartMax = Math.max(budget, ...chart.map((w) => w.actualSpend!));
+  // What sales took off the carts that were sent to the store.
+  const saleSaved = (w: (typeof weeks)[number]) => (w.cart?.sentAt ? cartTotal(w.cart.lines).saved : 0);
+  const sentWeeks = weeks.filter((w) => saleSaved(w) > 0);
+  const totalSaleSaved = sentWeeks.reduce((a, w) => a + saleSaved(w), 0);
 
   return (
     <div className="space-y-6">
@@ -27,7 +32,7 @@ export default async function HistoryPage() {
         <h1 className="text-4xl font-semibold">History</h1>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className={`grid gap-3 ${totalSaleSaved > 0 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
         <div className="rounded-3xl bg-olive p-5 text-cream shadow-soft">
           <p className="font-bold opacity-90">Average week</p>
           <p className="font-display text-5xl font-semibold">{money(avg)}</p>
@@ -38,6 +43,13 @@ export default async function HistoryPage() {
           <p className="font-display text-5xl font-semibold">{spent.length ? `${money(Math.abs(saved))}${saved > 0 ? " 🎉" : ""}` : "—"}</p>
           <p className="text-muted">{spent.length ? `Across ${spent.length} week${spent.length === 1 ? "" : "s"}` : "We'll add it up for you."}</p>
         </div>
+        {totalSaleSaved > 0 && (
+          <div className="rounded-3xl bg-blush p-5 shadow-soft">
+            <p className="font-bold text-terracotta-dark">🏷️ Saved on sales</p>
+            <p className="font-display text-5xl font-semibold">{money(totalSaleSaved)}</p>
+            <p className="text-muted">In {sentWeeks.length} cart{sentWeeks.length === 1 ? "" : "s"} sent to the store</p>
+          </div>
+        )}
       </div>
 
       {chart.length >= 2 && (
@@ -81,7 +93,10 @@ export default async function HistoryPage() {
               <li key={w.id} className="card space-y-4 p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h2 className="text-2xl font-semibold">Week of {shortDate(w.weekOf)}</h2>
-                  {w.estimatedTotal != null && <span className="text-muted">Estimated {money(w.estimatedTotal)}</span>}
+                  <span className="text-muted">
+                    {w.estimatedTotal != null && <>Estimated {money(w.estimatedTotal)}</>}
+                    {saleSaved(w) > 0 && <> · <b className="text-terracotta-dark">saved {money(saleSaved(w))} on sales</b></>}
+                  </span>
                 </div>
                 <ul className="grid gap-2 sm:grid-cols-2">
                   {dinners.map((d) => (
