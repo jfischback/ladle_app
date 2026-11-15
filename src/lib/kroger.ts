@@ -5,8 +5,9 @@ import "server-only";
  * Stage 1 uses Locations only. Product prices come after the sale-price test (spec section 14);
  * cart fill comes after that, behind Approve. The app never checks out.
  */
-// KROGER_API_BASE is only for testing against a stand-in server.
-const BASE = process.env.KROGER_API_BASE ?? "https://api.kroger.com/v1";
+// KROGER_API_BASE points at a stand-in server for local testing only; it's ignored in production so Kroger
+// credentials and family tokens can never be sent anywhere else.
+const BASE = (process.env.NODE_ENV !== "production" && process.env.KROGER_API_BASE) || "https://api.kroger.com/v1";
 
 export function krogerEnabled(): boolean {
   return !!(process.env.KROGER_CLIENT_ID && process.env.KROGER_CLIENT_SECRET);
@@ -57,6 +58,7 @@ export async function findFrysStores(zip: string): Promise<StoreLocation[]> {
 
 export type KrogerProduct = {
   productId: string;
+  upc: string; // what the cart API takes
   description: string;
   brand: string;
   size: string;
@@ -80,6 +82,7 @@ export async function searchProducts(term: string, locationId: string, limit = 1
   const json = (await res.json()) as {
     data?: {
       productId: string;
+      upc?: string;
       description?: string;
       brand?: string;
       items?: { size?: string; price?: { regular?: number; promo?: number } }[];
@@ -93,6 +96,7 @@ export async function searchProducts(term: string, locationId: string, limit = 1
     const promo = item?.price?.promo;
     out.push({
       productId: p.productId,
+      upc: p.upc ?? p.productId,
       description: p.description ?? "",
       brand: p.brand ?? "",
       size: item?.size ?? "",
@@ -101,4 +105,57 @@ export async function searchProducts(term: string, locationId: string, limit = 1
     });
   }
   return out;
+}
+
+// ---------- a family's own Kroger account (for filling their cart) ----------
+
+export const CART_SCOPE = "cart.basic:write profile.compact";
+
+/** Where to send someone to connect their Fry's account. */
+export function authorizeUrl(redirectUri: string, state: string): string {
+  const u = new URL(`${BASE}/connect/oauth2/authorize`);
+  u.searchParams.set("scope", CART_SCOPE);
+  u.searchParams.set("response_type", "code");
+  u.searchParams.set("client_id", process.env.KROGER_CLIENT_ID ?? "");
+  u.searchParams.set("redirect_uri", redirectUri);
+  u.searchParams.set("state", state);
+  return u.toString();
+}
+
+export type UserTokens = { accessToken: string; refreshToken: string; expiresAt: Date };
+
+async function tokenRequest(body: URLSearchParams): Promise<UserTokens> {
+  const basic = Buffer.from(`${process.env.KROGER_CLIENT_ID}:${process.env.KROGER_CLIENT_SECRET}`).toString("base64");
+  const res = await fetch(`${BASE}/connect/oauth2/token`, {
+    method: "POST",
+    headers: { Authorization: `Basic ${basic}`, "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) throw new Error(`Fry's sign-in failed (${res.status})`);
+  const j = (await res.json()) as { access_token: string; refresh_token?: string; expires_in: number };
+  return { accessToken: j.access_token, refreshToken: j.refresh_token ?? "", expiresAt: new Date(Date.now() + j.expires_in * 1000) };
+}
+
+export const exchangeCode = (code: string, redirectUri: string) =>
+  tokenRequest(new URLSearchParams({ grant_type: "authorization_code", code, redirect_uri: redirectUri }));
+
+export const refreshUserTokens = (refreshToken: string) =>
+  tokenRequest(new URLSearchParams({ grant_type: "refresh_token", refresh_token: refreshToken }));
+
+/**
+ * Add items to the family's Fry's cart (pickup or delivery). This only fills the cart: the family reviews,
+ * pays and checks out on Fry's themselves. The app never checks out.
+ */
+export async function addToCart(accessToken: string, items: { upc: string; quantity: number }[], modality: "PICKUP" | "DELIVERY") {
+  for (let i = 0; i < items.length; i += 25) {
+    const res = await fetch(`${BASE}/cart/add`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ items: items.slice(i, i + 25).map((x) => ({ upc: x.upc, quantity: x.quantity, modality })) }),
+      signal: AbortSignal.timeout(20000),
+    });
+    if (res.status === 401) throw new Error("NEEDS_RECONNECT");
+    if (!res.ok) throw new Error(`Fry's didn't accept the cart (${res.status})`);
+  }
 }

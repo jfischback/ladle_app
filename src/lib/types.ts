@@ -22,6 +22,21 @@ export type PlanDay = {
   holiday?: string | null; // federal holiday on this date
 };
 
+/** One store product option for a grocery line. */
+export type CartProduct = { upc: string; description: string; size: string; price: number; regular: number; onSale: boolean };
+
+/** A grocery list line matched to a Fry's product, ready to send to the cart. */
+export type CartLine = {
+  key: string; // section + item, stable while reviewing
+  section: string;
+  item: string; // as on the grocery list
+  quantity: number;
+  chosen: number | null; // index into options; null = skipped
+  options: CartProduct[];
+};
+
+export type CartState = { matchedAt: string; lines: CartLine[]; sentAt?: string | null; sentCount?: number };
+
 export type ExtraCategory = "snacks" | "sweets" | "drinks" | "baby";
 
 /** One snack/sweet/drink/baby item on this week's list, with why it's there. */
