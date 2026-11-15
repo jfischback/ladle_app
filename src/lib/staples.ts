@@ -1,9 +1,4 @@
-import { z } from "zod";
 import type { Staple, StapleLine } from "./types";
-
-export const StaplesSchema = z
-  .array(z.object({ item: z.string().trim().min(2).max(60), quantity: z.string().trim().max(30), active: z.boolean() }))
-  .max(60);
 
 /** One-tap ideas on the staples page. */
 export const STAPLE_IDEAS: Staple[] = [

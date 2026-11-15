@@ -5,7 +5,7 @@ import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
 import { settings as settingsTable } from "@/db/schema";
 import { getSettings } from "@/lib/data";
-import { StaplesSchema } from "@/lib/staples";
+import { StaplesSchema } from "@/lib/staples-schema";
 import type { Staple } from "@/lib/types";
 
 /** Save the weekly staples list (only that part of the settings). */

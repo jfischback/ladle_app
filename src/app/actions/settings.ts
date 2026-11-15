@@ -9,7 +9,7 @@ import { recipes, settings as settingsTable } from "@/db/schema";
 import { findFrysStores, krogerEnabled, type StoreLocation } from "@/lib/kroger";
 import { DEFAULT_SETTINGS, type Settings } from "@/lib/settings";
 import { FOOD_RULES, type FoodRule } from "@/lib/diet";
-import { StaplesSchema } from "@/lib/staples";
+import { StaplesSchema } from "@/lib/staples-schema";
 import { copyStarters } from "./recipes";
 
 const int = (min: number, max: number) => z.number().int().min(min).max(max);
