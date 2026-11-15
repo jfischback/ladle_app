@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GOALS, type AthleteWeek } from "@/lib/athletes";
+import { PHASES, SPORTS, type AthleteWeek } from "@/lib/athletes";
 
 const DAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const weekday = (date: string) => new Date(`${date}T12:00:00Z`).getUTCDay();
@@ -13,7 +13,8 @@ export function AthleteWeekCard({ week }: { week: AthleteWeek }) {
     <section className="card p-5" aria-label={`${a.name || "Athlete"}'s week`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="flex items-center gap-2 text-2xl font-semibold"><span aria-hidden="true">{GOALS[a.goal].icon}</span> {a.name || "Athlete"}&apos;s fuel</h2>
+          <h2 className="flex items-center gap-2 text-2xl font-semibold"><span aria-hidden="true">{SPORTS[a.sport].icon}</span> {a.name || "Athlete"}&apos;s fuel</h2>
+          <p className="text-sm font-bold text-terracotta-dark">{SPORTS[a.sport].label}{a.phase !== "maintain" ? ` · ${PHASES[a.phase].label.toLowerCase()}` : ""}{a.youth ? " · teen" : ""}</p>
           <p className="text-muted">{n(a.protein)} g protein · {n(a.calories)} cal on training days · protein goal hit {hit} of {week.days.length} days</p>
         </div>
         <Link href="/athletes" className="btn-quiet min-h-9 px-3 text-sm">Edit</Link>
@@ -29,7 +30,7 @@ export function AthleteWeekCard({ week }: { week: AthleteWeek }) {
                 <div className={`w-full rounded-xl ${pct >= 95 ? "bg-olive" : pct >= 80 ? "bg-ochre" : "bg-terracotta"}`} style={{ height: `${Math.max(8, pct)}%` }} />
               </div>
               <span className="text-xs font-bold text-muted">{DAY[weekday(d.date)]}</span>
-              <span className="text-xs">{d.meet === "day" ? "🏆" : d.training ? "🏋️" : "·"}</span>
+              <span className="text-xs">{d.event?.phase === "day" ? "🏆" : d.event?.phase === "load" ? "🍝" : d.event?.phase === "lighten" ? "⚖️" : d.training ? "🏋️" : "·"}</span>
             </div>
           );
         })}
@@ -40,7 +41,7 @@ export function AthleteWeekCard({ week }: { week: AthleteWeek }) {
           <li key={d.date}>
             <details className="rounded-2xl bg-cream/70 p-3">
               <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                <span className="font-bold">{DAY[weekday(d.date)]}{d.training ? " · training" : " · rest"}{d.meet === "day" ? " · 🏆 meet day" : d.meet === "eve" ? " · meet tomorrow" : ""}</span>
+                <span className="font-bold">{DAY[weekday(d.date)]}{d.training ? " · training" : " · rest"}{d.event ? ` · ${d.event.label}` : ""}</span>
                 <span className={`text-sm font-bold ${d.short.protein > 10 ? "text-terracotta-dark" : "text-olive-dark"}`}>
                   {n(d.total.protein)}/{n(d.target.protein)} g · {n(d.total.kcal)} cal
                 </span>
@@ -60,6 +61,7 @@ export function AthleteWeekCard({ week }: { week: AthleteWeek }) {
                 ))}
               </ul>
               {d.short.protein > 10 && <p className="mt-2 text-sm font-semibold text-terracotta-dark">Still {d.short.protein} g short: add a shake or a bigger dinner portion.</p>}
+              {d.total.kcal - d.target.kcal > 300 && (a.phase === "cut" || d.event?.phase === "lighten") && <p className="mt-2 text-sm font-semibold text-ochre-dark">About {n(Math.round((d.total.kcal - d.target.kcal) / 50) * 50)} cal over: take a smaller portion, or go light on bread, rice and sauces.</p>}
               {d.short.protein <= 10 && d.short.kcal > 500 && <p className="mt-2 text-sm font-semibold text-ochre-dark">About {n(Math.round(d.short.kcal / 50) * 50)} cal short: add extra rice, pasta or potatoes at dinner.</p>}
               {d.tip && <p className="mt-2 rounded-xl bg-ochre-soft p-2 text-sm">{d.tip}</p>}
             </details>

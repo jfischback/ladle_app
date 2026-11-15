@@ -11,8 +11,11 @@ import type { Athlete } from "@/lib/athletes";
 const AthleteSchema = z.object({
   id: z.string().min(1).max(20),
   name: z.string().trim().max(40),
-  goal: z.enum(["strength", "muscle", "maintain", "lose", "endurance"]),
+  sport: z.enum(["strongman", "powerlifting", "bodybuilding", "crossfit", "endurance", "combat", "team", "gym", "active"]),
+  phase: z.enum(["bulk", "maintain", "cut"]),
+  youth: z.boolean(),
   weightLb: z.number().int().min(60).max(600).nullable(),
+  milesPerWeek: z.number().int().min(0).max(200).nullable(),
   calories: z.number().int().min(1200).max(8000),
   protein: z.number().int().min(40).max(500),
   mealsPerDay: z.number().int().min(3).max(7),

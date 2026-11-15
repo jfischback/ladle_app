@@ -3,13 +3,15 @@ import { and, desc, eq, isNull, isNotNull, inArray } from "drizzle-orm";
 import { getDb } from "@/db";
 import { cooks, extraItems, foundRecipes, pantryItems, plans, recipes, settings as settingsTable } from "@/db/schema";
 import { DEFAULT_SETTINGS, cookDaysFor, type Settings } from "./settings";
+import { normalizeAthlete } from "./athletes";
 
 export async function getSettings(userId: string): Promise<{ data: Settings; complete: boolean }> {
   const db = await getDb();
   const [row] = await db.select().from(settingsTable).where(eq(settingsTable.userId, userId));
   const saved = row?.data ?? {};
   const cookDays = cookDaysFor(saved);
-  return { data: { ...DEFAULT_SETTINGS, ...saved, cookDays, dinnersPerWeek: cookDays.length }, complete: !!row?.completedAt };
+  const athletes = (saved.athletes ?? []).map((x) => normalizeAthlete(x));
+  return { data: { ...DEFAULT_SETTINGS, ...saved, athletes, cookDays, dinnersPerWeek: cookDays.length }, complete: !!row?.completedAt };
 }
 
 export async function myRecipes(userId: string, meal = "dinner") {
