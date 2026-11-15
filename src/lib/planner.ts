@@ -5,8 +5,7 @@ import { MOTIVATIONS, type Settings } from "./settings";
 import type { PlanDay } from "./types";
 import { askClaude, claudeEnabled } from "./claude";
 import { dayName, weekDates } from "./week";
-
-export type SaleItem = { item: string; regularPrice: number; salePrice: number; pctOff: number };
+import { recipeSales, type SaleItem, type StorePrice } from "./sales";
 
 export type PlanResult = {
   days: PlanDay[];
@@ -24,7 +23,7 @@ const PlanSchema = z.object({
         recipeKey: z.string().nullable().describe("Key of the chosen recipe, or null for a no-cook night"),
         reason: z.string().describe("One short line on why this pick, e.g. 'Beef is 30% off, so two beef nights'"),
         estimatedCost: z.number().nullable().describe("Estimated grocery cost in USD for this dinner for this household"),
-        saleItems: z.array(z.string()).describe("Sale items this dinner uses; empty if none"),
+        saleItems: z.array(z.string()).describe("Sale items this dinner uses, using the exact 'item' names from saleItems; empty if none"),
         alternatives: z
           .array(
             z.object({
@@ -54,7 +53,8 @@ Rules:
 - If favorQuickWeeknights is true, prefer quicker recipes (shorter totalMinutes, "quick" tag) Monday through Thursday.
 - Budget: keep the week's estimated total near weeklyBudget. If budgetMode is "hard", the total must not go over it. If "target", it may go slightly over when that keeps a good week.
 - If a recipe has a prepAhead note, avoid putting it on the first day of the week (there is no day before to prep).
-- Costs: until real store prices are connected, estimate typical Phoenix-area Fry's grocery prices for the ingredients needed to cook the dinner for this household's size. Use sale prices when given. These are clearly labeled estimates in the app, so be reasonable rather than precise.
+- Costs: estimate what the ingredients for each dinner cost for this household's size. When an ingredient is in storePrices, use that real shelf price at their Fry's (sale prices are already applied there); otherwise estimate typical Phoenix-area Fry's prices. Pantry staples they likely have count as zero. These are labeled estimates in the app, so be reasonable rather than precise.
+- When a reason mentions a sale, name the item and the discount, e.g. "Chicken thighs are 35% off".
 - Each pick gets a one-line reason a tired parent can read in two seconds.
 - Give two or three alternatives for each cooking night, from the same recipe list, not already used that week and following the same rules.`;
 
@@ -64,6 +64,7 @@ export async function planWeek(input: {
   recipes: Recipe[];
   recentPlans: Plan[];
   saleItems: SaleItem[];
+  storePrices?: StorePrice[];
 }): Promise<PlanResult> {
   const { settings, weekStart } = input;
   const dates = weekDates(weekStart);
@@ -75,7 +76,7 @@ export async function planWeek(input: {
   const eligible = input.recipes.filter((r) => !(r.rating != null && r.rating <= 2) && !recentRecipeIds.has(r.id));
   const pool = eligible.length >= settings.dinnersPerWeek ? eligible : input.recipes.filter((r) => !(r.rating != null && r.rating <= 2));
 
-  if (!claudeEnabled()) return basicPlan(dates, pool, settings);
+  if (!claudeEnabled()) return basicPlan(dates, pool, settings, input.saleItems);
 
   const keyed = pool.map((r, i) => ({ key: `r${i + 1}`, recipe: r }));
   const byKey = new Map(keyed.map((k) => [k.key, k.recipe]));
@@ -96,6 +97,7 @@ export async function planWeek(input: {
     store: settings.storeName || "Fry's",
     saleItems: input.saleItems,
     salePricesAvailable: input.saleItems.length > 0,
+    storePrices: input.storePrices ?? [],
     recentDinners: input.recentPlans.map((p) => ({
       weekOf: p.weekOf,
       dinners: p.days.map((d) => d.recipeName).filter(Boolean),
@@ -128,7 +130,7 @@ export async function planWeek(input: {
       recipeName: valid ? recipe.name : null,
       estimatedCost: valid ? (d?.estimatedCost ?? null) : null,
       reason: valid ? (d?.reason ?? "") : d?.recipeKey ? "No-cook night" : (d?.reason ?? "No-cook night"),
-      saleItems: valid ? (d?.saleItems ?? []) : [],
+      saleItems: valid ? daySales(recipe, d?.saleItems ?? [], input.saleItems) : [],
       alternatives: (d?.alternatives ?? [])
         .map((a) => {
           const r = byKey.get(a.recipeKey);
@@ -141,9 +143,19 @@ export async function planWeek(input: {
   return { days, summary: out.summary, estimatedTotal: sumCosts(days), source: "claude" };
 }
 
-/** Used when no Claude key is configured: random picks that respect the hard rules, no costs. */
-function basicPlan(dates: string[], pool: Recipe[], settings: Settings): PlanResult {
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+/** The sale items a dinner really uses: what the recipe's ingredients match, plus any valid ones Claude named. */
+function daySales(recipe: Recipe, named: string[], sales: SaleItem[]): string[] {
+  const known = new Set(sales.map((s) => s.item));
+  return [...new Set([...recipeSales(recipe, sales), ...named.filter((n) => known.has(n))])];
+}
+
+/** Used when no Claude key is configured: random picks that respect the hard rules, leaning on sale items, no costs. */
+function basicPlan(dates: string[], pool: Recipe[], settings: Settings, sales: SaleItem[]): PlanResult {
+  // Shuffle, then let recipes that use more sale items float to the top.
+  const shuffled = [...pool]
+    .map((r) => ({ r, score: recipeSales(r, sales).length + Math.random() * 0.9 }))
+    .sort((a, b) => b.score - a.score)
+    .map((x) => x.r);
   const picks = shuffled.slice(0, settings.dinnersPerWeek);
   const rest = shuffled.slice(settings.dinnersPerWeek);
   // Spread cooking nights from the start of the week.
@@ -158,8 +170,8 @@ function basicPlan(dates: string[], pool: Recipe[], settings: Settings): PlanRes
       recipeId: r?.id ?? null,
       recipeName: r?.name ?? null,
       estimatedCost: null,
-      reason: r ? "Picked from your recipes" : "No-cook night",
-      saleItems: [],
+      reason: r ? saleReason(r, sales) : "No-cook night",
+      saleItems: r ? recipeSales(r, sales) : [],
       alternatives: r ? rest.slice((i * 3) % Math.max(rest.length, 1)).slice(0, 3).map((a) => ({
         recipeId: a.id,
         recipeName: a.name,
@@ -170,10 +182,20 @@ function basicPlan(dates: string[], pool: Recipe[], settings: Settings): PlanRes
   });
   return {
     days,
-    summary: "Basic planner (Claude isn't connected yet): random picks from your recipes, skipping recent repeats and low ratings.",
+    summary: sales.length
+      ? `Picked from your recipes, favoring dinners that use this week's ${sales.length} sale item${sales.length === 1 ? "" : "s"}.`
+      : "Basic planner (Claude isn't connected yet): random picks from your recipes, skipping recent repeats and low ratings.",
     estimatedTotal: null,
     source: "basic",
   };
+}
+
+function saleReason(r: Recipe, sales: SaleItem[]): string {
+  const used = recipeSales(r, sales);
+  if (!used.length) return "Picked from your recipes";
+  const top = sales.find((s) => s.item === used[0])!;
+  const name = top.item.charAt(0).toUpperCase() + top.item.slice(1);
+  return used.length > 1 ? `${name} and ${used.length - 1} more on sale` : `${name} ${/s$/.test(top.item) ? "are" : "is"} ${top.pctOff}% off`;
 }
 
 export function sumCosts(days: PlanDay[]): number | null {

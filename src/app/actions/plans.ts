@@ -8,6 +8,8 @@ import { plans, recipes } from "@/db/schema";
 import { activePlans, getPlan, getSettings, myRecipes, recipesByIds } from "@/lib/data";
 import { buildGroceryList } from "@/lib/grocery";
 import { planWeek, sumCosts } from "@/lib/planner";
+import { recipeSales, scanSales, type SaleScan } from "@/lib/sales";
+import type { SaleCheck, SaleItem } from "@/lib/types";
 import { addDays, upcomingWeekStart, weekDates } from "@/lib/week";
 
 export type ActionResult = { error?: string } | void;
@@ -19,7 +21,7 @@ async function archiveOthersForWeek(userId: string, weekOf: string, keepId?: str
   await db.update(plans).set({ archivedAt: new Date() }).where(and(...conds));
 }
 
-/** The Plan button: pull prices (later), ask Claude for the week, save it as a draft. */
+/** The Plan button: check this week's prices at their Fry's, ask Claude for the week, save it as a draft. */
 export async function planUpcomingWeek(): Promise<ActionResult> {
   const userId = await requireUserId();
   const { data: settings } = await getSettings(userId);
@@ -33,10 +35,26 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     (p) => p.status === "approved" && p.weekOf >= windowStart && p.weekOf < weekStart,
   );
 
+  // A failed price check never blocks planning: the week is planned without sales and the home screen says why.
+  let scan: SaleScan;
+  try {
+    scan = await scanSales(recipeList, settings);
+  } catch (e) {
+    scan = { status: "failed", message: (e as Error).message };
+  }
+  const at = new Date().toISOString();
+  const saleCheck: SaleCheck =
+    scan.status === "ok" ? { status: "ok", checked: scan.checked, at }
+    : scan.status === "off" ? { status: "off", reason: scan.reason, at }
+    : { status: "failed", message: scan.message, at };
+  const sales = scan.status === "ok" ? scan.sales : [];
+
   let result;
   try {
-    // Kroger sale prices plug in here once the sale-price test passes (spec section 14).
-    result = await planWeek({ settings, weekStart, recipes: recipeList, recentPlans: recent, saleItems: [] });
+    result = await planWeek({
+      settings, weekStart, recipes: recipeList, recentPlans: recent,
+      saleItems: sales, storePrices: scan.status === "ok" ? scan.prices : [],
+    });
   } catch (e) {
     return { error: `The planner hit a problem: ${(e as Error).message}` };
   }
@@ -48,7 +66,8 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     weekOf: weekStart,
     status: "draft",
     days: result.days,
-    saleItems: [],
+    saleItems: sales,
+    saleCheck,
     summary: result.summary,
     plannerSource: result.source,
     estimatedTotal: result.estimatedTotal,
@@ -79,7 +98,7 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
       recipeName: recipe.name,
       estimatedCost: alt?.estimatedCost ?? null,
       reason: alt?.reason ?? "Your pick",
-      saleItems: [],
+      saleItems: recipeSales(recipe, plan.saleItems.filter((x): x is SaleItem => typeof x !== "string")),
       alternatives: [...previous, ...day.alternatives.filter((a) => a.recipeId !== recipeId)].slice(0, 3),
     };
   }
@@ -102,7 +121,8 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   const chosen = await recipesByIds(userId, ids);
   let groceryList;
   try {
-    groceryList = await buildGroceryList(chosen, settings);
+    const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
+    groceryList = await buildGroceryList(chosen, settings, sales);
   } catch (e) {
     return { error: `Couldn't build the grocery list: ${(e as Error).message}` };
   }
