@@ -16,7 +16,7 @@ import type { StoreLocation } from "@/lib/kroger";
 const FIRST_TIME = [1, 2, 3, 4, 7];
 const ALL_SECTIONS = [0, 1, 2, 3, 4, 5, 6];
 
-export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null }: { initial: Settings; isEdit: boolean; krogerEnabled: boolean; startStep?: number | null }) {
+export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, forName = null }: { initial: Settings; isEdit: boolean; krogerEnabled: boolean; startStep?: number | null; forName?: string | null }) {
   const [s, setS] = useState<Settings>(initial);
   const order = isEdit ? ALL_SECTIONS : FIRST_TIME;
   const [step, setStep] = useState(startStep != null && order.includes(startStep) ? startStep : order[0]);
@@ -62,7 +62,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null }
     <div className="mx-auto max-w-xl">
       <div className="mb-6">
         <p className="eyebrow">
-          {isEdit ? "Settings" : pos === 0 ? "Welcome to Ladle!" : "Getting to know you"} · {pos + 1} of {order.length}
+          {forName ? (isEdit ? `Settings for ${forName}` : `Setting up for ${forName}`) : isEdit ? "Settings" : pos === 0 ? "Welcome to Ladle!" : "Getting to know you"} · {pos + 1} of {order.length}
         </p>
         <div className="mt-2 flex gap-1.5" aria-hidden="true">
           {order.map((_, i) => (

@@ -120,6 +120,13 @@
       "when": 1794778905357,
       "tag": "0016_omniscient_swordsman",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794779053146,
+      "tag": "0017_lean_vermin",
+      "breakpoints": true
     }
   ]
 }

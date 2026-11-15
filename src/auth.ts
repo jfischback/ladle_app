@@ -2,11 +2,12 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, isNull, ne } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
 import { getDb } from "./db";
-import { settings as settingsTable, users } from "./db/schema";
+import { careLinks, settings as settingsTable, users } from "./db/schema";
 import { mayCreateAccount } from "./lib/signup-policy";
 
 export const googleEnabled = !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
@@ -106,8 +107,8 @@ export async function currentAccount(): Promise<{ accountId: string; householdId
   return { accountId: u.id, householdId: u.householdId ?? u.id, email: u.email, name: u.name, isOwner: !u.householdId || u.ownsHousehold };
 }
 
-/** Returns the current user's id or throws (use in server actions / pages behind middleware). */
-export async function requireUserId(): Promise<string> {
+/** The signed-in account's own household (never the one they're caring for). */
+export async function homeHouseholdId(): Promise<string> {
   if (!loginRequired) return guestUserId();
   const session = await auth();
   const id = session?.user?.id;
@@ -117,4 +118,32 @@ export async function requireUserId(): Promise<string> {
   const [u] = await db.select({ householdId: users.householdId }).from(users).where(eq(users.id, id));
   if (!u) throw new Error("Not signed in");
   return u.householdId ?? id;
+}
+
+/** Caregiver mode: which cared-for household (if any) this browser has switched to. A cookie names the link. */
+export const ACTING_COOKIE = "ladle-acting-for";
+
+/**
+ * The cared-for household this family is planning for right now, or null. The cookie only names a link; the
+ * link must belong to the signed-in account's own household and not be removed, or it's ignored.
+ */
+export async function actingFor(home?: string): Promise<{ linkId: string; householdId: string; label: string } | null> {
+  const linkId = (await cookies()).get(ACTING_COOKIE)?.value;
+  if (!linkId || !/^[0-9a-f-]{36}$/i.test(linkId)) return null;
+  const mine = home ?? (await homeHouseholdId());
+  const db = await getDb();
+  const [link] = await db
+    .select({ id: careLinks.id, householdId: careLinks.householdId, label: careLinks.label })
+    .from(careLinks)
+    .where(and(eq(careLinks.id, linkId), eq(careLinks.caregiverHouseholdId, mine), isNull(careLinks.archivedAt)));
+  return link ? { linkId: link.id, householdId: link.householdId, label: link.label } : null;
+}
+
+/**
+ * The household whose data this request works on (use in server actions / pages behind middleware): the
+ * account's own, or, in caregiver mode, the cared-for household it has switched to.
+ */
+export async function requireUserId(): Promise<string> {
+  const home = await homeHouseholdId();
+  return (await actingFor(home))?.householdId ?? home;
 }

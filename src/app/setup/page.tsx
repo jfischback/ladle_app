@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUserId } from "@/auth";
+import { actingFor, requireUserId } from "@/auth";
 import { getSettings, myCooks } from "@/lib/data";
 import { FeatureCards } from "@/components/FeatureCards";
 import { krogerEnabled } from "@/lib/kroger";
@@ -18,7 +18,7 @@ export default async function SetupPage({ searchParams }: { searchParams: Promis
           <FeatureCards creators={creators} athletes={data.athletes.length} title="Make Ladle yours" />
         </div>
       )}
-      <SetupWizard initial={data} isEdit={complete} krogerEnabled={krogerEnabled()} startStep={Number.isInteger(stepParam) ? stepParam : null} />
+      <SetupWizard forName={(await actingFor())?.label ?? null} initial={data} isEdit={complete} krogerEnabled={krogerEnabled()} startStep={Number.isInteger(stepParam) ? stepParam : null} />
       {complete && (
         <p className="mt-6 text-center">
           <Link href="/whats-new" className="font-bold text-olive-dark underline">✨ What&apos;s new in Ladle</Link>

@@ -18,6 +18,19 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * Caregiver mode: a household that also plans for someone else's (an aging parent). The cared-for household is
+ * a separate set of recipes, plans, pantry and cart; anyone in the caregiving household can switch to it.
+ */
+export const careLinks = pgTable("care_links", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  caregiverHouseholdId: uuid("caregiver_household_id").notNull(), // the caregiving family's household
+  householdId: uuid("household_id").notNull().references(() => users.id), // the cared-for household
+  label: text("label").notNull(), // "Mom", "Grandpa Joe"
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+});
+
 /** "Join my household" links. */
 export const householdInvites = pgTable("household_invites", {
   code: text("code").primaryKey(),
