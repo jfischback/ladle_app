@@ -109,7 +109,7 @@ export function packagesForWeight(quantity: string, productSize: string): number
   return Math.min(12, Math.max(1, Math.ceil(need / perPack - 0.15)));
 }
 
-const toCart = (p: KrogerProduct): CartProduct => ({ upc: p.upc, description: p.description, size: p.size, price: p.promo ?? p.regular, regular: p.regular, onSale: p.promo != null });
+const toCart = (p: KrogerProduct): CartProduct => ({ upc: p.upc, description: p.description, size: p.size, price: p.promo ?? p.regular, regular: p.regular, onSale: p.promo != null, aisle: p.aisle ?? null });
 
 /**
  * Up to three products for one line. Products that really match come first, and among those a sale comes first

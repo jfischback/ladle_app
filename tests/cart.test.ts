@@ -25,3 +25,12 @@ test("price per ounce", () => {
   assert.equal(unitPrice("12 ct", 6)?.unit, "ct");
   assert.equal(unitPrice("family size", 4), null);
 });
+
+test("aisle labels from Kroger's aisle locations", async () => {
+  const { aisleLabel } = await import("@/lib/kroger");
+  assert.equal(aisleLabel([{ number: "12", description: "AISLE 12" }]), "Aisle 12");
+  assert.equal(aisleLabel([{ description: "PRODUCE" }]), "Produce");
+  assert.equal(aisleLabel([]), null);
+  assert.equal(aisleLabel(undefined), null);
+  assert.equal(aisleLabel([{ number: "0", description: "" }]), null);
+});

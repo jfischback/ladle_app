@@ -66,7 +66,21 @@ export type KrogerProduct = {
   regular: number;
   /** Sale price, or null when the product isn't on promotion. */
   promo: number | null;
+  /** Where it is in this store ("Aisle 12"), when Kroger says. */
+  aisle?: string | null;
 };
+
+type AisleLocation = { number?: string; description?: string };
+
+/** "Aisle 12" from Kroger's aisle locations; null when there's nothing useful. */
+export function aisleLabel(locations: AisleLocation[] | undefined): string | null {
+  const a = locations?.find((l) => l.number || l.description);
+  if (!a) return null;
+  if (a.number && /^\d{1,3}$/.test(a.number.trim()) && Number(a.number) > 0) return `Aisle ${Number(a.number)}`;
+  const d = (a.description ?? "").trim();
+  if (!d || d.length > 30) return null;
+  return d.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 /** Search products at one store, with that store's prices. Needs the product.compact scope. */
 export async function searchProducts(term: string, locationId: string, limit = 12): Promise<KrogerProduct[]> {
@@ -87,6 +101,7 @@ export async function searchProducts(term: string, locationId: string, limit = 1
       description?: string;
       brand?: string;
       items?: { size?: string; price?: { regular?: number; promo?: number } }[];
+      aisleLocations?: AisleLocation[];
     }[];
   };
   const out: KrogerProduct[] = [];
@@ -103,6 +118,7 @@ export async function searchProducts(term: string, locationId: string, limit = 1
       size: item?.size ?? "",
       regular,
       promo: promo && promo > 0 && promo < regular ? promo : null,
+      aisle: aisleLabel(p.aisleLocations),
     });
   }
   return out;
