@@ -65,7 +65,8 @@ export async function CooksTab({ userId }: { userId: string }) {
         )}
       </section>
 
-      {suggestions.length > 0 && <SuggestedCooks names={suggestions} first={following.length === 0} />}
+      {/* Always rendered so its "Found N dinners" note survives the refresh after "Follow all". */}
+      <SuggestedCooks names={suggestions} first={following.length === 0} />
 
       {following.length > 0 && (
         <section aria-labelledby="shelf-title">

@@ -70,7 +70,7 @@ export async function draftFromPhoto(base64: string, mediaType: string): Promise
 
 /** Prefer the page's schema.org Recipe JSON-LD; fall back to visible text. */
 function extractRecipeSource(html: string): string {
-  const blocks = [...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+  const blocks = [...html.matchAll(/<script[^>]*type=["']?application\/ld\+json["']?[^>]*>([\s\S]*?)<\/script>/gi)];
   for (const b of blocks) {
     try {
       const found = findRecipe(JSON.parse(b[1].trim()));
@@ -91,7 +91,7 @@ function extractRecipeSource(html: string): string {
 
 /** The schema.org Recipe object in a page's JSON-LD, if the page has one. */
 export function recipeJsonLd(html: string): Record<string, unknown> | null {
-  const blocks = [...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+  const blocks = [...html.matchAll(/<script[^>]*type=["']?application\/ld\+json["']?[^>]*>([\s\S]*?)<\/script>/gi)];
   for (const b of blocks) {
     try {
       const found = findRecipe(JSON.parse(b[1].trim()));

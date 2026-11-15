@@ -4,9 +4,11 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { checkCooks, dismissFound, followCook, followSuggested, saveFound, unfollowCook } from "@/app/actions/cooks";
 
-function foundNote(n: number | undefined) {
+function foundNote(n: number | undefined, remaining = 0) {
   if (n == null) return null;
-  return n ? `Found ${n} new dinner${n === 1 ? "" : "s"}!` : "No new dinners right now. We'll keep checking.";
+  const base = n ? `Found ${n} new dinner${n === 1 ? "" : "s"}!` : remaining ? "" : "No new dinners right now. We'll keep checking.";
+  const more = remaining ? ` Still checking ${remaining} more cook${remaining === 1 ? "" : "s"}; tap "Check for new recipes" in a minute.` : "";
+  return (base + more).trim();
 }
 
 export function FollowForm() {
@@ -24,7 +26,7 @@ export function FollowForm() {
           if (r?.error) setMsg({ ok: false, text: r.error });
           else {
             setSite("");
-            setMsg({ ok: true, text: `Following! ${foundNote(r?.found) ?? ""}` });
+            setMsg({ ok: true, text: `Following! ${foundNote(r?.found, r?.remaining) ?? ""}` });
           }
         });
       }}
@@ -45,12 +47,15 @@ export function SuggestedCooks({ names, first }: { names: string[]; first: boole
   const [pending, start] = useTransition();
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+  const shown = showAll ? names : names.slice(0, 12);
+  if (!names.length) return msg ? <p role="status" className="rounded-3xl bg-olive-soft p-4 font-semibold text-olive-dark">{msg}</p> : null;
   const follow = (list: string[], label: string) =>
     start(async () => {
       setBusy(label);
       setMsg(null);
       const r = await followSuggested(list);
-      setMsg(foundNote(r?.found));
+      setMsg(foundNote(r?.found, r?.remaining));
       setBusy(null);
     });
   return (
@@ -64,13 +69,18 @@ export function SuggestedCooks({ names, first }: { names: string[]; first: boole
         )}
       </div>
       <ul className="flex flex-wrap gap-2">
-        {names.map((n) => (
+        {shown.map((n) => (
           <li key={n}>
             <button className="btn-secondary min-h-10 px-3 text-sm" disabled={pending} onClick={() => follow([n], n)}>
               {busy === n ? "…" : "+"} {n}
             </button>
           </li>
         ))}
+        {names.length > shown.length && (
+          <li>
+            <button className="btn-quiet min-h-10 px-3 text-sm" onClick={() => setShowAll(true)}>Show all {names.length} ▾</button>
+          </li>
+        )}
       </ul>
       {pending && <p className="mt-2 text-sm text-muted">Finding their newest dinners. This can take up to half a minute.</p>}
       {msg && <p role="status" className="mt-2 text-sm font-semibold text-olive-dark">{msg}</p>}
@@ -83,7 +93,7 @@ export function CheckButton() {
   const [msg, setMsg] = useState<string | null>(null);
   return (
     <div className="text-right">
-      <button className="btn-secondary min-h-10 px-4 text-sm" disabled={pending} onClick={() => start(async () => { setMsg(null); const r = await checkCooks(); setMsg(r?.error ?? foundNote(r?.found)); })}>
+      <button className="btn-secondary min-h-10 px-4 text-sm" disabled={pending} onClick={() => start(async () => { setMsg(null); const r = await checkCooks(); setMsg(r?.error ?? foundNote(r?.found, r?.remaining)); })}>
         {pending ? "Checking…" : "↻ Check for new recipes"}
       </button>
       {msg && <p role="status" className="mt-1 text-sm font-semibold text-olive-dark">{msg}</p>}
