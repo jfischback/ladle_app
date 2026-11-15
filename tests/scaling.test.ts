@@ -51,3 +51,12 @@ test("leftovers nights stay consistent after swaps", () => {
   assert.deepEqual([soup[0].batches, soup[0].estimatedCost], [2, 14]);
   assert.deepEqual(rebalanceBatches([cook, left], keep), [cook, left]);
 });
+
+test("who's eating tonight changes that night's batch", async () => {
+  const { recipeMultipliers } = await import("@/lib/scaling");
+  const day = (date: string, recipeId: string, eating?: { adults: number; kids: number }) => ({ date, recipeId, recipeName: recipeId, estimatedCost: 10, reason: "", saleItems: [], alternatives: [], eating });
+  const m = recipeMultipliers([day("2026-11-16", "a"), day("2026-11-17", "b", { adults: 6, kids: 4 }), day("2026-11-18", "c", { adults: 1, kids: 0 })], () => 4, { adults: 2, kids: 2 });
+  assert.equal(m.get("a"), 1);
+  assert.equal(m.get("b"), 2.5, "company: 8.4 plates of a 4-serving recipe");
+  assert.equal(m.get("c"), 0.5);
+});

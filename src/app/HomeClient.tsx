@@ -7,6 +7,7 @@ import { answerPantryCheck } from "./actions/pantry";
 import { addGroceryItem, removeGroceryItem, setGroceryChecks } from "./actions/grocery";
 import { tickKey } from "@/lib/grocery-checks";
 import { FeastCard, FeastPlanner } from "@/components/FeastCard";
+import { EatingPicker } from "@/components/EatingPicker";
 import { feastHolidayOn, feastIcon, feastLabel } from "@/lib/feast";
 import { ADDED_SECTION } from "@/lib/grocery-add";
 import { useRouter } from "next/navigation";
@@ -48,12 +49,13 @@ export function PlanButton({ label, big, thisWeek = false, quiet = false }: { la
   );
 }
 
-export function DayCard({ planId, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [], canFeast = false, feastGuests = 4, feastWhen = {} }: {
+export function DayCard({ planId, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [], canFeast = false, feastGuests = 4, feastWhen = {}, household }: {
   planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number; picky?: string[];
   moveTargets?: { index: number; label: string }[];
   canFeast?: boolean; // a holiday with a menu (Thanksgiving) that hasn't passed
   feastGuests?: number;
   feastWhen?: { boughtOn?: string; today?: string }; // when the turkey comes home, for the thaw countdown
+  household?: { adults: number; kids: number }; // the usual dinner table, for "who's eating tonight?"
 }) {
   const [open, setOpen] = useState(false);
   const [moving, setMoving] = useState(false);
@@ -146,6 +148,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
             </div>
           )}
           <WhyLine reason={reason} sale={day.saleItems} className="-mt-2 px-5 pb-5" />
+          {day.eating && <p className="-mt-3 px-5 pb-5 text-sm font-bold text-olive-dark">👥 For {day.eating.adults} adult{day.eating.adults === 1 ? "" : "s"}{day.eating.kids ? ` and ${day.eating.kids} kid${day.eating.kids === 1 ? "" : "s"}` : ""} tonight</p>}
           <PickyLines tips={picky} className="-mt-3 px-5 pb-5" />
           <LunchLine day={day} className="-mt-3 px-5 pb-5" />
         </div>
@@ -168,6 +171,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
           {swapButton}
         </div>
         <WhyLine reason={reason} sale={day.saleItems} className="px-3 pb-3" />
+        {day.eating && <p className="px-3 pb-3 text-sm font-bold text-olive-dark">👥 For {day.eating.adults} adult{day.eating.adults === 1 ? "" : "s"}{day.eating.kids ? ` and ${day.eating.kids} kid${day.eating.kids === 1 ? "" : "s"}` : ""} tonight</p>}
         <PickyLines tips={picky} className="px-3 pb-3" />
         <LunchLine day={day} className="px-3 pb-3" />
         </div>
@@ -201,6 +205,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
             {day.recipeId && <button className="btn-quiet" disabled={pending} onClick={() => swap(null)}>Take the night off 🍕</button>}
           </div>
           {movePicker && <div className="border-t border-line pt-3">{movePicker}</div>}
+          {household && day.recipeId && !day.leftoverOf && <div className="border-t border-line pt-3"><EatingPicker planId={planId} index={index} eating={day.eating} household={household} /></div>}
           <ErrorNote error={error} />
         </div>
       )}

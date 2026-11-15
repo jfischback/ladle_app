@@ -143,6 +143,7 @@ export default async function HomePage() {
                   canFeast={!!feastHolidayOn(d.date, d.holiday) && d.date >= todayStr}
                   feastGuests={settings.adults + settings.kids}
                   feastWhen={{ boughtOn: plan.weekOf, today: todayStr }}
+                  household={{ adults: settings.adults, kids: settings.kids }}
                 />
               </li>
             ))}
