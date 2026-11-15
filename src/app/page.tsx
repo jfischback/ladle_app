@@ -88,6 +88,15 @@ export default async function HomePage() {
             ? `${dinners} dinner${dinners === 1 ? "" : "s"} · ${approved ? "your list is ready" : "take a look, swap anything"} · ${settings.fulfillment === "pickup" ? "pickup" : "delivery"} from ${store}`
             : `${settings.fulfillment === "pickup" ? "Pickup" : "Delivery"} from ${store}`}
         </p>
+        {plan && approved && plan.groceryList && (
+          // A long page in the store: jump straight to what's needed.
+          <nav aria-label="On this page" className="no-print mt-3 flex flex-wrap gap-1.5">
+            <a href="#dinners" className="rounded-full border-2 border-line bg-card px-3 py-1 text-sm font-bold hover:border-olive/50">🗓 Dinners</a>
+            <a href="#grocery-print" className="rounded-full border-2 border-line bg-card px-3 py-1 text-sm font-bold hover:border-olive/50">🛒 Grocery list</a>
+            {prep && <a href="#prep" className="rounded-full border-2 border-line bg-card px-3 py-1 text-sm font-bold hover:border-olive/50">🥡 Prep day</a>}
+            <Link href={`/menu/${plan.id}`} className="rounded-full border-2 border-line bg-card px-3 py-1 text-sm font-bold hover:border-olive/50">🖨️ Fridge menu</Link>
+          </nav>
+        )}
       </header>
 
       {prepTomorrow.map(({ d, r }) => (
@@ -116,7 +125,7 @@ export default async function HomePage() {
         <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} yours={yours} />
       ) : (
         <>
-          <ul className="grid grid-cols-[minmax(0,1fr)] gap-3">
+          <ul id="dinners" className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)] gap-3">
             {plan.days.map((d, i) => (
               <li key={d.date}>
                 <DayCard
@@ -140,7 +149,7 @@ export default async function HomePage() {
           <StaplesCard plan={plan} staples={settings.staples} />
           <PantryCard plan={plan} />
           <ExtrasCard plan={plan} />
-          {prep && <PrepCard plan={prep} />}
+          {prep && <div id="prep" className="scroll-mt-24"><PrepCard plan={prep} /></div>}
           {athletes.map((w) => <AthleteWeekCard key={w.athlete.id} week={w} />)}
           {approved ? (
             <>
