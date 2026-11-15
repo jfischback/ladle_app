@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUserId } from "@/auth";
-import { browseStarters, myRecipes } from "@/lib/data";
+import { browseStarters, getSettings, myRecipes } from "@/lib/data";
+import { ruleProblems } from "@/lib/diet";
 import { addAllStarters, addStarter } from "@/app/actions/recipes";
 import { Stars } from "@/components/Stars";
 import type { Recipe } from "@/db/schema";
@@ -12,7 +13,8 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
   const userId = await requireUserId();
   const t = (await searchParams).tab;
   const tab = t === "browse" ? "browse" : t === "cooks" ? "cooks" : "mine";
-  const [mine, browse] = await Promise.all([myRecipes(userId), browseStarters(userId)]);
+  const [mine, browse, { data: settings }] = await Promise.all([myRecipes(userId), browseStarters(userId), getSettings(userId)]);
+  const problemsOf = (r: Recipe) => ruleProblems(r, settings.foodRules, settings.dislikes);
   const list = tab === "mine" ? mine : browse;
 
   return (
@@ -59,7 +61,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {list.map((r) => (
             <li key={r.id}>
-              <RecipeCard r={r} browse={tab === "browse"} />
+              <RecipeCard r={r} browse={tab === "browse"} problems={problemsOf(r)} />
             </li>
           ))}
         </ul>
@@ -76,7 +78,7 @@ function Tab({ href, active, children }: { href: string; active: boolean; childr
   );
 }
 
-function RecipeCard({ r, browse }: { r: Recipe; browse: boolean }) {
+function RecipeCard({ r, browse, problems }: { r: Recipe; browse: boolean; problems: string[] }) {
   return (
     <div className="card group relative flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lift">
       <FoodArt name={r.name} protein={r.protein} className="h-24 w-full sm:h-28" rounded="rounded-none" />
@@ -87,6 +89,11 @@ function RecipeCard({ r, browse }: { r: Recipe; browse: boolean }) {
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
           {r.totalMinutes && <span className="tag">⏱ {formatMinutes(r.totalMinutes)}</span>}
           {r.prepAhead && <span className="tag bg-ochre-soft text-ochre-dark">Prep ahead</span>}
+          {problems.length > 0 && (
+            <span className="tag bg-terracotta-soft font-bold text-terracotta-dark" title={`${problems.join(", ")}. It won't be planned.`}>
+              ⚠︎ {problems[0].replace(/ \(.*\)$/, "")}
+            </span>
+          )}
         </div>
         <div className="mt-auto flex items-center justify-between pt-1">
           {browse ? (

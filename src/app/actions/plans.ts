@@ -7,10 +7,12 @@ import { getDb } from "@/db";
 import { cooks, foundRecipes, plans, recipes } from "@/db/schema";
 import { activePlans, getPlan, getSettings, myRecipes, recipesByIds } from "@/lib/data";
 import { adoptFoundRecipe, refreshCooks } from "@/lib/cooks";
+import { ruleProblems } from "@/lib/diet";
 import { buildGroceryList } from "@/lib/grocery";
 import { FOUND_PREFIX, planWeek, sumCosts, type NewRecipeOption } from "@/lib/planner";
 import { recipeSales, scanSales, type SaleScan } from "@/lib/sales";
 import type { SaleCheck, SaleItem } from "@/lib/types";
+import type { Settings } from "@/lib/settings";
 import { addDays, upcomingWeekStart, weekDates } from "@/lib/week";
 
 export type ActionResult = { error?: string } | void;
@@ -31,6 +33,12 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
   if (recipeList.length < settings.dinnersPerWeek) {
     return { error: `You need at least ${settings.dinnersPerWeek} dinners in My Recipes to plan a week.` };
   }
+  const fitting = recipeList.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes).length).length;
+  if (fitting < settings.dinnersPerWeek) {
+    return {
+      error: `Only ${fitting} of your recipes fit your food rules, and you cook ${settings.dinnersPerWeek} nights. Add a few more recipes that fit (your cooks are a good place to look), or cook fewer nights in Settings.`,
+    };
+  }
   const windowStart = addDays(weekStart, -7 * settings.noRepeatWeeks);
   const recent = (await activePlans(userId)).filter(
     (p) => p.status === "approved" && p.weekOf >= windowStart && p.weekOf < weekStart,
@@ -49,7 +57,7 @@ export async function planUpcomingWeek(): Promise<ActionResult> {
     : scan.status === "off" ? { status: "off", reason: scan.reason, at }
     : { status: "failed", message: scan.message, at };
   const sales = scan.status === "ok" ? scan.sales : [];
-  const newRecipes = settings.newRecipesPerWeek > 0 ? await newRecipeOptions(userId, sales) : [];
+  const newRecipes = settings.newRecipesPerWeek > 0 ? await newRecipeOptions(userId, sales, settings) : [];
 
   let result;
   try {
@@ -175,7 +183,7 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
  * Candidates for "something new this week": unseen dinners from followed cooks that list their ingredients,
  * best sale matches first, then newest. Checks the cooks for new posts first (quickly; at most once a day).
  */
-async function newRecipeOptions(userId: string, sales: SaleItem[]): Promise<NewRecipeOption[]> {
+async function newRecipeOptions(userId: string, sales: SaleItem[], settings: Settings): Promise<NewRecipeOption[]> {
   await refreshCooks(userId, { budgetMs: 8000, minHours: 24 }).catch(() => {});
   const db = await getDb();
   const rows = await db
@@ -184,10 +192,11 @@ async function newRecipeOptions(userId: string, sales: SaleItem[]): Promise<NewR
     .innerJoin(cooks, eq(cooks.id, foundRecipes.cookId))
     .where(and(eq(foundRecipes.userId, userId), eq(foundRecipes.status, "new"), isNull(cooks.archivedAt)))
     .orderBy(desc(foundRecipes.publishedAt))
-    .limit(60);
+    .limit(150);
   const seen = new Set<string>();
   return rows
-    .filter(({ found }) => found.ingredients.length >= 3 && !seen.has(found.title.toLowerCase()) && seen.add(found.title.toLowerCase()))
+    .filter(({ found }) => found.ingredients.length >= 3 && !ruleProblems(found, settings.foodRules, settings.dislikes).length)
+    .filter(({ found }) => !seen.has(found.title.toLowerCase()) && seen.add(found.title.toLowerCase()))
     .map(({ found, cookName }, i) => ({ opt: { foundId: found.id, title: found.title, cookName, ingredients: found.ingredients, totalMinutes: found.totalMinutes }, rank: i }))
     .sort((a, b) => recipeSales(b.opt, sales).length - recipeSales(a.opt, sales).length || a.rank - b.rank)
     .slice(0, 8)

@@ -8,6 +8,7 @@ import { getDb } from "@/db";
 import { recipes, settings as settingsTable } from "@/db/schema";
 import { findFrysStores, krogerEnabled, type StoreLocation } from "@/lib/kroger";
 import { DEFAULT_SETTINGS, type Settings } from "@/lib/settings";
+import { FOOD_RULES, type FoodRule } from "@/lib/diet";
 import { copyStarters } from "./recipes";
 
 const int = (min: number, max: number) => z.number().int().min(min).max(max);
@@ -25,7 +26,10 @@ const SettingsSchema = z.object({
   shoppingDay: int(0, 6),
   weeklyBudget: z.number().min(10).max(5000),
   budgetMode: z.enum(["target", "hard"]),
-  dinnersPerWeek: int(1, 7),
+  cookDays: z.array(int(0, 6)).min(1).max(7),
+  newRecipesPerWeek: int(0, 2),
+  foodRules: z.array(z.enum(Object.keys(FOOD_RULES) as [FoodRule, ...FoodRule[]])).max(20),
+  dislikes: z.array(z.string().trim().min(2).max(40)).max(30),
   noRepeatWeeks: int(0, 12),
   favorQuickWeeknights: z.boolean(),
   saleThresholdPct: int(1, 90),
@@ -35,7 +39,8 @@ const SettingsSchema = z.object({
 export async function saveSettings(input: Partial<Settings>, startWith?: "ours" | "own") {
   const userId = await requireUserId();
   const parsed = SettingsSchema.parse(input);
-  const data: Settings = { ...DEFAULT_SETTINGS, ...parsed };
+  const cookDays = [...new Set(parsed.cookDays)].sort();
+  const data: Settings = { ...DEFAULT_SETTINGS, ...parsed, cookDays, dinnersPerWeek: cookDays.length };
   const db = await getDb();
   const now = new Date();
   await db

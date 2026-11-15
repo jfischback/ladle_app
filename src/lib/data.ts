@@ -2,12 +2,14 @@ import "server-only";
 import { and, desc, eq, isNull, isNotNull, inArray } from "drizzle-orm";
 import { getDb } from "@/db";
 import { cooks, foundRecipes, plans, recipes, settings as settingsTable } from "@/db/schema";
-import { DEFAULT_SETTINGS, type Settings } from "./settings";
+import { DEFAULT_SETTINGS, cookDaysFor, type Settings } from "./settings";
 
 export async function getSettings(userId: string): Promise<{ data: Settings; complete: boolean }> {
   const db = await getDb();
   const [row] = await db.select().from(settingsTable).where(eq(settingsTable.userId, userId));
-  return { data: { ...DEFAULT_SETTINGS, ...(row?.data ?? {}) }, complete: !!row?.completedAt };
+  const saved = row?.data ?? {};
+  const cookDays = cookDaysFor(saved);
+  return { data: { ...DEFAULT_SETTINGS, ...saved, cookDays, dinnersPerWeek: cookDays.length }, complete: !!row?.completedAt };
 }
 
 export async function myRecipes(userId: string, meal = "dinner") {
