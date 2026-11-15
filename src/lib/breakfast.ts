@@ -4,6 +4,7 @@ import type { PlanBreakfast, PlanDay, SaleItem } from "./types";
 import { weekday } from "./week";
 import { holidayOn } from "./holidays";
 import { ruleProblems } from "./diet";
+import { canCook } from "./prep";
 import { recipeSales } from "./sales";
 
 /** What we search the store for when looking for the week's breakfast-meat deal. */
@@ -47,7 +48,7 @@ export function planBreakfasts(days: PlanDay[], settings: Settings, pool: Recipe
     .filter((x): x is { i: number; holiday: boolean } => !!x);
   if (!slots.length) return days.map((d) => ({ ...d, breakfast: null }));
 
-  const ok = pool.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && !(r.rating != null && r.rating <= 2));
+  const ok = pool.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment) && !(r.rating != null && r.rating <= 2));
   const quick = ok.filter((r) => r.totalMinutes == null || r.totalMinutes <= settings.breakfastMaxMinutes);
   const choices = quick.length ? quick : ok;
   const score = (r: Recipe) => recipeSales(r, sales).length * 2 + (r.rating === 5 ? 2 : r.rating === 4 ? 1 : 0) + Math.random() * 2;

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { lookupStores, saveSettings } from "@/app/actions/settings";
 import { addRecipePack } from "@/app/actions/recipes";
 import { SAFE_FOOD_IDEAS, WONT_EAT_IDEAS, type PickyEater } from "@/lib/picky";
+import { EQUIPMENT } from "@/lib/prep";
 import { DAY_NAMES, MOTIVATIONS, type Motivation, type Settings } from "@/lib/settings";
 import { FOOD_RULES, FOOD_RULE_GROUPS, parseDislikes, type FoodRule } from "@/lib/diet";
 import type { StoreLocation } from "@/lib/kroger";
@@ -129,6 +130,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled }: { initial: Setti
         {step === 5 && (
           <div className="space-y-5">
             <DayPicker value={s.cookDays} onChange={(v) => { set("cookDays", v); set("dinnersPerWeek", v.length); set("busyDays", (s.busyDays ?? []).filter((d) => v.includes(d))); }} />
+            <PrepSection s={s} set={set} />
             <BusyPicker cookDays={s.cookDays} value={s.busyDays ?? []} minutes={s.busyMaxMinutes ?? 30} onChange={(v) => set("busyDays", v)} onMinutes={(m) => set("busyMaxMinutes", m)} />
             <div>
               <Counter label="Same main protein, at most" value={s.maxSameProtein ?? 2} min={1} max={4} onChange={(v) => set("maxSameProtein", v)} />
@@ -328,6 +330,49 @@ function Counter({ label, value, min, max, onChange }: { label: string; value: n
         <button type="button" aria-label={`More ${label.toLowerCase()}`} className="btn-secondary h-11 w-11 p-0 text-2xl" disabled={value >= max} onClick={() => onChange(value + 1)}>+</button>
       </div>
     </div>
+  );
+}
+
+/** Meal prep day and kitchen equipment. */
+function PrepSection({ s, set }: { s: Settings; set: <K extends keyof Settings>(k: K, v: Settings[K]) => void }) {
+  const have = s.equipment ?? [];
+  const toggle = (k: (typeof EQUIPMENT)[number]["key"]) => set("equipment", have.includes(k) ? have.filter((x) => x !== k) : [...have, k]);
+  return (
+    <section className="space-y-4 rounded-3xl border-2 border-line p-4">
+      <div>
+        <h3 className="text-lg font-semibold">🥡 Meal prep day</h3>
+        <p className="text-sm text-muted">Pick a day to get ahead: we&apos;ll make a checklist (cook the rice, chop everything, brown the meat, make a casserole) so weeknights just need finishing.</p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {[null, 0, 1, 2, 3, 4, 5, 6].map((d) => {
+            const on = (s.prepDay ?? null) === d;
+            return (
+              <button key={String(d)} type="button" aria-pressed={on} onClick={() => set("prepDay", d)}
+                className={`rounded-full border-2 px-3 py-1 text-sm font-bold ${on ? "border-olive bg-olive text-cream" : "border-line bg-card text-ink"}`}>
+                {d == null ? "No prep day" : DAY_NAMES[d].slice(0, 3)}
+              </button>
+            );
+          })}
+        </div>
+        {s.prepDay != null && (
+          <div className="mt-3"><Counter label="Prep time (minutes)" value={s.prepMinutes ?? 120} min={30} max={300} onChange={(v) => set("prepMinutes", Math.round(v / 15) * 15 || 30)} /></div>
+        )}
+      </div>
+      <fieldset>
+        <legend className="text-lg font-semibold">What&apos;s in your kitchen?</legend>
+        <p className="mb-2 text-sm text-muted">Dorm room with just a microwave? We&apos;ll skip dinners you can&apos;t make. Have a slow cooker? Slow-cooker dinners work on busy nights.</p>
+        <div className="flex flex-wrap gap-1.5">
+          {EQUIPMENT.map((e) => {
+            const on = have.includes(e.key);
+            return (
+              <button key={e.key} type="button" aria-pressed={on} onClick={() => toggle(e.key)}
+                className={`flex items-center gap-1 rounded-full border-2 px-3 py-1 text-sm font-bold ${on ? "border-olive bg-olive-soft text-olive-dark" : "border-line bg-card text-muted"}`}>
+                <span aria-hidden="true">{on ? "✓" : e.icon}</span> {e.label}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+    </section>
   );
 }
 

@@ -14,6 +14,8 @@ import { krogerEnabled } from "@/lib/kroger";
 import { ruleProblems } from "@/lib/diet";
 import { storeBrand } from "@/lib/stores";
 import { pickyTips } from "@/lib/picky";
+import { prepPlan } from "@/lib/prep";
+import { PrepCard } from "@/components/PrepCard";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { AthleteWeekCard } from "@/components/AthleteWeekCard";
 
@@ -55,6 +57,8 @@ export default async function HomePage() {
   const approved = plan?.status === "approved";
   const dinners = plan?.days.filter((d) => d.recipeId).length ?? 0;
   const athletes = plan ? await athleteWeeks(userId, plan, settings) : [];
+  // Meal prep day: one session that does the slow parts of the week's dinners.
+  const prep = plan && settings.prepDay != null ? prepPlan(plan.days, new Map(recipes.map((r) => [r.id, r])), settings.prepDay, settings.prepMinutes) : null;
   // Picky eaters: a tip for each dinner with something they won't eat.
   const pickyFor = (d: { recipeId: string | null; date: string; leftoverOf?: string | null }) => {
     const r = d.recipeId && !d.leftoverOf ? recipes.find((x) => x.id === d.recipeId) : null;
@@ -111,7 +115,7 @@ export default async function HomePage() {
                   isToday={d.date === todayStr}
                   locked={approved}
                   recipes={recipeInfo}
-                  picky={pickyFor(d)}
+                  picky={[...(prep?.finish[d.date] ? [`Prepped ${dayName(prep.date)}: about ${prep.finish[d.date]} minutes to finish tonight.`] : []), ...pickyFor(d)]}
                   plates={settings.tightBudget ? Math.max(1, settings.adults + settings.kids * 0.7) : undefined}
                 />
               </li>
@@ -121,6 +125,7 @@ export default async function HomePage() {
           <StaplesCard plan={plan} staples={settings.staples} />
           <PantryCard plan={plan} />
           <ExtrasCard plan={plan} />
+          {prep && <PrepCard plan={prep} />}
           {athletes.map((w) => <AthleteWeekCard key={w.athlete.id} week={w} />)}
           {approved ? (
             <>
