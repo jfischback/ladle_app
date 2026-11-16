@@ -26,6 +26,9 @@ import { PrepCard } from "@/components/PrepCard";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { AthleteWeekCard } from "@/components/AthleteWeekCard";
 import { GettingStarted, HomeHub } from "@/components/HomeHub";
+import { AlertsPanel } from "@/components/AlertsPanel";
+import { householdAlerts } from "@/lib/household-alerts";
+import { pushPublicKey } from "@/lib/push";
 
 // Planning, approving and importing can take a while (the AI, store prices): give them a minute.
 export const maxDuration = 60;
@@ -138,6 +141,7 @@ export default async function HomePage() {
 
       {/* Everything starts here: one tile for each place in Ladle. */}
       <ModeBanner mode={settings.mode} dietary={rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway)} saved={modeSaved} />
+      <AlertsPanel alerts={await householdAlerts(userId, settings)} level={settings.notifyLevel} pushKey={pushPublicKey()} />
       <HomeHub tiles={hubTiles} />
       {!settings.seen.includes("getting-started-hidden") && <GettingStarted steps={startSteps} />}
 

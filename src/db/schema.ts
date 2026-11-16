@@ -46,6 +46,20 @@ export const parties = pgTable("parties", {
 });
 export type Party = typeof parties.$inferSelect;
 
+/** A phone or browser that asked for Ladle's alerts (web push). One household can have several. */
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull().references(() => users.id), // the household
+    endpoint: text("endpoint").notNull(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("push_subscriptions_endpoint").on(t.endpoint)],
+);
+
 /** "Join my household" links. */
 export const householdInvites = pgTable("household_invites", {
   code: text("code").primaryKey(),

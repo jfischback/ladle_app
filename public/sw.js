@@ -62,3 +62,23 @@ self.addEventListener("fetch", (event) => {
     );
   }
 });
+
+// Phone alerts: show what the server sent, and open the right page when it's tapped.
+self.addEventListener("push", (event) => {
+  let msg = { title: "Ladle", body: "", url: "/", tag: "ladle" };
+  try { msg = { ...msg, ...event.data.json() }; } catch {}
+  event.waitUntil(self.registration.showNotification(msg.title, { body: msg.body, tag: msg.tag, icon: "/icons/icon-192.png", badge: "/icons/icon-192.png", data: { url: msg.url } }));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL(event.notification.data?.url || "/", self.location.origin);
+  if (url.origin !== self.location.origin) return; // only ever open Ladle's own pages
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      const open = wins.find((w) => new URL(w.url).origin === url.origin);
+      if (open) return open.navigate(url.href).then((w) => w && w.focus());
+      return self.clients.openWindow(url.href);
+    }),
+  );
+});
