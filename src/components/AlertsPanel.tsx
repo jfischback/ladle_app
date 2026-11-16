@@ -11,7 +11,7 @@ export function AlertsPanel({ alerts, level, pushKey }: { alerts: Alert[]; level
   const [hidden, setHidden] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [lvl, setLvl] = useState<NotifyLevel>(level);
-  const [pending, start] = useTransition();
+  const [, start] = useTransition();
   const shown = alerts.filter((a) => !hidden.includes(a.key));
   const label = NOTIFY_LEVELS.find((l) => l.key === lvl)?.label ?? "Just the essentials";
   return (
