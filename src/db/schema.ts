@@ -31,6 +31,21 @@ export const careLinks = pgTable("care_links", {
   archivedAt: timestamp("archived_at", { withTimezone: true }),
 });
 
+/** Parties a household is planning: the kind, the day, how many guests, and which dishes. */
+export const parties = pgTable("parties", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id), // the household
+  kind: text("kind").notNull(), // "birthday", "graduation", ...
+  title: text("title").notNull(), // "Sam's 8th birthday"
+  date: text("date").notNull(), // YYYY-MM-DD
+  guests: integer("guests").notNull(),
+  meal: boolean("meal").notNull().default(false), // the party food is the meal (no dinner after)
+  dishes: jsonb("dishes").$type<string[]>().notNull().default([]),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+});
+export type Party = typeof parties.$inferSelect;
+
 /** "Join my household" links. */
 export const householdInvites = pgTable("household_invites", {
   code: text("code").primaryKey(),

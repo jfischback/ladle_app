@@ -10,6 +10,9 @@ const NEW: { when: string; items: Item[] }[] = [
   {
     when: "November 2026",
     items: [
+      { icon: "🎉", title: "Plan a party", text: "Birthday, graduation, celebration of life, Christmas, a shower, game day or a picnic: pick the party and how many are coming. Ladle suggests boards, trays, bites, sweets and drinks, sizes them for the crowd, checks them against your food rules, and makes the shopping list and a timeline.", href: "/party" },
+      { icon: "🏷️", title: "What's on sale in each recipe", text: "Every recipe shows how many of its ingredients are on sale this week, the pricey ones first, and when the sale ends if the store says.", href: "/recipes" },
+      { icon: "🐾", title: "Pet food", text: "Add your pet's food and treats to Snacks & more: food when you're running low, treats when they're on sale.", href: "/extras?c=pets" },
       { icon: "🤝", title: "Plan for a parent", text: "Caring for Mom or Grandpa? Give them their own plan, grocery list, pantry and Fry's cart, run from your phone. A bar at the top always says whose week you're planning, and one tap takes you back to your family.", href: "/household#care" },
       { icon: "🎯", title: "Modes: Normal, Cost Cutting, Workout", text: "Pick one goal for the week from the banner on Home. Cost Cutting picks the cheapest dinners and products and shows what it saved compared with your family's typical week. Workout leans toward high-protein dinners. Your food rules apply in every mode.", where: "Home, the banner at the top" },
       { icon: "📷", title: "Snap my fridge", text: "Take a photo of the fridge or pantry and Ladle lists the foods it can see, then shows dinners that use them.", href: "/recipes?f=have" },
