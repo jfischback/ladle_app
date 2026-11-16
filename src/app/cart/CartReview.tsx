@@ -8,7 +8,7 @@ import type { CartLine, CartState } from "@/lib/types";
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
-export function CartReview({ planId, store, site, connected, fulfillment, cart, pantryQuestions, snap }: { planId: string; store: string; site: string; snap: boolean; connected: boolean; fulfillment: "pickup" | "delivery"; cart: CartState | null; pantryQuestions: number }) {
+export function CartReview({ planId, homeHref, store, site, connected, fulfillment, cart, pantryQuestions, snap }: { planId: string; homeHref: string; store: string; site: string; snap: boolean; connected: boolean; fulfillment: "pickup" | "delivery"; cart: CartState | null; pantryQuestions: number }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<{ tone: "ok" | "warn"; text: string; reconnect?: boolean } | null>(null);
   const run = (fn: () => Promise<{ error?: string; reconnect?: boolean; sent?: number } | void>) =>
@@ -43,7 +43,7 @@ export function CartReview({ planId, store, site, connected, fulfillment, cart, 
         <p className="card bg-olive-soft p-4">💳 <b>Paying with SNAP / EBT:</b> {store} takes EBT on pickup orders. At checkout on {store}&apos;s site, add your EBT card as a payment method; EBT-eligible groceries go on it and anything else (like paper goods) on a second card.</p>
       )}
       {pantryQuestions > 0 && (
-        <p className="card bg-ochre-soft p-4">❓ {pantryQuestions} pantry question{pantryQuestions === 1 ? "" : "s"} still open on your <Link href="/#grocery-title" className="font-bold underline">grocery list</Link>. Answer &ldquo;Need it&rdquo; to add them here.</p>
+        <p className="card bg-ochre-soft p-4">❓ {pantryQuestions} pantry question{pantryQuestions === 1 ? "" : "s"} still open on your <Link href={`${homeHref}#pantry-check`} className="font-bold underline">grocery list</Link>. Answer those first: &ldquo;Need it&rdquo; adds the item here.</p>
       )}
 
       {!cart ? (
@@ -80,6 +80,7 @@ export function CartReview({ planId, store, site, connected, fulfillment, cart, 
               Sent {cart.sentCount} item{cart.sentCount === 1 ? "" : "s"} on {new Date(cart.sentAt).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}.{" "}
               <a href={`${site}/cart`} target="_blank" rel="noreferrer" className="font-bold underline">Open my {store} cart →</a>
               <span className="block text-sm">Sending again adds the items again, so only resend if you emptied the cart.</span>
+              <span className="mt-1 block text-sm">After you shop, <Link href="/history" className="font-bold underline">add your receipt total</Link> so Ladle can show what you spent and saved.</span>
             </p>
           )}
 

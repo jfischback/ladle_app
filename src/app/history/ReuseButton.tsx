@@ -17,7 +17,7 @@ export function ReuseButton({ planId }: { planId: string }) {
           start(async () => {
             const r = await reuseWeek(planId);
             if (r?.error) setError(r.error);
-            else router.push("/");
+            else router.push("/?week=next");
           })
         }
       >

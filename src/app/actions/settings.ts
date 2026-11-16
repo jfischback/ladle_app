@@ -89,6 +89,26 @@ export async function setMode(mode: string): Promise<{ error?: string }> {
   return {};
 }
 
+/** The planning check-in's "Still right?" screen: save just the food rules. They apply to every week. */
+const FoodRulesOnly = z.object({
+  foodRules: z.array(z.enum(Object.keys(FOOD_RULES) as [FoodRule, ...FoodRule[]])).max(20),
+  dislikes: z.array(z.string().trim().min(2).max(40)).max(30),
+  allowAnyway: z.array(z.string().trim().min(2).max(40)).max(20),
+});
+export async function saveFoodRules(input: unknown): Promise<{ error?: string }> {
+  const userId = await requireUserId();
+  const parsed = FoodRulesOnly.safeParse(input);
+  if (!parsed.success) return { error: "Something in the food rules didn't look right. Check them and try again." };
+  const db = await getDb();
+  const [row] = await db.select({ data: settingsTable.data }).from(settingsTable).where(eq(settingsTable.userId, userId));
+  if (!row) return { error: "Finish setting up first." };
+  const data = row.data as Settings;
+  await db.update(settingsTable).set({ data: { ...data, ...parsed.data }, updatedAt: new Date() }).where(eq(settingsTable.userId, userId));
+  revalidatePath("/");
+  revalidatePath("/plan");
+  return {};
+}
+
 /** Getting started: mark a section as looked at, or hide the list. */
 export async function markSectionSeen(key: string): Promise<void> {
   const userId = await requireUserId();

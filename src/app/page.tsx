@@ -9,7 +9,9 @@ import { redirect } from "next/navigation";
 import { requireUserId, actingFor } from "@/auth";
 import { activePlans, getSettings, myCooks, myRecipes } from "@/lib/data";
 import { addDays, currentWeekStart, dayName, greeting, money, shortDate, today, upcomingWeekStart, weekDates, weekday } from "@/lib/week";
-import { PlanButton, DayCard, ApproveBar, RatePrompt, StartOverButton, GroceryChecklist, Celebrate } from "./HomeClient";
+import { DayCard, ApproveBar, RatePrompt, StartOverButton, GroceryChecklist, Celebrate } from "./HomeClient";
+import { tickKey } from "@/lib/grocery-checks";
+import { PANTRY_SECTIONS } from "@/lib/pantry";
 import { FoodArt } from "@/components/FoodArt";
 import { Highlight } from "@/components/Highlight";
 import type { Plan } from "@/db/schema";
@@ -33,7 +35,7 @@ import { pushPublicKey } from "@/lib/push";
 // Planning, approving and importing can take a while (the AI, store prices): give them a minute.
 export const maxDuration = 60;
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ week?: string }> }) {
   const userId = await requireUserId();
   const { data: settings, complete } = await getSettings(userId);
   // New families see what Ladle does first, then set up (someone planning for a parent goes straight to setup).
@@ -42,7 +44,14 @@ export default async function HomePage() {
   const [plans, recipes] = await Promise.all([activePlans(userId), myRecipes(userId)]);
   const upcoming = upcomingWeekStart(settings.shoppingDay);
   const inProgress = currentWeekStart(settings.shoppingDay);
-  const plan = plans.find((p) => p.weekOf === upcoming) ?? plans.find((p) => p.weekOf === inProgress) ?? null;
+  // Home shows one week at a time. The week being cooked and shopped stays up front even after the next one is
+  // planned; the other week is one tap away (or ?week= straight after planning it).
+  const thisPlan = plans.find((p) => p.weekOf === inProgress) ?? null;
+  const nextPlan = upcoming !== inProgress ? plans.find((p) => p.weekOf === upcoming) ?? null : null;
+  const asked = (await searchParams).week;
+  const askedPlan = asked === "next" ? nextPlan ?? thisPlan : asked ? [thisPlan, nextPlan].find((p) => p?.weekOf === asked) ?? null : null;
+  const plan = askedPlan ?? (thisPlan?.status === "approved" ? thisPlan : nextPlan ?? thisPlan);
+  const otherPlan = plan && thisPlan && nextPlan ? (plan.id === thisPlan.id ? nextPlan : thisPlan) : null;
   const todayStr = today();
   // Ladle's stand-out features, shown until they're in use.
   const creators = (await myCooks(userId)).map((c) => c.name);
@@ -87,24 +96,17 @@ export default async function HomePage() {
     ? { week: weekSaving(plan.days, averageDinner), month: costWeeks.reduce((a, p) => a + weekSaving(p.days, averageDinner), 0) }
     : null;
 
-  // The home hub: a tile for each place in Ladle.
-  const tonight = plan?.days.find((d) => d.date === todayStr);
-  const groceryCount = plan?.groceryList?.sections.filter((s) => !/already in your pantry/i.test(s.name)).reduce((n, s) => n + s.items.length, 0) ?? 0;
   const nextPlanned = plans.some((p) => p.weekOf === upcoming);
+  // More in Ladle: the places that aren't already on this page or in the tab bar.
   const hubTiles = [
-    { href: plan ? "#dinners" : "/plan", icon: "🍲", title: "This week", tone: "warm" as const, sub: !plan ? "Nothing planned yet" : tonight?.feast ? "Tonight: the holiday dinner" : tonight?.recipeName ? `Tonight: ${tonight.recipeName}` : `${dinners} dinner${dinners === 1 ? "" : "s"} planned` },
-    { href: approved && plan?.groceryList ? "#grocery-print" : plan ? "#dinners" : "/plan", icon: "🛒", title: "Grocery list", tone: "plain" as const, sub: approved && plan?.groceryList ? `${groceryCount} item${groceryCount === 1 ? "" : "s"}, shared` : plan ? "Ready when you approve the week" : "Comes with your plan" },
-    { href: "/plan", icon: "🗓", title: "Plan my week", tone: "plain" as const, sub: !plan ? "A few quick questions" : approved && !nextPlanned ? `Next: week of ${shortDate(upcoming)}` : "Re-plan with a check-in" },
-    { href: "/recipes", icon: "📖", title: "Recipes", tone: "plain" as const, sub: `${recipes.length} in your box` },
+    { href: "/plan", icon: "🗓", title: "Plan my week", tone: "plain" as const, sub: !plan ? "A few quick questions" : nextPlanned ? "Plan again with a check-in" : `Next: week of ${shortDate(upcoming)}` },
+    { href: "/recipes?f=have", icon: "🥫", title: "Use what I have", tone: "plain" as const, sub: "Dinners from your fridge" },
+    { href: "/calendar", icon: "📅", title: "Calendar", tone: "plain" as const, sub: "Your month of meals" },
+    { href: "/stores", icon: "📍", title: "Nearby stores", tone: "plain" as const, sub: "Where it's cheapest" },
     { href: "/recipes?tab=cooks", icon: "✨", title: "Food creators", tone: "ochre" as const, sub: creators.length ? `Following ${creators.length}` : "Recipes from your favorites" },
     { href: "/athletes", icon: "💪", title: "Athlete mode", tone: "olive" as const, sub: settings.athletes.length ? `${settings.athletes.length} set up` : "For whoever's training" },
-    { href: "/recipes?f=have", icon: "🥫", title: "Use what I have", tone: "plain" as const, sub: "Dinners from your fridge" },
-    { href: "/stores", icon: "📍", title: "Nearby stores", tone: "plain" as const, sub: "Where it's cheapest" },
-    { href: "/calendar", icon: "📅", title: "Calendar", tone: "plain" as const, sub: "Your month of meals" },
     { href: "/party", icon: "🎉", title: "Plan a party", tone: "plain" as const, sub: "Birthdays, grads, holidays" },
-    { href: "/history", icon: "📜", title: "History", tone: "plain" as const, sub: "Past weeks and spending" },
     { href: "/household#care", icon: "🤝", title: "Plan for a parent", tone: "plain" as const, sub: "Caregiver mode" },
-    { href: "/setup", icon: "⚙️", title: "Settings", tone: "plain" as const, sub: "Family, store, budget" },
   ];
   // Getting started: the extras that weren't in the short first setup.
   const startSteps = [
@@ -126,6 +128,15 @@ export default async function HomePage() {
     return [...healthTips(r, needs).map((t) => `🩺 ${t}`), ...(settings.pickyEaters.length ? pickyTips(r, settings.pickyEaters, Number(d.date.slice(8))).map((t) => `🧒 ${t.tip}`) : [])];
   };
 
+  // Where this week stands: plan, approve, pantry check, shop, receipt. The first one not done is the next step.
+  const list = approved ? plan?.groceryList ?? null : null;
+  const pantryQuestions = list?.sections.find((x) => x.name === PANTRY_SECTIONS.PANTRY_CHECK)?.items.length ?? 0;
+  const toBuy = (list?.sections ?? []).filter((x) => x.name !== PANTRY_SECTIONS.HAVE_IT && x.name !== PANTRY_SECTIONS.PANTRY_CHECK);
+  const listTotal = toBuy.reduce((n, x) => n + x.items.length, 0);
+  const listLeft = toBuy.reduce((n, x) => n + x.items.filter((it) => !plan?.groceryChecked?.[tickKey(x.name, it.item)]).length, 0);
+  const cartReady = krogerEnabled() && !!settings.storeLocationId;
+  const weekLabel = (p: Plan) => (p.weekOf === inProgress ? "This week" : "Next week");
+
   return (
     <div className="space-y-6">
       <header>
@@ -138,13 +149,37 @@ export default async function HomePage() {
             ? `${dinners} dinner${dinners === 1 ? "" : "s"} · ${approved ? "your list is ready" : "take a look, swap anything"} · ${settings.fulfillment === "pickup" ? "pickup" : "delivery"} from ${store}`
             : `${settings.fulfillment === "pickup" ? "Pickup" : "Delivery"} from ${store}`}
         </p>
+        {plan && otherPlan && (
+          // Two weeks on the go: say which one this is, and keep the other one tap away.
+          <nav aria-label="Which week" className="no-print mt-3 inline-flex max-w-full gap-1 rounded-full bg-oat p-1">
+            {[thisPlan!, nextPlan!].map((p) => (
+              <Link key={p.id} href={`/?week=${p.weekOf}`} aria-current={p.id === plan.id ? "page" : undefined} className={`rounded-full px-4 py-1.5 text-sm font-bold ${p.id === plan.id ? "bg-olive text-cream shadow-soft" : "text-olive-dark hover:bg-olive-soft"}`}>
+                {weekLabel(p)}{p.status !== "approved" ? " · needs your OK" : ""}
+              </Link>
+            ))}
+          </nav>
+        )}
       </header>
 
-      {/* Everything starts here: one tile for each place in Ladle. */}
+      {/* First thing on Home: where the week stands and the one next step. */}
+      {plan ? (
+        <WeekSteps
+          plan={plan}
+          today={todayStr}
+          pantryQuestions={pantryQuestions}
+          listTotal={listTotal}
+          listLeft={listLeft}
+          cartReady={cartReady}
+          storeName={brand.name ?? "store"}
+          tonight={plan.days.find((d) => d.date === todayStr)?.recipeName ?? null}
+          next={upcoming !== plan.weekOf ? { weekOf: upcoming, status: nextPlan ? nextPlan.status : "none" } : null}
+        />
+      ) : (
+        <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={daysLeft >= 2 ? Math.min(settings.dinnersPerWeek, Math.max(1, weekDates(inProgress).filter((d) => d >= todayStr && settings.cookDays.includes(weekday(d))).length)) : settings.dinnersPerWeek} checksSales={cartReady} yours={yours} />
+      )}
+
       <ModeBanner mode={settings.mode} dietary={rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway)} saved={modeSaved} />
       <AlertsPanel alerts={await householdAlerts(userId, settings)} level={settings.notifyLevel} pushKey={pushPublicKey()} />
-      <HomeHub tiles={hubTiles} />
-      {!settings.seen.includes("getting-started-hidden") && <GettingStarted steps={startSteps} />}
 
       {prepTomorrow.map(({ d, r }) => (
         <div key={d.date} className="flex items-start gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft">
@@ -159,19 +194,18 @@ export default async function HomePage() {
         <RatePrompt key={`${p.id}-${i}`} planId={p.id} dayIndex={i} recipeName={d.recipeName ?? ""} kids={settings.pickyEaters.map((k) => ({ id: k.id, name: k.name }))} label={`How did everyone like ${dayName(d.date)}'s ${d.recipeName}?`} />
       ))}
 
-      {plan?.summary && plan.plannerSource !== "basic" && <WhyThisWeek summary={plan.summary} />}
-      <SaleBanner plan={plan} saleThreshold={settings.saleThresholdPct} yours={yours} />
       {!plan && krogerEnabled() && !settings.storeLocationId && (
-        <Link href="/setup" className="flex items-center gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft hover:shadow-lift">
+        <Link href="/setup?step=3" className="flex items-center gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft hover:shadow-lift">
           <span className="text-3xl" aria-hidden="true">🏷️</span>
           <span><span className="font-bold">Want sale prices?</span> Pick your store in Settings first, and we&apos;ll plan around what&apos;s on sale. →</span>
         </Link>
       )}
 
-      {!plan ? (
-        <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={daysLeft >= 2 ? Math.min(settings.dinnersPerWeek, Math.max(1, weekDates(inProgress).filter((d) => d >= todayStr && settings.cookDays.includes(weekday(d))).length)) : settings.dinnersPerWeek} checksSales={krogerEnabled() && !!settings.storeLocationId} yours={yours} startNow={daysLeft >= 2 ? `the rest of this week (${dayName(todayStr).slice(0, 3)} to ${dayName(addDays(upcoming, -1)).slice(0, 3)})` : null} />
-      ) : (
+      {plan && (
         <>
+          {/* A draft explains itself before the dinners; once approved, the dinners and the list come first. */}
+          {!approved && plan.summary && plan.plannerSource !== "basic" && <WhyThisWeek summary={plan.summary} />}
+          {!approved && <SaleBanner plan={plan} saleThreshold={settings.saleThresholdPct} yours={yours} />}
           <ul id="dinners" className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)] gap-3">
             {plan.days.map((d, i) => (
               <li key={d.date}>
@@ -193,29 +227,103 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
+          {approved && (
+            <>
+              <Celebrate />
+              <GroceryChecklist plan={plan} store={brand.name ?? "store"} aiShopper={{ rules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway), budget: settings.weeklyBudget }} />
+            </>
+          )}
           <BudgetMeter plan={plan} budget={settings.weeklyBudget} mode={settings.budgetMode} />
+          {approved && plan.summary && plan.plannerSource !== "basic" && <WhyThisWeek summary={plan.summary} />}
+          {approved && <SaleBanner plan={plan} saleThreshold={settings.saleThresholdPct} yours={yours} />}
           <StaplesCard plan={plan} staples={settings.staples} />
           <PantryCard plan={plan} />
           <ExtrasCard plan={plan} />
           {prep && <div id="prep" className="scroll-mt-24"><PrepCard plan={prep} /></div>}
           {athletes.map((w) => <AthleteWeekCard key={w.athlete.id} week={w} />)}
-          {approved ? (
-            <>
-              <Celebrate />
-              <GroceryChecklist plan={plan} store={brand.name ?? "store"} aiShopper={{ rules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway), budget: settings.weeklyBudget }} />
-            </>
-          ) : (
-            <ApproveBar planId={plan.id} />
-          )}
+          {!approved && <ApproveBar planId={plan.id} />}
           <div className="flex flex-wrap justify-center gap-2 pt-2">
-            {plan.weekOf !== upcoming && approved && <Link href="/plan" className="btn-secondary">Plan the week of {shortDate(upcoming)}</Link>}
             <a href={`/api/plans/${plan.id}/calendar`} className="btn-quiet text-sm" download>📅 Add to my calendar</a>
             <Link href={`/menu/${plan.id}`} className="btn-quiet text-sm">🖨️ Fridge menu</Link>
-            <StartOverButton planId={plan.id} approved={approved} />
+            <StartOverButton planId={plan.id} approved={approved} planHref={plan.weekOf === upcoming ? "/plan" : "/plan?now=1"} />
           </div>
         </>
       )}
+
+      <section aria-labelledby="more-title" className="no-print space-y-3 pt-2">
+        <h2 id="more-title" className="text-xl font-semibold">More in Ladle</h2>
+        <HomeHub tiles={hubTiles} />
+      </section>
+      {!settings.seen.includes("getting-started-hidden") && <GettingStarted steps={startSteps} />}
     </div>
+  );
+}
+
+type WeekStep = { key: string; label: string; done: boolean };
+
+/**
+ * The top of Home: the week's steps in order (plan, approve, pantry check, shop, receipt), which are done,
+ * and one card for the next thing to do.
+ */
+function WeekSteps({ plan, today, pantryQuestions, listTotal, listLeft, cartReady, storeName, tonight, next }: {
+  plan: Plan; today: string; pantryQuestions: number; listTotal: number; listLeft: number; cartReady: boolean; storeName: string;
+  tonight: string | null;
+  next: { weekOf: string; status: string } | null; // the week after this one, when it's a different week
+}) {
+  const approved = plan.status === "approved";
+  const cartSent = !!plan.cart?.sentAt;
+  const firstDay = plan.days[0]?.date ?? plan.weekOf;
+  // Shopped: everything's ticked, the receipt is in, or the week's first day has passed.
+  const shopped = approved && ((listTotal > 0 && listLeft === 0) || plan.actualSpend != null || today > firstDay);
+  const steps: WeekStep[] = [
+    { key: "plan", label: "Plan", done: true },
+    { key: "approve", label: "Approve", done: approved },
+    { key: "pantry", label: "Pantry", done: approved && pantryQuestions === 0 },
+    { key: "shop", label: "Shop", done: shopped },
+    { key: "receipt", label: "Receipt", done: approved && plan.actualSpend != null },
+  ];
+  const nextStep = steps.find((x) => !x.done)?.key ?? "done";
+  const week = `/?week=${plan.weekOf}`;
+
+  const card: { icon: string; title: string; text: string; cta: string; href: string; more?: { label: string; href: string } } =
+    nextStep === "approve" ? { icon: "👀", title: "Look over the dinners", text: "Swap anything you don't like. When it looks good, tap \"Looks yummy, make my list!\"", cta: "See the dinners", href: "#dinners" }
+    : nextStep === "pantry" ? { icon: "❓", title: "Do you already have these?", text: `${pantryQuestions} pantry question${pantryQuestions === 1 ? "" : "s"}. Answer ${pantryQuestions === 1 ? "it" : "them"} so your list only has what you need.`, cta: pantryQuestions === 1 ? "Answer it" : "Answer them", href: "#pantry-check" }
+    : nextStep === "shop" ? (cartSent
+        ? { icon: "🛒", title: `Check out at ${storeName}`, text: `Your cart is filled. Review it, pay and pick your time on ${storeName}'s site. Ladle never checks out for you.`, cta: "Review my cart", href: `/cart?plan=${plan.id}`, more: { label: "Open my list", href: "#grocery-print" } }
+        : cartReady
+        ? { icon: "🛒", title: "Time to shop", text: `${listLeft} thing${listLeft === 1 ? "" : "s"} on your list. Send ${listLeft === 1 ? "it" : "them"} to your ${storeName} cart, or shop from the list.`, cta: `Send to my ${storeName} cart`, href: `/cart?plan=${plan.id}`, more: { label: "Open my list", href: "#grocery-print" } }
+        : { icon: "🛒", title: "Time to shop", text: `${listLeft} thing${listLeft === 1 ? "" : "s"} left on your list. Tick them off as you go.`, cta: "Open my list", href: "#grocery-print" })
+    : nextStep === "receipt" ? { icon: "🧾", title: "How did the shop go?", text: "Add the receipt total, or snap a photo of it, so Ladle can show what you spent and saved.", cta: "Add my receipt", href: "/history", more: listLeft > 0 ? { label: "Open my list", href: "#grocery-print" } : undefined }
+    : next?.status === "none" ? { icon: "🗓", title: "This week is done. Plan the next one?", text: `The week of ${shortDate(next.weekOf)} isn't planned yet.`, cta: "Plan next week", href: "/plan" }
+    : next?.status === "draft" ? { icon: "👀", title: "Next week is waiting for your OK", text: `Look over the dinners for the week of ${shortDate(next.weekOf)}.`, cta: "See next week", href: `/?week=${next.weekOf}` }
+    : { icon: "✅", title: "This week is all set", text: tonight ? `Tonight: ${tonight}.` : "Nothing left to do. Enjoy dinner.", cta: "See the dinners", href: "#dinners" };
+
+  return (
+    <section aria-labelledby="next-step" className="no-print rounded-3xl bg-card p-4 shadow-lift ring-2 ring-terracotta/30">
+      <ol className="mb-3 flex items-center gap-1" aria-label="This week's steps">
+        {steps.map((x, i) => {
+          const current = x.key === nextStep;
+          return (
+            <li key={x.key} className="flex min-w-0 flex-1 flex-col items-center gap-1" aria-current={current ? "step" : undefined}>
+              <span className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-extrabold ${x.done ? "bg-olive text-cream" : current ? "bg-terracotta text-cream" : "bg-oat text-muted"}`}>{x.done ? "✓" : i + 1}</span>
+              <span className={`truncate text-xs font-bold ${current ? "text-terracotta-dark" : x.done ? "text-olive-dark" : "text-muted"}`}>{x.label}<span className="sr-only">{x.done ? " (done)" : current ? " (next)" : ""}</span></span>
+            </li>
+          );
+        })}
+      </ol>
+      <div className="flex items-start gap-3">
+        <span className="text-3xl" aria-hidden="true">{card.icon}</span>
+        <div className="min-w-0 flex-1">
+          <p className="eyebrow">Next step</p>
+          <h2 id="next-step" className="text-2xl font-semibold leading-snug">{card.title}</h2>
+          <p className="mt-0.5 text-muted">{card.text}</p>
+        </div>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Link href={card.href.startsWith("#") ? `${week}${card.href}` : card.href} className="btn-warm min-h-12 flex-1 px-5 sm:flex-none">{card.cta}</Link>
+        {card.more && <Link href={card.more.href.startsWith("#") ? `${week}${card.more.href}` : card.more.href} className="btn-secondary min-h-12 px-4">{card.more.label}</Link>}
+      </div>
+    </section>
   );
 }
 
@@ -322,7 +430,7 @@ function SaleBanner({ plan, saleThreshold, yours }: { plan: Plan | null; saleThr
   );
 }
 
-function EmptyState({ weekOf, recipeCount, needed, checksSales, yours, startNow }: { weekOf: string; recipeCount: number; needed: number; checksSales: boolean; yours: string; startNow?: string | null }) {
+function EmptyState({ recipeCount, needed, checksSales, yours }: { weekOf: string; recipeCount: number; needed: number; checksSales: boolean; yours: string }) {
   if (recipeCount < needed) {
     return (
       <div className="card flex flex-col items-center gap-4 p-8 text-center">
@@ -345,17 +453,11 @@ function EmptyState({ weekOf, recipeCount, needed, checksSales, yours, startNow 
         <FoodArt kind="pasta" className="h-20 w-20 rotate-6 ring-4 ring-card" rounded="rounded-full" />
       </div>
       <div>
-        <h2 className="text-2xl font-semibold">What&apos;s for dinner this week?</h2>
-        <p className="mt-1 text-lg text-muted">We&apos;ll pick dinners for the week of {shortDate(weekOf)} from the recipes your family likes{checksSales ? `, built around what's on sale at ${yours}` : ""}. You can swap anything.</p>
+        <h2 className="text-2xl font-semibold">What&apos;s for dinner?</h2>
+        <p className="mt-1 text-lg text-muted">We&apos;ll pick dinners from the recipes your family likes{checksSales ? `, built around what's on sale at ${yours}` : ""}. You can swap anything.</p>
       </div>
       <Link href="/plan" className="btn-warm min-h-14 px-8 text-lg">Plan my week</Link>
-      <p className="-mt-1 text-sm text-muted">A few quick questions about this week first: busy nights, company, what to use up.</p>
-      <PlanButton label="Or plan with my usual settings" quiet />
-      {startNow && (
-        // Starting mid-week: no need to wait for the next shopping day.
-        <Link href="/plan?now=1" className="btn-quiet">Or start now: plan {startNow}</Link>
-      )}
-
+      <p className="-mt-1 text-sm text-muted">A few quick questions first: which days, who&apos;s eating, and whether your food rules are still right.</p>
     </div>
   );
 }

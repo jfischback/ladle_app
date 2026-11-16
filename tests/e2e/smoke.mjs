@@ -16,7 +16,7 @@ const step = async (name, fn) => {
   }
 };
 
-const browser = await chromium.launch();
+const browser = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH, args: ["--no-sandbox"] } : {});
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 page.setDefaultTimeout(60_000);
 page.on("pageerror", (e) => problems.push(`page error on ${page.url()}: ${e.message}`));
@@ -49,7 +49,9 @@ await step("plan the week", async () => {
   // "Plan my week" asks a few questions about this week first; the defaults are fine.
   await page.getByRole("link", { name: "Plan my week", exact: true }).click();
   await page.waitForURL(/\/plan/);
-  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: /^Next/ }).click();
+  // Which week (when there's a choice), which nights, who's around, "Still right?", wishes, then the summary.
+  for (let i = 0; i < 8 && !(await page.getByRole("button", { name: "Plan my week" }).count()); i++) await page.getByRole("button", { name: /^Next/ }).click();
+  await page.getByRole("heading", { name: "Ready?" }).waitFor();
   await page.getByRole("button", { name: "Plan my week" }).click();
   await page.getByRole("button", { name: "Looks yummy, make my list!" }).waitFor();
   await noCrash();
@@ -58,6 +60,8 @@ await step("plan the week", async () => {
 await step("approve it: a grocery list", async () => {
   await page.getByRole("button", { name: "Looks yummy, make my list!" }).click();
   await page.locator("#grocery-print").waitFor();
+  // Home leads with the next step once the week is approved.
+  await page.getByRole("heading", { name: /Do you already have these|Time to shop|Check out at|How did the shop go|all set|Plan the next one|waiting for your OK/ }).waitFor();
   const items = await page.locator("#grocery-print input[type=checkbox]").count();
   if (items < 5) throw new Error(`only ${items} grocery items`);
 });

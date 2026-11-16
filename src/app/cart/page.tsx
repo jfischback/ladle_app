@@ -33,7 +33,7 @@ export default async function CartPage({ searchParams }: { searchParams: Promise
   return (
     <div className="space-y-5">
       <div>
-        <Link href="/" className="inline-flex items-center gap-1 font-bold text-olive-dark hover:underline">← This week</Link>
+        <Link href={plan ? `/?week=${plan.weekOf}` : "/"} className="inline-flex items-center gap-1 font-bold text-olive-dark hover:underline">← This week</Link>
         <p className="eyebrow mt-3">Skip the aisles</p>
         <h1 className="text-4xl font-semibold">Fill my {brand.name ?? "store"} cart</h1>
         <p className="mt-1 text-lg text-muted">Ladle finds each thing on your list at {yourStore(brand)}, sale picks first. Check it over, then send it to your cart. You still review and check out on {storeWord(brand)}&apos;s site, so nothing is bought without you.</p>
@@ -57,6 +57,7 @@ export default async function CartPage({ searchParams }: { searchParams: Promise
       ) : (
         <CartReview
           planId={plan.id}
+          homeHref={`/?week=${plan.weekOf}`}
           store={brand.name ?? "store"}
           site={brand.site}
           connected={!!account}

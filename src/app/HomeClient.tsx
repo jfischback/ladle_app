@@ -385,7 +385,7 @@ export function Celebrate() {
     <>
       <div className="animate-pop rounded-3xl bg-olive p-5 text-center text-cream shadow-lift" role="status">
         <p className="font-display text-2xl font-semibold">Your week is set! 🎉</p>
-        <p>Grocery list is ready below.</p>
+        <p>Your grocery list is ready, right under the dinners.</p>
       </div>
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
         {Array.from({ length: 48 }, (_, i) => (
@@ -539,6 +539,15 @@ export function GroceryChecklist({ plan, store, aiShopper }: { plan: Plan; store
         <h2 id="grocery-title" className="flex items-center gap-2 text-2xl font-semibold"><span aria-hidden="true">🛒</span> Grocery list</h2>
         <span className="tag bg-olive-soft text-olive-dark">{done} of {total} got</span>
       </div>
+      {/* In order: answer the pantry questions, send the cart (or shop from the list), then the list itself. */}
+      {list.sections.filter((x) => x.name === PANTRY_SECTIONS.PANTRY_CHECK).map((x) => (
+        <div key={x.name} id="pantry-check" className="mb-4 scroll-mt-24"><PantryCheck planId={plan.id} items={x.items} /></div>
+      ))}
+      {plan.status === "approved" && (
+        <Link href={`/cart?plan=${plan.id}`} className="no-print btn-warm mb-4 w-full sm:w-auto">
+          <span aria-hidden="true">🛒</span> {plan.cart?.sentAt ? `${store} cart sent · review` : `Send to my ${store} cart`}
+        </Link>
+      )}
       <div className="no-print mb-4 flex flex-wrap gap-2">
         <button type="button" className="btn-secondary min-h-10 px-4 text-sm" onClick={shareList}>{shared ? "✓ Copied" : "📤 Text the list"}</button>
         <button
@@ -567,11 +576,6 @@ export function GroceryChecklist({ plan, store, aiShopper }: { plan: Plan; store
         <button className="btn-secondary shrink-0" disabled={adding}>{adding ? "Adding…" : "+ Add"}</button>
       </form>
       {addError && <p role="alert" className="-mt-2 mb-4 text-sm font-bold text-terracotta-dark">{addError}</p>}
-      {plan.status === "approved" && (
-        <Link href={`/cart?plan=${plan.id}`} className="no-print btn-warm mb-4 w-full sm:w-auto">
-          <span aria-hidden="true">🛒</span> {plan.cart?.sentAt ? `${store} cart sent · review` : `Send to my ${store} cart`}
-        </Link>
-      )}
       {list.notes && list.notes.length > 0 && (list.notes.length <= 3 ? (
         <ul className="mb-4 space-y-1.5 rounded-2xl bg-ochre-soft p-3 text-sm">
           {list.notes.map((n) => <li key={n} className="flex gap-2"><span aria-hidden="true">🍲</span><span>{n}</span></li>)}
@@ -586,9 +590,7 @@ export function GroceryChecklist({ plan, store, aiShopper }: { plan: Plan; store
         </details>
       ))}
       <div className="space-y-5">
-        {list.sections.map((s) => s.name === PANTRY_SECTIONS.PANTRY_CHECK ? (
-          <PantryCheck key={s.name} planId={plan.id} items={s.items} />
-        ) : s.name === PANTRY_SECTIONS.HAVE_IT ? (
+        {list.sections.filter((s) => s.name !== PANTRY_SECTIONS.PANTRY_CHECK).map((s) => s.name === PANTRY_SECTIONS.HAVE_IT ? (
           <details key={s.name} className="rounded-2xl bg-cream/70 p-3">
             <summary className="cursor-pointer font-bold text-olive-dark">✅ {s.items.length} item{s.items.length === 1 ? "" : "s"} already in your pantry</summary>
             <ul className="mt-2 space-y-1 text-sm text-muted">
@@ -664,19 +666,21 @@ function PantryCheck({ planId, items }: { planId: string; items: { item: string;
   );
 }
 
-export function StartOverButton({ planId, approved }: { planId: string; approved: boolean }) {
+export function StartOverButton({ planId, approved, planHref = "/plan" }: { planId: string; approved: boolean; planHref?: string }) {
   const [pending, start] = useTransition();
+  const router = useRouter();
   return (
     <button
       className="btn-quiet text-sm"
       disabled={pending}
       onClick={() => {
-        if (approved && !confirm("Unlock this week and plan it again? The current plan stays in your records.")) return;
-        if (!approved && !confirm("Start this week over with new picks?")) return;
-        start(() => startOver(planId));
+        if (approved && !confirm("Unlock this week and plan it again? You'll answer a few quick questions first. The current plan stays in your records.")) return;
+        if (!approved && !confirm("Plan this week again with new picks? You'll answer a few quick questions first.")) return;
+        // Planning always goes through the check-in: which days, who's eating, food rules still right.
+        start(async () => { await startOver(planId); router.push(planHref); });
       }}
     >
-      {approved ? "Re-plan this week" : "Start over with new picks"}
+      {pending ? "One moment…" : approved ? "Re-plan this week" : "Start over with new picks"}
     </button>
   );
 }

@@ -554,7 +554,7 @@ function DayPicker({ value, onChange }: { value: number[]; onChange: (v: number[
   );
 }
 
-function FoodRulesStep({ rules, dislikes, allow, onRules, onDislikes, onAllow }: { rules: FoodRule[]; dislikes: string[]; allow: string[]; onRules: (v: FoodRule[]) => void; onDislikes: (v: string[]) => void; onAllow: (v: string[]) => void }) {
+export function FoodRulesStep({ rules, dislikes, allow, onRules, onDislikes, onAllow }: { rules: FoodRule[]; dislikes: string[]; allow: string[]; onRules: (v: FoodRule[]) => void; onDislikes: (v: string[]) => void; onAllow: (v: string[]) => void }) {
   const [text, setText] = useState(dislikes.join(", "));
   const [allowText, setAllowText] = useState(allow.join(", "));
   const toggle = (r: FoodRule) => {
