@@ -12,6 +12,8 @@ import { ingredientTerm, productMatches } from "@/lib/sales";
 import type { Settings } from "@/lib/settings";
 import { compareBasket, type Comparison, type NearbyStore, type PriceRow, type SavedStore } from "@/lib/store-compare";
 import { today } from "@/lib/week";
+import { unitPrice } from "@/lib/cart";
+import { PANTRY_SECTIONS } from "@/lib/pantry";
 
 const okId = (id: unknown): id is string => typeof id === "string" && /^[A-Za-z0-9]{3,16}$/.test(id);
 
@@ -61,7 +63,9 @@ export async function compareStores(): Promise<{ result?: Comparison & { stores:
   const withList = (await activePlans(userId)).filter((p) => p.status === "approved" && p.groceryList);
   const plan = withList.find((p) => p.days.some((d) => d.date === now)) ?? withList.find((p) => p.weekOf >= now) ?? withList[0];
   if (!plan?.groceryList) return { error: "Approve a week first, so there's a grocery list to compare." };
-  const terms = [...new Set(plan.groceryList.sections.flatMap((s) => s.items.map((i) => ingredientTerm(i.item))).filter((t): t is string => !!t))].slice(0, 15);
+  // Only what's being bought: not what's already in the pantry, and not pantry questions still unanswered.
+  const buying = plan.groceryList.sections.filter((s) => s.name !== PANTRY_SECTIONS.HAVE_IT && s.name !== PANTRY_SECTIONS.PANTRY_CHECK);
+  const terms = [...new Set(buying.flatMap((s) => s.items.map((i) => ingredientTerm(i.item))).filter((t): t is string => !!t))].slice(0, 15);
   if (!terms.length) return { error: "Nothing on the list to compare yet." };
   const stores: SavedStore[] = [{ locationId: settings.storeLocationId, name: settings.storeName || "Your store", address: "" }, ...settings.extraStores];
   const rows: PriceRow[] = terms.map((item) => ({ item, prices: {} }));
@@ -72,8 +76,15 @@ export async function compareStores(): Promise<{ result?: Comparison & { stores:
       jobs.slice(i, i + 6).map(async ({ row, s }) => {
         const found = (await searchProducts(row.item, s.locationId, 8)).filter((p) => productMatches(row.item, p));
         if (!found.length) { row.prices[s.locationId] = null; return; }
-        const cheapest = found.reduce((a, b) => ((b.promo ?? b.regular) < (a.promo ?? a.regular) ? b : a));
-        row.prices[s.locationId] = { price: Math.round((cheapest.promo ?? cheapest.regular) * 100) / 100, onSale: cheapest.promo != null, product: cheapest.description };
+        // The best value, not the smallest package: by price per ounce (or each) when the size can be read.
+        const priceOf = (p: (typeof found)[number]) => p.promo ?? p.regular;
+        const value = (p: (typeof found)[number]) => unitPrice(p.size, priceOf(p));
+        const sized = found.filter((p) => value(p));
+        const kind = sized.length ? value(sized[0])!.unit : null;
+        const comparable = sized.filter((p) => value(p)!.unit === kind);
+        const cheapest = comparable.length ? comparable.reduce((a, b) => (value(b)!.per < value(a)!.per ? b : a)) : found.reduce((a, b) => (priceOf(b) < priceOf(a) ? b : a));
+        const v = value(cheapest);
+        row.prices[s.locationId] = { price: Math.round(priceOf(cheapest) * 100) / 100, onSale: cheapest.promo != null, product: cheapest.size ? `${cheapest.description} · ${cheapest.size}` : cheapest.description, per: v?.per, unit: v?.unit };
       }),
     );
   }

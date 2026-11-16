@@ -29,7 +29,21 @@ export function mapPoints(center: { lat: number; lng: number }, stores: NearbySt
 }
 
 /** One item's price at each store (null: not found there). */
-export type PriceRow = { item: string; prices: Record<string, { price: number; onSale: boolean; product: string } | null> };
+/** `per` is the price per ounce (or per item) when the package size could be read, so different sizes compare fairly. */
+export type PriceRow = { item: string; prices: Record<string, { price: number; onSale: boolean; product: string; per?: number; unit?: "oz" | "ct" } | null> };
+
+/**
+ * What the same amount costs at each store. When every store's package size is known (and in the same kind of
+ * unit), each is priced for the smallest package among them: a $3 five-pound bag beats a $2 one-pound bag.
+ * Otherwise the package prices are all there is to go on.
+ */
+export function sameAmountCosts(row: PriceRow, storeIds: string[]): Record<string, number> {
+  const have = storeIds.filter((id) => row.prices[id]);
+  const sized = have.every((id) => row.prices[id]!.per && row.prices[id]!.unit === row.prices[have[0]]!.unit);
+  if (!sized) return Object.fromEntries(have.map((id) => [id, row.prices[id]!.price]));
+  const amount = Math.min(...have.map((id) => row.prices[id]!.price / row.prices[id]!.per!));
+  return Object.fromEntries(have.map((id) => [id, Math.round(row.prices[id]!.per! * amount * 100) / 100]));
+}
 
 export type Comparison = {
   rows: (PriceRow & { best: string | null })[];
@@ -42,18 +56,17 @@ export type Comparison = {
 
 /** Which store is cheapest for each item and overall, comparing only items every store carries. */
 export function compareBasket(rows: PriceRow[], storeIds: string[]): Comparison {
+  const costs = new Map(rows.map((r) => [r, sameAmountCosts(r, storeIds)]));
   const withBest = rows.map((r) => {
+    const c = costs.get(r)!;
     let best: string | null = null;
-    for (const id of storeIds) {
-      const p = r.prices[id];
-      if (p && (best === null || p.price < r.prices[best]!.price)) best = id;
-    }
+    for (const id of storeIds) if (c[id] != null && (best === null || c[id] < c[best])) best = id;
     return { ...r, best };
   });
   const everywhere = rows.filter((r) => storeIds.every((id) => r.prices[id]));
   const totals = storeIds.map((id) => ({
     locationId: id,
-    total: Math.round(everywhere.reduce((a, r) => a + r.prices[id]!.price, 0) * 100) / 100,
+    total: Math.round(everywhere.reduce((a, r) => a + costs.get(r)![id], 0) * 100) / 100,
     sales: rows.filter((r) => r.prices[id]?.onSale).length,
     found: rows.filter((r) => r.prices[id]).length,
   }));

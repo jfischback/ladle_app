@@ -8,7 +8,7 @@ import type { CartLine, CartState } from "@/lib/types";
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
-export function CartReview({ planId, homeHref, store, site, connected, fulfillment, cart, pantryQuestions, snap }: { planId: string; homeHref: string; store: string; site: string; snap: boolean; connected: boolean; fulfillment: "pickup" | "delivery"; cart: CartState | null; pantryQuestions: number }) {
+export function CartReview({ planId, homeHref, stale = false, store, site, connected, fulfillment, cart, pantryQuestions, snap }: { planId: string; homeHref: string; stale?: boolean; store: string; site: string; snap: boolean; connected: boolean; fulfillment: "pickup" | "delivery"; cart: CartState | null; pantryQuestions: number }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<{ tone: "ok" | "warn"; text: string; reconnect?: boolean } | null>(null);
   const run = (fn: () => Promise<{ error?: string; reconnect?: boolean; sent?: number } | void>) =>
@@ -70,6 +70,12 @@ export function CartReview({ planId, homeHref, store, site, connected, fulfillme
             </div>
           </section>
 
+          {stale && (
+            <p role="alert" className="card bg-ochre-soft p-4 font-semibold">
+              Your grocery list changed since these products were found, so this cart is out of date.{" "}
+              <button type="button" className="underline" disabled={pending} onClick={() => run(() => matchCart(planId))}>Look again</button> before you send it.
+            </p>
+          )}
           {msg && (
             <p className={`card p-4 font-semibold ${msg.tone === "ok" ? "bg-olive-soft text-olive-dark" : "bg-ochre-soft"}`}>
               {msg.text} {msg.reconnect && <a href={connectHref} className="underline">Connect {store}</a>}
@@ -147,6 +153,7 @@ function Line({ planId, line }: { planId: string; line: CartLine }) {
           <p className="text-sm text-muted">Not found at this store. Grab it in the store, or skip it.</p>
         )
       )}
+      {!skipped && line.needs && <p className="text-sm font-bold text-terracotta-dark">Your list needs {line.needs}. One cart line holds {line.quantity}: add the rest on the store&apos;s site.</p>}
       {!skipped && line.options.length > 0 && line.chosen == null && <p className="text-sm text-terracotta-dark">Not sure these are right. Tap one, or skip.</p>}
     </li>
   );

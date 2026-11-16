@@ -8,7 +8,8 @@ import { z } from "zod";
 import { authConfig } from "./auth.config";
 import { getDb } from "./db";
 import { careLinks, settings as settingsTable, users } from "./db/schema";
-import { mayCreateAccount } from "./lib/signup-policy";
+import { mayCreateAccount, validClaimCode } from "./lib/signup-policy";
+import { under } from "./lib/rate-limit";
 
 export const googleEnabled = !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
 
@@ -24,6 +25,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
         const db = await getDb();
         const email = parsed.data.email.toLowerCase().trim();
+        // Limits live here, at the password check, so they hold however the sign-in request arrives.
+        if (!(await under("verifyPerEmail", email))) return null;
         const [user] = await db.select().from(users).where(eq(users.email, email));
         if (!user?.passwordHash) return null;
         const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
@@ -50,7 +53,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const row =
           found ?? (await db.insert(users).values({ email, name: user.name ?? null }).returning())[0];
         token.uid = row.id;
-        if (!found) await claimSharedDataIfFirst(row.id);
+        // A Google sign-up never takes over the shared household: that needs the claim link (email sign-up).
       } else if (user?.id) {
         token.uid = user.id;
       }
@@ -79,10 +82,13 @@ async function guestUserId(): Promise<string> {
 }
 
 /**
- * When login is first turned on, the first real account takes over everything made while it was off
- * (recipes, settings, plans, pantry, the Fry's connection), by joining the shared household.
+ * When login is first turned on, the owner takes over everything made while it was off (recipes, settings,
+ * plans, pantry, the store connection) by joining the shared household. Being first isn't enough: the new
+ * account must have signed up with the owner's claim code (see validClaimCode), so a stranger who signs up
+ * before the owner gets an empty household of their own.
  */
-export async function claimSharedDataIfFirst(newUserId: string): Promise<boolean> {
+export async function claimSharedDataIfFirst(newUserId: string, claimCode?: string): Promise<boolean> {
+  if (!validClaimCode(claimCode)) return false;
   const db = await getDb();
   const [guest] = await db.select().from(users).where(eq(users.email, GUEST_EMAIL));
   if (!guest) return false;

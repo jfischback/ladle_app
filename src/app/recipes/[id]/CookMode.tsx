@@ -34,7 +34,11 @@ export function CookMode({ recipeId, name, steps, ingredients, startOpen = false
   }, []);
   const [at, setAt] = useState(0);
   const [showIngredients, setShowIngredients] = useState(false);
-  const [timer, setTimer] = useState<{ left: number; total: number; running: boolean } | null>(null);
+  // `endsAt` is the clock time the timer finishes: the countdown is read from the clock, so a phone that
+  // slows or pauses the page in the background can't make it run long.
+  const [timer, setTimer] = useState<{ left: number; total: number; running: boolean; endsAt: number } | null>(null);
+  const dialog = useRef<HTMLDivElement>(null);
+  const opener = useRef<HTMLButtonElement>(null);
   const lock = useRef<{ release: () => Promise<void> } | null>(null);
 
   // Keep the screen on while cooking.
@@ -60,9 +64,33 @@ export function CookMode({ recipeId, name, steps, ingredients, startOpen = false
       setTimer((t) => (t ? { ...t, running: false } : t));
       return;
     }
-    const id = setTimeout(() => setTimer((t) => (t ? { ...t, left: t.left - 1 } : t)), 1000);
-    return () => clearTimeout(id);
+    const tick = () => setTimer((t) => (t && t.running ? { ...t, left: Math.max(0, Math.ceil((t.endsAt - Date.now()) / 1000)) } : t));
+    const id = setTimeout(tick, 500);
+    // Back from the background: catch up straight away.
+    document.addEventListener("visibilitychange", tick);
+    return () => { clearTimeout(id); document.removeEventListener("visibilitychange", tick); };
   }, [timer]);
+
+  // A real dialog for the keyboard and screen readers: focus moves in, Tab stays inside, and focus goes back
+  // to "Start cooking" when it closes.
+  useEffect(() => {
+    if (!open) return;
+    const box = dialog.current;
+    const back = opener.current;
+    box?.focus();
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !box) return;
+      const stops = [...box.querySelectorAll<HTMLElement>("button:not([disabled]), summary, a[href], [tabindex]:not([tabindex='-1'])")];
+      if (!stops.length) return;
+      const first = stops[0];
+      const lastStop = stops[stops.length - 1];
+      const here = document.activeElement;
+      if (e.shiftKey && (here === first || here === box)) { e.preventDefault(); lastStop.focus(); }
+      else if (!e.shiftKey && (here === lastStop || !box.contains(here))) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", trap);
+    return () => { document.removeEventListener("keydown", trap); back?.focus(); };
+  }, [open]);
 
   const go = useCallback((d: number) => setAt((n) => Math.min(steps.length - 1, Math.max(0, n + d))), [steps.length]);
   useEffect(() => {
@@ -78,9 +106,9 @@ export function CookMode({ recipeId, name, steps, ingredients, startOpen = false
 
   return (
     <>
-      <button type="button" className="btn-warm w-full sm:w-auto" onClick={() => { setOpen(true); setAt(0); }}>👩‍🍳 Start cooking</button>
+      <button ref={opener} type="button" className="btn-warm w-full sm:w-auto" onClick={() => { setOpen(true); setAt(0); }}>👩‍🍳 Start cooking</button>
       {open && (
-        <div role="dialog" aria-modal="true" aria-label={`Cooking ${name}`} className="fixed inset-0 z-50 flex flex-col bg-cream">
+        <div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label={`Cooking ${name}`} className="fixed inset-0 z-50 flex flex-col bg-cream outline-none">
           <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3">
             <p className="min-w-0 truncate font-display text-lg font-semibold">{name}</p>
             <button type="button" className="btn-quiet min-h-10 px-3" onClick={() => setOpen(false)}>{last ? "Finish cooking" : "Exit cooking"}</button>
@@ -92,6 +120,7 @@ export function CookMode({ recipeId, name, steps, ingredients, startOpen = false
                 <p className="mt-1 whitespace-pre-line">{notes}</p>
               </details>
             )}
+            {factor !== 1 && /\d/.test(steps[at]) && <p className="mb-3 rounded-2xl bg-ochre-soft px-3 py-2 text-sm">You&apos;re not making the recipe as written, so go by the ingredient list for amounts. Numbers inside the steps are for the original size.</p>}
             <p className="eyebrow">Step {at + 1} of {steps.length}</p>
             <p className="mt-3 text-2xl leading-relaxed sm:text-3xl">{steps[at]}</p>
             {minutes && (
@@ -99,11 +128,11 @@ export function CookMode({ recipeId, name, steps, ingredients, startOpen = false
                 {timer && timer.total === minutes * 60 ? (
                   <div className="flex flex-wrap items-center gap-3">
                     <span className={`font-display text-4xl font-semibold ${timer.left === 0 ? "text-terracotta-dark" : ""}`} aria-live="polite">{timer.left === 0 ? "Time's up!" : mmss(timer.left)}</span>
-                    {timer.left > 0 && <button type="button" className="btn-secondary min-h-10 px-4" onClick={() => setTimer({ ...timer, running: !timer.running })}>{timer.running ? "Pause" : "Resume"}</button>}
+                    {timer.left > 0 && <button type="button" className="btn-secondary min-h-10 px-4" onClick={() => setTimer({ ...timer, running: !timer.running, endsAt: Date.now() + timer.left * 1000 })}>{timer.running ? "Pause" : "Resume"}</button>}
                     <button type="button" className="btn-quiet min-h-10 px-3" onClick={() => setTimer(null)}>Clear</button>
                   </div>
                 ) : (
-                  <button type="button" className="btn-primary" onClick={() => setTimer({ left: minutes * 60, total: minutes * 60, running: true })}>⏲️ Start a {minutes >= 60 && minutes % 60 === 0 ? `${minutes / 60}-hour` : `${minutes}-minute`} timer</button>
+                  <button type="button" className="btn-primary" onClick={() => setTimer({ left: minutes * 60, total: minutes * 60, running: true, endsAt: Date.now() + minutes * 60_000 })}>⏲️ Start a {minutes >= 60 && minutes % 60 === 0 ? `${minutes / 60}-hour` : `${minutes}-minute`} timer</button>
                 )}
               </div>
             )}

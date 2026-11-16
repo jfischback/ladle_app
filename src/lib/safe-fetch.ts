@@ -17,12 +17,40 @@ function privateV4(ip: string): boolean {
   );
 }
 
+/** The eight 16-bit groups of an IPv6 address (with "::" filled in and a dotted tail converted), or null. */
+function v6Groups(ip: string): number[] | null {
+  let x = ip.toLowerCase().split("%")[0];
+  // A dotted IPv4 tail ("::ffff:127.0.0.1") is two groups.
+  const tail = x.match(/(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (tail) {
+    const [a, b, c, d] = tail.slice(1).map(Number);
+    if ([a, b, c, d].some((n) => n > 255)) return null;
+    x = x.slice(0, tail.index) + ((a << 8) | b).toString(16) + ":" + ((c << 8) | d).toString(16);
+  }
+  const halves = x.split("::");
+  if (halves.length > 2) return null;
+  const head = halves[0] ? halves[0].split(":") : [];
+  const rest = halves.length === 2 && halves[1] ? halves[1].split(":") : [];
+  const fill = halves.length === 2 ? 8 - head.length - rest.length : 0;
+  if (fill < 0 || (halves.length === 1 && head.length !== 8)) return null;
+  const groups = [...head, ...Array(fill).fill("0"), ...rest].map((g) => (/^[0-9a-f]{1,4}$/.test(g) ? parseInt(g, 16) : NaN));
+  return groups.length === 8 && groups.every((n) => !Number.isNaN(n)) ? groups : null;
+}
+
 function privateV6(ip: string): boolean {
-  const x = ip.toLowerCase();
-  if (x === "::" || x === "::1") return true;
-  const mapped = x.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-  if (mapped) return privateV4(mapped[1]);
-  return /^(fc|fd|fe8|fe9|fea|feb|ff)/.test(x); // unique local, link-local, multicast
+  const g = v6Groups(ip);
+  if (!g) return true; // can't read it: don't fetch it
+  const v4 = (hi: number, lo: number) => privateV4(`${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`);
+  const zeros = (n: number) => g.slice(0, n).every((x) => x === 0);
+  if (zeros(8)) return true; // ::
+  if (zeros(7) && g[7] === 1) return true; // ::1
+  // An IPv4 address wearing an IPv6 coat, however it's written ("::ffff:127.0.0.1" is the same as "::ffff:7f00:1"):
+  if (zeros(5) && g[5] === 0xffff) return v4(g[6], g[7]); // IPv4-mapped
+  if (zeros(6)) return v4(g[6], g[7]); // IPv4-compatible (old)
+  if (g[0] === 0x64 && g[1] === 0xff9b && g.slice(2, 6).every((x) => x === 0)) return v4(g[6], g[7]); // NAT64
+  if (g[0] === 0x2002) return v4(g[1], g[2]); // 6to4
+  const top = g[0];
+  return (top & 0xfe00) === 0xfc00 || (top & 0xffc0) === 0xfe80 || (top & 0xffc0) === 0xfec0 || (top & 0xff00) === 0xff00; // unique local, link-local, site-local, multicast
 }
 
 export function isPrivateAddress(ip: string): boolean {

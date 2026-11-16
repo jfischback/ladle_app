@@ -6,6 +6,7 @@ import { krogerAccounts } from "@/db/schema";
 import { activePlans, getPlan, getSettings } from "@/lib/data";
 import { krogerEnabled } from "@/lib/kroger";
 import { CartReview } from "./CartReview";
+import { cartListKey } from "@/lib/cart";
 import { storeBrand, storeWord, yourStore } from "@/lib/stores";
 
 // Matching a whole grocery list at Fry's takes a little while.
@@ -58,6 +59,7 @@ export default async function CartPage({ searchParams }: { searchParams: Promise
         <CartReview
           planId={plan.id}
           homeHref={`/?week=${plan.weekOf}`}
+          stale={!!plan.cart && plan.cart.listKey !== undefined && plan.cart.listKey !== cartListKey(plan.groceryList)}
           store={brand.name ?? "store"}
           site={brand.site}
           connected={!!account}

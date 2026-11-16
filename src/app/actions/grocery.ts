@@ -7,6 +7,8 @@ import { getDb } from "@/db";
 import { plans } from "@/db/schema";
 import { cleanChecks, tickKey } from "@/lib/grocery-checks";
 import { updateGroceryList } from "@/lib/plan-list";
+import { getPlan } from "@/lib/data";
+import { markBought } from "@/lib/bought";
 import { ADDED_SECTION, addToList, parseAdded, removeFromList } from "@/lib/grocery-add";
 import type { GroceryList } from "@/lib/types";
 
@@ -44,7 +46,15 @@ export async function setGroceryChecks(planId: string, changes: Record<string, b
   const userId = await requireUserId();
   const clean = cleanChecks(changes);
   if (!/^[0-9a-f-]{36}$/i.test(planId) || !Object.keys(clean).length) return null;
-  return mergeChecks(userId, planId, clean);
+  const saved = await mergeChecks(userId, planId, clean);
+  // A tick is how Ladle knows something was bought (and an untick, that it wasn't): keep the pantry in step.
+  if (saved) {
+    const plan = await getPlan(userId, planId);
+    const things = (on: boolean) => Object.entries(clean).filter(([, v]) => v === on).map(([k]) => ({ section: k.split("::")[0], item: k.split("::").slice(1).join("::") }));
+    await markBought(userId, things(true), true, plan?.stockUp ?? []);
+    await markBought(userId, things(false), false, plan?.stockUp ?? []);
+  }
+  return saved;
 }
 
 async function mergeChecks(userId: string, planId: string, clean: Record<string, boolean>): Promise<Record<string, boolean> | null> {

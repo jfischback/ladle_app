@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireUserId } from "@/auth";
-import { activePlans, getSettings } from "@/lib/data";
+import { activePlans, getSettings, replacedPlans } from "@/lib/data";
 import { setActualSpend } from "@/app/actions/plans";
 import { dayName, money, shortDate } from "@/lib/week";
 import { FoodArt } from "@/components/FoodArt";
@@ -13,12 +13,14 @@ export const maxDuration = 60;
 
 export default async function HistoryPage() {
   const userId = await requireUserId();
-  const [plans, { data: settings }] = await Promise.all([activePlans(userId), getSettings(userId)]);
+  const [plans, { data: settings }, replaced] = await Promise.all([activePlans(userId), getSettings(userId), replacedPlans(userId)]);
   const weeks = plans.filter((p) => p.status === "approved");
   const spent = weeks.filter((w) => w.actualSpend != null).map((w) => w.actualSpend!);
   const avg = spent.length ? spent.reduce((a, b) => a + b, 0) / spent.length : null;
   const budget = settings.weeklyBudget;
-  const saved = spent.reduce((a, s) => a + (budget - s), 0);
+  // Each week is judged against the budget it was planned with (older weeks didn't record one: today's is used).
+  const budgetOf = (w: (typeof weeks)[number]) => w.budget ?? budget;
+  const saved = weeks.filter((w) => w.actualSpend != null).reduce((a, w) => a + (budgetOf(w) - w.actualSpend!), 0);
   // Oldest to newest, last 8 weeks with a receipt total, for the little chart.
   const chart = weeks.filter((w) => w.actualSpend != null).slice(0, 8).reverse();
   const chartMax = Math.max(budget, ...chart.map((w) => w.actualSpend!));
@@ -38,7 +40,7 @@ export default async function HistoryPage() {
         <div className="rounded-3xl bg-olive p-5 text-cream shadow-soft">
           <p className="font-bold opacity-90">Average week</p>
           <p className="font-display text-5xl font-semibold">{money(avg)}</p>
-          <p className="opacity-90">{spent.length ? `Budget is ${money(budget)}` : "Add your receipt totals below to see this."}</p>
+          <p className="opacity-90">{spent.length ? `Your usual budget is ${money(budget)}` : "Add your receipt totals below to see this."}</p>
         </div>
         <div className={`rounded-3xl p-5 shadow-soft ${saved >= 0 ? "bg-ochre-soft" : "bg-terracotta-soft"}`}>
           <p className="font-bold text-ochre-dark">{saved >= 0 ? "Saved under budget" : "Over budget so far"}</p>
@@ -47,7 +49,7 @@ export default async function HistoryPage() {
         </div>
         {totalSaleSaved > 0 && (
           <div className="rounded-3xl bg-blush p-5 shadow-soft">
-            <p className="font-bold text-terracotta-dark">🏷️ Saved on sales</p>
+            <p className="font-bold text-terracotta-dark">🏷️ Sale savings in carts (estimate)</p>
             <p className="font-display text-5xl font-semibold">{money(totalSaleSaved)}</p>
             <p className="text-muted">In {sentWeeks.length} cart{sentWeeks.length === 1 ? "" : "s"} sent to the store</p>
           </div>
@@ -59,10 +61,10 @@ export default async function HistoryPage() {
           <h2 id="spend-chart" className="mb-4 text-xl font-semibold">What you spent each week</h2>
           <div className="relative flex h-40 items-end gap-2 sm:gap-3">
             <div className="absolute inset-x-0 border-t-2 border-dashed border-terracotta/50" style={{ bottom: `${(budget / chartMax) * 100}%` }}>
-              <span className="absolute -top-6 right-0 rounded-full bg-card px-2 text-xs font-bold text-terracotta-dark">Budget {money(budget)}</span>
+              <span className="absolute -top-6 right-0 rounded-full bg-card px-2 text-xs font-bold text-terracotta-dark">Usual budget {money(budget)}</span>
             </div>
             {chart.map((w) => {
-              const over = w.actualSpend! > budget;
+              const over = w.actualSpend! > budgetOf(w);
               return (
                 <div key={w.id} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
                   <span className="text-xs font-bold text-muted">{money(w.actualSpend)}</span>
@@ -98,6 +100,7 @@ export default async function HistoryPage() {
                   <h2 className="text-2xl font-semibold">Week of {shortDate(w.weekOf)}</h2>
                   <span className="text-muted">
                     {w.estimatedTotal != null && <>Estimated {money(w.estimatedTotal)}</>}
+                    {w.budget != null && <> · budget {money(w.budget)}</>}
                     {saleSaved(w) > 0 && <> · <b className="text-terracotta-dark">saved {money(saleSaved(w))} on sales</b></>}
                   </span>
                 </div>
@@ -127,6 +130,24 @@ export default async function HistoryPage() {
             );
           })}
         </ul>
+      )}
+      {replaced.length > 0 && (
+        // Weeks that were approved and then re-planned: kept for the record, not counted in the totals above.
+        <details className="card p-5">
+          <summary className="cursor-pointer text-xl font-semibold">Replaced weeks ({replaced.length})</summary>
+          <p className="mt-1 text-sm text-muted">Weeks you approved and then planned again. They aren&apos;t counted in the totals above.</p>
+          <ul className="mt-3 space-y-4">
+            {replaced.map((w) => (
+              <li key={w.id} className="border-t border-line pt-3">
+                <p className="font-bold">Week of {shortDate(w.weekOf)} <span className="font-normal text-muted">· replaced {w.archivedAt ? shortDate(w.archivedAt.toISOString().slice(0, 10)) : ""}</span></p>
+                <ul className="mt-1 text-sm">
+                  {w.days.filter((d) => d.recipeId).map((d) => <li key={d.date}><span className="font-bold text-terracotta-dark">{dayName(d.date).slice(0, 3)}</span> · {d.recipeName}</li>)}
+                </ul>
+                <div className="mt-2"><ReuseButton planId={w.id} /></div>
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
     </div>
   );

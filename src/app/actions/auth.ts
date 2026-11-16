@@ -26,14 +26,15 @@ export async function signup(_: FormState, form: FormData): Promise<FormState> {
   const next = String(form.get("next") ?? "");
   const familyInvite = String(form.get("invite") ?? "");
   const joinCode = next.match(/^\/join\/([A-Za-z0-9_-]+)$/)?.[1];
-  if (!(await mayCreateAccount({ familyInvite, joinCode }))) return { error: INVITE_ONLY_MESSAGE };
+  const claimCode = String(form.get("claim") ?? "");
+  if (!(await mayCreateAccount({ familyInvite, joinCode, claimCode }))) return { error: INVITE_ONLY_MESSAGE };
   const db = await getDb();
   const { email, password, name } = parsed.data;
   const [existing] = await db.select().from(users).where(eq(users.email, email));
   if (existing) return { error: "An account with that email already exists. Sign in instead." };
   const [row] = await db.insert(users).values({ email, name: name || null, passwordHash: await bcrypt.hash(password, 10) }).returning();
-  // The first account keeps everything set up while login was off; everyone else starts fresh.
-  const claimed = await claimSharedDataIfFirst(row.id);
+  // The owner (signing up with the claim link) keeps everything set up while login was off; everyone else starts fresh.
+  const claimed = await claimSharedDataIfFirst(row.id, claimCode);
   if (familyInvite) await markFamilyInviteUsed(familyInvite, row.id);
   // Joining someone's household from an invite link: go back to it after signing up.
   const redirectTo = /^\/join\/[A-Za-z0-9_-]+$/.test(next) ? next : claimed ? "/" : "/setup";

@@ -50,19 +50,21 @@ export function PlanButton({ label, big, thisWeek = false, quiet = false }: { la
 }
 
 /** A dinner's recipe page, sized like the grocery list: tonight's batches and who's eating. */
-function recipeHref(day: PlanDay, weekOf: string, cook = false): string {
+function recipeHref(day: PlanDay, weekOf: string, cook = false, times?: number): string {
   const q = new URLSearchParams();
   // So the recipe's back link returns to this week (Home may be showing the other one by default).
   q.set("from", weekOf);
   if (cook) q.set("cook", "1");
+  // How many times the grocery list made this recipe (leftover lunches and extra portions included).
+  if (times && !day.leftoverOf) q.set("times", String(times));
   if ((day.batches ?? 1) > 1 && !day.leftoverOf) q.set("batches", String(day.batches));
   if (day.eating && !day.leftoverOf) q.set("for", `${day.eating.adults}-${day.eating.kids}`);
   const qs = q.toString();
   return `/recipes/${day.recipeId}${qs ? `?${qs}` : ""}`;
 }
 
-export function DayCard({ planId, weekOf, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [], canFeast = false, feastGuests = 4, feastWhen = {}, household }: {
-  planId: string; weekOf: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number; picky?: string[];
+export function DayCard({ planId, weekOf, times, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [], canFeast = false, feastGuests = 4, feastWhen = {}, household }: {
+  planId: string; weekOf: string; times?: number; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number; picky?: string[];
   moveTargets?: { index: number; label: string }[];
   canFeast?: boolean; // a holiday with a menu (Thanksgiving) that hasn't passed
   feastGuests?: number;
@@ -146,7 +148,7 @@ export function DayCard({ planId, weekOf, index, day, isToday, locked, recipes, 
           <div className="flex items-start justify-between gap-3 p-5">
             <div className="min-w-0">
               {day.recipeId ? (
-                <Link href={recipeHref(day, weekOf)} className="font-display text-2xl font-semibold leading-snug hover:underline">{day.recipeName}</Link>
+                <Link href={recipeHref(day, weekOf, false, times)} className="font-display text-2xl font-semibold leading-snug hover:underline">{day.recipeName}</Link>
               ) : (
                 <p className="font-display text-2xl font-semibold">{dinnerName ?? "Night off tonight!"}</p>
               )}
@@ -156,7 +158,7 @@ export function DayCard({ planId, weekOf, index, day, isToday, locked, recipes, 
           </div>
           {day.recipeId && !day.leftoverOf && (
             <div className="-mt-2 px-5 pb-4">
-              <Link href={recipeHref(day, weekOf, true)} className="btn-warm w-full sm:w-auto">👩‍🍳 Start cooking</Link>
+              <Link href={recipeHref(day, weekOf, true, times)} className="btn-warm w-full sm:w-auto">👩‍🍳 Start cooking</Link>
             </div>
           )}
           <WhyLine reason={reason} sale={day.saleItems} className="-mt-2 px-5 pb-5" />
@@ -174,7 +176,7 @@ export function DayCard({ planId, weekOf, index, day, isToday, locked, recipes, 
               {day.fromCook && <NewBadge className="ml-1.5 align-middle" label="✨ New" />}
             </p>
             {day.recipeId ? (
-              <Link href={recipeHref(day, weekOf)} className="block font-bold leading-snug hover:underline">{day.recipeName}</Link>
+              <Link href={recipeHref(day, weekOf, false, times)} className="block font-bold leading-snug hover:underline">{day.recipeName}</Link>
             ) : (
               <p className="font-bold text-olive-dark">{dinnerName ?? "Night off"}</p>
             )}
@@ -680,7 +682,7 @@ export function StartOverButton({ planId, approved, planHref = "/plan", cartSent
       className="btn-quiet text-sm"
       disabled={pending}
       onClick={() => {
-        if (approved && !confirm(`Unlock this week and plan it again? You'll answer a few quick questions first. The current plan stays in your records.${cartSent ? "\n\nYour store cart was already filled from this plan. Re-planning doesn't empty it: clear it on the store's site before sending the new list." : ""}`)) return;
+        if (approved && !confirm(`Unlock this week and plan it again? You'll answer a few quick questions first. The current plan moves to \"Replaced weeks\" in History.${cartSent ? "\n\nYour store cart was already filled from this plan. Re-planning doesn't empty it: clear it on the store's site before sending the new list." : ""}`)) return;
         if (!approved && !confirm("Plan this week again with new picks? You'll answer a few quick questions first.")) return;
         // Planning always goes through the check-in: which days, who's eating, food rules still right.
         start(async () => { await startOver(planId); router.push(planHref); });

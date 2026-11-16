@@ -38,9 +38,13 @@ export type CartLine = {
   quantity: number;
   chosen: number | null; // index into options; null = skipped
   options: CartProduct[];
+  raw?: string; // the amount the grocery list asks for ("1 1/2 lb"), so the count can follow a change of product
+  manual?: boolean; // the family set the count themselves: leave it alone
+  needs?: number; // more than the cart can hold in one line: how many it really takes
 };
 
-export type CartState = { matchedAt: string; lines: CartLine[]; sentAt?: string | null; sentCount?: number };
+/** `listKey` is the grocery list these products were matched against: a different list means the cart is out of date. */
+export type CartState = { matchedAt: string; lines: CartLine[]; sentAt?: string | null; sentCount?: number; listKey?: string };
 
 export type ExtraCategory = "snacks" | "sweets" | "drinks" | "baby" | "pets";
 
@@ -82,7 +86,8 @@ export type PlanLunch = {
 };
 
 export type GroceryItem = { item: string; quantity: string; note?: string; forRecipes: string[]; added?: boolean }; // added: typed in by the family
-export type GroceryList = { sections: { name: string; items: GroceryItem[] }[]; source: "claude" | "basic"; notes?: string[] };
+/** `partyId` marks a party's section, so two parties with the same name never share (or overwrite) one section. */
+export type GroceryList = { sections: { name: string; items: GroceryItem[]; partyId?: string }[]; source: "claude" | "basic"; notes?: string[] };
 
 /** One sale found at the store: the ingredient it covers, the product on the shelf, and the prices. */
 export type SaleItem = {

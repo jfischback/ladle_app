@@ -8,7 +8,7 @@ import { getDb } from "@/db";
 import { parties } from "@/db/schema";
 import { activePlans } from "@/lib/data";
 import { PARTY_DISHES, PARTY_KINDS, partyKind } from "@/lib/party";
-import { partyGroceries, partySection, withPartySection } from "@/lib/party-grocery";
+import { isSectionOf, partyGroceries, withPartySection, withoutParty } from "@/lib/party-grocery";
 import { updateGroceryList } from "@/lib/plan-list";
 import { addDays, today } from "@/lib/week";
 import type { SaleItem } from "@/lib/types";
@@ -57,10 +57,11 @@ export async function updateParty(id: string, input: Input): Promise<{ error?: s
   await db.update(parties).set(value).where(eq(parties.id, old.id));
   // Already on a grocery list: keep that list in step (more guests, different food, new name).
   for (const p of await activePlans(userId)) {
-    if (!p.groceryList?.sections.some((s) => s.name === partySection(old.title))) continue;
+    if (!p.groceryList?.sections.some((s) => isSectionOf(s, old.id, old.title))) continue;
     const sales = p.saleItems.filter((x): x is SaleItem => typeof x !== "string");
     const section = partyGroceries(value, sales);
-    await updateGroceryList(userId, p.id, (list) => withPartySection({ ...list, sections: list.sections.filter((s) => s.name !== partySection(old.title)) }, section));
+    // Same title: the section keeps its name and its ticks. A new title replaces it.
+    await updateGroceryList(userId, p.id, (list) => withPartySection(value.title === old.title ? list : withoutParty(list, old.id, old.title), section, old.id, value.title));
   }
   revalidatePath(`/party/${id}`);
   revalidatePath("/");
@@ -75,8 +76,8 @@ export async function removeParty(id: string): Promise<void> {
   const [row] = await db.update(parties).set({ archivedAt: new Date() }).where(and(eq(parties.id, id), eq(parties.userId, userId))).returning();
   if (row) {
     for (const p of await activePlans(userId)) {
-      if (p.groceryList?.sections.some((s) => s.name === partySection(row.title))) {
-        await updateGroceryList(userId, p.id, (list) => ({ ...list, sections: list.sections.filter((s) => s.name !== partySection(row.title)) }));
+      if (p.groceryList?.sections.some((s) => isSectionOf(s, row.id, row.title))) {
+        await updateGroceryList(userId, p.id, (list) => withoutParty(list, row.id, row.title));
       }
     }
   }
@@ -100,7 +101,7 @@ export async function addPartyToList(id: string): Promise<{ error?: string; week
   if (!plan) return { error: "Approve a week's dinners first, then the party's shopping goes on that grocery list." };
   const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
   const section = partyGroceries(party, sales);
-  const saved = await updateGroceryList(userId, plan.id, (list) => withPartySection(list, section));
+  const saved = await updateGroceryList(userId, plan.id, (list) => withPartySection(list, section, party.id, party.title));
   if (!saved) return { error: "Couldn't add it just now. Try again." };
   revalidatePath("/");
   return { week: plan.weekOf };

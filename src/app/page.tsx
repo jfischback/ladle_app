@@ -12,6 +12,7 @@ import { addDays, currentWeekStart, dayName, greeting, money, shortDate, today, 
 import { DayCard, ApproveBar, RatePrompt, StartOverButton, GroceryChecklist, Celebrate } from "./HomeClient";
 import { tickKey } from "@/lib/grocery-checks";
 import { pickWeek, weekSteps, type WeekState } from "@/lib/home-week";
+import { recipeMultipliers } from "@/lib/scaling";
 import { PANTRY_SECTIONS } from "@/lib/pantry";
 import { FoodArt } from "@/components/FoodArt";
 import { Highlight } from "@/components/Highlight";
@@ -116,6 +117,14 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     { href: "/pantry", title: "Tell us what's in your pantry", why: "So the list skips what you already have.", done: pantryCount > 0, skipped: settings.seen.includes("pantry") },
   ];
   const athletes = plan ? await athleteWeeks(userId, plan, settings) : [];
+  // How much to cook of each dinner: the same sum the grocery list is built from (the table that night, a
+  // leftovers night, leftover lunches, athletes' extra portions), so what's cooked matches what was bought.
+  const extraPortions = athletes.reduce((n, w) => {
+    const meals = w.days.flatMap((d) => d.meals.filter((m) => m.meal === "Dinner" && !m.estimated));
+    return n + (meals.length ? meals.reduce((a, m) => a + m.portion, 0) / meals.length - 1 : 0);
+  }, 0);
+  const servingsById = new Map(recipes.map((r) => [r.id, r.servings]));
+  const makeTimes = plan ? recipeMultipliers(plan.days, (id) => servingsById.get(id) ?? null, settings, extraPortions) : new Map<string, number>();
   // Meal prep day: one session that does the slow parts of the week's dinners.
   const prep = plan && settings.prepDay != null ? prepPlan(plan.days, new Map(recipes.map((r) => [r.id, r])), settings.prepDay, settings.prepMinutes) : null;
   // Picky eaters: a tip for each dinner with something they won't eat.
@@ -212,7 +221,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       {plan && (
         <>
           {/* A draft explains itself before the dinners; once approved, the dinners and the list come first. */}
-          {!approved && plan.summary && plan.plannerSource !== "basic" && <WhyThisWeek summary={plan.summary} />}
+          {!approved && plan.summary && (plan.plannerSource !== "basic" || /couldn't get this week under/.test(plan.summary)) && <WhyThisWeek summary={plan.summary} />}
           {!approved && <SaleBanner plan={plan} saleThreshold={settings.saleThresholdPct} yours={yours} />}
           <ul id="dinners" className="grid scroll-mt-24 grid-cols-[minmax(0,1fr)] gap-3">
             {plan.days.map((d, i) => (
@@ -220,6 +229,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 <DayCard
                   planId={plan.id}
                   weekOf={plan.weekOf}
+                  times={d.recipeId && !d.leftoverOf ? makeTimes.get(d.recipeId) : undefined}
                   index={i}
                   day={d}
                   isToday={d.date === todayStr}
@@ -238,10 +248,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           </ul>
           {approved && (
             <>
-              <GroceryChecklist plan={plan} store={brand.name ?? "store"} cartOn={krogerEnabled()} aiShopper={{ rules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway), budget: settings.weeklyBudget }} />
+              <GroceryChecklist plan={plan} store={brand.name ?? "store"} cartOn={krogerEnabled()} aiShopper={{ rules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway), budget: plan.budget ?? settings.weeklyBudget }} />
             </>
           )}
-          <BudgetMeter plan={plan} budget={settings.weeklyBudget} mode={settings.budgetMode} />
+          <BudgetMeter plan={plan} budget={plan.budget ?? settings.weeklyBudget} mode={settings.budgetMode} />
           {!approved && <ApproveBar planId={plan.id} />}
           {approved && plan.summary && plan.plannerSource !== "basic" && <WhyThisWeek summary={plan.summary} />}
           {approved && <SaleBanner plan={plan} saleThreshold={settings.saleThresholdPct} yours={yours} />}

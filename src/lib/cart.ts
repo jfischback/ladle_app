@@ -47,8 +47,21 @@ export function cartQuantity(quantity: string, item = ""): number {
   }
   // Pieces of something sold in packs become packs (18 eggs -> 2 cartons); other pieces are bought one by one.
   const fromPieces = pieces > 0 ? (pack ? Math.ceil(pieces / pack) : Math.ceil(pieces)) : 0;
-  const n = fromPieces + Math.ceil(packages);
-  return Math.min(Math.max(n, 1), 12);
+  // Never silently fewer than the list asks for: a big count is trimmed (and flagged) where the cart line is made.
+  return Math.max(fromPieces + Math.ceil(packages), 1);
+}
+
+/** The most one cart line holds. Above this the line says how many it really takes. */
+export const MAX_PER_LINE = 24;
+
+/** A count for the cart, trimmed to what one line holds; `needs` is set when the list asks for more than that. */
+export function lineCount(n: number): { quantity: number; needs?: number } {
+  return n > MAX_PER_LINE ? { quantity: MAX_PER_LINE, needs: n } : { quantity: n };
+}
+
+/** The grocery list as the cart sees it: which things to buy and how much. A change here means a matched cart is out of date. */
+export function cartListKey(list: GroceryList): string {
+  return cartItems(list).map((x) => `${x.key}=${x.raw}`).sort().join("\n");
 }
 
 /** What to search Fry's for. */
@@ -88,7 +101,7 @@ export function unitPrice(size: string, price: number): { per: number; unit: "oz
   return { per: price / n, unit: "ct" };
 }
 
-/** Ounces in a weight like "1 1/2 lb", "12 oz" (summed over "a + b"), or null if none of it is a weight. */
+/** Ounces in a weight like "1 1/2 lb", "12 oz", "500 g", "2 kg" (summed over "a + b"), or null if none of it is a weight. */
 export function ouncesNeeded(quantity: string): number | null {
   let oz = 0;
   for (const part of quantity.toLowerCase().split(/\s*\+\s*/)) {
@@ -97,17 +110,20 @@ export function ouncesNeeded(quantity: string): number | null {
     const unit = a.rest.replace(/\([^)]*\)/g, " ").trim().split(/\s+/)[0] ?? "";
     if (/^(lbs?|pounds?)$/.test(unit)) oz += a.n * 16;
     else if (/^(oz|ounces?)$/.test(unit)) oz += a.n;
+    else if (/^(kg|kgs|kilos?|kilograms?)$/.test(unit)) oz += a.n * 35.274;
+    else if (/^(g|grams?)$/.test(unit)) oz += a.n / 28.3495;
   }
   return oz > 0 ? oz : null;
 }
 
-/** How many of a product cover a weighed amount: 4 lb of beef in 1 lb packs -> 4 (a little short is fine). */
+/** How many of a product cover a weighed amount: 4 lb of beef in 1 lb packs -> 4; 18 oz in 16 oz packs -> 2 (never short). */
 export function packagesForWeight(quantity: string, productSize: string): number | null {
   const need = ouncesNeeded(quantity);
   const size = unitPrice(productSize, 1);
   if (!need || !size || size.unit !== "oz") return null;
   const perPack = 1 / size.per; // ounces in one package
-  return Math.min(12, Math.max(1, Math.ceil(need / perPack - 0.15)));
+  // The tiny allowance is only for rounding in unit conversion (1 kg vs 35.27 oz), not for buying less than needed.
+  return Math.max(1, Math.ceil(need / perPack - 0.005));
 }
 
 const toCart = (p: KrogerProduct): CartProduct => ({ upc: p.upc, description: p.description, size: p.size, price: p.promo ?? p.regular, regular: p.regular, onSale: p.promo != null, aisle: p.aisle ?? null });

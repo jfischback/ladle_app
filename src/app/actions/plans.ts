@@ -5,7 +5,7 @@ import { z } from "zod";
 import { and, desc, eq, inArray, isNull, ne } from "drizzle-orm";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
-import { cooks, extraItems, foundRecipes, pantryItems, plans, recipes, type Recipe } from "@/db/schema";
+import { cooks, foundRecipes, plans, recipes, type Recipe } from "@/db/schema";
 import { activePlans, getPlan, getSettings, myExtras, myPantry, myRecipes, recipesByIds } from "@/lib/data";
 import { adoptFoundRecipe, refreshCooks } from "@/lib/cooks";
 import { ruleProblems } from "@/lib/diet";
@@ -19,7 +19,7 @@ import { planDesserts } from "@/lib/dessert";
 import { copyStarters } from "@/lib/starters";
 import { pickStarters } from "@/lib/starter-pick";
 import { CATEGORIES, extraSearchTerm, extrasTotal, neverRegex, planExtras, termsToCheck } from "@/lib/extras";
-import { applyPantry, pantrySearchTerm, sameThing } from "@/lib/pantry";
+import { applyPantry, pantrySearchTerm } from "@/lib/pantry";
 import { fuelGroceries, fuelTerms, portionNotes } from "@/lib/athletes";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { canCook } from "@/lib/prep";
@@ -176,24 +176,36 @@ export async function planUpcomingWeek(thisWeek = false, checkIn?: unknown): Pro
   const byId = new Map([...recipeList, ...planned].map((r) => [r.id, r]));
   result.days = fillCosts(result.days, byId, settings, sales);
   if (settings.cookOnceEatTwice) result.days = cookOnceEatTwice(result.days, byId).days;
-  if (settings.budgetMode === "hard" || settings.tightBudget) {
-    const recentIds = new Set(recent.flatMap((p) => p.days.map((d) => d.recipeId)).filter((x): x is string => !!x));
-    let capped = enforceCap(result.days, recipeList, settings, sales, staplesTotal(staples).total + extrasTotal(extraLines), recentIds);
-    // Every dollar counts: if dinners alone can't fit, the optional snacks go first (every-trip and running-low items stay).
-    if (capped.over > 0 && settings.tightBudget) {
-      // Baby food and pet food are never cut.
-      extraLines = extraLines.filter((l) => l.category === "baby" || l.category === "pets" || /^Every trip|You're out|Running low/.test(l.reason));
-      capped = enforceCap(capped.days, recipeList, settings, sales, staplesTotal(staples).total + extrasTotal(extraLines), recentIds);
-    }
-    result.days = capped.days;
-  }
-  // Who's eating on the nights the check-in changed (company, or someone away).
+  // Who's eating on the nights the check-in changed (company, or someone away). This comes before the budget
+  // check, so the limit is held against what those nights really cost.
   if (week?.eating.length) {
     result.days = result.days.map((d) => {
       const e = week.eating.find((x) => x.weekday === weekday(d.date));
       return e && d.recipeId && !d.leftoverOf && !(e.adults === settings.adults && e.kids === settings.kids) ? withEating(d, { adults: e.adults, kids: e.kids }, settings) : d;
     });
   }
+  let overBy = 0;
+  if (settings.budgetMode === "hard" || settings.tightBudget) {
+    const recentIds = new Set(recent.flatMap((p) => p.days.map((d) => d.recipeId)).filter((x): x is string => !!x));
+    // A cheaper pick is priced for the usual table: price it again for that night's table, then check once more.
+    const cap = (days: PlanDay[]) => {
+      const out = enforceCap(days, recipeList, settings, sales, staplesTotal(staples).total + extrasTotal(extraLines), recentIds);
+      const repriced = out.days.map((d, i) => (d.eating && d.recipeId !== days[i].recipeId && d.estimatedCost != null ? { ...d, estimatedCost: forTable(d.estimatedCost, d.eating, settings) } : d));
+      return { days: repriced, over: Math.max(0, Math.round((sumCosts(repriced) ?? 0) + staplesTotal(staples).total + extrasTotal(extraLines) - settings.weeklyBudget)) };
+    };
+    let capped = cap(result.days);
+    if (capped.over > 0) capped = cap(capped.days);
+    // Every dollar counts: if dinners alone can't fit, the optional snacks go first (every-trip and running-low items stay).
+    if (capped.over > 0 && settings.tightBudget) {
+      // Baby food and pet food are never cut.
+      extraLines = extraLines.filter((l) => l.category === "baby" || l.category === "pets" || /^Every trip|You're out|Running low/.test(l.reason));
+      capped = cap(capped.days);
+    }
+    result.days = capped.days;
+    overBy = capped.over;
+  }
+  // The limit couldn't be met with this family's recipes: say so plainly, with the plan.
+  if (overBy > 0) result.summary = `${result.summary ? `${result.summary} ` : ""}We couldn't get this week under your $${settings.weeklyBudget} limit with the recipes that fit: it's about $${overBy} over. Swap a dinner for a cheaper one, take a night off, or raise the limit.`;
   result.estimatedTotal = sumCosts(result.days);
   result.days = await withLunches(userId, await withBreakfasts(userId, result.days, settings, sales, bDeal), settings, sales);
   const recentDesserts = new Set(recent.flatMap((p) => p.days.map((d) => d.dessert?.recipeId)).filter((x): x is string => !!x));
@@ -215,6 +227,8 @@ export async function planUpcomingWeek(thisWeek = false, checkIn?: unknown): Pro
     plannerSource: result.source,
     mode: settings.mode,
     estimatedTotal: result.estimatedTotal,
+    // The budget this week was planned against (the check-in can set one for just this week).
+    budget: settings.weeklyBudget,
   });
   revalidatePath("/");
 }
@@ -233,6 +247,10 @@ export async function swapDay(planId: string, dayIndex: number, recipeId: string
   } else {
     const [recipe] = await recipesByIds(userId, [recipeId]);
     if (!recipe) return { error: "Recipe not found." };
+    // The screen only offers dinners that fit, but the rule is enforced here too.
+    const breaks = ruleProblems(recipe, settings.foodRules, settings.dislikes, settings.allowAnyway);
+    if (breaks.length) return { error: `${recipe.name} doesn't fit your food rules (${breaks.join(", ")}).` };
+    if (!canCook(recipe, settings.equipment)) return { error: `${recipe.name} needs equipment your kitchen settings say you don't have.` };
     if (plan.days.some((d, i) => i !== dayIndex && d.recipeId === recipeId)) return { error: `${recipe.name} is already on another night this week.` };
     const alt = day.alternatives.find((a) => a.recipeId === recipeId);
     const previous =
@@ -311,6 +329,11 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   // Lunch recipes need shopping too (leftover lunches are covered by cooking extra at dinner).
   const lunchIds = plan.days.flatMap((d) => [d.lunch?.kind === "recipe" ? d.lunch.recipeId : null, d.breakfast?.recipeId ?? null, d.dessert?.recipeId ?? null]).filter((x): x is string => !!x);
   const chosen = await recipesByIds(userId, [...new Set([...ids, ...lunchIds])]);
+  // Food rules can change after a week is planned (a new allergy, an edited recipe): check every meal again now.
+  const broken = chosen.map((r) => ({ r, why: ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway) })).filter((x) => x.why.length);
+  if (broken.length) {
+    return { error: `${broken.map((x) => `${x.r.name} (${x.why.join(", ")})`).join("; ")} ${broken.length === 1 ? "doesn't" : "don't"} fit your food rules any more. Swap ${broken.length === 1 ? "it" : "them"}, or plan the week again, then approve.` };
+  }
   let groceryList;
   try {
     const sales = plan.saleItems.filter((x): x is SaleItem => typeof x !== "string");
@@ -354,29 +377,19 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
     // One line per thing: eggs in the staples, a recipe and athlete fuel become one line with the amounts added.
     groceryList = mergeDuplicates(groceryList);
     groceryList = applyPantry(groceryList, pantry, plan.stockUp ?? [], saleNote);
-    // Low/out pantry items on this week's list (stock-ups included) will be bought, so they're "have" from now on.
-    const bought = new Set(groceryList.sections.filter((s) => !/already in your pantry|pantry check/i.test(s.name)).flatMap((s) => s.items.map((i) => i.item)));
-    const restocked = pantry.filter((p) => p.status !== "have" && ([...bought].some((b) => sameThing(b, p.name)) || (plan.stockUp ?? []).some((s) => s.item === pantrySearchTerm(p.name))));
-    if (restocked.length) {
-      const db = await getDb();
-      await db.update(pantryItems).set({ status: "have", updatedAt: new Date() }).where(and(eq(pantryItems.userId, userId), inArray(pantryItems.id, restocked.map((p) => p.id))));
-    }
+    // Nothing is marked bought here: that happens when things are ticked off the list or sent to the store cart.
   } catch (e) {
     return { error: `Couldn't build the grocery list: ${(e as Error).message}` };
   }
   const db = await getDb();
-  await db
-    .update(plans)
-    .set({ status: "approved", approvedAt: new Date(), groceryList })
-    .where(and(eq(plans.id, planId), eq(plans.status, "draft"), isNull(plans.archivedAt)));
-  // Remember what was bought, so "rotate" items take turns and "when low" items count as restocked.
-  const boughtExtras = new Set((plan.extras ?? []).map((l) => `${l.category}|${l.item}`));
-  if (boughtExtras.size) {
-    const all = await myExtras(userId);
-    for (const x of all.filter((x) => boughtExtras.has(`${x.category}|${x.name}`))) {
-      await db.update(extraItems).set({ lastPickedAt: new Date(), ...(x.mode === "when-low" ? { status: "have" as const } : {}) }).where(eq(extraItems.id, x.id));
-    }
-  }
+  // Making the list can take a while. If someone swapped a dinner meanwhile, this list is for the wrong meals:
+  // don't approve it. (The check and the write happen under one lock, so nothing slips in between.)
+  const locked = await updatePlanLocked(userId, planId, (row) => {
+    if (row.status !== "draft" || row.archivedAt) return { error: "This week was changed while your list was being made. Refresh the page and look again." };
+    if (JSON.stringify(row.days) !== JSON.stringify(plan.days)) return { error: "A dinner was changed while your list was being made. Look over the week once more, then tap the button again." };
+    return { groceryList, status: "approved" as const, approvedAt: new Date() };
+  });
+  if (locked.error) return { error: locked.error };
   // New recipes in an approved week join My Recipes for good.
   const trialIds = chosen.filter((r) => r.trial).map((r) => r.id);
   if (trialIds.length) {
@@ -618,6 +631,7 @@ export async function reuseWeek(planId: string): Promise<ActionResult> {
     summary: `Started from your week of ${source.weekOf}. Swap anything you like, then approve.`,
     plannerSource: "basic",
     estimatedTotal: sumCosts(days),
+    budget: settings.weeklyBudget,
   });
   revalidatePath("/");
 }

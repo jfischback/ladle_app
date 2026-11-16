@@ -34,6 +34,7 @@ Without `ANTHROPIC_API_KEY` the app still works: a basic planner picks at random
 1. Import the repo in Vercel.
 2. Add a Postgres database (Storage → Neon); it sets `DATABASE_URL`.
 3. Set `AUTH_SECRET`, `ANTHROPIC_API_KEY`, and optionally `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` and `KROGER_CLIENT_ID`/`KROGER_CLIENT_SECRET`.
+4. Turning sign-in on for a site that was used with it off: set `REQUIRE_LOGIN=true`, `AUTH_SECRET` and `OWNER_CLAIM_CODE` (a long private phrase), redeploy, then the owner signs up at `/signup?claim=<that phrase>`. That account keeps everything already set up. Nobody else can take it over, however early they sign up.
 
 ## Layout
 

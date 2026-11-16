@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cartQuantity, packagesForWeight, unitPrice } from "@/lib/cart";
+import type { GroceryList } from "@/lib/types";
+import { MAX_PER_LINE, cartListKey, cartQuantity, lineCount, packagesForWeight, unitPrice } from "@/lib/cart";
 
 test("cart quantities from grocery lines", () => {
   const cases: [string, string, number][] = [
@@ -17,6 +18,11 @@ test("weighed items use the package size", () => {
   assert.equal(packagesForWeight("4 lbs + 2 lb", "1 lb"), 6);
   assert.equal(packagesForWeight("3 3/4 lb", "3 lb"), 2);
   assert.equal(packagesForWeight("12 oz", "16 oz"), 1);
+  // Never short: 18 oz needs two 16 oz packages, and metric amounts count too.
+  assert.equal(packagesForWeight("18 oz", "16 oz"), 2);
+  assert.equal(packagesForWeight("2 kg", "1 kg"), 2);
+  assert.equal(packagesForWeight("500 g", "16 oz"), 2);
+  assert.equal(packagesForWeight("20 lb", "1 lb"), 20);
   assert.equal(packagesForWeight("2 cups", "16 oz"), null);
 });
 
@@ -54,4 +60,23 @@ test("aisle labels survive odd shapes", async () => {
   assert.equal(aisleLabel([{ number: "0" }, { number: "14" }]), "Aisle 14");
   assert.equal(aisleLabel({ number: "3" }), null);
   assert.equal(aisleLabel([null, "x"]), null);
+});
+
+test("a big count is flagged, not quietly cut", () => {
+  assert.equal(cartQuantity("20", "onions"), 20);
+  assert.deepEqual(lineCount(20), { quantity: 20 });
+  assert.deepEqual(lineCount(30), { quantity: MAX_PER_LINE, needs: 30 });
+});
+
+test("the cart knows when the grocery list changed under it", () => {
+  const onions = (quantity: string): GroceryList => ({ source: "basic", sections: [{ name: "Produce", items: [{ item: "onions", quantity, note: "", forRecipes: [] }] }] });
+  const list = onions("2");
+  const more = onions("3");
+  const added: GroceryList = { ...list, sections: [...list.sections, { name: "Added by you", items: [{ item: "paper towels", quantity: "1", note: "", forRecipes: [] }] }] };
+  assert.equal(cartListKey(list), cartListKey(structuredClone(list)));
+  assert.notEqual(cartListKey(list), cartListKey(more));
+  assert.notEqual(cartListKey(list), cartListKey(added));
+  // Things that aren't bought don't make the cart stale.
+  const have: GroceryList = { ...list, sections: [...list.sections, { name: "Already in your pantry", items: [{ item: "salt", quantity: "", note: "", forRecipes: [] }] }] };
+  assert.equal(cartListKey(list), cartListKey(have));
 });

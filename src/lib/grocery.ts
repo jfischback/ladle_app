@@ -61,8 +61,13 @@ export async function buildGroceryList(recipes: Recipe[], settings: Settings, sa
     foodRules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway) || "none",
     weeklyStaples: settings.staples.filter((x) => x.active).map((x) => `${x.item} (${x.quantity})`),
   };
-  const out = await askClaude({ system: SYSTEM, content: JSON.stringify(pkg), schema: GrocerySchema, effort: "low" });
-  return { sections: out.sections, source: "claude", notes: extraNotes };
+  try {
+    const out = await askClaude({ system: SYSTEM, content: JSON.stringify(pkg), schema: GrocerySchema, effort: "low" });
+    return { sections: out.sections, source: "claude", notes: extraNotes };
+  } catch {
+    // The smart list didn't come back. The dinners are already chosen, so make the plain list instead of nothing.
+    return { ...basicGroceryList(recipes, sales, makeTimes), notes: ["This is the basic list: the smart list couldn't be made just now, so amounts are added up per recipe and not combined across units. Check quantities before you shop.", ...extraNotes] };
+  }
 }
 
 /** Fallback: merge identical items without unit conversion. */

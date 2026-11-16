@@ -17,7 +17,7 @@ import { RecipeNotes } from "./RecipeNotes";
 import { ShareRecipe } from "./ShareRecipe";
 import { estimateCost, estimateNutrition, estimateSodium, trustworthy } from "@/lib/nutrition";
 
-export default async function RecipePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cook?: string; batches?: string; for?: string; from?: string }> }) {
+export default async function RecipePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cook?: string; batches?: string; for?: string; from?: string; times?: string }> }) {
   const userId = await requireUserId();
   const { id } = await params;
   const sp = await searchParams;
@@ -41,8 +41,12 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
   const forMatch = (sp.for ?? "").match(/^(\d{1,2})-(\d{1,2})$/);
   const tonight = forMatch ? { adults: Number(forMatch[1]), kids: Number(forMatch[2]) } : null;
   const plates = (tonight && tonight.adults + tonight.kids > 0 ? dinnerServings(tonight) : dinnerServings(settings)) + dinnerServings(settings) * (batches - 1);
-  const familyServings = r.meal === "dinner" && r.servings ? Math.round(r.servings * Math.max(0.5, Math.ceil((plates / r.servings) * 2) / 2)) : null;
-  const sizedWhy = familyServings ? (tonight ? `Sized for tonight's table: ${tonight.adults} adult${tonight.adults === 1 ? "" : "s"}${tonight.kids ? ` and ${tonight.kids} kid${tonight.kids === 1 ? "" : "s"}` : ""}${batches > 1 ? ", plus the leftovers night" : ""}.` : batches > 1 ? `Sized for your family, times ${batches} for the leftovers night.` : "Sized for your family. Cooking extra for tomorrow's lunch? Add those servings.") : null;
+  // Opened from the week: ?times= is how many times the grocery list made this recipe (dinner, a leftovers night,
+  // leftover lunches, athletes' portions), so the amounts to cook match what was bought.
+  const listTimes = Number(sp.times);
+  const fromList = r.servings && Number.isFinite(listTimes) && listTimes >= 0.5 && listTimes <= 12 && (listTimes * 2) % 1 === 0 ? listTimes : null;
+  const familyServings = fromList ? Math.round(r.servings! * fromList) : r.meal === "dinner" && r.servings ? Math.round(r.servings * Math.max(0.5, Math.ceil((plates / r.servings) * 2) / 2)) : null;
+  const sizedWhy = fromList ? "Sized to match this week's grocery list: dinner plus any leftovers night and leftover lunches that come from this pot." : familyServings ? (tonight ? `Sized for tonight's table: ${tonight.adults} adult${tonight.adults === 1 ? "" : "s"}${tonight.kids ? ` and ${tonight.kids} kid${tonight.kids === 1 ? "" : "s"}` : ""}${batches > 1 ? ", plus the leftovers night" : ""}.` : batches > 1 ? `Sized for your family, times ${batches} for the leftovers night.` : "Sized for your family. Cooking extra for tomorrow's lunch? Add those servings.") : null;
 
   return (
     <article className="space-y-6">

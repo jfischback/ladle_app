@@ -64,6 +64,17 @@ export async function activePlans(userId: string) {
     .orderBy(desc(plans.weekOf));
 }
 
+/** Approved weeks that were re-planned: set aside, never deleted. History shows them as "replaced". */
+export async function replacedPlans(userId: string) {
+  const db = await getDb();
+  return db
+    .select()
+    .from(plans)
+    .where(and(eq(plans.userId, userId), isNotNull(plans.archivedAt), eq(plans.status, "approved")))
+    .orderBy(desc(plans.weekOf), desc(plans.archivedAt))
+    .limit(30);
+}
+
 export async function getPlan(userId: string, id: string) {
   const db = await getDb();
   const [p] = await db.select().from(plans).where(and(eq(plans.id, id), eq(plans.userId, userId)));

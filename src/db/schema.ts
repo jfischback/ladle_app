@@ -141,6 +141,7 @@ export const plans = pgTable(
     estimatedTotal: real("estimated_total"),
     groceryList: jsonb("grocery_list").$type<GroceryList>(),
     actualSpend: real("actual_spend"),
+    budget: real("budget"), // the budget this week was planned against (a check-in can set one just for the week)
     approvedAt: timestamp("approved_at", { withTimezone: true }),
     archivedAt: timestamp("archived_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

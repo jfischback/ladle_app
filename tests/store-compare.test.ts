@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { compareBasket, mapPoints, milesBetween } from "@/lib/store-compare";
+import { compareBasket, mapPoints, milesBetween, sameAmountCosts } from "@/lib/store-compare";
 
 test("miles between two Phoenix-area points", () => {
   const d = milesBetween({ lat: 33.4484, lng: -112.074 }, { lat: 33.4152, lng: -111.8315 }); // Phoenix to Mesa
@@ -36,4 +36,16 @@ test("comparing a basket: fair totals over shared items, best store per item", (
   assert.equal(c.cheapest, "b");
   assert.deepEqual(c.rows.map((r) => r.best), ["b", "a", "a"]);
   assert.equal(c.totals[1].sales, 1);
+});
+
+test("stores are compared on the same amount of food, not the smallest package", () => {
+  // $2 for one pound against $3 for five pounds: the five-pound bag is the better buy.
+  const rows = [{ item: "rice", prices: { a: { price: 2, onSale: false, product: "Rice · 1 lb", per: 2 / 16, unit: "oz" as const }, b: { price: 3, onSale: false, product: "Rice · 5 lb", per: 3 / 80, unit: "oz" as const } } }];
+  const c = compareBasket(rows, ["a", "b"]);
+  assert.equal(c.rows[0].best, "b");
+  assert.equal(c.cheapest, "b");
+  assert.deepEqual(sameAmountCosts(rows[0], ["a", "b"]), { a: 2, b: 0.6 });
+  // When a size can't be read, package prices are all there is.
+  const unsized = [{ item: "basil", prices: { a: { price: 2, onSale: false, product: "Basil" }, b: { price: 3, onSale: false, product: "Basil · 5 lb", per: 3 / 80, unit: "oz" as const } } }];
+  assert.equal(compareBasket(unsized, ["a", "b"]).rows[0].best, "a");
 });

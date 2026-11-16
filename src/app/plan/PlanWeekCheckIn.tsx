@@ -330,7 +330,7 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, defaults, f
               {desserts > 0 && <li>🍰 Dessert {desserts} night{desserts === 1 ? "" : "s"}</li>}
               {alsoPlanned.length > 0 && <li>☕ Also planned, from your <Link href="/setup?step=5" className="font-bold text-olive-dark underline">Cooking settings</Link>: {alsoPlanned.join(", ")}</li>}
             </ul>
-            {week.status === "draft" && <p className="rounded-2xl bg-ochre-soft p-3 text-sm">This replaces the plan that&apos;s waiting for your OK. The old one is kept in your records.</p>}
+            {week.status === "draft" && <p className="rounded-2xl bg-ochre-soft p-3 text-sm">This replaces the plan that&apos;s waiting for your OK.</p>}
           </>
         )}
 

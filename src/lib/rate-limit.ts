@@ -31,6 +31,7 @@ export async function clientAddress(): Promise<string> {
 export const LIMITS = {
   loginPerEmail: [10, 15 * 60],
   loginPerAddress: [40, 15 * 60],
+  verifyPerEmail: [20, 15 * 60],
   signupPerAddress: [10, 60 * 60],
   plan: [20, 60 * 60],
   approve: [20, 60 * 60],

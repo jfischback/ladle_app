@@ -88,9 +88,9 @@ export async function answerPantryCheck(planId: string, item: string | null, hav
     if (name.length < 2) continue;
     await db
       .insert(pantryItems)
-      // "Need it" puts it on this week's list, so after shopping they'll have it: either way it's "have" next week.
-      .values({ userId, name, place: guessPlace(name), status: "have" })
-      .onConflictDoUpdate({ target: [pantryItems.userId, pantryItems.name], set: { status: "have", updatedAt: new Date() } });
+      // "Need it" puts it on this week's list. It only becomes "have" once it's ticked off or sent to the cart.
+      .values({ userId, name, place: guessPlace(name), status: have ? "have" : "out" })
+      .onConflictDoUpdate({ target: [pantryItems.userId, pantryItems.name], set: { status: have ? "have" : "out", updatedAt: new Date() } });
   }
   revalidatePath("/");
 }

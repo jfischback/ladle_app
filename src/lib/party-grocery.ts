@@ -32,8 +32,31 @@ export function partyGroceries(p: Pick<PartyPlan, "title" | "guests" | "meal" | 
   return { name: partySection(p.title), items };
 }
 
-/** The week's list with this party's section added or brought up to date (it goes first, so it's easy to find). */
-export function withPartySection(list: GroceryList, section: GroceryList["sections"][number]): GroceryList {
-  const kept = list.sections.filter((s) => s.name !== section.name);
-  return { ...list, sections: section.items.length ? [section, ...kept] : kept };
+type Section = GroceryList["sections"][number];
+
+/** Is this section this party's? By its id; lists made before sections carried an id match on the name. */
+export const isSectionOf = (s: Section, partyId: string, title: string) => (s.partyId ? s.partyId === partyId : s.name === partySection(title));
+
+/** The list without this party's section. */
+export function withoutParty(list: GroceryList, partyId: string, title: string): GroceryList {
+  return { ...list, sections: list.sections.filter((s) => !isSectionOf(s, partyId, title)) };
+}
+
+/**
+ * The week's list with this party's section added or brought up to date (it goes first, so it's easy to find).
+ * The section belongs to the party by id. Another party with the same name keeps its own section: the newcomer's
+ * is numbered ("Party: Birthday (2)"), since ticks are kept by section name.
+ */
+export function withPartySection(list: GroceryList, section: Section, partyId?: string, title?: string): GroceryList {
+  if (!partyId) {
+    const kept = list.sections.filter((s) => s.name !== section.name);
+    return { ...list, sections: section.items.length ? [section, ...kept] : kept };
+  }
+  const mine = list.sections.find((s) => isSectionOf(s, partyId, title ?? section.name.replace(/^Party: /, "")));
+  const kept = list.sections.filter((s) => s !== mine);
+  if (!section.items.length) return { ...list, sections: kept };
+  // Keep the name it already has (so ticks stay put); otherwise the first free one.
+  let name = mine && mine.name.replace(/ \(\d+\)$/, "") === section.name ? mine.name : section.name;
+  for (let n = 2; kept.some((s) => s.name === name); n++) name = `${section.name} (${n})`;
+  return { ...list, sections: [{ ...section, name, partyId }, ...kept] };
 }

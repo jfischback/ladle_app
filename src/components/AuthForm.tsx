@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { login, signup, googleLogin, type FormState } from "@/app/actions/auth";
 import { Wordmark } from "./Logo";
 
-export function AuthForm({ mode, googleEnabled, next, invite, inviteOnlyNote, resetDone }: { mode: "login" | "signup"; googleEnabled: boolean; next?: string; invite?: string; inviteOnlyNote?: boolean; resetDone?: boolean }) {
+export function AuthForm({ mode, googleEnabled, next, invite, claim, inviteOnlyNote, resetDone }: { mode: "login" | "signup"; googleEnabled: boolean; next?: string; invite?: string; claim?: string; inviteOnlyNote?: boolean; resetDone?: boolean }) {
   const [state, action, pending] = useActionState<FormState, FormData>(mode === "login" ? login : signup, undefined);
   const isLogin = mode === "login";
   return (
@@ -18,11 +18,13 @@ export function AuthForm({ mode, googleEnabled, next, invite, inviteOnlyNote, re
         <h1 className="mb-4 text-2xl font-bold">{isLogin ? "Sign in" : "Create your account"}</h1>
         {resetDone && <p className="mb-4 rounded-2xl bg-olive-soft p-3 font-semibold text-olive-dark">✓ Your password is changed. Sign in with the new one.</p>}
         {invite && <p className="mb-4 rounded-2xl bg-olive-soft p-3 font-semibold text-olive-dark">🎉 You&apos;re invited to Ladle! Make your account to start planning your family&apos;s dinners.</p>}
+        {claim && <p className="mb-4 rounded-2xl bg-olive-soft p-3 font-semibold text-olive-dark">🔑 Owner&apos;s link. The account you make here keeps the recipes, plans, pantry and store connection already set up.</p>}
         {inviteOnlyNote && <p className="mb-4 rounded-2xl bg-ochre-soft p-3 text-sm">Ladle is invite-only right now. If someone sent you an invite link, open that link to sign up.</p>}
         {next?.startsWith("/join/") && <p className="mb-4 rounded-2xl bg-olive-soft p-3 font-semibold text-olive-dark">🏡 {isLogin ? "Sign in" : "Create an account"} to join the household you were invited to.</p>}
         <form action={action} className="space-y-4">
           {next && <input type="hidden" name="next" value={next} />}
           {invite && <input type="hidden" name="invite" value={invite} />}
+          {claim && <input type="hidden" name="claim" value={claim} />}
           {!isLogin && (
             <div>
               <label htmlFor="name" className="label">Your first name</label>

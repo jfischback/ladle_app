@@ -30,7 +30,7 @@ type PlanRow = typeof plans.$inferSelect;
  * Change a plan's days and grocery list together under a lock (a holiday feast changes both), so a tick-off,
  * added item or pantry answer at the same moment isn't lost. `change` returns the fields to write, or an error.
  */
-export async function updatePlanLocked(userId: string, planId: string, change: (row: PlanRow) => Partial<Pick<PlanRow, "days" | "groceryList" | "estimatedTotal">> | { error: string }): Promise<{ error?: string }> {
+export async function updatePlanLocked(userId: string, planId: string, change: (row: PlanRow) => Partial<Pick<PlanRow, "days" | "groceryList" | "estimatedTotal" | "status" | "approvedAt">> | { error: string }): Promise<{ error?: string }> {
   const db = await getDb();
   return db.transaction(async (tx) => {
     const [row] = await tx.select().from(plans).where(and(eq(plans.id, planId), eq(plans.userId, userId))).for("update");

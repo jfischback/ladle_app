@@ -6,8 +6,9 @@ import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
 import { krogerAccounts, plans } from "@/db/schema";
 import { getPlan, getSettings } from "@/lib/data";
+import { markBought } from "@/lib/bought";
 import { addToCart, krogerEnabled, refreshUserTokens, searchProducts } from "@/lib/kroger";
-import { cartItems, packagesForWeight, pickOptions } from "@/lib/cart";
+import { cartItems, packagesForWeight, pickOptions, MAX_PER_LINE, cartListKey, lineCount } from "@/lib/cart";
 import { open, seal } from "@/lib/secret-box";
 import type { CartLine, CartState } from "@/lib/types";
 import { storeBrand, yourStore } from "@/lib/stores";
@@ -50,11 +51,14 @@ export async function matchCart(planId: string): Promise<{ error?: string }> {
       const pick = keepChoice >= 0 ? keepChoice : chosen;
       // Weighed items: as many packages of the chosen product as the recipe amounts need.
       const byWeight = pick != null && options[pick] ? packagesForWeight(x.raw, options[pick].size) : null;
-      lines.push({ key: x.key, section: x.section, item: x.item, quantity: prev ? prev.quantity : byWeight ?? x.quantity, chosen: pick, options });
+      // An earlier count is kept when the family set it themselves, or skipped the line, and the list still asks for the same amount.
+      const keepCount = prev && (prev.manual || prev.quantity === 0) && (prev.raw === undefined || prev.raw === x.raw);
+      const count = keepCount ? { quantity: prev.quantity } : lineCount(byWeight ?? x.quantity);
+      lines.push({ key: x.key, section: x.section, item: x.item, ...count, chosen: pick, options, raw: x.raw, manual: keepCount ? prev.manual : undefined });
     });
   }
   if (lines.length && lines.every((l) => !l.options.length)) return { error: `${brand.name ?? "The store"} didn't answer. Try again in a minute.` };
-  await saveCart(userId, planId, { matchedAt: new Date().toISOString(), lines, sentAt: plan.cart?.sentAt ?? null, sentCount: plan.cart?.sentCount });
+  await saveCart(userId, planId, { matchedAt: new Date().toISOString(), lines, sentAt: plan.cart?.sentAt ?? null, sentCount: plan.cart?.sentCount, listKey: cartListKey(plan.groceryList) });
   return {};
 }
 
@@ -65,9 +69,14 @@ export async function updateCartLine(planId: string, key: string, patch: { quant
   if (!plan?.cart) return;
   const lines = plan.cart.lines.map((l) => {
     if (l.key !== key) return l;
-    const quantity = patch.quantity != null && Number.isFinite(patch.quantity) ? Math.min(Math.max(Math.round(patch.quantity), 0), 24) : l.quantity;
     const chosen = patch.chosen === undefined ? l.chosen : patch.chosen === null ? null : patch.chosen >= 0 && patch.chosen < l.options.length ? patch.chosen : l.chosen;
-    return { ...l, quantity, chosen };
+    if (patch.quantity != null && Number.isFinite(patch.quantity)) {
+      // The family's own count: keep it from here on, whatever product they pick.
+      return { ...l, quantity: Math.min(Math.max(Math.round(patch.quantity), 0), MAX_PER_LINE), chosen, manual: true, needs: undefined };
+    }
+    // A different product can be a different size: work out again how many it takes (4 lb is four 1 lb packs or two 2 lb packs).
+    const resized = chosen != null && chosen !== l.chosen && !l.manual && l.raw && l.quantity > 0 ? packagesForWeight(l.raw, l.options[chosen].size) : null;
+    return resized ? { ...l, chosen, ...lineCount(resized), needs: lineCount(resized).needs } : { ...l, chosen };
   });
   await saveCart(userId, planId, { ...plan.cart, lines });
 }
@@ -98,6 +107,10 @@ export async function sendCart(planId: string): Promise<{ error?: string; reconn
   if (!(await under("cartSend", userId))) return { error: TOO_MANY };
   const [plan, { data: settings }] = await Promise.all([getPlan(userId, planId), getSettings(userId)]);
   if (!plan?.cart) return { error: "Find products first." };
+  // The list changed since these products were found (something added, a pantry answer, a party): don't send an old cart.
+  if (plan.groceryList && plan.cart.listKey !== undefined && plan.cart.listKey !== cartListKey(plan.groceryList)) {
+    return { error: "Your grocery list changed since these products were found. Tap \"Look again\" to bring the cart up to date, then send it." };
+  }
   const items = plan.cart.lines
     .filter((l) => l.quantity > 0 && l.chosen != null && l.options[l.chosen])
     .map((l) => ({ upc: l.options[l.chosen!].upc, quantity: l.quantity }));
@@ -115,6 +128,8 @@ export async function sendCart(planId: string): Promise<{ error?: string; reconn
     return { error: (e as Error).message };
   }
   await saveCart(userId, planId, { ...plan.cart, sentAt: new Date().toISOString(), sentCount: items.length });
+  // Sent to the store cart counts as bought, the same as a tick on the list.
+  await markBought(userId, plan.cart.lines.filter((l) => l.quantity > 0 && l.chosen != null && l.options[l.chosen]).map((l) => ({ section: l.section, item: l.item })), true, plan.stockUp ?? []);
   return { sent: items.length };
 }
 

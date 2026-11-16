@@ -15,3 +15,14 @@ test("only normal public web links get through", async () => {
   for (const u of refused) await assert.rejects(assertPublicUrl(u), u);
   assert.equal((await assertPublicUrl("https://8.8.8.8/recipe")).hostname, "8.8.8.8");
 });
+
+test("an IPv4 address inside an IPv6 one is judged as the IPv4 address, however it's written", async () => {
+  // The URL parser rewrites "::ffff:127.0.0.1" as "::ffff:7f00:1": both spellings must be caught.
+  for (const ip of ["::ffff:127.0.0.1", "::ffff:7f00:1", "::ffff:a9fe:a9fe", "::ffff:169.254.169.254", "0:0:0:0:0:ffff:c0a8:1", "::127.0.0.1", "64:ff9b::7f00:1", "2002:7f00:1::", "fec0::1", "fe80::1%eth0", "not-an-address::1::2"]) {
+    assert.ok(isPrivateAddress(ip), ip);
+  }
+  for (const ip of ["::ffff:8.8.8.8", "::ffff:808:808", "2606:4700:4700::1111", "2001:4860:4860::8888"]) assert.ok(!isPrivateAddress(ip), ip);
+  assert.equal(new URL("http://[::ffff:127.0.0.1]/").hostname, "[::ffff:7f00:1]");
+  await assert.rejects(assertPublicUrl("http://[::ffff:127.0.0.1]/"));
+  await assert.rejects(assertPublicUrl("http://[::ffff:169.254.169.254]/latest/meta-data"));
+});

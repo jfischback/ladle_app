@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PARTY_DISHES, PARTY_KINDS, partyDish, partyDishes, partyTimeline, partyTimes } from "@/lib/party";
-import { partyGroceries, withPartySection } from "@/lib/party-grocery";
+import { partyGroceries, withPartySection, withoutParty } from "@/lib/party-grocery";
 import { ruleProblems } from "@/lib/diet";
 
 test("every party kind's usual menu uses real dishes", () => {
@@ -51,4 +51,23 @@ test("shopping list: one section, things bought whole, shared ingredients merged
 test("units agree with the amount once scaled", () => {
   const [d] = partyDishes({ guests: 24, meal: false, dishes: ["pinwheels"] });
   assert.equal(d.scaled.find((x) => x.item === "baby spinach")?.unit, "cups");
+});
+
+test("two parties with the same name each keep their own groceries", () => {
+  const empty = { sections: [], source: "basic" as const };
+  const a = partyGroceries({ title: "Birthday", guests: 10, meal: false, dishes: ["charcuterie"] });
+  const b = partyGroceries({ title: "Birthday", guests: 30, meal: true, dishes: ["veggie-tray"] });
+  let list = withPartySection(empty, a, "party-a", "Birthday");
+  list = withPartySection(list, b, "party-b", "Birthday");
+  assert.deepEqual(list.sections.map((s) => s.name).sort(), ["Party: Birthday", "Party: Birthday (2)"]);
+  assert.equal(list.sections.find((s) => s.partyId === "party-a")!.items.length, a.items.length);
+  // Updating one leaves the other alone, and keeps its own name (so ticks stay put).
+  const bigger = partyGroceries({ title: "Birthday", guests: 60, meal: true, dishes: ["veggie-tray"] });
+  list = withPartySection(list, bigger, "party-b", "Birthday");
+  assert.equal(list.sections.length, 2);
+  assert.equal(list.sections.find((s) => s.partyId === "party-b")!.name, "Party: Birthday (2)");
+  assert.equal(withoutParty(list, "party-a", "Birthday").sections.length, 1);
+  // A list from before sections had ids: the same-named section is adopted, not doubled.
+  const old = { sections: [{ name: "Party: Birthday", items: a.items }], source: "basic" as const };
+  assert.equal(withPartySection(old, a, "party-a", "Birthday").sections.length, 1);
 });

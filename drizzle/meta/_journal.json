@@ -141,6 +141,13 @@
       "when": 1794799259684,
       "tag": "0019_numerous_zaladane",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794862201327,
+      "tag": "0020_jazzy_justice",
+      "breakpoints": true
     }
   ]
 }
