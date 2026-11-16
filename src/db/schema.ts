@@ -196,7 +196,7 @@ export const extraItems = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id),
-    category: text("category").$type<"snacks" | "sweets" | "drinks" | "baby">().notNull(),
+    category: text("category").$type<"snacks" | "sweets" | "drinks" | "baby" | "pets">().notNull(),
     name: text("name").notNull(),
     mode: text("mode").$type<"always" | "on-sale" | "rotate" | "when-low">().notNull().default("on-sale"),
     qty: integer("qty").notNull().default(1),

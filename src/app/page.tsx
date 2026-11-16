@@ -6,7 +6,7 @@ import Link from "next/link";
 import { moveTargets } from "@/lib/move-dinner";
 import { feastHolidayOn, feastTips } from "@/lib/feast";
 import { redirect } from "next/navigation";
-import { requireUserId } from "@/auth";
+import { requireUserId, actingFor } from "@/auth";
 import { activePlans, getSettings, myCooks, myRecipes } from "@/lib/data";
 import { addDays, currentWeekStart, dayName, greeting, money, shortDate, today, upcomingWeekStart, weekDates, weekday } from "@/lib/week";
 import { PlanButton, DayCard, ApproveBar, RatePrompt, StartOverButton, GroceryChecklist, Celebrate } from "./HomeClient";
@@ -33,7 +33,8 @@ export const maxDuration = 60;
 export default async function HomePage() {
   const userId = await requireUserId();
   const { data: settings, complete } = await getSettings(userId);
-  if (!complete) redirect("/setup");
+  // New families see what Ladle does first, then set up (someone planning for a parent goes straight to setup).
+  if (!complete) redirect((await actingFor()) ? "/setup" : "/welcome");
 
   const [plans, recipes] = await Promise.all([activePlans(userId), myRecipes(userId)]);
   const upcoming = upcomingWeekStart(settings.shoppingDay);
@@ -406,7 +407,7 @@ function ExtrasCard({ plan }: { plan: Plan }) {
       <span className="text-3xl" aria-hidden="true">🍿</span>
       <span className="min-w-0 flex-1">
         <span className="font-bold">Snacks &amp; more</span>{" "}
-        <span className="text-muted">{lines.length ? `· ${lines.length} on your list` : "· snacks, sweets, drinks, baby"}</span>
+        <span className="text-muted">{lines.length ? `· ${lines.length} on your list` : "· snacks, sweets, drinks, baby, pets"}</span>
         <span className="block truncate text-sm text-muted">
           {deals.length ? <span className="font-bold text-terracotta-dark">🏷️ {deals.map((l) => `${l.item} ${l.sale!.pctOff}% off`).join(", ")}</span> : lines.length ? lines.map((l) => l.item).join(", ") : "Add favorites and how to buy them: every trip, on sale, rotate."}
         </span>

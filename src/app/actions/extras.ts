@@ -9,7 +9,7 @@ import { extraItems, settings as settingsTable } from "@/db/schema";
 import { getSettings } from "@/lib/data";
 import type { ExtraCategory, ExtrasRule } from "@/lib/types";
 
-const Category = z.enum(["snacks", "sweets", "drinks", "baby"]);
+const Category = z.enum(["snacks", "sweets", "drinks", "baby", "pets"]);
 const Mode = z.enum(["always", "on-sale", "rotate", "when-low"]);
 const ItemSchema = z.object({
   category: Category,

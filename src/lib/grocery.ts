@@ -9,6 +9,7 @@ import { rulesSummary } from "./diet";
 import { askClaude, claudeEnabled } from "./claude";
 import { scaleIngredient } from "./scaling";
 import { AISLES, aisleOf, notBought } from "./aisles";
+import { saleEnds } from "./sale-dates";
 
 const GrocerySchema = z.object({
   sections: z.array(
@@ -66,7 +67,8 @@ export async function buildGroceryList(recipes: Recipe[], settings: Settings, sa
 
 /** Fallback: merge identical items without unit conversion. */
 export function saleNote(s: SaleItem): string {
-  return `On sale $${s.salePrice.toFixed(2)} (${s.pctOff}% off)`;
+  const ends = saleEnds(s.endsOn);
+  return `On sale $${s.salePrice.toFixed(2)} (${s.pctOff}% off${ends ? `, ${ends}` : ""})`;
 }
 
 export function basicGroceryList(recipes: Recipe[], sales: SaleItem[] = [], makeTimes: Map<string, number> = new Map()): GroceryList {

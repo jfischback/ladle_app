@@ -7,7 +7,7 @@ import { extraSearchTerm } from "./extras";
 
 // Sections that aren't bought: things already on hand, and pantry questions not answered yet.
 const NOT_BOUGHT = new Set([PANTRY_SECTIONS.HAVE_IT, PANTRY_SECTIONS.PANTRY_CHECK]);
-const EXTRA_SECTIONS = /^(snacks|sweets|drinks|baby)$/i;
+const EXTRA_SECTIONS = /^(snacks|sweets|drinks|baby|pets)$/i;
 
 // Things sold in packs: how many come in one (12 eggs to a carton, 10 tortillas to a pack...).
 const PACK_OF: [RegExp, number][] = [

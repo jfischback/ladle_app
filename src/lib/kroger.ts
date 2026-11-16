@@ -1,4 +1,5 @@
 import "server-only";
+import { saleEndDate } from "./sale-dates";
 
 /**
  * Kroger Public API (developer.kroger.com). Fry's is a Kroger banner.
@@ -66,6 +67,8 @@ export type KrogerProduct = {
   regular: number;
   /** Sale price, or null when the product isn't on promotion. */
   promo: number | null;
+  /** The sale's last day (YYYY-MM-DD), when Kroger says. */
+  endsOn?: string | null;
   /** Where it is in this store ("Aisle 12"), when Kroger says. */
   aisle?: string | null;
 };
@@ -103,7 +106,7 @@ export async function searchProducts(term: string, locationId: string, limit = 1
       upc?: string;
       description?: string;
       brand?: string;
-      items?: { size?: string; price?: { regular?: number; promo?: number } }[];
+      items?: { size?: string; price?: { regular?: number; promo?: number; expirationDate?: unknown } }[];
       aisleLocations?: AisleLocation[];
     }[];
   };
@@ -113,6 +116,7 @@ export async function searchProducts(term: string, locationId: string, limit = 1
     const regular = item?.price?.regular;
     if (!regular) continue; // not sold at this store, or no price shown
     const promo = item?.price?.promo;
+    const onPromo = !!promo && promo > 0 && promo < regular;
     out.push({
       productId: p.productId,
       upc: p.upc ?? p.productId,
@@ -120,7 +124,8 @@ export async function searchProducts(term: string, locationId: string, limit = 1
       brand: p.brand ?? "",
       size: item?.size ?? "",
       regular,
-      promo: promo && promo > 0 && promo < regular ? promo : null,
+      promo: onPromo ? promo : null,
+      endsOn: onPromo ? saleEndDate(item?.price?.expirationDate) : null,
       aisle: aisleLabel(p.aisleLocations),
     });
   }

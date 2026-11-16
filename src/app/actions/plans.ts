@@ -174,8 +174,8 @@ export async function planUpcomingWeek(thisWeek = false, checkIn?: unknown): Pro
     let capped = enforceCap(result.days, recipeList, settings, sales, staplesTotal(staples).total + extrasTotal(extraLines), recentIds);
     // Every dollar counts: if dinners alone can't fit, the optional snacks go first (every-trip and running-low items stay).
     if (capped.over > 0 && settings.tightBudget) {
-      // Baby food is never cut.
-      extraLines = extraLines.filter((l) => l.category === "baby" || /^Every trip|You're out|Running low/.test(l.reason));
+      // Baby food and pet food are never cut.
+      extraLines = extraLines.filter((l) => l.category === "baby" || l.category === "pets" || /^Every trip|You're out|Running low/.test(l.reason));
       capped = enforceCap(capped.days, recipeList, settings, sales, staplesTotal(staples).total + extrasTotal(extraLines), recentIds);
     }
     result.days = capped.days;

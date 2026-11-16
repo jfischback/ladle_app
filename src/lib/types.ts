@@ -41,7 +41,7 @@ export type CartLine = {
 
 export type CartState = { matchedAt: string; lines: CartLine[]; sentAt?: string | null; sentCount?: number };
 
-export type ExtraCategory = "snacks" | "sweets" | "drinks" | "baby";
+export type ExtraCategory = "snacks" | "sweets" | "drinks" | "baby" | "pets";
 
 /** One snack/sweet/drink/baby item on this week's list, with why it's there. */
 export type ExtraLine = {
@@ -88,6 +88,8 @@ export type SaleItem = {
   regularPrice: number;
   salePrice: number;
   pctOff: number;
+  /** The sale's last day (YYYY-MM-DD), when the store says. */
+  endsOn?: string | null;
 };
 
 /** Something bought every week no matter what's for dinner (milk, eggs, bread…). */

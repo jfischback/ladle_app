@@ -66,7 +66,7 @@ export type Settings = {
   breadBreakfasts: number; // bread-based breakfasts a week (pancakes, bagels…); the rest are egg or protein
   breakfastMustHave: string[]; // e.g. ["omelet"]: at least one of each, every week
   breakfastMeatDeal: boolean; // find the week's best breakfast-meat sale and use it in egg breakfasts
-  extras: Record<ExtraCategory, ExtrasRule>; // snacks, sweets, drinks and baby: how many to rotate, targets, never-buy words
+  extras: Record<ExtraCategory, ExtrasRule>; // snacks, sweets, drinks, baby and pets: how many to rotate, targets, never-buy words
   athletes: Athlete[]; // athlete mode: people with their own calorie and protein goals
   noRepeatWeeks: number;
   favorQuickWeeknights: boolean;
@@ -130,6 +130,7 @@ export const DEFAULT_SETTINGS: Settings = {
     drinks: { rotateCount: 1, servingsTarget: null, neverWords: [] },
     // Safety defaults for babies: no honey under 12 months, nothing labeled for toddlers or 12+ months.
     baby: { rotateCount: 2, servingsTarget: 5, neverWords: ["honey", "toddler", "12+ months", "12 months+"] },
+    pets: { rotateCount: 0, servingsTarget: null, neverWords: [] },
   },
   athletes: [],
   noRepeatWeeks: 3,

@@ -101,7 +101,7 @@ export function ExtrasEditor({ category, items, rules, thisWeek }: { category: E
       <form className="card space-y-2 p-4 sm:p-5" onSubmit={(e) => { e.preventDefault(); start(async () => { await addExtra({ category, name, mode, anyBrand, servings: category === "baby" ? 1 : null }); setName(""); setAnyBrand(false); }); }}>
         <p className="label">Add to {cat.label.toLowerCase()}</p>
         <div className="flex flex-wrap gap-2">
-          <input className="field min-w-0 basis-full sm:basis-0 sm:flex-[2]" aria-label="Item" placeholder={category === "sweets" ? "e.g. Reese's Peanut Butter Cups" : category === "drinks" ? "e.g. Snapple Peach Tea" : category === "baby" ? "e.g. Fruit puree pouches" : "e.g. Goldfish crackers"} value={name} onChange={(e) => setName(e.target.value)} />
+          <input className="field min-w-0 basis-full sm:basis-0 sm:flex-[2]" aria-label="Item" placeholder={category === "sweets" ? "e.g. Reese's Peanut Butter Cups" : category === "drinks" ? "e.g. Snapple Peach Tea" : category === "baby" ? "e.g. Fruit puree pouches" : category === "pets" ? "e.g. Purina Pro Plan dog food" : "e.g. Goldfish crackers"} value={name} onChange={(e) => setName(e.target.value)} />
           <select className="field w-auto flex-1" aria-label="How to buy it" value={mode} onChange={(e) => setMode(e.target.value as Mode)}>
             {MODES.map((m) => <option key={m} value={m}>{MODE_LABEL[m]}</option>)}
           </select>
