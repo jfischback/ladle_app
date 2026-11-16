@@ -8,7 +8,7 @@ import { settings, starterBox } from "./helpers";
 const week = (): PlanDay[] =>
   ["2026-11-23", "2026-11-24", "2026-11-25", "2026-11-26", "2026-11-27", "2026-11-28", "2026-11-29"].map((date, i) => ({
     date, recipeId: i === 3 ? null : `dinner-${i}`, recipeName: i === 3 ? null : "Dinner", estimatedCost: null, reason: "", saleItems: [], leftoverOf: null,
-  }) as PlanDay);
+  }) as unknown as PlanDay);
 
 const desserts = starterBox("dessert");
 
