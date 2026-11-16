@@ -3,6 +3,7 @@ import type { Athlete } from "./athletes";
 import type { PickyEater } from "./picky";
 import type { Equipment } from "./prep";
 import type { NotifyLevel } from "./alerts";
+import type { SavedStore } from "./store-compare";
 import type { ExtraCategory, ExtrasRule, Staple } from "./types";
 
 export const MOTIVATIONS = {
@@ -34,6 +35,7 @@ export type Settings = {
   zip: string;
   storeLocationId: string | null; // Kroger locationId once connected
   storeName: string;
+  extraStores: SavedStore[]; // up to 4 more Kroger-family stores to compare prices with
   fulfillment: "pickup" | "delivery";
   shoppingDay: number; // 0 = Sunday
   // Q3 Money
@@ -98,6 +100,7 @@ export const DEFAULT_SETTINGS: Settings = {
   zip: "",
   storeLocationId: null,
   storeName: "",
+  extraStores: [],
   fulfillment: "pickup",
   shoppingDay: 6,
   weeklyBudget: 150,

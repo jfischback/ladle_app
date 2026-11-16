@@ -1,5 +1,6 @@
 import "server-only";
 import { saleEndDate } from "./sale-dates";
+import type { NearbyStore } from "./store-compare";
 
 /**
  * Kroger Public API (developer.kroger.com). Fry's is a Kroger banner.
@@ -55,6 +56,28 @@ export async function findStores(zip: string): Promise<StoreLocation[]> {
     name: l.name,
     chain: l.chain ?? "",
     address: `${l.address.addressLine1}, ${l.address.city}, ${l.address.state} ${l.address.zipCode}`,
+  }));
+}
+
+/** Kroger-family stores within `radius` miles of a zip, with where they are (for the map). */
+export async function findNearby(zip: string, radius: number): Promise<NearbyStore[]> {
+  const token = await appToken();
+  const url = new URL(`${BASE}/locations`);
+  url.searchParams.set("filter.zipCode.near", zip);
+  url.searchParams.set("filter.radiusInMiles", String(Math.max(1, Math.min(50, Math.round(radius)))));
+  url.searchParams.set("filter.limit", "25");
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }, signal: AbortSignal.timeout(15000) });
+  if (!res.ok) throw new Error(`Store lookup failed (${res.status})`);
+  const json = (await res.json()) as {
+    data?: { locationId: string; name: string; chain?: string; address: { addressLine1: string; city: string; state: string; zipCode: string }; geolocation?: { latitude?: number; longitude?: number } }[];
+  };
+  return (json.data ?? []).map((l) => ({
+    locationId: l.locationId,
+    name: l.name,
+    chain: l.chain ?? "",
+    address: `${l.address.addressLine1}, ${l.address.city}, ${l.address.state} ${l.address.zipCode}`,
+    lat: typeof l.geolocation?.latitude === "number" ? l.geolocation.latitude : null,
+    lng: typeof l.geolocation?.longitude === "number" ? l.geolocation.longitude : null,
   }));
 }
 

@@ -43,6 +43,7 @@ export const LIMITS = {
   stores: [30, 60 * 60],
   invite: [20, 24 * 60 * 60],
   push: [20, 60 * 60],
+  compare: [8, 60 * 60],
 } as const satisfies Record<string, readonly [number, number]>;
 
 export const TOO_MANY = "That's a lot of tries in a short time. Please wait a few minutes and try again.";
