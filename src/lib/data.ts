@@ -11,7 +11,9 @@ export async function getSettings(userId: string): Promise<{ data: Settings; com
   const saved = row?.data ?? {};
   const cookDays = cookDaysFor(saved);
   const athletes = (saved.athletes ?? []).map((x) => normalizeAthlete(x));
-  return { data: { ...DEFAULT_SETTINGS, ...saved, athletes, cookDays, dinnersPerWeek: cookDays.length }, complete: !!row?.completedAt };
+  // Categories added later (pets) get their default rule.
+  const extras = { ...DEFAULT_SETTINGS.extras, ...saved.extras };
+  return { data: { ...DEFAULT_SETTINGS, ...saved, extras, athletes, cookDays, dinnersPerWeek: cookDays.length }, complete: !!row?.completedAt };
 }
 
 export async function myRecipes(userId: string, meal = "dinner") {

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUserId } from "@/auth";
-import { getRecipe, getSettings } from "@/lib/data";
+import { activePlans, getRecipe, getSettings } from "@/lib/data";
+import { recipeSaleSummary, saleEnds } from "@/lib/sale-summary";
 import { ruleProblems } from "@/lib/diet";
 import { addStarter, archiveRecipe } from "@/app/actions/recipes";
 import { RecipeRating } from "./RecipeRating";
@@ -29,6 +30,9 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
   const nutrition = estimateNutrition(r);
   const sodium = estimateSodium(r);
   const cost = estimateCost(r);
+  // This week's sales (from the newest plan's price check): how much of this recipe is on sale.
+  const salePlan = (await activePlans(userId)).find((p) => p.saleItems.some((x) => typeof x === "object"));
+  const onSale = salePlan ? recipeSaleSummary(r, salePlan.saleItems) : null;
   const cookNow = sp.cook === "1";
   // Dinners open sized for the family (times the batches tonight cooks: a double batch for a leftovers night).
   const batches = Math.min(3, Math.max(1, Math.round(Number(sp.batches)) || 1));
@@ -54,7 +58,7 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
             {r.protein && <span className="tag">{r.protein}</span>}
             {trustworthy(nutrition) && <span className="tag bg-olive-soft text-olive-dark" title="Estimated from the ingredients">💪 ~{nutrition.protein} g protein · {nutrition.kcal} cal a serving</span>}
             {r.ease && <span className="tag">{r.ease >= 4 ? "Easy" : r.ease >= 3 ? "Medium" : "A bit of work"}</span>}
-            {r.meal !== "dinner" && <span className="tag bg-olive-soft font-bold text-olive-dark">{r.meal === "lunch" ? "🥪 Lunch" : "☕ Breakfast"}</span>}
+            {r.meal !== "dinner" && <span className="tag bg-olive-soft font-bold text-olive-dark">{r.meal === "lunch" ? "🥪 Lunch" : r.meal === "dessert" ? "🍰 Dessert" : "☕ Breakfast"}</span>}
             {r.tags.filter((t) => t !== "leftovers" && t !== "no-leftovers").map((t) => <span key={t} className="tag">{t}</span>)}
           </div>
           {r.creditName && (
@@ -120,6 +124,29 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
               </div>
             ))}
           </dl>
+        </section>
+      )}
+
+      {onSale && onSale.total > 0 && (
+        <section aria-labelledby="sale-title" className="rounded-3xl bg-ochre-soft p-4 shadow-soft">
+          <h2 id="sale-title" className="text-lg font-bold">
+            🏷️ {onSale.onSale.length ? `${onSale.onSale.length} of ${onSale.total} ingredients on sale this week` : `None of the ${onSale.total} ingredients are on sale this week`}
+            {onSale.saved >= 0.5 && <span className="font-semibold text-ochre-dark"> · about ${onSale.saved.toFixed(2)} off</span>}
+          </h2>
+          {onSale.onSale.length > 0 && (
+            <ul className="mt-2 space-y-1 text-sm">
+              {onSale.onSale.map((x) => (
+                <li key={x.item} className="flex flex-wrap justify-between gap-x-3">
+                  <span className="font-semibold">{x.item}</span>
+                  <span>
+                    ${x.salePrice.toFixed(2)} <span className="text-muted line-through">${x.regularPrice.toFixed(2)}</span>
+                    {saleEnds(x.endsOn) && <span className="text-muted"> · {saleEnds(x.endsOn)}</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-2 text-xs text-muted">Prices at your store when this week was planned. Pantry basics like salt and oil aren&apos;t counted.</p>
         </section>
       )}
 

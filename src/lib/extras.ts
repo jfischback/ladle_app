@@ -18,6 +18,7 @@ export const CATEGORIES: { key: ExtraCategory; label: string; icon: string }[] =
   { key: "sweets", label: "Sweets", icon: "🍬" },
   { key: "drinks", label: "Drinks", icon: "🥤" },
   { key: "baby", label: "Baby", icon: "🍼" },
+  { key: "pets", label: "Pets", icon: "🐾" },
 ];
 
 export const MODE_LABEL: Record<ExtraLike["mode"], string> = {
@@ -66,6 +67,11 @@ export const EXTRA_IDEAS: Record<ExtraCategory, { name: string; mode: ExtraLike[
     { name: "Fruit puree pouches", mode: "rotate", anyBrand: true, servings: 1, qty: 4 }, { name: "Unsweetened applesauce cups", mode: "rotate", anyBrand: true, servings: 6 },
     { name: "Baby yogurt cups", mode: "rotate", anyBrand: true, servings: 6 }, { name: "Grain puffs", mode: "when-low", anyBrand: true },
     { name: "Yogurt melts", mode: "when-low", anyBrand: true }, { name: "Teething wafers", mode: "when-low", anyBrand: true }, { name: "Fruit cups, no sugar added", mode: "rotate", anyBrand: true, servings: 4 },
+  ],
+  // Pet food is usually one brand the pet is used to, so "when low" by default; treats are happy to wait for a sale.
+  pets: [
+    { name: "Dry dog food", mode: "when-low" }, { name: "Wet cat food", mode: "when-low" }, { name: "Dog treats", mode: "on-sale", anyBrand: true },
+    { name: "Cat treats", mode: "on-sale", anyBrand: true }, { name: "Cat litter", mode: "when-low" }, { name: "Dental chews", mode: "on-sale", anyBrand: true },
   ],
 };
 

@@ -25,8 +25,10 @@ const noCrash = async () => {
   if (await page.getByText("Application error").count()) throw new Error("the page crashed");
 };
 
-await step("first visit goes to setup", async () => {
+await step("first visit shows how Ladle works, then setup", async () => {
   await page.goto(BASE + "/");
+  await page.waitForURL(/\/welcome/);
+  await page.getByRole("link", { name: /Set up my family/ }).first().click();
   await page.waitForURL(/\/setup/);
 });
 

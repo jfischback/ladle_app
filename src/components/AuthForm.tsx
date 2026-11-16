@@ -69,7 +69,7 @@ export function AuthForm({ mode, googleEnabled, next, invite, inviteOnlyNote, re
       </div>
       <p className="mt-4 text-center">
         {isLogin ? (
-          <>New here? <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="font-semibold text-olive-dark underline">Create an account</Link></>
+          <><Link href="/welcome" className="font-semibold text-olive-dark underline">How Ladle works</Link> · New here? <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="font-semibold text-olive-dark underline">Create an account</Link></>
         ) : (
           <>Already have an account? <Link href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="font-semibold text-olive-dark underline">Sign in</Link></>
         )}

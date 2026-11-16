@@ -276,7 +276,8 @@ function Details({ cookTime, cost, noCook, leftover, plates }: { cookTime: strin
 function LunchLine({ day, className = "" }: { day: PlanDay; className?: string }) {
   const l = day.lunch;
   const b = day.breakfast;
-  if (!l && !b && !day.holiday) return null;
+  const sweet = day.dessert;
+  if (!l && !b && !sweet && !day.holiday) return null;
   return (
     <div className={`space-y-1.5 ${className}`}>
       {day.holiday && <span className="inline-flex rounded-full bg-olive-soft px-2.5 py-0.5 text-xs font-extrabold text-olive-dark">🎉 {day.holiday}</span>}
@@ -299,6 +300,16 @@ function LunchLine({ day, className = "" }: { day: PlanDay; className?: string }
             {l.recipeId ? <Link href={`/recipes/${l.recipeId}`} className="font-semibold hover:underline">{l.name}</Link> : <span className="font-semibold">{l.name}</span>}
             <span className="text-muted"> · {l.eaters}</span>
             <span className="block text-xs text-muted">{l.reason}</span>
+          </span>
+        </div>
+      )}
+      {sweet && (
+        <div className="flex items-start gap-2 rounded-2xl border border-line px-3 py-2 text-sm">
+          <span aria-hidden="true">🍰</span>
+          <span className="min-w-0">
+            <span className="font-bold">Dessert: </span>
+            <Link href={`/recipes/${sweet.recipeId}`} className="font-semibold hover:underline">{sweet.name}</Link>
+            <span className="block text-xs text-muted">{sweet.reason}</span>
           </span>
         </div>
       )}

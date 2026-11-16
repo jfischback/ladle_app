@@ -19,6 +19,7 @@ export type PlanDay = {
   fromCook?: string | null; // set when this is a new recipe from a followed cook
   lunch?: PlanLunch | null; // the next-day-style lunch planned for this date, if someone's home
   breakfast?: PlanBreakfast | null; // breakfast for this date, if planned
+  dessert?: PlanDessert | null; // a dessert after dinner, on dessert nights
   holiday?: string | null; // federal holiday on this date
   leftoverOf?: string | null; // "cook once, eat twice": leftovers of the dinner cooked on this date
   batches?: number; // how many dinners' worth this night cooks (2 = a double batch for a leftovers night)
@@ -41,7 +42,7 @@ export type CartLine = {
 
 export type CartState = { matchedAt: string; lines: CartLine[]; sentAt?: string | null; sentCount?: number };
 
-export type ExtraCategory = "snacks" | "sweets" | "drinks" | "baby";
+export type ExtraCategory = "snacks" | "sweets" | "drinks" | "baby" | "pets";
 
 /** One snack/sweet/drink/baby item on this week's list, with why it's there. */
 export type ExtraLine = {
@@ -58,6 +59,9 @@ export type ExtraLine = {
 export type ExtrasRule = { rotateCount: number; servingsTarget: number | null; neverWords: string[] };
 
 /** Breakfast for one day. */
+/** Dessert after tonight's dinner. */
+export type PlanDessert = { recipeId: string; name: string; servings: number; reason: string };
+
 export type PlanBreakfast = {
   recipeId: string | null;
   name: string;
@@ -88,6 +92,8 @@ export type SaleItem = {
   regularPrice: number;
   salePrice: number;
   pctOff: number;
+  /** The sale's last day (YYYY-MM-DD), when the store says. */
+  endsOn?: string | null;
 };
 
 /** Something bought every week no matter what's for dinner (milk, eggs, bread…). */

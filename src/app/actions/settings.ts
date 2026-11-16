@@ -43,6 +43,7 @@ const SettingsSchema = z.object({
   snap: z.boolean(),
   cookDays: z.array(int(0, 6)).min(1).max(7),
   newRecipesPerWeek: int(0, 2),
+  dessertNights: int(0, 3),
   foodRules: z.array(z.enum(Object.keys(FOOD_RULES) as [FoodRule, ...FoodRule[]])).max(20),
   dislikes: z.array(z.string().trim().min(2).max(40)).max(30),
   staples: StaplesSchema,
@@ -66,7 +67,7 @@ const SettingsSchema = z.object({
   breakfastMustHave: z.array(z.string().trim().min(2).max(40)).max(10),
   breakfastMeatDeal: z.boolean(),
   extras: z.record(
-    z.enum(["snacks", "sweets", "drinks", "baby"]),
+    z.enum(["snacks", "sweets", "drinks", "baby", "pets"]),
     z.object({ rotateCount: int(0, 10), servingsTarget: int(0, 50).nullable(), neverWords: z.array(z.string().trim().min(2).max(40)).max(30) }),
   ),
   noRepeatWeeks: int(0, 12),

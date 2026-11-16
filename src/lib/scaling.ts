@@ -25,6 +25,7 @@ export function recipeMultipliers(
     // A leftovers night is a second dinner from the same pot; "who's eating tonight" changes how many plates.
     if (d.recipeId) add(d.recipeId, (d.eating ? dinnerServings(d.eating) : family) + athleteExtraPortions);
     if (d.breakfast?.recipeId) add(d.breakfast.recipeId, d.breakfast.servings);
+    if (d.dessert?.recipeId) add(d.dessert.recipeId, d.dessert.servings);
     if (d.lunch?.recipeId) add(d.lunch.recipeId, d.lunch.servings); // leftover lunches come from that dinner's pot too
   }
   const out = new Map<string, number>();

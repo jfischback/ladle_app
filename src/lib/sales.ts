@@ -159,6 +159,7 @@ export async function scanSales(recipes: Recipe[], settings: Settings, extraTerm
         regularPrice: round2(best.p.regular),
         salePrice: round2(best.p.promo!),
         pctOff: Math.round(best.pct),
+        endsOn: best.p.endsOn ?? null,
       });
     }
 

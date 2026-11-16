@@ -39,7 +39,7 @@ export default async function MenuPage({ params }: { params: Promise<{ planId: s
                 <td className="py-3 pr-3 font-bold text-terracotta-dark">{dayName(d.date)}<br /><span className="text-sm font-normal text-muted">{shortDate(d.date)}</span>{d.holiday && <><br /><span className="text-sm font-normal">{d.holiday}</span></>}</td>
                 {breakfasts && <td className="py-3 pr-3">{d.breakfast?.name ?? ""}</td>}
                 {lunches && <td className="py-3 pr-3">{d.lunch ? d.lunch.name.replace(/^Lunch: your pick$/, "Your pick") : ""}</td>}
-                <td className="py-3 text-lg font-semibold">{dinnerLabel(d)}</td>
+                <td className="py-3 text-lg font-semibold">{dinnerLabel(d)}{d.dessert && <span className="block text-sm font-normal">🍰 {d.dessert.name}</span>}</td>
               </tr>
             ))}
           </tbody>

@@ -22,6 +22,8 @@ export default async function SetupPage({ searchParams }: { searchParams: Promis
       {complete && (
         <p className="mt-6 text-center">
           <Link href="/whats-new" className="font-bold text-olive-dark underline">✨ What&apos;s new in Ladle</Link>
+          <span className="mx-2 text-muted" aria-hidden="true">·</span>
+          <Link href="/welcome" className="font-bold text-olive-dark underline">How Ladle works</Link>
         </p>
       )}
       {complete && (!claudeEnabled() || !krogerEnabled()) && (
