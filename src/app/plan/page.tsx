@@ -36,6 +36,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
           busyDays: settings.busyDays,
           budget: settings.weeklyBudget,
           tryNew: settings.newRecipesPerWeek > 0,
+          desserts: settings.dessertNights,
           adults: settings.adults,
           kids: settings.kids,
         }}

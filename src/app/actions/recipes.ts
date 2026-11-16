@@ -47,7 +47,7 @@ export async function addRecipePack(tag: string): Promise<{ added: number }> {
 
 const RecipeInput = z.object({
   name: z.string().trim().min(1, "Give the recipe a name.").max(200),
-  meal: z.enum(["dinner", "breakfast", "lunch"]).default("dinner"),
+  meal: z.enum(["dinner", "breakfast", "lunch", "dessert"]).default("dinner"),
   protein: z.string().trim().max(60).nullable(),
   servings: z.number().int().min(1).max(50).nullable(),
   totalMinutes: z.number().int().min(1).max(2000).nullable(),

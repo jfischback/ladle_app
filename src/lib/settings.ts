@@ -59,6 +59,7 @@ export type Settings = {
   holidayEveryoneHome: boolean; // on federal holidays everyone eats lunch at home
   holidayNoReheat: string[]; // proteins someone won't eat reheated on those days (e.g. "Chicken")
   allowAnyway: string[]; // exceptions to diet rules, e.g. "sushi" with No seafood (never allergies)
+  dessertNights: number; // desserts a week (0 to 3), after dinner, weekends first
   breakfastDays: number[]; // weekdays we plan breakfast
   breakfastAdults: number; // adults eating those breakfasts
   breakfastKids: boolean; // kids and the baby eat them too
@@ -117,6 +118,7 @@ export const DEFAULT_SETTINGS: Settings = {
   holidayEveryoneHome: true,
   holidayNoReheat: [],
   allowAnyway: [],
+  dessertNights: 0,
   breakfastDays: [],
   breakfastAdults: 1,
   breakfastKids: true,

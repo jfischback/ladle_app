@@ -10214,5 +10214,600 @@
   "creditName": null,
   "creditUrl": null,
   "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "Strawberry Shortcake Cups",
+  "protein": null,
+  "servings": 6,
+  "totalMinutes": 15,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "strawberries"
+   },
+   {
+    "amount": "2",
+    "unit": "tbsp",
+    "item": "sugar"
+   },
+   {
+    "amount": "6",
+    "unit": "",
+    "item": "sponge shortcake cups"
+   },
+   {
+    "amount": "1",
+    "unit": "(8 oz) tub",
+    "item": "whipped topping"
+   }
+  ],
+  "steps": [
+   "Slice the strawberries, toss them with the sugar and let them sit 10 minutes to get juicy.",
+   "Set a shortcake cup on each plate, spoon the berries and their juice over it, and top with whipped topping."
+  ],
+  "tags": [
+   "dessert",
+   "quick",
+   "no-bake",
+   "fruit"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "Fudgy Brownies with Ice Cream",
+  "protein": null,
+  "servings": 9,
+  "totalMinutes": 40,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "box",
+    "item": "brownie mix"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "eggs"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "vegetable oil"
+   },
+   {
+    "amount": "1",
+    "unit": "(48 oz) carton",
+    "item": "vanilla ice cream"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 350 F and grease an 8-inch pan.",
+   "Stir the mix, eggs, oil and the water the box asks for until just combined, then spread in the pan.",
+   "Bake as the box says, until a toothpick comes out with a few moist crumbs. Cool 15 minutes.",
+   "Serve warm squares with a scoop of ice cream."
+  ],
+  "tags": [
+   "dessert",
+   "kid-favorite"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "Chocolate Chip Cookies",
+  "protein": null,
+  "servings": 24,
+  "totalMinutes": 30,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "butter, softened"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "brown sugar"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "sugar"
+   },
+   {
+    "amount": "2",
+    "unit": "",
+    "item": "eggs"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "vanilla extract"
+   },
+   {
+    "amount": "2 1/4",
+    "unit": "cups",
+    "item": "all-purpose flour"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "baking soda"
+   },
+   {
+    "amount": "1/2",
+    "unit": "tsp",
+    "item": "salt"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "semisweet chocolate chips"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 375 F.",
+   "Beat the butter and both sugars until fluffy, then beat in the eggs and vanilla.",
+   "Stir in the flour, baking soda and salt, then the chocolate chips.",
+   "Drop rounded spoonfuls onto ungreased sheets and bake 9 to 11 minutes, until golden at the edges. Cool on the pan 2 minutes."
+  ],
+  "tags": [
+   "dessert",
+   "kid-favorite",
+   "make-ahead"
+  ],
+  "ease": 4,
+  "prepAhead": "The dough keeps 3 days in the fridge; bake a few at a time.",
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "Banana Pudding",
+  "protein": null,
+  "servings": 8,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "(5 oz) box",
+    "item": "instant vanilla pudding mix"
+   },
+   {
+    "amount": "3",
+    "unit": "cups",
+    "item": "cold milk"
+   },
+   {
+    "amount": "1",
+    "unit": "(8 oz) tub",
+    "item": "whipped topping"
+   },
+   {
+    "amount": "1",
+    "unit": "(11 oz) box",
+    "item": "vanilla wafers"
+   },
+   {
+    "amount": "4",
+    "unit": "",
+    "item": "ripe bananas"
+   }
+  ],
+  "steps": [
+   "Whisk the pudding mix into the cold milk for 2 minutes, then fold in half the whipped topping.",
+   "In a dish, layer wafers, sliced bananas and pudding; repeat twice.",
+   "Spread the rest of the whipped topping on top and chill at least 3 hours."
+  ],
+  "tags": [
+   "dessert",
+   "no-bake",
+   "make-ahead"
+  ],
+  "ease": 5,
+  "prepAhead": "Make it in the morning or the night before.",
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "Warm Apple Crisp",
+  "protein": null,
+  "servings": 6,
+  "totalMinutes": 50,
+  "ingredients": [
+   {
+    "amount": "5",
+    "unit": "",
+    "item": "apples"
+   },
+   {
+    "amount": "1",
+    "unit": "tbsp",
+    "item": "lemon juice"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "cinnamon"
+   },
+   {
+    "amount": "3/4",
+    "unit": "cup",
+    "item": "old-fashioned oats"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "all-purpose flour"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "brown sugar"
+   },
+   {
+    "amount": "6",
+    "unit": "tbsp",
+    "item": "butter, melted"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 375 F. Peel and slice the apples and toss them with the lemon juice and half the cinnamon in a baking dish.",
+   "Mix the oats, flour, brown sugar, the rest of the cinnamon and the melted butter into a crumbly topping and scatter it over the apples.",
+   "Bake 35 to 40 minutes, until bubbling and golden. Good with ice cream."
+  ],
+  "tags": [
+   "dessert",
+   "fall",
+   "fruit"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "Ice Cream Sundae Night",
+  "protein": null,
+  "servings": 6,
+  "totalMinutes": 10,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "(48 oz) carton",
+    "item": "vanilla ice cream"
+   },
+   {
+    "amount": "1",
+    "unit": "bottle",
+    "item": "chocolate syrup"
+   },
+   {
+    "amount": "1",
+    "unit": "jar",
+    "item": "rainbow sprinkles"
+   },
+   {
+    "amount": "1",
+    "unit": "jar",
+    "item": "maraschino cherries"
+   },
+   {
+    "amount": "1",
+    "unit": "can",
+    "item": "whipped cream"
+   },
+   {
+    "amount": "3",
+    "unit": "",
+    "item": "bananas"
+   }
+  ],
+  "steps": [
+   "Set out the toppings and sliced bananas, scoop the ice cream, and let everyone build their own."
+  ],
+  "tags": [
+   "dessert",
+   "quick",
+   "kid-favorite",
+   "no-bake"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "Marshmallow Cereal Bars",
+  "protein": null,
+  "servings": 16,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "3",
+    "unit": "tbsp",
+    "item": "butter"
+   },
+   {
+    "amount": "1",
+    "unit": "(10 oz) bag",
+    "item": "mini marshmallows"
+   },
+   {
+    "amount": "6",
+    "unit": "cups",
+    "item": "crisp rice cereal"
+   }
+  ],
+  "steps": [
+   "Melt the butter in a big pot over low heat, add the marshmallows and stir until smooth.",
+   "Take it off the heat and stir in the cereal until coated.",
+   "Press into a buttered 9x13 pan with a piece of buttered wax paper. Cool and cut into squares."
+  ],
+  "tags": [
+   "dessert",
+   "quick",
+   "kid-favorite",
+   "no-bake",
+   "make-ahead"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "Yogurt and Berry Parfaits",
+  "protein": null,
+  "servings": 4,
+  "totalMinutes": 10,
+  "ingredients": [
+   {
+    "amount": "3",
+    "unit": "cups",
+    "item": "vanilla greek yogurt"
+   },
+   {
+    "amount": "2",
+    "unit": "cups",
+    "item": "mixed berries"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "granola"
+   },
+   {
+    "amount": "2",
+    "unit": "tbsp",
+    "item": "honey"
+   }
+  ],
+  "steps": [
+   "Layer yogurt, berries and granola in glasses or jars, twice.",
+   "Drizzle with honey and serve right away so the granola stays crunchy."
+  ],
+  "tags": [
+   "dessert",
+   "quick",
+   "lighter",
+   "no-bake",
+   "fruit"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "Peach Cobbler",
+  "protein": null,
+  "servings": 8,
+  "totalMinutes": 55,
+  "ingredients": [
+   {
+    "amount": "2",
+    "unit": "(15 oz) cans",
+    "item": "sliced peaches in juice"
+   },
+   {
+    "amount": "1/2",
+    "unit": "cup",
+    "item": "butter"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "all-purpose flour"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "sugar"
+   },
+   {
+    "amount": "2",
+    "unit": "tsp",
+    "item": "baking powder"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "milk"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "cinnamon"
+   }
+  ],
+  "steps": [
+   "Heat the oven to 350 F. Put the butter in a 9x13 dish and let it melt in the oven.",
+   "Whisk the flour, sugar, baking powder and milk and pour it over the melted butter without stirring.",
+   "Spoon the drained peaches over the batter and sprinkle with cinnamon.",
+   "Bake 40 to 45 minutes, until golden; the batter rises up around the fruit."
+  ],
+  "tags": [
+   "dessert",
+   "fruit",
+   "summer"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "No-Bake Cheesecake Cups",
+  "protein": null,
+  "servings": 6,
+  "totalMinutes": 20,
+  "ingredients": [
+   {
+    "amount": "8",
+    "unit": "",
+    "item": "graham crackers"
+   },
+   {
+    "amount": "3",
+    "unit": "tbsp",
+    "item": "butter, melted"
+   },
+   {
+    "amount": "1",
+    "unit": "(8 oz) block",
+    "item": "cream cheese, softened"
+   },
+   {
+    "amount": "1/3",
+    "unit": "cup",
+    "item": "sugar"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "vanilla extract"
+   },
+   {
+    "amount": "1",
+    "unit": "(8 oz) tub",
+    "item": "whipped topping"
+   },
+   {
+    "amount": "1",
+    "unit": "(21 oz) can",
+    "item": "cherry pie filling"
+   }
+  ],
+  "steps": [
+   "Crush the graham crackers, mix with the melted butter and press a spoonful into each cup.",
+   "Beat the cream cheese, sugar and vanilla until smooth, then fold in the whipped topping.",
+   "Spoon it over the crusts, top with cherry pie filling and chill at least 2 hours."
+  ],
+  "tags": [
+   "dessert",
+   "no-bake",
+   "make-ahead"
+  ],
+  "ease": 5,
+  "prepAhead": "Make them the night before.",
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "Bakery Pie Night",
+  "protein": null,
+  "servings": 8,
+  "totalMinutes": 5,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "",
+    "item": "bakery pie"
+   },
+   {
+    "amount": "1",
+    "unit": "can",
+    "item": "whipped cream"
+   }
+  ],
+  "steps": [
+   "Warm the pie at 300 F for 10 minutes if you like, then slice and top with whipped cream."
+  ],
+  "tags": [
+   "dessert",
+   "quick",
+   "store-bought"
+  ],
+  "ease": 5,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
+ },
+ {
+  "meal": "dessert",
+  "name": "Chocolate-Dipped Strawberries",
+  "protein": null,
+  "servings": 4,
+  "totalMinutes": 25,
+  "ingredients": [
+   {
+    "amount": "1",
+    "unit": "lb",
+    "item": "strawberries"
+   },
+   {
+    "amount": "1",
+    "unit": "cup",
+    "item": "semisweet chocolate chips"
+   },
+   {
+    "amount": "1",
+    "unit": "tsp",
+    "item": "coconut oil"
+   }
+  ],
+  "steps": [
+   "Wash the strawberries and dry them completely.",
+   "Melt the chocolate chips with the coconut oil in 20-second bursts in the microwave, stirring between.",
+   "Dip each berry, set it on wax paper and chill 15 minutes until set."
+  ],
+  "tags": [
+   "dessert",
+   "fruit",
+   "gluten-free"
+  ],
+  "ease": 4,
+  "prepAhead": null,
+  "creditName": null,
+  "creditUrl": null,
+  "sourceDocUrl": null
  }
 ]

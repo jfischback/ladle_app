@@ -58,7 +58,7 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
             {r.protein && <span className="tag">{r.protein}</span>}
             {trustworthy(nutrition) && <span className="tag bg-olive-soft text-olive-dark" title="Estimated from the ingredients">💪 ~{nutrition.protein} g protein · {nutrition.kcal} cal a serving</span>}
             {r.ease && <span className="tag">{r.ease >= 4 ? "Easy" : r.ease >= 3 ? "Medium" : "A bit of work"}</span>}
-            {r.meal !== "dinner" && <span className="tag bg-olive-soft font-bold text-olive-dark">{r.meal === "lunch" ? "🥪 Lunch" : "☕ Breakfast"}</span>}
+            {r.meal !== "dinner" && <span className="tag bg-olive-soft font-bold text-olive-dark">{r.meal === "lunch" ? "🥪 Lunch" : r.meal === "dessert" ? "🍰 Dessert" : "☕ Breakfast"}</span>}
             {r.tags.filter((t) => t !== "leftovers" && t !== "no-leftovers").map((t) => <span key={t} className="tag">{t}</span>)}
           </div>
           {r.creditName && (

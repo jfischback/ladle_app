@@ -40,17 +40,17 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
   // "Use what I have": what they typed plus what the Pantry page says is on hand.
   const haveMode = sp.f === "have";
   const typedHave = (sp.have ?? "").slice(0, 300);
-  const tab = t === "browse" ? "browse" : t === "cooks" ? "cooks" : t === "lunch" ? "lunch" : t === "breakfast" ? "breakfast" : "mine";
+  const tab = t === "browse" ? "browse" : t === "cooks" ? "cooks" : t === "lunch" ? "lunch" : t === "breakfast" ? "breakfast" : t === "dessert" ? "dessert" : "mine";
   // Getting started: they've looked at this.
   if (tab === "cooks") await markSeen(userId, "creators");
-  const [mine, lunches, breakfasts, browse, { data: settings }] = await Promise.all([myRecipes(userId), myRecipes(userId, "lunch"), myRecipes(userId, "breakfast"), browseStarters(userId), getSettings(userId)]);
+  const [mine, lunches, breakfasts, desserts, browse, { data: settings }] = await Promise.all([myRecipes(userId), myRecipes(userId, "lunch"), myRecipes(userId, "breakfast"), myRecipes(userId, "dessert"), browseStarters(userId), getSettings(userId)]);
   // How many starters are in each recipe pack.
   const db = await getDb();
   const starterTags = await db.select({ tags: recipesTable.tags }).from(recipesTable).where(and(isNull(recipesTable.ownerId), isNull(recipesTable.archivedAt)));
   const packCounts: Record<string, number> = {};
   for (const r of starterTags) for (const t of r.tags) packCounts[t] = (packCounts[t] ?? 0) + 1;
   const problemsOf = (r: Recipe) => ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway);
-  const all = tab === "mine" ? mine : tab === "lunch" ? lunches : tab === "breakfast" ? breakfasts : browse;
+  const all = tab === "mine" ? mine : tab === "lunch" ? lunches : tab === "breakfast" ? breakfasts : tab === "dessert" ? desserts : browse;
   // Search by name, protein or ingredient; then the chosen filter chip.
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
   const list = all.filter((r) => {
@@ -90,6 +90,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
         <Tab href="/recipes" active={tab === "mine"}>Dinners ({mine.length})</Tab>
         <Tab href="/recipes?tab=breakfast" active={tab === "breakfast"}>Breakfasts ({breakfasts.length})</Tab>
         <Tab href="/recipes?tab=lunch" active={tab === "lunch"}>Lunches ({lunches.length})</Tab>
+        <Tab href="/recipes?tab=dessert" active={tab === "dessert"}>Desserts ({desserts.length})</Tab>
         <Tab href="/recipes?tab=cooks" active={tab === "cooks"}>✨ Food creators</Tab>
         <Tab href="/recipes?tab=browse" active={tab === "browse"}>Starters &amp; packs</Tab>
       </div>
@@ -160,7 +161,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
       ) : shown.length === 0 ? (
         <div className="card flex flex-col items-center gap-3 p-8 text-center">
           <FoodArt kind={tab === "mine" ? "pot" : "nightoff"} className="h-24 w-24" rounded="rounded-full" />
-          {tab === "mine" || tab === "lunch" || tab === "breakfast" ? (
+          {tab === "mine" || tab === "lunch" || tab === "breakfast" || tab === "dessert" ? (
             <>
               <p className="font-display text-2xl font-semibold">Your recipe box is empty</p>
               <p className="text-lg text-muted">Start with our family favorites, or add the dinners you already love.</p>

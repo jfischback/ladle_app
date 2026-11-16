@@ -6,7 +6,7 @@ import { useState, useTransition } from "react";
 import { planUpcomingWeek } from "@/app/actions/plans";
 
 type Night = "cook" | "busy" | "out";
-type Defaults = { cookDays: number[]; busyDays: number[]; budget: number; tryNew: boolean; adults: number; kids: number };
+type Defaults = { cookDays: number[]; busyDays: number[]; budget: number; tryNew: boolean; adults: number; kids: number; desserts: number };
 type Table = { adults: number; kids: number };
 
 const DAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -29,6 +29,7 @@ export function PlanWeekCheckIn({ thisWeek, days, defaults, athletes, creators }
   const [useUp, setUseUp] = useState("");
   const [craving, setCraving] = useState("");
   const [tryNew, setTryNew] = useState(defaults.tryNew);
+  const [desserts, setDesserts] = useState(defaults.desserts);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -48,6 +49,7 @@ export function PlanWeekCheckIn({ thisWeek, days, defaults, athletes, creators }
         useUp,
         craving,
         tryNew,
+        desserts,
         eating: changedTables.map((d) => ({ weekday: d.weekday, ...tables[d.weekday] })),
       });
       if (r?.error) setError(r.error);
@@ -139,6 +141,17 @@ export function PlanWeekCheckIn({ thisWeek, days, defaults, athletes, creators }
               <label htmlFor="ci-craving" className="label">In the mood for anything?</label>
               <input id="ci-craving" className="field" placeholder="tacos, soup, something Italian…" value={craving} maxLength={80} onChange={(e) => setCraving(e.target.value)} />
             </div>
+            <fieldset>
+              <legend className="label">🍰 Dessert this week?</legend>
+              <div className="flex flex-wrap gap-2">
+                {[0, 1, 2, 3].map((n) => (
+                  <label key={n} className={`cursor-pointer rounded-full border-2 px-3 py-1 font-semibold ${desserts === n ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>
+                    <input type="radio" name="ci-desserts" className="sr-only" checked={desserts === n} onChange={() => setDesserts(n)} />
+                    {n === 0 ? "None" : `${n} night${n === 1 ? "" : "s"}`}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             <label className="flex items-start gap-2">
               <input type="checkbox" className="mt-1" checked={tryNew} onChange={(e) => setTryNew(e.target.checked)} />
               <span>
@@ -158,6 +171,7 @@ export function PlanWeekCheckIn({ thisWeek, days, defaults, athletes, creators }
             {useUp.trim() && <li>🥫 Use up: {useUp.trim()}</li>}
             {craving.trim() && <li>😋 In the mood for: {craving.trim()}</li>}
             <li>✨ {tryNew ? "Something new from your food creators" : "Just your own recipes"}</li>
+            {desserts > 0 && <li>🍰 Dessert {desserts} night{desserts === 1 ? "" : "s"}</li>}
           </ul>
         )}
 

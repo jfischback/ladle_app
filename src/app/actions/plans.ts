@@ -5,7 +5,7 @@ import { z } from "zod";
 import { and, desc, eq, inArray, isNull, ne } from "drizzle-orm";
 import { requireUserId } from "@/auth";
 import { getDb } from "@/db";
-import { cooks, extraItems, foundRecipes, pantryItems, plans, recipes } from "@/db/schema";
+import { cooks, extraItems, foundRecipes, pantryItems, plans, recipes, type Recipe } from "@/db/schema";
 import { activePlans, getPlan, getSettings, myExtras, myPantry, myRecipes, recipesByIds } from "@/lib/data";
 import { adoptFoundRecipe, refreshCooks } from "@/lib/cooks";
 import { ruleProblems } from "@/lib/diet";
@@ -15,6 +15,9 @@ import { FOUND_PREFIX, planWeek, sumCosts, type NewRecipeOption } from "@/lib/pl
 import { recipeSales, scanSales, type SaleScan } from "@/lib/sales";
 import { leftoverNotes, planLunches } from "@/lib/lunch";
 import { BREAKFAST_MEAT_TERMS, breakfastDeal, planBreakfasts } from "@/lib/breakfast";
+import { planDesserts } from "@/lib/dessert";
+import { copyStarters } from "@/lib/starters";
+import { pickStarters } from "@/lib/starter-pick";
 import { CATEGORIES, extraSearchTerm, extrasTotal, neverRegex, planExtras, termsToCheck } from "@/lib/extras";
 import { applyPantry, pantrySearchTerm, sameThing } from "@/lib/pantry";
 import { fuelGroceries, fuelTerms, portionNotes } from "@/lib/athletes";
@@ -67,6 +70,7 @@ export async function planUpcomingWeek(thisWeek = false, checkIn?: unknown): Pro
         busyDays: week.busyDays.filter((d) => week.cookDays.includes(d)),
         weeklyBudget: week.budget ?? saved.weeklyBudget,
         newRecipesPerWeek: week.tryNew ? Math.max(1, saved.newRecipesPerWeek) : 0,
+        dessertNights: week.desserts ?? saved.dessertNights,
       }
     : saved;
   const wishes = week ? { useUp: week.useUp.split(/,|\band\b|\n/).map((x) => x.trim()).filter((x) => x.length >= 2).slice(0, 10), craving: week.craving.trim() } : undefined;
@@ -108,9 +112,11 @@ export async function planUpcomingWeek(thisWeek = false, checkIn?: unknown): Pro
     const re = x.anyBrand ? neverRegex(settings.extras[x.category]?.neverWords ?? []) : null;
     if (re) exclude.set(extraSearchTerm(x.name), re);
   }
+  const dessertPool = settings.dessertNights > 0 ? await dessertRecipes(userId, settings) : [];
   let scan: SaleScan;
   try {
-    scan = await scanSales(recipeList, settings, [...stockTerms, ...(wantsBreakfastDeal ? BREAKFAST_MEAT_TERMS : []), ...extraTerms], exclude);
+    // Dessert recipes get price-checked too, so desserts with sale ingredients come first.
+    scan = await scanSales([...recipeList, ...dessertPool], settings, [...stockTerms, ...(wantsBreakfastDeal ? BREAKFAST_MEAT_TERMS : []), ...extraTerms], exclude);
   } catch (e) {
     scan = { status: "failed", message: (e as Error).message };
   }
@@ -189,6 +195,8 @@ export async function planUpcomingWeek(thisWeek = false, checkIn?: unknown): Pro
   }
   result.estimatedTotal = sumCosts(result.days);
   result.days = await withLunches(userId, await withBreakfasts(userId, result.days, settings, sales, bDeal), settings, sales);
+  const recentDesserts = new Set(recent.flatMap((p) => p.days.map((d) => d.dessert?.recipeId)).filter((x): x is string => !!x));
+  result.days = planDesserts(result.days, settings, dessertPool, sales, recentDesserts);
 
   await archiveOthersForWeek(userId, weekStart);
   await db.insert(plans).values({
@@ -270,6 +278,19 @@ async function withLunches(userId: string, days: PlanDay[], settings: Settings, 
   return planLunches(days, settings, new Map(dinnerRows.map((r) => [r.id, r])), lunchPool, sales, new Map(breakfastRows.map((r) => [r.id, r])));
 }
 
+/**
+ * The household's dessert recipes. A family that turns desserts on before having any gets the starter desserts
+ * that fit their food rules and kitchen (once), so dessert night works right away.
+ */
+async function dessertRecipes(userId: string, settings: Settings): Promise<Recipe[]> {
+  const mine = await myRecipes(userId, "dessert");
+  if (mine.length) return mine;
+  const db = await getDb();
+  const starters = await db.select().from(recipes).where(and(isNull(recipes.ownerId), eq(recipes.meal, "dessert"), isNull(recipes.archivedAt)));
+  await copyStarters(userId, pickStarters(starters, settings).map((s) => s.id));
+  return myRecipes(userId, "dessert");
+}
+
 /** Plan the week's breakfasts (quick, the household's bread/egg mix, must-haves, the breakfast-meat deal). */
 async function withBreakfasts(userId: string, days: PlanDay[], settings: Settings, sales: SaleItem[], deal: SaleItem | null): Promise<PlanDay[]> {
   if (!settings.breakfastDays.length && !settings.holidayEveryoneHome) return days.map((d) => ({ ...d, breakfast: null }));
@@ -287,7 +308,7 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
   const { data: settings } = await getSettings(userId);
   const ids = plan.days.map((d) => d.recipeId).filter((x): x is string => !!x);
   // Lunch recipes need shopping too (leftover lunches are covered by cooking extra at dinner).
-  const lunchIds = plan.days.flatMap((d) => [d.lunch?.kind === "recipe" ? d.lunch.recipeId : null, d.breakfast?.recipeId ?? null]).filter((x): x is string => !!x);
+  const lunchIds = plan.days.flatMap((d) => [d.lunch?.kind === "recipe" ? d.lunch.recipeId : null, d.breakfast?.recipeId ?? null, d.dessert?.recipeId ?? null]).filter((x): x is string => !!x);
   const chosen = await recipesByIds(userId, [...new Set([...ids, ...lunchIds])]);
   let groceryList;
   try {
@@ -425,6 +446,7 @@ const WeekCheckIn = z.object({
   useUp: z.string().max(300),
   craving: z.string().max(80),
   tryNew: z.boolean(),
+  desserts: z.number().int().min(0).max(3).optional(),
   eating: z.array(z.object({ weekday: z.number().int().min(0).max(6), adults: z.number().int().min(0).max(30), kids: z.number().int().min(0).max(30) }).refine((e) => e.adults + e.kids >= 1)).max(7),
 });
 

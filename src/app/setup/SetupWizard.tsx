@@ -158,7 +158,10 @@ export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, 
               <Counter label="New recipes to try each week" value={s.newRecipesPerWeek ?? 1} min={0} max={2} onChange={(v) => set("newRecipesPerWeek", v)} />
               <p className="mt-1 text-sm text-muted">From the cooks you follow, picked when their ingredients are on sale. 0 sticks to your saved recipes.</p>
             </div>
-            <p className="text-sm text-muted">Breakfast and lunch aren&apos;t planned yet, just dinners.</p>
+            <div>
+              <Counter label="Dessert nights a week" value={s.dessertNights ?? 0} min={0} max={3} onChange={(v) => set("dessertNights", v)} />
+              <p className="mt-1 text-sm text-muted">A dessert after dinner, weekends first, with sale ingredients when there are some. 0 for none.</p>
+            </div>
           </div>
         )}
 

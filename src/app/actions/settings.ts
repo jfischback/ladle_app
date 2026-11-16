@@ -43,6 +43,7 @@ const SettingsSchema = z.object({
   snap: z.boolean(),
   cookDays: z.array(int(0, 6)).min(1).max(7),
   newRecipesPerWeek: int(0, 2),
+  dessertNights: int(0, 3),
   foodRules: z.array(z.enum(Object.keys(FOOD_RULES) as [FoodRule, ...FoodRule[]])).max(20),
   dislikes: z.array(z.string().trim().min(2).max(40)).max(30),
   staples: StaplesSchema,

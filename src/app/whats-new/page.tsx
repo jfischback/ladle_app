@@ -10,6 +10,7 @@ const NEW: { when: string; items: Item[] }[] = [
   {
     when: "November 2026",
     items: [
+      { icon: "🍰", title: "Dessert nights", text: "Choose up to three dessert nights a week in Plan my week (or Settings). Ladle picks from twelve easy family desserts (brownies, banana pudding, cobbler, sundaes…), weekends first and quick ones on busy nights, favors ones with sale ingredients, and puts them on the grocery list.", href: "/recipes?tab=dessert" },
       { icon: "🎉", title: "Plan a party", text: "Birthday, graduation, celebration of life, Christmas, a shower, game day or a picnic: pick the party and how many are coming. Ladle suggests boards, trays, bites, sweets and drinks, sizes them for the crowd, checks them against your food rules, and makes the shopping list and a timeline.", href: "/party" },
       { icon: "🏷️", title: "What's on sale in each recipe", text: "Every recipe shows how many of its ingredients are on sale this week, the pricey ones first, and when the sale ends if the store says.", href: "/recipes" },
       { icon: "🐾", title: "Pet food", text: "Add your pet's food and treats to Snacks & more: food when you're running low, treats when they're on sale.", href: "/extras?c=pets" },
