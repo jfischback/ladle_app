@@ -88,21 +88,11 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
         </div>
       )}
 
-      {mine ? (
-        <div className="card flex flex-wrap items-center justify-between gap-3 p-4">
-          <div className="space-y-3">
-            <RecipeRating id={r.id} rating={r.rating} />
-            {r.meal === "dinner" && <LeftoversSwitch id={r.id} good={leftoverKind(r) === "ok"} why={leftoverWhy(r)} />}
-          </div>
-          <Link href={`/recipes/${r.id}/edit`} className="btn-secondary">Edit</Link>
-        </div>
-      ) : (
+      {!mine && (
         <form action={addStarter.bind(null, r.id)}>
           <button className="btn-warm min-h-12 w-full sm:w-auto">+ Add to my recipes</button>
         </form>
       )}
-
-      {mine && <RecipeNotes id={r.id} notes={r.familyNotes} />}
 
       {r.prepAhead && (
         <div className="flex items-start gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft">
@@ -110,6 +100,51 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
           <p><span className="font-bold">The day before:</span> {r.prepAhead}</p>
         </div>
       )}
+
+      {/* The recipe itself comes first; ratings, notes and the numbers follow. */}
+      <section>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-2xl font-semibold">Ingredients</h2>
+          <ShareRecipe recipe={{ id: r.id, name: r.name, servings: r.servings, totalMinutes: r.totalMinutes, ingredients: r.ingredients, steps: r.steps, creditName: r.creditName, creditUrl: r.creditUrl }} />
+        </div>
+        {r.ingredients.length ? <IngredientList recipeId={r.id} ingredients={r.ingredients} servings={r.servings} familyServings={familyServings} why={sizedWhy} /> : <p className="text-muted">No ingredients yet.</p>}
+      </section>
+
+      <section>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-2xl font-semibold">Let&apos;s cook</h2>
+          <CookMode recipeId={r.id} name={r.name} steps={r.steps} ingredients={r.ingredients} startOpen={cookNow} notes={mine ? r.familyNotes : null} />
+        </div>
+        {!r.steps.length && r.creditUrl ? (
+          <a href={r.creditUrl} target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 p-4 font-bold text-olive-dark hover:shadow-lift">
+            <span>See the steps on {r.creditName ?? "the original site"}</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+        ) : r.steps.length ? (
+          <ol className="space-y-3">
+            {r.steps.map((s, n) => (
+              <li key={n} className="card flex gap-4 p-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-terracotta font-extrabold text-cream">{n + 1}</span>
+                <p className="pt-1 text-lg leading-relaxed">{s}</p>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="text-muted">No steps yet.</p>
+        )}
+      </section>
+
+      {mine && (
+        <div className="card flex flex-wrap items-center justify-between gap-3 p-4">
+          <div className="space-y-3">
+            <RecipeRating id={r.id} rating={r.rating} />
+            {r.meal === "dinner" && <LeftoversSwitch id={r.id} good={leftoverKind(r) === "ok"} why={leftoverWhy(r)} />}
+          </div>
+          <Link href={`/recipes/${r.id}/edit`} className="btn-secondary">Edit</Link>
+        </div>
+      )}
+
+      {mine && <RecipeNotes id={r.id} notes={r.familyNotes} />}
 
       {trustworthy(nutrition) && (
         <section aria-label="Per serving" className="card p-4">
@@ -154,38 +189,6 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
           <p className="mt-2 text-xs text-muted">Prices at your store when this week was planned. Pantry basics like salt and oil aren&apos;t counted.</p>
         </section>
       )}
-
-      <section>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-2xl font-semibold">Ingredients</h2>
-          <ShareRecipe recipe={{ id: r.id, name: r.name, servings: r.servings, totalMinutes: r.totalMinutes, ingredients: r.ingredients, steps: r.steps, creditName: r.creditName, creditUrl: r.creditUrl }} />
-        </div>
-        {r.ingredients.length ? <IngredientList recipeId={r.id} ingredients={r.ingredients} servings={r.servings} familyServings={familyServings} why={sizedWhy} /> : <p className="text-muted">No ingredients yet.</p>}
-      </section>
-
-      <section>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-2xl font-semibold">Let&apos;s cook</h2>
-          <CookMode recipeId={r.id} name={r.name} steps={r.steps} ingredients={r.ingredients} startOpen={cookNow} notes={mine ? r.familyNotes : null} />
-        </div>
-        {!r.steps.length && r.creditUrl ? (
-          <a href={r.creditUrl} target="_blank" rel="noopener noreferrer" className="card flex items-center justify-between gap-3 p-4 font-bold text-olive-dark hover:shadow-lift">
-            <span>See the steps on {r.creditName ?? "the original site"}</span>
-            <span aria-hidden="true">↗</span>
-          </a>
-        ) : r.steps.length ? (
-          <ol className="space-y-3">
-            {r.steps.map((s, n) => (
-              <li key={n} className="card flex gap-4 p-4">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-terracotta font-extrabold text-cream">{n + 1}</span>
-                <p className="pt-1 text-lg leading-relaxed">{s}</p>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="text-muted">No steps yet.</p>
-        )}
-      </section>
 
       {mine && (
         <details className="rounded-3xl px-2 text-sm text-muted">

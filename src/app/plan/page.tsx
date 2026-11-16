@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUserId } from "@/auth";
-import { activePlans, getSettings, myCooks } from "@/lib/data";
+import { activePlans, getPlan, getSettings, myCooks } from "@/lib/data";
 import { addDays, currentWeekStart, dayName, shortDate, today, upcomingWeekStart, weekDates, weekday } from "@/lib/week";
 import { PlanWeekCheckIn, type WeekChoice } from "./PlanWeekCheckIn";
 
@@ -10,7 +10,7 @@ export const metadata = { title: "Plan my week · Ladle" };
 export const maxDuration = 60;
 
 /** "Plan my week": pick the week, then a quick check-in about it, then the plan. */
-export default async function PlanPage({ searchParams }: { searchParams: Promise<{ now?: string }> }) {
+export default async function PlanPage({ searchParams }: { searchParams: Promise<{ now?: string; from?: string }> }) {
   const userId = await requireUserId();
   const { data: settings, complete } = await getSettings(userId);
   if (!complete) redirect("/setup");
@@ -23,6 +23,17 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
     return mine.some((p) => p.status === "approved") ? ("approved" as const) : mine.length ? ("draft" as const) : ("none" as const);
   };
 
+  // Re-planning starts from the plan that was on screen (its nights and who's eating), not the usual settings.
+  // ?from= names the plan "Start over" or "Re-plan" just set aside; otherwise it's the draft waiting for an OK.
+  const replaced = sp.from && /^[0-9a-f-]{36}$/i.test(sp.from) ? await getPlan(userId, sp.from) : null;
+  const currentFor = (weekOf: string, dates: string[]) => {
+    const p = replaced?.weekOf === weekOf ? replaced : plans.find((x) => x.weekOf === weekOf && x.status === "draft");
+    if (!p) return undefined;
+    return dates.flatMap((date) => {
+      const d = p.days.find((x) => x.date === date);
+      return d ? [{ weekday: weekday(date), cook: !!(d.recipeId || d.feast || d.leftoverOf), eating: d.eating ?? null }] : [];
+    });
+  };
   // The two weeks someone can plan: the rest of the week in progress, and the next one (from the next shopping day).
   const inProgress = currentWeekStart(settings.shoppingDay);
   const upcoming = upcomingWeekStart(settings.shoppingDay);
@@ -37,6 +48,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
       range: `${dayName(restDates[0]).slice(0, 3)} ${shortDate(restDates[0])} to ${dayName(restDates[restDates.length - 1]).slice(0, 3)} ${shortDate(restDates[restDates.length - 1])}`,
       days: restDates.map((d) => ({ date: d, weekday: weekday(d) })),
       status: statusOf(inProgress),
+      current: currentFor(inProgress, restDates),
     });
   }
   const nextDates = weekDates(upcoming);
@@ -47,6 +59,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
     range: `${dayName(upcoming).slice(0, 3)} ${shortDate(upcoming)} to ${dayName(addDays(upcoming, 6)).slice(0, 3)} ${shortDate(addDays(upcoming, 6))}`,
     days: nextDates.map((d) => ({ date: d, weekday: weekday(d) })),
     status: statusOf(upcoming),
+    current: currentFor(upcoming, nextDates),
   });
   const open = weeks.filter((w) => w.status !== "approved");
   const wanted = sp.now === "1" ? "now" : "next";
@@ -70,6 +83,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
         <PlanWeekCheckIn
           weeks={weeks}
           initialWeek={initial}
+          fresh={!!replaced}
           defaults={{
             cookDays: settings.cookDays,
             busyDays: settings.busyDays,

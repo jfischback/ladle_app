@@ -64,7 +64,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
               {monthGrid(month).flat().map((date) => {
                 const c = days.get(date);
                 const inMonth = monthOf(date) === month;
-                const label = [longDate(date), c?.dinner ? `dinner: ${c.dinner}` : "", c?.dessert ? `dessert: ${c.dessert}` : "", ...(c?.parties.map((p) => `party: ${p.title}`) ?? []), c?.holiday ?? ""].filter(Boolean).join(", ");
+                const label = [longDate(date), c?.dinner ? `dinner: ${c.dinner}` : "", c?.dessert ? `dessert: ${c.dessert}` : "", ...(c?.parties.map((p) => `party: ${p.title}`) ?? []), c?.holiday ?? "", c?.dinner && !c.approved ? "waiting for your OK" : ""].filter(Boolean).join(", ");
                 return (
                   <li key={date} className="min-w-0 border-b border-r border-line [&:nth-child(7n)]:border-r-0">
                     <Link href={href({ m: month, d: date })} aria-label={label} aria-current={date === selected ? "date" : undefined}
@@ -73,7 +73,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                       {c?.parties.map((p) => <span key={p.id} className="truncate rounded bg-olive px-1 text-[0.65rem] font-bold text-cream">{p.icon} {p.title}</span>)}
                       {c?.dinner && (
                         <span lang="en" className={`line-clamp-3 overflow-hidden hyphens-auto text-[0.66rem] leading-tight sm:line-clamp-2 ${c.approved ? "" : "italic text-muted"}`}>
-                          <span aria-hidden="true">{icon(c)} </span>{c.dinner}
+                          <span aria-hidden="true">{c.approved ? icon(c) : "✎"} </span>{c.dinner}
                         </span>
                       )}
                       {c?.dessert && <span className="text-[0.65rem]" aria-hidden="true">🍰</span>}
@@ -83,7 +83,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
               })}
             </ol>
           </div>
-          <p className="text-sm text-muted">Tap a day for everything planned. <span className="italic">Slanted names</span> are waiting for your OK.</p>
+          <p className="text-sm text-muted">Tap a day for everything planned. Names marked ✎ <span className="italic">(and slanted)</span> are waiting for your OK.</p>
           <DayDetails date={selected} c={pick} />
         </>
       ) : (

@@ -144,7 +144,10 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
               <FridgeButton tab={tab} typed={typedHave} />
             </form>
           )}
-          {(q || filter || haveMode) && (
+          {haveMode && onHand.length === 0 && !q ? (
+            // Nothing to match yet: say what to do, not "0 recipes".
+            <p className="text-sm text-muted">Type what you have, or snap your fridge, and the dinners that use it show up here. <Link href={linkWith({ f: null, q: null })} className="font-bold text-olive-dark underline">Back to all recipes</Link></p>
+          ) : (q || filter || haveMode) && (
             <p className="text-sm text-muted">
               {shown.length} of {all.length} recipes{q ? ` matching “${q}”` : ""}{filter ? ` · ${filter.label.replace(/^\S+ /, "")}` : ""}{haveMode ? " · use what I have" : ""} ·{" "}
               <Link href={linkWith({ f: null, q: null })} className="font-bold text-olive-dark underline">Clear</Link>

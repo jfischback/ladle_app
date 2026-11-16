@@ -142,7 +142,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, 
               onChange={(v) => set("budgetMode", v)}
               options={[
                 { value: "target", label: "Target", hint: "Aim for it. Going over a little is fine for a good week." },
-                { value: "hard", label: "Hard limit", hint: "Never go over, even if it drops a good dinner." },
+                { value: "hard", label: "Hard limit", hint: "Ladle's estimate stays under it, even if that drops a good dinner. Store prices can still change at checkout." },
               ]}
             />
             <TightBudget s={s} set={set} />
@@ -247,9 +247,9 @@ const MOTIVATION_ICON: Record<Motivation, string> = { save_money: "💰", eat_he
 const HINT = [
   "Tap them in order, most important first. This changes how we pick dinners.",
   "We use this for portions and baby-safe choices.",
-  "Allergies, diets, or foods your family won't eat. We'll never plan a dinner that breaks these.",
+  "Allergies, diets, or foods your family won't eat. Ladle skips recipes whose ingredients break these. For allergies, still check every label yourself.",
   "We plan around what's on sale at your store: Kroger, Fry's, Ralphs, King Soopers, Smith's, Fred Meyer, Harris Teeter and other Kroger stores.",
-  "We keep the week's dinners near this number.",
+  "We keep the estimate for dinners, staples and snacks near this number.",
   "Pick the nights you want dinner planned. The others are nights off.",
   "Two quick rules for picking products.",
   "Most families start with ours and add favorites over time.",

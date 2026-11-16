@@ -83,7 +83,7 @@ export function CookMode({ recipeId, name, steps, ingredients, startOpen = false
         <div role="dialog" aria-modal="true" aria-label={`Cooking ${name}`} className="fixed inset-0 z-50 flex flex-col bg-cream">
           <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3">
             <p className="min-w-0 truncate font-display text-lg font-semibold">{name}</p>
-            <button type="button" className="btn-quiet min-h-10 px-3" onClick={() => setOpen(false)}>Done</button>
+            <button type="button" className="btn-quiet min-h-10 px-3" onClick={() => setOpen(false)}>{last ? "Finish cooking" : "Exit cooking"}</button>
           </div>
           <div className="flex-1 overflow-y-auto px-5 py-6">
             {notes && (

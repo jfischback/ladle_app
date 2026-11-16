@@ -7,7 +7,7 @@ import { moveTargets } from "@/lib/move-dinner";
 import { feastHolidayOn, feastTips } from "@/lib/feast";
 import { redirect } from "next/navigation";
 import { requireUserId, actingFor } from "@/auth";
-import { activePlans, getSettings, myCooks, myRecipes } from "@/lib/data";
+import { activePlans, getSettings, myCooks, myPantry, myRecipes } from "@/lib/data";
 import { addDays, currentWeekStart, dayName, greeting, money, shortDate, today, upcomingWeekStart, weekDates, weekday } from "@/lib/week";
 import { DayCard, ApproveBar, RatePrompt, StartOverButton, GroceryChecklist, Celebrate } from "./HomeClient";
 import { tickKey } from "@/lib/grocery-checks";
@@ -100,18 +100,20 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     { href: "/calendar", icon: "📅", title: "Calendar", tone: "plain" as const, sub: "Your month of meals" },
     { href: "/stores", icon: "📍", title: "Nearby stores", tone: "plain" as const, sub: "Where it's cheapest" },
     { href: "/recipes?tab=cooks", icon: "✨", title: "Food creators", tone: "ochre" as const, sub: creators.length ? `Following ${creators.length}` : "Recipes from your favorites" },
-    { href: "/athletes", icon: "💪", title: "Athlete mode", tone: "olive" as const, sub: settings.athletes.length ? `${settings.athletes.length} set up` : "For whoever's training" },
+    { href: "/athletes", icon: "💪", title: "Athlete mode", tone: "olive" as const, sub: settings.athletes.length ? `${settings.athletes.length} set up` : "Training, weight and health goals" },
     { href: "/party", icon: "🎉", title: "Plan a party", tone: "plain" as const, sub: "Birthdays, grads, holidays" },
     { href: "/household#care", icon: "🤝", title: "Plan for a parent", tone: "plain" as const, sub: "Caregiver mode" },
   ];
-  // Getting started: the extras that weren't in the short first setup.
+  const pantryCount = (await myPantry(userId)).length;
+  // Getting started: the extras that weren't in the short first setup. Opening a page without setting anything
+  // up counts as skipped, not done.
   const startSteps = [
     { href: "/plan", title: "Plan your first week", why: "A few quick questions, then dinners for the week and a grocery list.", done: plans.length > 0 },
     { href: "/setup?step=5", title: "Pick your cooking nights", why: "Which nights you cook, which are busy, and your kitchen.", done: settings.seen.includes("cooking") },
-    { href: "/recipes?tab=cooks", title: "Follow your favorite food creators", why: "Their new dinners come into your week, especially when the ingredients are on sale.", done: creators.length > 0 || settings.seen.includes("creators") },
-    { href: "/athletes", title: "Anyone training? Turn on athlete mode", why: "Portions, protein and snacks for whoever's working out.", done: settings.athletes.length > 0 || settings.seen.includes("athletes") },
-    { href: "/staples", title: "Add your weekly staples", why: "Milk, eggs, bread: the things you buy every week, on every list.", done: settings.staples.length > 0 || settings.seen.includes("staples") },
-    { href: "/pantry", title: "Tell us what's in your pantry", why: "So the list skips what you already have.", done: settings.seen.includes("pantry") },
+    { href: "/recipes?tab=cooks", title: "Follow your favorite food creators", why: "Their new dinners come into your week, especially when the ingredients are on sale.", done: creators.length > 0, skipped: settings.seen.includes("creators") },
+    { href: "/athletes", title: "Anyone training? Turn on athlete mode", why: "Portions, protein and snacks for whoever's working out.", done: settings.athletes.length > 0, skipped: settings.seen.includes("athletes") },
+    { href: "/staples", title: "Add your weekly staples", why: "Milk, eggs, bread: the things you buy every week, on every list.", done: settings.staples.length > 0, skipped: settings.seen.includes("staples") },
+    { href: "/pantry", title: "Tell us what's in your pantry", why: "So the list skips what you already have.", done: pantryCount > 0, skipped: settings.seen.includes("pantry") },
   ];
   const athletes = plan ? await athleteWeeks(userId, plan, settings) : [];
   // Meal prep day: one session that does the slow parts of the week's dinners.
@@ -140,7 +142,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <header>
         <p className="eyebrow">{greeting()}!</p>
         <h1 className="text-4xl font-semibold leading-tight">
-          {plan ? (plan.days[0] && plan.days[0].date > plan.weekOf ? <>This week, {shortDate(plan.days[0].date)} to {shortDate(plan.days[plan.days.length - 1].date)}</> : <>Week of {shortDate(plan.weekOf)}</>) : "Let's plan dinner"}
+          {plan ? <>{plan.weekOf === inProgress ? "This week" : "Next week"}, {shortDate(plan.days[0]?.date ?? plan.weekOf)} to {shortDate(plan.days[plan.days.length - 1]?.date ?? addDays(plan.weekOf, 6))}</> : "Let's plan dinner"}
         </h1>
         <p className="mt-1 text-muted">
           {plan
@@ -240,6 +242,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </>
           )}
           <BudgetMeter plan={plan} budget={settings.weeklyBudget} mode={settings.budgetMode} />
+          {!approved && <ApproveBar planId={plan.id} />}
           {approved && plan.summary && plan.plannerSource !== "basic" && <WhyThisWeek summary={plan.summary} />}
           {approved && <SaleBanner plan={plan} saleThreshold={settings.saleThresholdPct} yours={yours} />}
           <p className="no-print -mb-3 px-1 text-sm text-muted">
@@ -252,11 +255,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <ExtrasCard plan={plan} />
           {prep && <div id="prep" className="scroll-mt-24"><PrepCard plan={prep} /></div>}
           {athletes.map((w) => <AthleteWeekCard key={w.athlete.id} week={w} />)}
-          {!approved && <ApproveBar planId={plan.id} />}
           <div className="flex flex-wrap justify-center gap-2 pt-2">
             <a href={`/api/plans/${plan.id}/calendar`} className="btn-quiet text-sm" download>📅 Add to my calendar</a>
             <Link href={`/menu/${plan.id}`} className="btn-quiet text-sm">🖨️ Fridge menu</Link>
-            <StartOverButton planId={plan.id} approved={approved} cartSent={!!plan.cart?.sentAt} planHref={plan.weekOf === upcoming ? "/plan" : "/plan?now=1"} />
+            <StartOverButton planId={plan.id} approved={approved} cartSent={!!plan.cart?.sentAt} planHref={`${plan.weekOf === upcoming ? "/plan?" : "/plan?now=1&"}from=${plan.id}`} />
           </div>
         </>
       )}
@@ -457,14 +459,16 @@ function BudgetMeter({ plan, budget, mode }: { plan: Plan; budget: number; mode:
   const total = (dinners ?? 0) + staples.total + extras;
   const over = total > budget;
   const pct = (n: number) => Math.min(100, (n / Math.max(budget, total)) * 100);
+  // What the estimate leaves out, so "under budget" isn't read as money in hand.
+  const unpriced = [plan.days.some((d) => d.breakfast) ? "breakfasts" : "", plan.days.some((d) => d.lunch?.recipeId) ? "lunches" : "", plan.days.some((d) => d.dessert) ? "desserts" : ""].filter(Boolean);
   return (
     <section aria-label="Budget" className={`rounded-3xl p-5 shadow-soft ${over ? "bg-terracotta-soft" : "bg-olive-soft"}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-lg">
-          <span className="font-bold">About {money(total)}</span> <span className="text-muted">{dinners == null ? "so far " : ""}of your {money(budget)} budget</span>
+          <span className="font-bold">About {money(total)}</span> <span className="text-muted">{dinners == null ? "so far " : ""}estimated, of your {money(budget)} budget</span>
         </p>
         <p className={`text-lg font-bold ${over ? "text-terracotta-dark" : "text-olive-dark"}`}>
-          {over ? `${money(total - budget)} over ${mode === "hard" ? "your limit" : "budget"}` : `${money(budget - total)} left 🎉`}
+          {over ? `${money(total - budget)} over ${mode === "hard" ? "your limit" : "budget"}` : `${money(budget - total)} under so far`}
         </p>
       </div>
       <div className="mt-3 flex h-4 overflow-hidden rounded-full bg-card" role="meter" aria-valuemin={0} aria-valuemax={budget} aria-valuenow={total} aria-label="Estimated cart compared with budget">
@@ -479,7 +483,7 @@ function BudgetMeter({ plan, budget, mode }: { plan: Plan; budget: number; mode:
           {extras > 0 && <span><span aria-hidden="true" className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-terracotta/50" />Snacks &amp; more {money(extras)}</span>}
         </p>
       )}
-      <p className="mt-1 text-sm text-muted">Estimate. Your receipt may be a little different.</p>
+      <p className="mt-1 text-sm text-muted">An estimate for dinners{staples.total > 0 ? ", staples" : ""}{extras > 0 ? ", snacks" : ""} from recipe amounts, not full packages.{unpriced.length ? ` Not counted: ${unpriced.join(", ")}.` : ""} Your receipt will be different.</p>
     </section>
   );
 }

@@ -61,7 +61,7 @@ export function weekSteps(s: WeekState): { steps: WeekStep[]; nextStep: StepKey 
   const planNext = s.next?.status === "none" ? { label: "Plan next week", href: "/plan" } : undefined;
 
   const card: NextCard =
-    nextStep === "approve" ? { icon: "👀", title: "Look over the dinners", text: "Swap anything you don't like. When it looks good, tap \"Looks yummy, make my list!\"", cta: "See the dinners", href: "#dinners" }
+    nextStep === "approve" ? { icon: "👀", title: "Look over the dinners", text: "Swap anything you don't like. When it looks good, tap \"Looks yummy, make my list!\" under the dinners.", cta: "See the dinners", href: "#dinners" }
     : nextStep === "pantry" ? { icon: "❓", title: "Do you already have these?", text: `${s.pantryQuestions} pantry question${s.pantryQuestions === 1 ? "" : "s"}. Answer ${s.pantryQuestions === 1 ? "it" : "them"} so your list only has what you need.`, cta: s.pantryQuestions === 1 ? "Answer it" : "Answer them", href: "#pantry-check" }
     : nextStep === "shop" ? (
         s.cartSent ? { icon: "🛒", title: `Check out at ${s.storeName}`, text: `Your cart is filled. Review it, pay and pick your time on ${s.storeName}'s site. Ladle never checks out for you.`, cta: "Review my cart", href: `/cart?plan=${s.planId}`, more: openList }

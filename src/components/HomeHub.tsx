@@ -26,12 +26,16 @@ export function HomeHub({ tiles }: { tiles: Tile[] }) {
   );
 }
 
-type Step = { href: string; title: string; why: string; done: boolean };
+type Step = { href: string; title: string; why: string; done: boolean; skipped?: boolean };
 
-/** A short "Getting started" list for new families: each step links where it happens and ticks itself off. */
+/**
+ * A short "Getting started" list for new families: each step links where it happens. A step is done when
+ * something is actually set up; a page that was opened and left empty shows as skipped.
+ */
 export function GettingStarted({ steps }: { steps: Step[] }) {
   const done = steps.filter((s) => s.done).length;
-  if (done === steps.length) return null;
+  // Nothing left to decide: every step is set up or was looked at and skipped.
+  if (steps.every((s) => s.done || s.skipped)) return null;
   return (
     <section aria-labelledby="getting-started" className="no-print card space-y-3 p-4">
       <div className="flex items-baseline justify-between gap-2">
@@ -42,18 +46,21 @@ export function GettingStarted({ steps }: { steps: Step[] }) {
         <div className="h-full rounded-full bg-olive" style={{ width: `${(done / steps.length) * 100}%` }} />
       </div>
       <ol className="space-y-1.5">
-        {steps.map((s) => (
-          <li key={s.title}>
-            <Link href={s.href} className={`flex items-start gap-3 rounded-2xl p-2 hover:bg-cream ${s.done ? "text-muted" : ""}`}>
-              <span aria-hidden="true" className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold ${s.done ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>{s.done ? "✓" : ""}</span>
-              <span className="min-w-0">
-                <span className={`block font-bold ${s.done ? "line-through" : ""}`}>{s.title}</span>
-                {!s.done && <span className="block text-sm text-muted">{s.why}</span>}
-              </span>
-              <span className="sr-only">{s.done ? "(done)" : ""}</span>
-            </Link>
-          </li>
-        ))}
+        {steps.map((s) => {
+          const skipped = !s.done && !!s.skipped;
+          return (
+            <li key={s.title}>
+              <Link href={s.href} className={`flex items-start gap-3 rounded-2xl p-2 hover:bg-cream ${s.done || skipped ? "text-muted" : ""}`}>
+                <span aria-hidden="true" className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold ${s.done ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>{s.done ? "✓" : skipped ? "–" : ""}</span>
+                <span className="min-w-0">
+                  <span className={`block font-bold ${s.done ? "line-through" : ""}`}>{s.title}</span>
+                  {skipped ? <span className="block text-sm text-muted">Skipped for now. Tap to set it up.</span> : !s.done && <span className="block text-sm text-muted">{s.why}</span>}
+                </span>
+                <span className="sr-only">{s.done ? "(done)" : skipped ? "(skipped)" : ""}</span>
+              </Link>
+            </li>
+          );
+        })}
       </ol>
       <HideGettingStarted />
     </section>

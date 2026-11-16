@@ -340,8 +340,8 @@ export function ApproveBar({ planId }: { planId: string }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   return (
-    <div className="sticky bottom-24 z-20 sm:bottom-4">
-      <div className="rounded-[2rem] bg-card/95 p-2 shadow-lift ring-1 ring-line/60 backdrop-blur sm:p-3">
+    <div>
+      <div className="rounded-[2rem] bg-card p-2 shadow-lift ring-1 ring-line/60 sm:p-3">
         <button
           className="btn-warm min-h-12 w-full text-lg sm:min-h-14"
           disabled={pending}
@@ -362,7 +362,7 @@ export function ApproveBar({ planId }: { planId: string }) {
         >
           {pending ? <><span className="animate-wiggle inline-block" aria-hidden="true">📝</span> Writing your grocery list…</> : "Looks yummy, make my list!"}
         </button>
-        <p className="mt-1.5 px-2 text-center text-xs text-muted sm:mt-2 sm:text-sm">Locks in the week. You still do the paying and checkout.</p>
+        <p className="mt-1.5 px-2 text-center text-xs text-muted sm:mt-2 sm:text-sm">Makes your grocery list. After that you can still move dinners between nights; to change a dinner, re-plan the week. You do the paying and checkout.</p>
         <ErrorNote error={error} />
       </div>
     </div>

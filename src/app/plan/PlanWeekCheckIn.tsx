@@ -14,7 +14,9 @@ type Defaults = { cookDays: number[]; busyDays: number[]; budget: number; tryNew
 type Table = { adults: number; kids: number };
 type Rules = { rules: FoodRule[]; dislikes: string[]; allow: string[] };
 /** A week that can be planned: the rest of the one in progress ("now") or the next one. */
-export type WeekChoice = { key: "now" | "next"; weekOf: string; title: string; range: string; days: { date: string; weekday: number }[]; status: "none" | "draft" | "approved" };
+export type WeekChoice = { key: "now" | "next"; weekOf: string; title: string; range: string; days: { date: string; weekday: number }[]; status: "none" | "draft" | "approved";
+  /** The plan this week already has (or just had): which nights it cooks and who's eating, to start from. */
+  current?: { weekday: number; cook: boolean; eating: Table | null }[] };
 type StepKey = "week" | "nights" | "who" | "still" | "wishes" | "ready";
 
 const DAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -28,7 +30,7 @@ const NIGHTS: { key: Night; label: string; hint: string }[] = [
 const KEEP = "ladle-checkin";
 
 /** The weekly check-in: which week, which nights, who's eating, what's still right, wishes. Then Ladle plans the week. */
-export function PlanWeekCheckIn({ weeks, initialWeek, defaults, foodRules, mode: savedMode, alsoPlanned = [], athletes, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; defaults: Defaults; foodRules: Rules; mode: Mode; alsoPlanned?: string[]; athletes: number; creators: string[] }) {
+export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, defaults, foodRules, mode: savedMode, alsoPlanned = [], athletes, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; fresh?: boolean; defaults: Defaults; foodRules: Rules; mode: Mode; alsoPlanned?: string[]; athletes: number; creators: string[] }) {
   const router = useRouter();
   const open = weeks.filter((w) => w.status !== "approved");
   // The week question only shows when there's a real choice to make.
@@ -38,11 +40,17 @@ export function PlanWeekCheckIn({ weeks, initialWeek, defaults, foodRules, mode:
   const [weekKey, setWeekKey] = useState<"now" | "next">(initialWeek);
   const week = weeks.find((w) => w.key === weekKey) ?? open[0];
   const days = week.days;
-  // Every weekday starts on the family's usual answer, so switching weeks keeps what was tapped.
-  const [nights, setNights] = useState<Record<number, Night>>(() =>
-    Object.fromEntries([0, 1, 2, 3, 4, 5, 6].map((wd) => [wd, !defaults.cookDays.includes(wd) ? "out" : defaults.busyDays.includes(wd) ? "busy" : "cook"])),
-  );
-  const [tables, setTables] = useState<Record<number, Table>>({});
+  // A week that already has a plan starts from that plan's nights and tables; otherwise from the usual settings.
+  const seedNights = (w: WeekChoice): Record<number, Night> =>
+    Object.fromEntries([0, 1, 2, 3, 4, 5, 6].map((wd) => {
+      const now = w.current?.find((c) => c.weekday === wd);
+      const cooks = now ? now.cook : defaults.cookDays.includes(wd);
+      return [wd, !cooks ? "out" : defaults.busyDays.includes(wd) ? "busy" : "cook"];
+    }));
+  const seedTables = (w: WeekChoice): Record<number, Table> => Object.fromEntries((w.current ?? []).flatMap((c) => (c.cook && c.eating ? [[c.weekday, c.eating]] : [])));
+  const [nights, setNights] = useState<Record<number, Night>>(() => seedNights(week));
+  const [tables, setTables] = useState<Record<number, Table>>(() => seedTables(week));
+  const pickWeek = (w: WeekChoice) => { setWeekKey(w.key); setNights(seedNights(w)); setTables(seedTables(w)); };
   const [budget, setBudget] = useState(String(defaults.budget));
   const [useUp, setUseUp] = useState("");
   const [craving, setCraving] = useState("");
@@ -64,7 +72,8 @@ export function PlanWeekCheckIn({ weeks, initialWeek, defaults, foodRules, mode:
   const weeksKey = weeks.map((w) => `${w.key}:${w.weekOf}:${w.days.length}`).join("|");
   useEffect(() => {
     try {
-      const kept = JSON.parse(sessionStorage.getItem(KEEP) ?? "null");
+      // Arriving from "Start over" or "Re-plan" begins from that plan, not from answers left over from another time.
+      const kept = fresh ? null : JSON.parse(sessionStorage.getItem(KEEP) ?? "null");
       if (kept && kept.weeksKey === weeksKey) {
         if (open.some((w) => w.key === kept.weekKey)) setWeekKey(kept.weekKey);
         if (steps.includes(kept.stepKey)) setStepKey(kept.stepKey);
@@ -147,7 +156,7 @@ export function PlanWeekCheckIn({ weeks, initialWeek, defaults, foodRules, mode:
                 const on = w.key === weekKey;
                 const done = w.status === "approved";
                 return (
-                  <button key={w.key} type="button" role="radio" aria-checked={on} disabled={done} onClick={() => setWeekKey(w.key)}
+                  <button key={w.key} type="button" role="radio" aria-checked={on} disabled={done} onClick={() => w.key !== weekKey && pickWeek(w)}
                     className={`flex w-full items-start gap-3 rounded-2xl border-2 p-3.5 text-left ${done ? "border-line bg-oat/60 text-muted" : on ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive/50"}`}>
                     <span aria-hidden="true" className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold ${on && !done ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>{on && !done ? "✓" : ""}</span>
                     <span>
@@ -165,7 +174,7 @@ export function PlanWeekCheckIn({ weeks, initialWeek, defaults, foodRules, mode:
 
         {stepKey === "nights" && (
           <>
-            <p className="text-muted">Tap a night to change it.</p>
+            <p className="text-muted">{week.current ? "These match the plan you have now. Tap a night to change it." : "These are your usual nights. Tap one to change it."}</p>
             <ul className="space-y-2">
               {days.map((d) => (
                 <li key={d.date} className="flex items-center gap-2">
@@ -240,7 +249,7 @@ export function PlanWeekCheckIn({ weeks, initialWeek, defaults, foodRules, mode:
                   </div>
                 </div>
               )}
-              <p className="mt-2 text-sm text-muted">Saved for every week, not just this one. We never plan a dinner that breaks these.</p>
+              <p className="mt-2 text-sm text-muted">Saved for every week, not just this one. Ladle skips recipes whose ingredients break these. For allergies, still check every label yourself.</p>
             </div>
 
             <fieldset className="rounded-2xl border-2 border-line p-3.5">

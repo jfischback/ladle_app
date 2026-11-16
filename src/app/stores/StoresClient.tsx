@@ -108,7 +108,8 @@ export function StoresClient({ zip: zip0, home, initial }: { zip: string; home: 
 
       <section aria-labelledby="compare-title" className="card space-y-3 p-5">
         <h2 id="compare-title" className="text-xl font-semibold">Where is this week&apos;s list cheapest?</h2>
-        <p className="text-muted">Checks up to 15 things on your list at each store. It takes a little while.</p>
+        <p className="text-muted">Compares up to 15 things from your list at each store, so it&apos;s a sample, not your whole cart. It takes a little while.</p>
+        {!picked.length && <p className="text-sm font-bold text-terracotta-dark">Pick at least one other store above first.</p>}
         <button type="button" className="btn-secondary" disabled={pending || !picked.length} onClick={compare}>{pending && found !== null ? "Working…" : "Compare my stores"}</button>
         {result && (
           <div className="space-y-3">

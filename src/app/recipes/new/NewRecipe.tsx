@@ -7,7 +7,7 @@ import { RecipeForm, type RecipeFormValues } from "@/components/RecipeForm";
 type Mode = "type" | "link" | "photo";
 
 export function NewRecipe({ importEnabled }: { importEnabled: boolean }) {
-  const [mode, setMode] = useState<Mode>("type");
+  const [mode, setMode] = useState<Mode>(importEnabled ? "link" : "type");
   const [draft, setDraft] = useState<Partial<RecipeFormValues> | null>(null);
   const [draftKey, setDraftKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -39,9 +39,9 @@ export function NewRecipe({ importEnabled }: { importEnabled: boolean }) {
     <div className="space-y-6">
       <div role="tablist" className="flex flex-wrap gap-2">
         {([
-          ["type", "Type it in"],
           ["link", "Save from link"],
           ["photo", "Snap a photo"],
+          ["type", "Type it in"],
         ] as [Mode, string][]).map(([m, label]) => (
           <button key={m} role="tab" aria-selected={mode === m} onClick={() => { setMode(m); setError(null); }} className={`rounded-full px-4 py-2 font-semibold ${mode === m ? "bg-olive text-cream" : "bg-oat text-olive-dark hover:bg-olive-soft"}`}>
             {label}

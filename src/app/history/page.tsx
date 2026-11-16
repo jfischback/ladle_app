@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireUserId } from "@/auth";
 import { activePlans, getSettings } from "@/lib/data";
 import { setActualSpend } from "@/app/actions/plans";
@@ -85,6 +86,7 @@ export default async function HistoryPage() {
           <FoodArt kind="rice" className="h-24 w-24" rounded="rounded-full" />
           <p className="font-display text-2xl font-semibold">Your weeks will live here</p>
           <p className="text-lg text-muted">Once you approve a week, you&apos;ll see it here, and you can reuse the good ones.</p>
+          <Link href="/" className="btn-primary">Go to this week</Link>
         </div>
       ) : (
         <ul className="space-y-4">
