@@ -96,6 +96,7 @@ export default async function HomePage() {
     { href: "/recipes?tab=cooks", icon: "✨", title: "Food creators", tone: "ochre" as const, sub: creators.length ? `Following ${creators.length}` : "Recipes from your favorites" },
     { href: "/athletes", icon: "💪", title: "Athlete mode", tone: "olive" as const, sub: settings.athletes.length ? `${settings.athletes.length} set up` : "For whoever's training" },
     { href: "/recipes?f=have", icon: "🥫", title: "Use what I have", tone: "plain" as const, sub: "Dinners from your fridge" },
+    { href: "/calendar", icon: "📅", title: "Calendar", tone: "plain" as const, sub: "Your month of meals" },
     { href: "/party", icon: "🎉", title: "Plan a party", tone: "plain" as const, sub: "Birthdays, grads, holidays" },
     { href: "/history", icon: "📜", title: "History", tone: "plain" as const, sub: "Past weeks and spending" },
     { href: "/household#care", icon: "🤝", title: "Plan for a parent", tone: "plain" as const, sub: "Caregiver mode" },
