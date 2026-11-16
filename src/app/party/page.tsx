@@ -19,7 +19,8 @@ export default async function PartyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="eyebrow">Parties and get-togethers</p>
+        <Link href="/" className="inline-flex items-center gap-1 font-bold text-olive-dark hover:underline">← This week</Link>
+        <p className="eyebrow mt-3">Parties and get-togethers</p>
         <h1 className="text-3xl font-semibold">🎉 Plan a party</h1>
         <p className="mt-1 text-lg text-muted">
           Birthdays, graduations, a celebration of life, the holidays. Pick the kind of party and how many are coming, and Ladle

@@ -39,7 +39,8 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="eyebrow">At a glance</p>
+          <Link href="/" className="inline-flex items-center gap-1 font-bold text-olive-dark hover:underline">← This week</Link>
+          <p className="eyebrow mt-3">At a glance</p>
           <h1 className="text-3xl font-semibold">📅 Calendar</h1>
         </div>
         <nav aria-label="Calendar view" className="flex rounded-full bg-oat p-1">

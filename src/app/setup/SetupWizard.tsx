@@ -28,13 +28,15 @@ export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, 
   }, [isEdit, step]);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const set = <K extends keyof Settings>(k: K, v: Settings[K]) => setS((prev) => ({ ...prev, [k]: v }));
+  const [saved, setSaved] = useState(false);
+  const set = <K extends keyof Settings>(k: K, v: Settings[K]) => { setSaved(false); setS((prev) => ({ ...prev, [k]: v })); };
 
   function finish(startWith?: "ours" | "own") {
     setError(null);
     startTransition(async () => {
       try {
-        await saveSettings(s, startWith);
+        await saveSettings(s, startWith, isEdit);
+        if (isEdit) setSaved(true);
       } catch (e) {
         // redirect() throws a special error that Next handles; anything else is a real problem.
         if ((e as { digest?: string }).digest?.startsWith("NEXT_REDIRECT")) throw e;
@@ -61,14 +63,19 @@ export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, 
   return (
     <div className="mx-auto max-w-xl">
       <div className="mb-6">
-        <p className="eyebrow">
-          {forName ? (isEdit ? `Settings for ${forName}` : `Setting up for ${forName}`) : isEdit ? "Settings" : pos === 0 ? "Welcome to Ladle!" : "Getting to know you"} · {pos + 1} of {order.length}
-        </p>
-        <div className="mt-2 flex gap-1.5" aria-hidden="true">
-          {order.map((_, i) => (
-            <div key={i} className={`h-2.5 flex-1 rounded-full transition-colors ${i <= pos ? "bg-terracotta" : "bg-oat"}`} />
-          ))}
-        </div>
+        {(!isEdit || forName) && <p className="eyebrow">
+          {forName ? (isEdit ? `Settings for ${forName}` : `Setting up for ${forName}`) : isEdit ? "Settings" : pos === 0 ? "Welcome to Ladle!" : "Getting to know you"}{isEdit ? "" : ` · ${pos + 1} of ${order.length}`}
+        </p>}
+        {isEdit ? (
+          // Settings isn't a march through steps: pick a section, change it, save.
+          <h1 className="text-4xl font-semibold">Settings</h1>
+        ) : (
+          <div className="mt-2 flex gap-1.5" aria-hidden="true">
+            {order.map((_, i) => (
+              <div key={i} className={`h-2.5 flex-1 rounded-full transition-colors ${i <= pos ? "bg-terracotta" : "bg-oat"}`} />
+            ))}
+          </div>
+        )}
         {isEdit && (
           // In Settings, jump straight to any question.
           <nav aria-label="Settings sections" className="mt-3 flex flex-wrap gap-1.5">
@@ -88,7 +95,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, 
 
       <section key={step} className="card animate-pop p-6" aria-labelledby="q-title">
         <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-soft text-4xl" aria-hidden="true">{ICON[step]}</div>
-        <h1 id="q-title" className="mb-1 text-3xl font-semibold">{QUESTION[step]}</h1>
+        {isEdit ? <h2 id="q-title" className="mb-1 text-3xl font-semibold">{QUESTION[step]}</h2> : <h1 id="q-title" className="mb-1 text-3xl font-semibold">{QUESTION[step]}</h1>}
         <p className="mb-6 text-lg text-muted">{HINT[step]}</p>
 
         {step === 0 && <MotivationStep value={s.motivation} onChange={(v) => set("motivation", v)} />}
@@ -202,9 +209,10 @@ export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, 
             <button className="btn-quiet whitespace-nowrap px-3 text-sm" onClick={() => go(-1)} disabled={pos === 0 || pending}>← Back</button>
             {pos < order.length - 1 && <button className="btn-secondary whitespace-nowrap px-3 text-sm" onClick={() => go(1)} disabled={pending}>Next →</button>}
             <button className="btn-warm flex-1 whitespace-nowrap px-4 sm:flex-none" onClick={() => finish()} disabled={pending || !allValid}>
-              {pending ? "Saving…" : "✓ Save"}
+              {pending ? "Saving…" : saved ? "✓ Saved" : "Save changes"}
             </button>
           </div>
+          {saved && <p role="status" className="mt-2 rounded-2xl bg-olive-soft p-3 text-center font-bold text-olive-dark">Saved. Your next plan uses these. <Link href="/" className="underline">Back to this week</Link></p>}
           {!allValid && <p className="mt-2 text-center text-sm text-terracotta-dark">{invalidReason}</p>}
         </div>
       ) : (

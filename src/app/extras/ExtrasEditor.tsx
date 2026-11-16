@@ -41,7 +41,7 @@ export function ExtrasEditor({ category, items, rules, thisWeek }: { category: E
 
   return (
     <div className="space-y-5">
-      <nav aria-label="Categories" className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-oat p-1">
+      <nav aria-label="Categories" className="flex max-w-full flex-wrap gap-1 rounded-3xl bg-oat p-1 sm:inline-flex">
         {CATEGORIES.map((c) => (
           <Link key={c.key} href={`/extras?c=${c.key}`} aria-current={c.key === category ? "page" : undefined}
             className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 font-bold ${c.key === category ? "bg-card text-terracotta-dark shadow-soft" : "text-olive-dark"}`}>

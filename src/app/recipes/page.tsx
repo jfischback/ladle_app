@@ -86,7 +86,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
         <Link href="/recipes/new" className="btn-warm">+ Add your own</Link>
       </div>
 
-      <div role="tablist" className="mb-5 inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-oat p-1">
+      <div role="tablist" className="mb-5 flex max-w-full flex-wrap gap-1 rounded-3xl bg-oat p-1 sm:inline-flex">
         <Tab href="/recipes" active={tab === "mine"}>Dinners ({mine.length})</Tab>
         <Tab href="/recipes?tab=breakfast" active={tab === "breakfast"}>Breakfasts ({breakfasts.length})</Tab>
         <Tab href="/recipes?tab=lunch" active={tab === "lunch"}>Lunches ({lunches.length})</Tab>
@@ -189,7 +189,7 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
 
 function Tab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link role="tab" aria-selected={active} href={href} className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 font-bold transition-colors ${active ? "bg-card text-terracotta-dark shadow-soft" : "text-olive-dark hover:text-ink"}`}>
+    <Link role="tab" aria-selected={active} href={href} className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-bold sm:px-4 sm:text-base transition-colors ${active ? "bg-card text-terracotta-dark shadow-soft" : "text-olive-dark hover:text-ink"}`}>
       {children}
     </Link>
   );

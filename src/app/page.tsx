@@ -11,6 +11,7 @@ import { activePlans, getSettings, myCooks, myRecipes } from "@/lib/data";
 import { addDays, currentWeekStart, dayName, greeting, money, shortDate, today, upcomingWeekStart, weekDates, weekday } from "@/lib/week";
 import { DayCard, ApproveBar, RatePrompt, StartOverButton, GroceryChecklist, Celebrate } from "./HomeClient";
 import { tickKey } from "@/lib/grocery-checks";
+import { pickWeek, weekSteps, type WeekState } from "@/lib/home-week";
 import { PANTRY_SECTIONS } from "@/lib/pantry";
 import { FoodArt } from "@/components/FoodArt";
 import { Highlight } from "@/components/Highlight";
@@ -46,12 +47,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const inProgress = currentWeekStart(settings.shoppingDay);
   // Home shows one week at a time. The week being cooked and shopped stays up front even after the next one is
   // planned; the other week is one tap away (or ?week= straight after planning it).
-  const thisPlan = plans.find((p) => p.weekOf === inProgress) ?? null;
-  const nextPlan = upcoming !== inProgress ? plans.find((p) => p.weekOf === upcoming) ?? null : null;
-  const asked = (await searchParams).week;
-  const askedPlan = asked === "next" ? nextPlan ?? thisPlan : asked ? [thisPlan, nextPlan].find((p) => p?.weekOf === asked) ?? null : null;
-  const plan = askedPlan ?? (thisPlan?.status === "approved" ? thisPlan : nextPlan ?? thisPlan);
-  const otherPlan = plan && thisPlan && nextPlan ? (plan.id === thisPlan.id ? nextPlan : thisPlan) : null;
+  const { plan, thisPlan, nextPlan, other: otherPlan } = pickWeek(plans, inProgress, upcoming, (await searchParams).week);
   const todayStr = today();
   // Ladle's stand-out features, shown until they're in use.
   const creators = (await myCooks(userId)).map((c) => c.name);
@@ -135,6 +131,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const listTotal = toBuy.reduce((n, x) => n + x.items.length, 0);
   const listLeft = toBuy.reduce((n, x) => n + x.items.filter((it) => !plan?.groceryChecked?.[tickKey(x.name, it.item)]).length, 0);
   const cartReady = krogerEnabled() && !!settings.storeLocationId;
+  // The next-step card already says these for the week on screen; no need to say them twice.
+  const nextStepAlerts = plan ? [`approve:${plan.weekOf}`, ...(approved && plan.days.some((d) => d.date === todayStr) ? [`shop:${todayStr}`] : [])] : [];
   const weekLabel = (p: Plan) => (p.weekOf === inProgress ? "This week" : "Next week");
 
   return (
@@ -161,25 +159,33 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         )}
       </header>
 
+      {approved && <Celebrate />}
       {/* First thing on Home: where the week stands and the one next step. */}
       {plan ? (
         <WeekSteps
-          plan={plan}
-          today={todayStr}
-          pantryQuestions={pantryQuestions}
-          listTotal={listTotal}
-          listLeft={listLeft}
-          cartReady={cartReady}
-          storeName={brand.name ?? "store"}
-          tonight={plan.days.find((d) => d.date === todayStr)?.recipeName ?? null}
-          next={upcoming !== plan.weekOf ? { weekOf: upcoming, status: nextPlan ? nextPlan.status : "none" } : null}
+          state={{
+            planId: plan.id,
+            weekOf: plan.weekOf,
+            approved,
+            firstDay: plan.days[0]?.date ?? plan.weekOf,
+            today: todayStr,
+            pantryQuestions,
+            listTotal,
+            listLeft,
+            cartSent: !!plan.cart?.sentAt,
+            cartReady,
+            receiptIn: plan.actualSpend != null,
+            storeName: brand.name ?? "store",
+            tonight: plan.days.find((d) => d.date === todayStr)?.recipeName ?? null,
+            next: upcoming !== plan.weekOf ? { weekOf: upcoming, status: nextPlan ? (nextPlan.status === "approved" ? "approved" : "draft") : "none" } : null,
+          }}
         />
       ) : (
         <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={daysLeft >= 2 ? Math.min(settings.dinnersPerWeek, Math.max(1, weekDates(inProgress).filter((d) => d >= todayStr && settings.cookDays.includes(weekday(d))).length)) : settings.dinnersPerWeek} checksSales={cartReady} yours={yours} />
       )}
 
       <ModeBanner mode={settings.mode} dietary={rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway)} saved={modeSaved} />
-      <AlertsPanel alerts={await householdAlerts(userId, settings)} level={settings.notifyLevel} pushKey={pushPublicKey()} />
+      <AlertsPanel alerts={(await householdAlerts(userId, settings)).filter((a) => !(plan && nextStepAlerts.includes(a.key)))} level={settings.notifyLevel} pushKey={pushPublicKey()} />
 
       {prepTomorrow.map(({ d, r }) => (
         <div key={d.date} className="flex items-start gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft">
@@ -211,6 +217,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               <li key={d.date}>
                 <DayCard
                   planId={plan.id}
+                  weekOf={plan.weekOf}
                   index={i}
                   day={d}
                   isToday={d.date === todayStr}
@@ -229,13 +236,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           </ul>
           {approved && (
             <>
-              <Celebrate />
-              <GroceryChecklist plan={plan} store={brand.name ?? "store"} aiShopper={{ rules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway), budget: settings.weeklyBudget }} />
+              <GroceryChecklist plan={plan} store={brand.name ?? "store"} cartOn={krogerEnabled()} aiShopper={{ rules: rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway), budget: settings.weeklyBudget }} />
             </>
           )}
           <BudgetMeter plan={plan} budget={settings.weeklyBudget} mode={settings.budgetMode} />
           {approved && plan.summary && plan.plannerSource !== "basic" && <WhyThisWeek summary={plan.summary} />}
           {approved && <SaleBanner plan={plan} saleThreshold={settings.saleThresholdPct} yours={yours} />}
+          <p className="no-print -mb-3 px-1 text-sm text-muted">
+            {approved
+              ? "This list is made. Changes to staples, pantry and snacks start with your next plan. To add something now, use \u201cAdd something\u201d on the list."
+              : "Before you approve: staples and pantry changes go on this list. Snack changes start with your next plan."}
+          </p>
           <StaplesCard plan={plan} staples={settings.staples} />
           <PantryCard plan={plan} />
           <ExtrasCard plan={plan} />
@@ -245,7 +256,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <div className="flex flex-wrap justify-center gap-2 pt-2">
             <a href={`/api/plans/${plan.id}/calendar`} className="btn-quiet text-sm" download>📅 Add to my calendar</a>
             <Link href={`/menu/${plan.id}`} className="btn-quiet text-sm">🖨️ Fridge menu</Link>
-            <StartOverButton planId={plan.id} approved={approved} planHref={plan.weekOf === upcoming ? "/plan" : "/plan?now=1"} />
+            <StartOverButton planId={plan.id} approved={approved} cartSent={!!plan.cart?.sentAt} planHref={plan.weekOf === upcoming ? "/plan" : "/plan?now=1"} />
           </div>
         </>
       )}
@@ -259,44 +270,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   );
 }
 
-type WeekStep = { key: string; label: string; done: boolean };
-
-/**
- * The top of Home: the week's steps in order (plan, approve, pantry check, shop, receipt), which are done,
- * and one card for the next thing to do.
- */
-function WeekSteps({ plan, today, pantryQuestions, listTotal, listLeft, cartReady, storeName, tonight, next }: {
-  plan: Plan; today: string; pantryQuestions: number; listTotal: number; listLeft: number; cartReady: boolean; storeName: string;
-  tonight: string | null;
-  next: { weekOf: string; status: string } | null; // the week after this one, when it's a different week
-}) {
-  const approved = plan.status === "approved";
-  const cartSent = !!plan.cart?.sentAt;
-  const firstDay = plan.days[0]?.date ?? plan.weekOf;
-  // Shopped: everything's ticked, the receipt is in, or the week's first day has passed.
-  const shopped = approved && ((listTotal > 0 && listLeft === 0) || plan.actualSpend != null || today > firstDay);
-  const steps: WeekStep[] = [
-    { key: "plan", label: "Plan", done: true },
-    { key: "approve", label: "Approve", done: approved },
-    { key: "pantry", label: "Pantry", done: approved && pantryQuestions === 0 },
-    { key: "shop", label: "Shop", done: shopped },
-    { key: "receipt", label: "Receipt", done: approved && plan.actualSpend != null },
-  ];
-  const nextStep = steps.find((x) => !x.done)?.key ?? "done";
-  const week = `/?week=${plan.weekOf}`;
-
-  const card: { icon: string; title: string; text: string; cta: string; href: string; more?: { label: string; href: string } } =
-    nextStep === "approve" ? { icon: "👀", title: "Look over the dinners", text: "Swap anything you don't like. When it looks good, tap \"Looks yummy, make my list!\"", cta: "See the dinners", href: "#dinners" }
-    : nextStep === "pantry" ? { icon: "❓", title: "Do you already have these?", text: `${pantryQuestions} pantry question${pantryQuestions === 1 ? "" : "s"}. Answer ${pantryQuestions === 1 ? "it" : "them"} so your list only has what you need.`, cta: pantryQuestions === 1 ? "Answer it" : "Answer them", href: "#pantry-check" }
-    : nextStep === "shop" ? (cartSent
-        ? { icon: "🛒", title: `Check out at ${storeName}`, text: `Your cart is filled. Review it, pay and pick your time on ${storeName}'s site. Ladle never checks out for you.`, cta: "Review my cart", href: `/cart?plan=${plan.id}`, more: { label: "Open my list", href: "#grocery-print" } }
-        : cartReady
-        ? { icon: "🛒", title: "Time to shop", text: `${listLeft} thing${listLeft === 1 ? "" : "s"} on your list. Send ${listLeft === 1 ? "it" : "them"} to your ${storeName} cart, or shop from the list.`, cta: `Send to my ${storeName} cart`, href: `/cart?plan=${plan.id}`, more: { label: "Open my list", href: "#grocery-print" } }
-        : { icon: "🛒", title: "Time to shop", text: `${listLeft} thing${listLeft === 1 ? "" : "s"} left on your list. Tick them off as you go.`, cta: "Open my list", href: "#grocery-print" })
-    : nextStep === "receipt" ? { icon: "🧾", title: "How did the shop go?", text: "Add the receipt total, or snap a photo of it, so Ladle can show what you spent and saved.", cta: "Add my receipt", href: "/history", more: listLeft > 0 ? { label: "Open my list", href: "#grocery-print" } : undefined }
-    : next?.status === "none" ? { icon: "🗓", title: "This week is done. Plan the next one?", text: `The week of ${shortDate(next.weekOf)} isn't planned yet.`, cta: "Plan next week", href: "/plan" }
-    : next?.status === "draft" ? { icon: "👀", title: "Next week is waiting for your OK", text: `Look over the dinners for the week of ${shortDate(next.weekOf)}.`, cta: "See next week", href: `/?week=${next.weekOf}` }
-    : { icon: "✅", title: "This week is all set", text: tonight ? `Tonight: ${tonight}.` : "Nothing left to do. Enjoy dinner.", cta: "See the dinners", href: "#dinners" };
+/** The top of Home: the week's steps in order, which are done, and one card for the next thing to do. */
+function WeekSteps({ state }: { state: WeekState }) {
+  const { steps, nextStep, card } = weekSteps(state);
+  const week = `/?week=${state.weekOf}`;
 
   return (
     <section aria-labelledby="next-step" className="no-print rounded-3xl bg-card p-4 shadow-lift ring-2 ring-terracotta/30">
@@ -380,7 +357,7 @@ function SaleBanner({ plan, saleThreshold, yours }: { plan: Plan | null; saleThr
 
   if (check?.status === "off" && check.reason === "no-store") {
     return (
-      <Link href="/setup" className="flex items-center gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft hover:shadow-lift">
+      <Link href="/setup?step=3" className="flex items-center gap-3 rounded-3xl bg-ochre-soft p-4 shadow-soft hover:shadow-lift">
         <span className="text-3xl" aria-hidden="true">🏷️</span>
         <span><span className="font-bold">See what&apos;s on sale.</span> Pick your store in Settings and we&apos;ll check prices each week. →</span>
       </Link>

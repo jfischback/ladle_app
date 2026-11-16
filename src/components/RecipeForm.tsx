@@ -60,7 +60,7 @@ export function RecipeForm({ id, initial }: { id?: string; initial?: Partial<Rec
         </div>
         <fieldset>
           <legend className="label">Which meal is it?</legend>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {(["breakfast", "lunch", "dinner", "dessert"] as const).map((m) => (
               <button key={m} type="button" aria-pressed={(v.meal ?? "dinner") === m} onClick={() => set("meal", m)}
                 className={`btn min-h-10 border-2 px-4 text-sm ${(v.meal ?? "dinner") === m ? "border-olive bg-olive text-cream" : "border-line bg-card text-ink"}`}>

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { auth, loginRequired } from "@/auth";
+import { auth, loginRequired, requireUserId } from "@/auth";
+import { getSettings } from "@/lib/data";
 import { Wordmark } from "@/components/Logo";
 
 export const metadata = { title: "How Ladle works", description: "Ladle plans your family's dinners around what's on sale, builds the grocery list, and fills your Fry's cart." };
@@ -26,7 +27,9 @@ const MORE = [
 /** What Ladle does, before anyone signs up, so it isn't mistaken for just another recipe app. */
 export default async function WelcomePage() {
   const signedIn = loginRequired ? !!(await auth())?.user : true;
-  const start = signedIn ? { href: "/setup", label: "Set up my family" } : { href: "/signup", label: "Create my free account" };
+  // Someone who's already set up (they opened this from Settings) goes back to their week, not through setup again.
+  const setUp = signedIn ? await requireUserId().then(getSettings).then((x) => x.complete).catch(() => false) : false;
+  const start = setUp ? { href: "/", label: "Back to my week" } : signedIn ? { href: "/setup", label: "Set up my family" } : { href: "/signup", label: "Create my free account" };
   return (
     <div className="space-y-10">
       {!signedIn && (
@@ -80,8 +83,8 @@ export default async function WelcomePage() {
       </section>
 
       <section className="rounded-3xl bg-olive p-6 text-center text-cream">
-        <p className="text-2xl font-semibold">Ready for an easier week?</p>
-        <p className="mt-1">Free to try. You always check out yourself.</p>
+        <p className="text-2xl font-semibold">{setUp ? "That's the whole loop" : "Ready for an easier week?"}</p>
+        <p className="mt-1">{setUp ? "Your week is waiting." : "Free to try. You always check out yourself."}</p>
         <Link href={start.href} className="mt-4 inline-flex min-h-11 items-center rounded-full bg-cream px-5 font-bold text-olive-dark hover:bg-oat">{start.label} →</Link>
       </section>
     </div>

@@ -79,19 +79,20 @@ export async function planUpcomingWeek(thisWeek = false, checkIn?: unknown): Pro
   if (fromDate) {
     const left = weekDates(weekStart).filter((d) => d >= fromDate);
     if (left.length < 2) return { error: "There's only a day left this week: plan the next one instead." };
-    if ((await activePlans(userId)).some((p) => p.weekOf === weekStart && p.status === "approved")) return { error: "This week is already planned." };
   }
+  // An approved week (and its grocery list) is only replaced on purpose, with "Re-plan this week" on Home.
+  if ((await activePlans(userId)).some((p) => p.weekOf === weekStart && p.status === "approved")) return { error: "That week is already approved. To change it, open it on Home and tap \"Re-plan this week.\"" };
   // A short week needs only as many dinners as it has cooking nights.
   const needed = fromDate ? weekDates(weekStart).filter((d) => d >= fromDate && settings.cookDays.includes(weekday(d))).length : settings.dinnersPerWeek;
   if (needed === 0) return { error: "None of your cooking nights are left this week: plan the next one instead." };
   const recipeList = await myRecipes(userId);
   if (recipeList.length < needed) {
-    return { error: `You need at least ${needed} dinners in My Recipes to plan a week.` };
+    return { error: `You have ${recipeList.length} dinner${recipeList.length === 1 ? "" : "s"} in your recipe box and this plan needs ${needed}. Add more recipes, or go back and pick fewer nights.` };
   }
   const fitting = recipeList.filter((r) => !ruleProblems(r, settings.foodRules, settings.dislikes, settings.allowAnyway).length && canCook(r, settings.equipment) && !(r.rating != null && r.rating <= 2)).length;
   if (fitting < needed) {
     return {
-      error: `Only ${fitting} of your recipes fit your food rules, and you cook ${needed} nights. Add a few more recipes that fit (your cooks are a good place to look), or cook fewer nights in Settings.`,
+      error: `Only ${fitting} of your recipes fit your food rules and kitchen, and this plan needs ${needed}. Add recipes that fit, or go back and pick fewer nights.`,
     };
   }
   const windowStart = addDays(weekStart, -7 * settings.noRepeatWeeks);

@@ -117,7 +117,7 @@ export async function markSectionSeen(key: string): Promise<void> {
   revalidatePath("/");
 }
 
-export async function saveSettings(input: Partial<Settings>, startWith?: "ours" | "own") {
+export async function saveSettings(input: Partial<Settings>, startWith?: "ours" | "own", stay = false) {
   const userId = await requireUserId();
   const parsed = SettingsSchema.parse(input);
   const cookDays = [...new Set(parsed.cookDays)].sort();
@@ -144,6 +144,12 @@ export async function saveSettings(input: Partial<Settings>, startWith?: "ours" 
     redirect("/");
   }
   if (startWith === "own") redirect("/recipes/new");
+  // Editing Settings: stay put (the screen says it saved). First-time setup goes on to Home.
+  if (stay) {
+    revalidatePath("/");
+    revalidatePath("/setup");
+    return;
+  }
   redirect("/");
 }
 

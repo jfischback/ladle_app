@@ -91,7 +91,7 @@ export default async function HistoryPage() {
           {weeks.map((w) => {
             const dinners = w.days.filter((d) => d.recipeId);
             return (
-              <li key={w.id} className="card space-y-4 p-5">
+              <li key={w.id} id={`week-${w.id}`} className="card scroll-mt-24 space-y-4 p-5">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h2 className="text-2xl font-semibold">Week of {shortDate(w.weekOf)}</h2>
                   <span className="text-muted">

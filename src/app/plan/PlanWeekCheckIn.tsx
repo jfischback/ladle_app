@@ -28,7 +28,7 @@ const NIGHTS: { key: Night; label: string; hint: string }[] = [
 const KEEP = "ladle-checkin";
 
 /** The weekly check-in: which week, which nights, who's eating, what's still right, wishes. Then Ladle plans the week. */
-export function PlanWeekCheckIn({ weeks, initialWeek, defaults, foodRules, mode: savedMode, athletes, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; defaults: Defaults; foodRules: Rules; mode: Mode; athletes: number; creators: string[] }) {
+export function PlanWeekCheckIn({ weeks, initialWeek, defaults, foodRules, mode: savedMode, alsoPlanned = [], athletes, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; defaults: Defaults; foodRules: Rules; mode: Mode; alsoPlanned?: string[]; athletes: number; creators: string[] }) {
   const router = useRouter();
   const open = weeks.filter((w) => w.status !== "approved");
   // The week question only shows when there's a real choice to make.
@@ -319,12 +319,23 @@ export function PlanWeekCheckIn({ weeks, initialWeek, defaults, foodRules, mode:
               {craving.trim() && <li>😋 In the mood for: {craving.trim()}</li>}
               <li>✨ {tryNew ? "Something new from your food creators" : "Just your own recipes"}</li>
               {desserts > 0 && <li>🍰 Dessert {desserts} night{desserts === 1 ? "" : "s"}</li>}
+              {alsoPlanned.length > 0 && <li>☕ Also planned, from your <Link href="/setup?step=5" className="font-bold text-olive-dark underline">Cooking settings</Link>: {alsoPlanned.join(", ")}</li>}
             </ul>
             {week.status === "draft" && <p className="rounded-2xl bg-ochre-soft p-3 text-sm">This replaces the plan that&apos;s waiting for your OK. The old one is kept in your records.</p>}
           </>
         )}
 
-        {error && <p role="alert" className="font-bold text-terracotta-dark">{error}</p>}
+        {error && (
+          <div role="alert" className="space-y-2 rounded-2xl bg-terracotta-soft p-3">
+            <p className="font-bold text-terracotta-dark">{error}</p>
+            {/recipe/i.test(error) && (
+              <p className="flex flex-wrap gap-2">
+                <Link href="/recipes?tab=browse" className="btn-secondary min-h-10 px-3.5 text-sm">Add recipes</Link>
+                <button type="button" className="btn-quiet min-h-10 px-3 text-sm" onClick={() => { setError(null); setStepKey("nights"); }}>Pick fewer nights</button>
+              </p>
+            )}
+          </div>
+        )}
         <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
           <button type="button" className="btn-quiet" disabled={step === 0 || pending} onClick={() => setStepKey(steps[step - 1])}>← Back</button>
           {!last ? (

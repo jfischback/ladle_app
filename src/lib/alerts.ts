@@ -44,9 +44,9 @@ export function alertsFor(input: {
     out.push({ key: `plan:${upcoming}`, level: "essential", icon: "🗓", title: "Time to plan next week", text: `Shopping day is ${daysToShop === 1 ? "tomorrow" : dayName(upcoming)}. A quick check-in and Ladle plans it.`, href: "/plan" });
   }
   const draft = plans.find((p) => p.status === "draft" && p.weekOf >= addDays(today, -6));
-  if (draft) out.push({ key: `approve:${draft.weekOf}`, level: "essential", icon: "👍", title: "Your week is ready for your OK", text: "Look over the dinners, swap any you don't like, and approve to get the grocery list.", href: "/" });
+  if (draft) out.push({ key: `approve:${draft.weekOf}`, level: "essential", icon: "👍", title: "Your week is ready for your OK", text: "Look over the dinners, swap any you don't like, and approve to get the grocery list.", href: `/?week=${draft.weekOf}#dinners` });
   if (weekday(today) === shoppingDay && live?.status === "approved" && !live.cart?.sentAt) {
-    out.push({ key: `shop:${today}`, level: "essential", icon: "🛒", title: "It's shopping day", text: "Your grocery list is ready. Send it to your Fry's cart when you're set.", href: "/" });
+    out.push({ key: `shop:${today}`, level: "essential", icon: "🛒", title: "It's shopping day", text: "Your grocery list is ready. Send it to your store cart, or shop from the list.", href: `/?week=${live.weekOf}#grocery-print` });
   }
   for (const party of input.parties ?? []) {
     partyTimeline(party).forEach((t, n) => {
@@ -66,7 +66,7 @@ export function alertsFor(input: {
     if (ahead?.prepAhead) out.push({ key: `prep:${today}`, level: "extra", icon: "⏰", title: `Tonight, for tomorrow's ${ahead.name}`, text: ahead.prepAhead, href: `/recipes/${ahead.id}` });
     const ending = live.saleItems.filter((s): s is SaleItem => typeof s === "object" && (s.endsOn === today || s.endsOn === addDays(today, 1)));
     if (ending.length && !live.cart?.sentAt) {
-      out.push({ key: `sale:${today}`, level: "extra", icon: "🏷️", title: "Sales ending soon", text: ending.slice(0, 3).map((s) => `${s.item} $${s.salePrice.toFixed(2)} (${saleEnds(s.endsOn)})`).join(", "), href: "/" });
+      out.push({ key: `sale:${today}`, level: "extra", icon: "🏷️", title: "Sales ending soon", text: ending.slice(0, 3).map((s) => `${s.item} $${s.salePrice.toFixed(2)} (${saleEnds(s.endsOn)})`).join(", "), href: `/?week=${live.weekOf}#grocery-print` });
     }
   }
   const gone = new Set(input.dismissed ?? []);

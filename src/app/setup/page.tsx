@@ -13,12 +13,12 @@ export default async function SetupPage({ searchParams }: { searchParams: Promis
   const creators = complete ? (await myCooks(userId)).map((c) => c.name) : [];
   return (
     <>
+      <SetupWizard forName={(await actingFor())?.label ?? null} initial={data} isEdit={complete} krogerEnabled={krogerEnabled()} startStep={Number.isInteger(stepParam) ? stepParam : null} />
       {complete && (
-        <div className="mb-6">
+        <div className="mt-8">
           <FeatureCards creators={creators} athletes={data.athletes.length} title="Make Ladle yours" />
         </div>
       )}
-      <SetupWizard forName={(await actingFor())?.label ?? null} initial={data} isEdit={complete} krogerEnabled={krogerEnabled()} startStep={Number.isInteger(stepParam) ? stepParam : null} />
       {complete && (
         <p className="mt-6 text-center">
           <Link href="/whats-new" className="font-bold text-olive-dark underline">✨ What&apos;s new in Ladle</Link>

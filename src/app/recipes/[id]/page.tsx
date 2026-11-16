@@ -17,7 +17,7 @@ import { RecipeNotes } from "./RecipeNotes";
 import { ShareRecipe } from "./ShareRecipe";
 import { estimateCost, estimateNutrition, estimateSodium, trustworthy } from "@/lib/nutrition";
 
-export default async function RecipePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cook?: string; batches?: string; for?: string }> }) {
+export default async function RecipePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cook?: string; batches?: string; for?: string; from?: string }> }) {
   const userId = await requireUserId();
   const { id } = await params;
   const sp = await searchParams;
@@ -46,7 +46,12 @@ export default async function RecipePage({ params, searchParams }: { params: Pro
 
   return (
     <article className="space-y-6">
-      <Link href={mine ? "/recipes" : "/recipes?tab=browse"} className="inline-flex items-center gap-1 font-bold text-olive-dark hover:underline">← All recipes</Link>
+      {/* Opened from a dinner on Home: back goes to the week, not the whole recipe box. */}
+      {/^\d{4}-\d{2}-\d{2}$/.test(sp.from ?? "") ? (
+        <Link href={`/?week=${sp.from}#dinners`} className="inline-flex items-center gap-1 font-bold text-olive-dark hover:underline">← This week</Link>
+      ) : (
+        <Link href={mine ? "/recipes" : "/recipes?tab=browse"} className="inline-flex items-center gap-1 font-bold text-olive-dark hover:underline">← All recipes</Link>
+      )}
 
       <div className="card overflow-hidden">
         <FoodArt name={r.name} protein={r.protein} className="h-52 w-full sm:h-64" rounded="rounded-none" />

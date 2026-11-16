@@ -47,7 +47,7 @@ export default async function CartPage({ searchParams }: { searchParams: Promise
       ) : !settings.storeLocationId ? (
         <div className="card space-y-3 p-5">
           <p className="text-lg">First, pick your store so we look up the right shelf and prices.</p>
-          <Link href="/setup" className="btn-primary">Pick my store</Link>
+          <Link href="/setup?step=3" className="btn-primary">Pick my store</Link>
         </div>
       ) : !plan || plan.status !== "approved" || !plan.groceryList ? (
         <div className="card space-y-3 p-5">

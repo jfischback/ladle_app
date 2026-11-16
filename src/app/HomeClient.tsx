@@ -50,8 +50,10 @@ export function PlanButton({ label, big, thisWeek = false, quiet = false }: { la
 }
 
 /** A dinner's recipe page, sized like the grocery list: tonight's batches and who's eating. */
-function recipeHref(day: PlanDay, cook = false): string {
+function recipeHref(day: PlanDay, weekOf: string, cook = false): string {
   const q = new URLSearchParams();
+  // So the recipe's back link returns to this week (Home may be showing the other one by default).
+  q.set("from", weekOf);
   if (cook) q.set("cook", "1");
   if ((day.batches ?? 1) > 1 && !day.leftoverOf) q.set("batches", String(day.batches));
   if (day.eating && !day.leftoverOf) q.set("for", `${day.eating.adults}-${day.eating.kids}`);
@@ -59,8 +61,8 @@ function recipeHref(day: PlanDay, cook = false): string {
   return `/recipes/${day.recipeId}${qs ? `?${qs}` : ""}`;
 }
 
-export function DayCard({ planId, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [], canFeast = false, feastGuests = 4, feastWhen = {}, household }: {
-  planId: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number; picky?: string[];
+export function DayCard({ planId, weekOf, index, day, isToday, locked, recipes, plates, picky = [], moveTargets = [], canFeast = false, feastGuests = 4, feastWhen = {}, household }: {
+  planId: string; weekOf: string; index: number; day: PlanDay; isToday: boolean; locked: boolean; recipes: RecipeInfo[]; plates?: number; picky?: string[];
   moveTargets?: { index: number; label: string }[];
   canFeast?: boolean; // a holiday with a menu (Thanksgiving) that hasn't passed
   feastGuests?: number;
@@ -144,7 +146,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
           <div className="flex items-start justify-between gap-3 p-5">
             <div className="min-w-0">
               {day.recipeId ? (
-                <Link href={recipeHref(day)} className="font-display text-2xl font-semibold leading-snug hover:underline">{day.recipeName}</Link>
+                <Link href={recipeHref(day, weekOf)} className="font-display text-2xl font-semibold leading-snug hover:underline">{day.recipeName}</Link>
               ) : (
                 <p className="font-display text-2xl font-semibold">{dinnerName ?? "Night off tonight!"}</p>
               )}
@@ -154,7 +156,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
           </div>
           {day.recipeId && !day.leftoverOf && (
             <div className="-mt-2 px-5 pb-4">
-              <Link href={recipeHref(day, true)} className="btn-warm w-full sm:w-auto">👩‍🍳 Start cooking</Link>
+              <Link href={recipeHref(day, weekOf, true)} className="btn-warm w-full sm:w-auto">👩‍🍳 Start cooking</Link>
             </div>
           )}
           <WhyLine reason={reason} sale={day.saleItems} className="-mt-2 px-5 pb-5" />
@@ -172,7 +174,7 @@ export function DayCard({ planId, index, day, isToday, locked, recipes, plates, 
               {day.fromCook && <NewBadge className="ml-1.5 align-middle" label="✨ New" />}
             </p>
             {day.recipeId ? (
-              <Link href={recipeHref(day)} className="block font-bold leading-snug hover:underline">{day.recipeName}</Link>
+              <Link href={recipeHref(day, weekOf)} className="block font-bold leading-snug hover:underline">{day.recipeName}</Link>
             ) : (
               <p className="font-bold text-olive-dark">{dinnerName ?? "Night off"}</p>
             )}
@@ -351,6 +353,9 @@ export function ApproveBar({ planId }: { planId: string }) {
               if (r?.error) {
                 setError(r.error);
                 try { sessionStorage.removeItem(CELEBRATE_KEY); } catch {}
+              } else {
+                // The next step (pantry check, then shopping) is at the top of Home.
+                window.scrollTo({ top: 0 });
               }
             })
           }
@@ -385,7 +390,7 @@ export function Celebrate() {
     <>
       <div className="animate-pop rounded-3xl bg-olive p-5 text-center text-cream shadow-lift" role="status">
         <p className="font-display text-2xl font-semibold">Your week is set! 🎉</p>
-        <p>Your grocery list is ready, right under the dinners.</p>
+        <p>Your grocery list is made. Here&apos;s what&apos;s next.</p>
       </div>
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
         {Array.from({ length: 48 }, (_, i) => (
@@ -439,7 +444,7 @@ const sectionIcon = (name: string) => SECTION_ICONS.find(([re]) => re.test(name)
  * with the list open picks up the others' ticks every few seconds (so two people can split the store).
  * Ticks made with no signal are kept and sent when the phone is back online.
  */
-export function GroceryChecklist({ plan, store, aiShopper }: { plan: Plan; store: string; aiShopper?: { rules: string; budget: number } }) {
+export function GroceryChecklist({ plan, store, aiShopper, cartOn = true }: { plan: Plan; store: string; aiShopper?: { rules: string; budget: number }; cartOn?: boolean }) {
   const list = plan.groceryList;
   const key = `ladle-grocery-${plan.id}`;
   const pendingKey = `ladle-grocery-unsent-${plan.id}`;
@@ -543,7 +548,8 @@ export function GroceryChecklist({ plan, store, aiShopper }: { plan: Plan; store
       {list.sections.filter((x) => x.name === PANTRY_SECTIONS.PANTRY_CHECK).map((x) => (
         <div key={x.name} id="pantry-check" className="mb-4 scroll-mt-24"><PantryCheck planId={plan.id} items={x.items} /></div>
       ))}
-      {plan.status === "approved" && (
+      {/* Only when store carts are connected: otherwise the button leads nowhere. */}
+      {plan.status === "approved" && cartOn && (
         <Link href={`/cart?plan=${plan.id}`} className="no-print btn-warm mb-4 w-full sm:w-auto">
           <span aria-hidden="true">🛒</span> {plan.cart?.sentAt ? `${store} cart sent · review` : `Send to my ${store} cart`}
         </Link>
@@ -653,8 +659,8 @@ function PantryCheck({ planId, items }: { planId: string; items: { item: string;
       )}
       <ul className={`space-y-2 ${pending ? "opacity-60" : ""}`}>
         {items.map((it) => (
-          <li key={it.item} className="flex flex-wrap items-center gap-2">
-            <span className="min-w-0 flex-1"><span className="font-semibold">{it.item}</span>{it.quantity && <span className="text-muted"> · {it.quantity}</span>}</span>
+          <li key={it.item} className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-line/60 pt-2 first:border-0 first:pt-0">
+            <span className="min-w-[9rem] flex-1"><span className="font-semibold">{it.item}</span>{it.quantity && <span className="text-muted"> · {it.quantity}</span>}</span>
             <span className="no-print flex shrink-0 gap-1.5">
               <button className="btn-primary min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(() => answerPantryCheck(planId, it.item, true))}>Have it</button>
               <button className="btn-secondary min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(() => answerPantryCheck(planId, it.item, false))}>Need it</button>
@@ -666,7 +672,7 @@ function PantryCheck({ planId, items }: { planId: string; items: { item: string;
   );
 }
 
-export function StartOverButton({ planId, approved, planHref = "/plan" }: { planId: string; approved: boolean; planHref?: string }) {
+export function StartOverButton({ planId, approved, planHref = "/plan", cartSent = false }: { planId: string; approved: boolean; planHref?: string; cartSent?: boolean }) {
   const [pending, start] = useTransition();
   const router = useRouter();
   return (
@@ -674,7 +680,7 @@ export function StartOverButton({ planId, approved, planHref = "/plan" }: { plan
       className="btn-quiet text-sm"
       disabled={pending}
       onClick={() => {
-        if (approved && !confirm("Unlock this week and plan it again? You'll answer a few quick questions first. The current plan stays in your records.")) return;
+        if (approved && !confirm(`Unlock this week and plan it again? You'll answer a few quick questions first. The current plan stays in your records.${cartSent ? "\n\nYour store cart was already filled from this plan. Re-planning doesn't empty it: clear it on the store's site before sending the new list." : ""}`)) return;
         if (!approved && !confirm("Plan this week again with new picks? You'll answer a few quick questions first.")) return;
         // Planning always goes through the check-in: which days, who's eating, food rules still right.
         start(async () => { await startOver(planId); router.push(planHref); });
