@@ -10,6 +10,9 @@ const NEW: { when: string; items: Item[] }[] = [
   {
     when: "November 2026",
     items: [
+      { icon: "📍", title: "Compare nearby stores", text: "Find Kroger-family stores within 5, 10 or 25 miles on a little map, pick up to four besides your own, and see where this week's list is cheapest, item by item and overall.", href: "/stores" },
+      { icon: "🔔", title: "Alerts, your way", text: "Pick how much Ladle tells you: off, just the essentials (time to plan, a week waiting for your OK, shopping day, party to-dos) or everything (also tonight's dinner, what to prep the night before and sales ending soon). They show on Home, and can come to your phone too.", where: "Home, Alerts · Change" },
+      { icon: "📅", title: "Meal calendar", text: "See your meals like a wall calendar: a month of dinners, desserts and parties at a glance, or one week with every meal. Tap a day for the details.", href: "/calendar" },
       { icon: "🍰", title: "Dessert nights", text: "Choose up to three dessert nights a week in Plan my week (or Settings). Ladle picks from twelve easy family desserts (brownies, banana pudding, cobbler, sundaes…), weekends first and quick ones on busy nights, favors ones with sale ingredients, and puts them on the grocery list.", href: "/recipes?tab=dessert" },
       { icon: "🎉", title: "Plan a party", text: "Birthday, graduation, celebration of life, Christmas, a shower, game day or a picnic: pick the party and how many are coming. Ladle suggests boards, trays, bites, sweets and drinks, sizes them for the crowd, checks them against your food rules, and makes the shopping list and a timeline.", href: "/party" },
       { icon: "🏷️", title: "What's on sale in each recipe", text: "Every recipe shows how many of its ingredients are on sale this week, the pricey ones first, and when the sale ends if the store says.", href: "/recipes" },

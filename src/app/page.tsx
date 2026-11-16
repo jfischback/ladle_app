@@ -26,6 +26,9 @@ import { PrepCard } from "@/components/PrepCard";
 import { athleteWeeks } from "@/lib/athlete-week";
 import { AthleteWeekCard } from "@/components/AthleteWeekCard";
 import { GettingStarted, HomeHub } from "@/components/HomeHub";
+import { AlertsPanel } from "@/components/AlertsPanel";
+import { householdAlerts } from "@/lib/household-alerts";
+import { pushPublicKey } from "@/lib/push";
 
 // Planning, approving and importing can take a while (the AI, store prices): give them a minute.
 export const maxDuration = 60;
@@ -96,6 +99,8 @@ export default async function HomePage() {
     { href: "/recipes?tab=cooks", icon: "✨", title: "Food creators", tone: "ochre" as const, sub: creators.length ? `Following ${creators.length}` : "Recipes from your favorites" },
     { href: "/athletes", icon: "💪", title: "Athlete mode", tone: "olive" as const, sub: settings.athletes.length ? `${settings.athletes.length} set up` : "For whoever's training" },
     { href: "/recipes?f=have", icon: "🥫", title: "Use what I have", tone: "plain" as const, sub: "Dinners from your fridge" },
+    { href: "/stores", icon: "📍", title: "Nearby stores", tone: "plain" as const, sub: "Where it's cheapest" },
+    { href: "/calendar", icon: "📅", title: "Calendar", tone: "plain" as const, sub: "Your month of meals" },
     { href: "/party", icon: "🎉", title: "Plan a party", tone: "plain" as const, sub: "Birthdays, grads, holidays" },
     { href: "/history", icon: "📜", title: "History", tone: "plain" as const, sub: "Past weeks and spending" },
     { href: "/household#care", icon: "🤝", title: "Plan for a parent", tone: "plain" as const, sub: "Caregiver mode" },
@@ -137,6 +142,7 @@ export default async function HomePage() {
 
       {/* Everything starts here: one tile for each place in Ladle. */}
       <ModeBanner mode={settings.mode} dietary={rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway)} saved={modeSaved} />
+      <AlertsPanel alerts={await householdAlerts(userId, settings)} level={settings.notifyLevel} pushKey={pushPublicKey()} />
       <HomeHub tiles={hubTiles} />
       {!settings.seen.includes("getting-started-hidden") && <GettingStarted steps={startSteps} />}
 

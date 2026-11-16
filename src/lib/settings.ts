@@ -2,6 +2,8 @@ import type { FoodRule } from "./diet";
 import type { Athlete } from "./athletes";
 import type { PickyEater } from "./picky";
 import type { Equipment } from "./prep";
+import type { NotifyLevel } from "./alerts";
+import type { SavedStore } from "./store-compare";
 import type { ExtraCategory, ExtrasRule, Staple } from "./types";
 
 export const MOTIVATIONS = {
@@ -33,6 +35,7 @@ export type Settings = {
   zip: string;
   storeLocationId: string | null; // Kroger locationId once connected
   storeName: string;
+  extraStores: SavedStore[]; // up to 4 more Kroger-family stores to compare prices with
   fulfillment: "pickup" | "delivery";
   shoppingDay: number; // 0 = Sunday
   // Q3 Money
@@ -81,6 +84,9 @@ export type Settings = {
   fruitRule: boolean; // buy a lot of in-season fruit, only when on sale
   prepReminders: boolean; // remind the day before (marinating, thawing)
   mode: Mode; // the week's goal: one at a time, always shown in a banner (dietary rules stay on whatever the mode)
+  notifyLevel: NotifyLevel; // alerts: off, just the essentials, or everything
+  dismissedAlerts: string[]; // alert keys the family closed (the newest 80)
+  pushedAlerts: string[]; // alert keys already sent to their phones (the newest 120)
   seen: string[]; // Getting started: the sections they've looked at (cooking, pantry, staples, athletes…)
 };
 
@@ -94,6 +100,7 @@ export const DEFAULT_SETTINGS: Settings = {
   zip: "",
   storeLocationId: null,
   storeName: "",
+  extraStores: [],
   fulfillment: "pickup",
   shoppingDay: 6,
   weeklyBudget: 150,
@@ -145,6 +152,9 @@ export const DEFAULT_SETTINGS: Settings = {
   fruitRule: true,
   prepReminders: true,
   mode: "normal",
+  notifyLevel: "essentials",
+  dismissedAlerts: [],
+  pushedAlerts: [],
   seen: [],
 };
 
