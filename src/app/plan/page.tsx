@@ -96,7 +96,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
           }}
           foodRules={{ rules: settings.foodRules, dislikes: settings.dislikes, allow: settings.allowAnyway ?? [] }}
           mode={settings.mode}
-          costCutting={settings.tightBudget}
+          money={{ budgetMode: settings.budgetMode, tightBudget: settings.tightBudget, cookOnceEatTwice: settings.cookOnceEatTwice, snap: settings.snap, preferPremiumOnSale: settings.preferPremiumOnSale }}
           alsoPlanned={[settings.breakfastDays.length ? `breakfast ${settings.breakfastDays.length} day${settings.breakfastDays.length === 1 ? "" : "s"}` : "", settings.lunchDays.length ? `lunch at home ${settings.lunchDays.length} day${settings.lunchDays.length === 1 ? "" : "s"}` : ""].filter(Boolean)}
           athletes={settings.athletes.length}
           health={settings.healthPeople.length}

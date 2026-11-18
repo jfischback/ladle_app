@@ -133,27 +133,7 @@ export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, 
 
         {step === 3 && <StoreStep s={s} set={set} krogerEnabled={krogerEnabled} />}
 
-        {step === 4 && (
-          <div className="space-y-5">
-            <div>
-              <label htmlFor="budget" className="label">Weekly grocery budget</label>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-semibold text-muted">$</span>
-                <input id="budget" type="number" inputMode="numeric" min={10} step={5} className="field text-2xl" value={s.weeklyBudget || ""} onChange={(e) => set("weeklyBudget", Number(e.target.value))} />
-              </div>
-            </div>
-            <Choice
-              label="How strict?"
-              value={s.budgetMode}
-              onChange={(v) => set("budgetMode", v)}
-              options={[
-                { value: "target", label: "Target", hint: "Aim for it. Going over a little is fine for a good week." },
-                { value: "hard", label: "Hard limit", hint: "Ladle's estimate stays under it, even if that drops a good dinner. Store prices can still change at checkout." },
-              ]}
-            />
-            <TightBudget s={s} set={set} />
-          </div>
-        )}
+        {step === 4 && <BudgetStep s={s} set={(k, v) => set(k, v as Settings[typeof k])} />}
 
         {step === 5 && (
           <div className="space-y-5">
@@ -467,7 +447,36 @@ function ChipPicker({ label, ideas, value, onChange, tone }: { label: string; id
 }
 
 /** "Every dollar counts": cheapest wins, plus the ways to stretch a tight budget. */
-function TightBudget({ s, set }: { s: Settings; set: <K extends keyof Settings>(k: K, v: Settings[K]) => void }) {
+/** The money fields, shared by Settings' Budget section and the weekly check-in's last screen. */
+export type MoneySettings = Pick<Settings, "weeklyBudget" | "budgetMode" | "tightBudget" | "cookOnceEatTwice" | "snap" | "preferPremiumOnSale">;
+type SetMoney = <K extends keyof MoneySettings>(k: K, v: MoneySettings[K]) => void;
+
+export function BudgetStep({ s, set, amountNote }: { s: MoneySettings; set: SetMoney; amountNote?: string }) {
+  return (
+    <div className="space-y-5">
+      <div>
+        <label htmlFor="budget" className="label">Weekly grocery budget</label>
+        <div className="flex items-center gap-2">
+          <span className="text-2xl font-semibold text-muted">$</span>
+          <input id="budget" type="number" inputMode="numeric" min={10} step={5} className="field text-2xl" value={s.weeklyBudget || ""} onChange={(e) => set("weeklyBudget", Number(e.target.value))} />
+        </div>
+        {amountNote && <p className="mt-1 text-sm text-muted">{amountNote}</p>}
+      </div>
+      <Choice
+        label="How strict?"
+        value={s.budgetMode}
+        onChange={(v) => set("budgetMode", v)}
+        options={[
+          { value: "target", label: "Target", hint: "Aim for it. Going over a little is fine for a good week." },
+          { value: "hard", label: "Hard limit", hint: "Ladle's estimate stays under it, even if that drops a good dinner. Store prices can still change at checkout." },
+        ]}
+      />
+      <TightBudget s={s} set={set} />
+    </div>
+  );
+}
+
+function TightBudget({ s, set }: { s: MoneySettings; set: SetMoney }) {
   const [pending, start] = useTransition();
   const [added, setAdded] = useState<number | null>(null);
   const toggle = (on: boolean) => {

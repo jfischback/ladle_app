@@ -103,6 +103,28 @@ export async function setCostCutting(on: boolean): Promise<{ error?: string }> {
   return {};
 }
 
+/** The check-in's budget screen: how strict, Cost Cutting and its extras. Saved for every week (the amount is per plan). */
+const MoneyOnly = z.object({
+  budgetMode: z.enum(["target", "hard"]),
+  tightBudget: z.boolean(),
+  cookOnceEatTwice: z.boolean(),
+  snap: z.boolean(),
+  preferPremiumOnSale: z.boolean(),
+});
+export async function saveMoneySettings(input: unknown): Promise<{ error?: string }> {
+  const userId = await requireUserId();
+  const parsed = MoneyOnly.safeParse(input);
+  if (!parsed.success) return { error: "Something in the budget settings didn't look right. Try again." };
+  const db = await getDb();
+  const [row] = await db.select({ data: settingsTable.data }).from(settingsTable).where(eq(settingsTable.userId, userId));
+  if (!row) return { error: "Finish setting up first." };
+  const data = row.data as Settings;
+  const mode = (data.mode as string) === "cost" ? "normal" : data.mode;
+  await db.update(settingsTable).set({ data: { ...data, mode, ...parsed.data }, updatedAt: new Date() }).where(eq(settingsTable.userId, userId));
+  revalidatePath("/");
+  return {};
+}
+
 /** The planning check-in's "Still right?" screen: save just the food rules. They apply to every week. */
 const FoodRulesOnly = z.object({
   foodRules: z.array(z.enum(Object.keys(FOOD_RULES) as [FoodRule, ...FoodRule[]])).max(20),

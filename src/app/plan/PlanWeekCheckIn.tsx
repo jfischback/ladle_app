@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { GoalCard } from "@/components/GoalCard";
 import { planUpcomingWeek } from "@/app/actions/plans";
-import { saveFoodRules, setCostCutting, setMode } from "@/app/actions/settings";
-import { FoodRulesStep } from "@/app/setup/SetupWizard";
+import { saveFoodRules, saveMoneySettings } from "@/app/actions/settings";
+import { BudgetStep, FoodRulesStep, type MoneySettings } from "@/app/setup/SetupWizard";
 import { rulesSummary, type FoodRule } from "@/lib/diet";
 import { COST_CUTTING, MODES, type Mode } from "@/lib/settings";
 
@@ -20,11 +20,10 @@ export type WeekChoice = { key: "now" | "next"; weekOf: string; title: string; r
   current?: { weekday: number; cook: boolean; eating: Table | null }[] };
 type StepKey = "week" | "nights" | "who" | "rules" | "wishes" | "pricing" | "ready";
 
-const GOAL_HINT: Record<Mode, string> = { normal: "Favorites, sales and new things", workout: "More protein for everyone" };
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const shortDay = (date: string) => `${MON[Number(date.slice(5, 7)) - 1]} ${Number(date.slice(8))}`;
 const DAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const TITLE: Record<StepKey, string> = { week: "Which week?", nights: "Which nights?", who: "Who's around", rules: "Food rules still right?", wishes: "This week's wishes", pricing: "Goal and budget", ready: "Ready?" };
+const TITLE: Record<StepKey, string> = { week: "Which week?", nights: "Which nights?", who: "Who's around", rules: "Food rules still right?", wishes: "This week's wishes", pricing: "What's your weekly budget?", ready: "Ready?" };
 const NIGHTS: { key: Night; icon: string; label: string; hint: string }[] = [
   { key: "cook", icon: "🍲", label: "Cook", hint: "A regular dinner" },
   { key: "busy", icon: "⚡", label: "Quick", hint: "Busy night, fast dinner" },
@@ -34,7 +33,7 @@ const NIGHTS: { key: Night; icon: string; label: string; hint: string }[] = [
 const KEEP = "ladle-checkin";
 
 /** The weekly check-in: which week, which nights, who's eating, food rules, wishes, then mode and budget. Then Ladle plans the week. */
-export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek = false, defaults, foodRules, mode: savedMode, costCutting: savedCost = false, alsoPlanned = [], athletes, health = 0, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; fresh?: boolean; firstWeek?: boolean; defaults: Defaults; foodRules: Rules; mode: Mode; costCutting?: boolean; alsoPlanned?: string[]; athletes: number; health?: number; creators: string[] }) {
+export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek = false, defaults, foodRules, mode: savedMode, money: savedMoney, alsoPlanned = [], athletes, health = 0, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; fresh?: boolean; firstWeek?: boolean; defaults: Defaults; foodRules: Rules; mode: Mode; money: Omit<MoneySettings, "weeklyBudget">; alsoPlanned?: string[]; athletes: number; health?: number; creators: string[] }) {
   const router = useRouter();
   const open = weeks.filter((w) => w.status !== "approved");
   // The week question only shows when there's a real choice to make. The food rules check is skipped on the very
@@ -68,8 +67,10 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
   const [rules, setRules] = useState<Rules>(foodRules);
   const [draft, setDraft] = useState<Rules>(foodRules);
   const [editingRules, setEditingRules] = useState(false);
-  const [mode, setModeNow] = useState<Mode>(MODES[savedMode] ? savedMode : "normal");
-  const [cost, setCostNow] = useState(savedCost);
+  const mode: Mode = MODES[savedMode] ? savedMode : "normal";
+  // The budget screen: how strict and Cost Cutting are saved for every week when the week is planned.
+  const [money, setMoney] = useState(savedMoney);
+  const cost = money.tightBudget;
   const [saving, startSaving] = useTransition();
   const [stillError, setStillError] = useState<string | null>(null);
 
@@ -106,6 +107,10 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
   const plan = () =>
     start(async () => {
       setError(null);
+      if (JSON.stringify(money) !== JSON.stringify(savedMoney)) {
+        const m = await saveMoneySettings(money);
+        if (m?.error) { setError(m.error); return; }
+      }
       const r = await planUpcomingWeek(week.key === "now", {
         cookDays: cooking.map((d) => d.weekday),
         busyDays: cooking.filter((d) => nights[d.weekday] === "busy").map((d) => d.weekday),
@@ -131,24 +136,9 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
       if (r?.error) setStillError(r.error);
       else { setRules(draft); setEditingRules(false); }
     });
-  const pickMode = (k: Mode) =>
-    startSaving(async () => {
-      setStillError(null);
-      const r = await setMode(k);
-      if (r?.error) setStillError(r.error);
-      else setModeNow(k);
-    });
-  const toggleCost = () =>
-    startSaving(async () => {
-      setStillError(null);
-      const r = await setCostCutting(!cost);
-      if (r?.error) setStillError(r.error);
-      else setCostNow(!cost);
-    });
-
   const people = (t: Table) => `${t.adults} adult${t.adults === 1 ? "" : "s"}${t.kids ? `, ${t.kids} kid${t.kids === 1 ? "" : "s"}` : ""}`;
   const last = step === steps.length - 1;
-  const canNext = stepKey === "nights" ? cooking.length > 0 : stepKey === "rules" ? !editingRules && !saving : stepKey === "pricing" ? !saving : true;
+  const canNext = stepKey === "nights" ? cooking.length > 0 : stepKey === "rules" ? !editingRules && !saving : true;
 
   return (
     <div className="space-y-4">
@@ -159,7 +149,8 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
         </div>
       </div>
       <section className="card space-y-4 p-5" aria-labelledby="checkin-step">
-        <h2 id="checkin-step" className="text-2xl font-semibold">{TITLE[stepKey]}</h2>
+        {stepKey === "pricing" && <div className="flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-soft text-4xl" aria-hidden="true">💰</div>}
+        <h2 id="checkin-step" className={stepKey === "pricing" ? "text-3xl font-semibold" : "text-2xl font-semibold"}>{TITLE[stepKey]}</h2>
 
         {stepKey === "week" && (
           <>
@@ -314,48 +305,12 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
 
         {stepKey === "pricing" && (
           <>
-            <p className="text-muted">Three quick answers, then Ladle plans the week.</p>
-
-            <fieldset>
-              <legend className="text-lg font-bold">1. What&apos;s the goal?</legend>
-              <div role="radiogroup" aria-label="Goal" className="mt-2 grid grid-cols-2 gap-2">
-                {(Object.keys(MODES) as Mode[]).map((k) => (
-                  <button key={k} type="button" role="radio" aria-checked={k === mode} disabled={saving} onClick={() => k !== mode && pickMode(k)}
-                    className={`flex flex-col items-center gap-0.5 rounded-2xl border-2 p-3 text-center ${k === mode ? "border-olive bg-olive text-cream" : "border-line bg-card hover:border-olive/50"}`}>
-                    <span className="text-2xl" aria-hidden="true">{MODES[k].icon}</span>
-                    <span className="text-lg font-bold">{MODES[k].label}</span>
-                    <span className={`text-sm ${k === mode ? "text-cream/90" : "text-muted"}`}>{GOAL_HINT[k]}</span>
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <legend className="text-lg font-bold">2. Buy the cheapest brands?</legend>
-              <div role="radiogroup" aria-label="Buy the cheapest brands" className="mt-2 grid grid-cols-2 gap-2">
-                {[true, false].map((v) => (
-                  <button key={String(v)} type="button" role="radio" aria-checked={cost === v} disabled={saving} onClick={() => cost !== v && toggleCost()}
-                    className={`flex flex-col items-center gap-0.5 rounded-2xl border-2 p-3 text-center ${cost === v ? "border-olive bg-olive text-cream" : "border-line bg-card hover:border-olive/50"}`}>
-                    <span className="text-2xl" aria-hidden="true">{v ? "💵" : "🏷️"}</span>
-                    <span className="text-lg font-bold">{v ? "Yes, save money" : "No"}</span>
-                    <span className={`text-sm ${cost === v ? "text-cream/90" : "text-muted"}`}>{v ? "Cheapest dinners and products win" : "Your usual picks and brands"}</span>
-                  </button>
-                ))}
-              </div>
-              <p className="mt-1 text-sm text-muted">This is Cost Cutting. It works with either goal.</p>
-            </fieldset>
-
-            <div>
-              <label htmlFor="ci-budget" className="text-lg font-bold">3. Spend up to how much this week?</label>
-              <div className="relative mt-2 w-40">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-muted">$</span>
-                <input id="ci-budget" inputMode="decimal" className="field pl-7 text-lg" value={budget} onChange={(e) => setBudget(e.target.value)} />
-              </div>
-              {!budgetOk && <p className="mt-1 text-sm text-terracotta-dark">That doesn&apos;t look like a budget, so we&apos;ll use your usual ${defaults.budget}.</p>}
-            </div>
-
-            <p className="rounded-2xl bg-oat/70 p-3 text-sm">The goal and cheapest brands stay on for future weeks until you change them. The budget is just for this week; your usual is ${defaults.budget}.</p>
-            {stillError && <p role="alert" className="font-bold text-terracotta-dark">{stillError}</p>}
+            <p className="text-lg text-muted">We keep the estimate for dinners, staples and snacks near this number.</p>
+            <BudgetStep
+              s={{ ...money, weeklyBudget: budgetOk ? budgetNum : 0 }}
+              set={(k, v) => (k === "weeklyBudget" ? setBudget(v ? String(v) : "") : setMoney((m) => ({ ...m, [k]: v })))}
+              amountNote={budgetOk ? `Just for this week. Your usual is $${defaults.budget}; change that in Settings.` : `Type a budget of at least $10, or we'll use your usual $${defaults.budget}.`}
+            />
           </>
         )}
 
