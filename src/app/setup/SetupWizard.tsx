@@ -483,32 +483,57 @@ function TightBudget({ s, set }: { s: MoneySettings; set: SetMoney }) {
     set("tightBudget", on);
     if (on) { set("budgetMode", "hard"); set("preferPremiumOnSale", false); set("cookOnceEatTwice", true); }
   };
+  const on = s.tightBudget;
   return (
-    <div className={`space-y-4 rounded-3xl border-2 p-4 ${s.tightBudget ? "border-olive bg-olive-soft/60" : "border-line"}`}>
-      <label className="flex cursor-pointer items-start gap-3">
-        <input type="checkbox" className="mt-1 h-6 w-6 accent-olive" checked={s.tightBudget} onChange={(e) => toggle(e.target.checked)} />
-        <span>
-          <span className="block text-lg font-bold">💵 Cost Cutting: every dollar counts</span>
-          <span className="text-muted">For a fixed income, a student budget or a lean month. The cheapest dinners and the lowest price per ounce win every time; brands don&apos;t matter, and optional snacks drop off first if the week runs over.</span>
-        </span>
-      </label>
-      <label className="flex cursor-pointer items-start gap-3">
-        <input type="checkbox" className="mt-1 h-5 w-5 accent-olive" checked={s.cookOnceEatTwice} onChange={(e) => set("cookOnceEatTwice", e.target.checked)} />
-        <span><b>Cook once, eat twice</b> <span className="text-muted">A double batch, then leftovers the next planned night. Half the cooking, less to buy, nothing wasted.</span></span>
-      </label>
-      <label className="flex cursor-pointer items-start gap-3">
-        <input type="checkbox" className="mt-1 h-5 w-5 accent-olive" checked={s.snap} onChange={(e) => set("snap", e.target.checked)} />
-        <span><b>I pay with SNAP / EBT</b> <span className="text-muted">We&apos;ll remind you how to pay with EBT on pickup orders.</span></span>
-      </label>
-      {s.tightBudget && (
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-card p-3">
-          <span className="min-w-0 flex-1 text-sm"><b>Budget recipe pack:</b> 20 filling dinners for about $1 to $2.50 a plate (rice and beans, sheet-pan chicken, potato soup…).</span>
-          <button type="button" className="btn-secondary min-h-9 px-3 text-sm" disabled={pending} onClick={() => start(async () => setAdded((await addRecipePack("budget")).added))}>
-            {added == null ? "Add them" : added ? `✓ Added ${added}` : "✓ Already added"}
-          </button>
+    <div className={`overflow-hidden rounded-3xl border-2 ${on ? "border-olive" : "border-ochre/60"}`}>
+      <div className={`space-y-3 p-4 ${on ? "bg-olive-soft/70" : "bg-ochre-soft/70"}`}>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-wide text-olive-dark">Save money</p>
+            <p className="text-2xl font-semibold leading-tight"><span aria-hidden="true">💵</span> Cost Cutting</p>
+          </div>
+          <Switch on={on} label="Cost Cutting" onChange={toggle} />
         </div>
-      )}
+        <p className="text-lg font-semibold">Feed the family for less, every week.</p>
+        <ul className="space-y-1.5">
+          <li className="flex gap-2"><span aria-hidden="true">✅</span><span><b>The cheapest dinners win.</b> Ladle plans around what&apos;s on sale and what costs least per plate.</span></li>
+          <li className="flex gap-2"><span aria-hidden="true">✅</span><span><b>Lowest price per ounce, any brand.</b> The cart picks the best deal, not the fanciest label.</span></li>
+          <li className="flex gap-2"><span aria-hidden="true">✅</span><span><b>Stays under your budget.</b> Optional snacks drop off first if the week runs over.</span></li>
+          <li className="flex gap-2"><span aria-hidden="true">✅</span><span><b>See what you saved.</b> Home shows what Cost Cutting saved you this week and this month.</span></li>
+        </ul>
+        {!on && <button type="button" className="btn-primary w-full" onClick={() => toggle(true)}>Turn on Cost Cutting</button>}
+      </div>
+      <div className="space-y-3 bg-card p-4">
+        <p className="font-bold">More ways to save</p>
+        <div className="flex items-start justify-between gap-3">
+          <span><b>🍲 Cook once, eat twice</b><span className="block text-muted">A double batch, then leftovers the next planned night. Half the cooking, less to buy, nothing wasted.</span></span>
+          <Switch on={s.cookOnceEatTwice} label="Cook once, eat twice" onChange={(v) => set("cookOnceEatTwice", v)} />
+        </div>
+        <div className="flex items-start justify-between gap-3">
+          <span><b>💳 I pay with SNAP / EBT</b><span className="block text-muted">We&apos;ll remind you how to pay with EBT on pickup orders.</span></span>
+          <Switch on={s.snap} label="I pay with SNAP / EBT" onChange={(v) => set("snap", v)} />
+        </div>
+        {on && (
+          <div className="space-y-2 rounded-2xl bg-oat/70 p-3 sm:flex sm:items-center sm:gap-3 sm:space-y-0">
+            <span className="block min-w-0 sm:flex-1"><b>🥫 Budget recipe pack:</b> 20 filling dinners for about $1 to $2.50 a plate (rice and beans, sheet-pan chicken, potato soup…).</span>
+            <button type="button" className="btn-secondary min-h-10 w-full px-4 sm:w-auto" disabled={pending} onClick={() => start(async () => setAdded((await addRecipePack("budget")).added))}>
+              {added == null ? "Add them" : added ? `✓ Added ${added}` : "✓ Already added"}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
+  );
+}
+
+/** A big, easy on/off switch with the state written on it. */
+function Switch({ on, label, onChange }: { on: boolean; label: string; onChange: (v: boolean) => void }) {
+  return (
+    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={() => onChange(!on)}
+      className={`relative inline-flex h-9 w-[4.5rem] shrink-0 items-center rounded-full border-2 text-xs font-extrabold transition-colors ${on ? "border-olive bg-olive text-cream" : "border-line bg-oat text-muted"}`}>
+      <span className={`absolute ${on ? "left-2.5" : "right-2.5"}`}>{on ? "ON" : "OFF"}</span>
+      <span className={`absolute h-7 w-7 rounded-full bg-card shadow-soft transition-all ${on ? "right-0.5" : "left-0.5"}`} />
+    </button>
   );
 }
 
