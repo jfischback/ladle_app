@@ -18,7 +18,10 @@ export async function getSettings(userId: string): Promise<{ data: Settings; com
   // Cost Cutting used to be a mode of its own; now it's an on/off that works with either goal.
   const legacyCost = (saved.mode as string | undefined) === "cost";
   const costFix = legacyCost ? { mode: "normal" as const, tightBudget: true } : {};
-  return { data: { ...DEFAULT_SETTINGS, ...saved, ...costFix, extras, athletes, healthPeople, cookDays, dinnersPerWeek: cookDays.length }, complete: !!row?.completedAt };
+  // Saved before "What kind of week?" existed: Cost Cutting on reads as Save money.
+  const tight = legacyCost || !!saved.tightBudget;
+  const styleFix = !saved.weekStyle || (saved.weekStyle === "save") !== tight ? { weekStyle: tight ? ("save" as const) : saved.weekStyle && saved.weekStyle !== "save" ? saved.weekStyle : ("normal" as const) } : {};
+  return { data: { ...DEFAULT_SETTINGS, ...saved, ...costFix, ...styleFix, extras, athletes, healthPeople, cookDays, dinnersPerWeek: cookDays.length }, complete: !!row?.completedAt };
 }
 
 export async function myRecipes(userId: string, meal = "dinner") {

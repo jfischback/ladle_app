@@ -39,6 +39,7 @@ const SettingsSchema = z.object({
   weeklyBudget: z.number().min(10).max(5000),
   budgetMode: z.enum(["target", "hard"]),
   tightBudget: z.boolean(),
+  weekStyle: z.enum(["save", "normal", "healthy", "treat"]).default("normal"),
   cookOnceEatTwice: z.boolean(),
   snap: z.boolean(),
   cookDays: z.array(int(0, 6)).min(1).max(7),
@@ -98,7 +99,8 @@ export async function setCostCutting(on: boolean): Promise<{ error?: string }> {
   if (!row) return { error: "Finish setting up first." };
   const data = row.data as Settings;
   const mode = (data.mode as string) === "cost" ? "normal" : data.mode;
-  await db.update(settingsTable).set({ data: { ...data, mode, tightBudget: on }, updatedAt: new Date() }).where(eq(settingsTable.userId, userId));
+  const weekStyle = on ? "save" : data.weekStyle === "save" || !data.weekStyle ? "normal" : data.weekStyle;
+  await db.update(settingsTable).set({ data: { ...data, mode, tightBudget: on, weekStyle }, updatedAt: new Date() }).where(eq(settingsTable.userId, userId));
   revalidatePath("/");
   return {};
 }
@@ -107,6 +109,7 @@ export async function setCostCutting(on: boolean): Promise<{ error?: string }> {
 const MoneyOnly = z.object({
   budgetMode: z.enum(["target", "hard"]),
   tightBudget: z.boolean(),
+  weekStyle: z.enum(["save", "normal", "healthy", "treat"]),
   cookOnceEatTwice: z.boolean(),
   snap: z.boolean(),
   preferPremiumOnSale: z.boolean(),
@@ -120,7 +123,7 @@ export async function saveMoneySettings(input: unknown): Promise<{ error?: strin
   if (!row) return { error: "Finish setting up first." };
   const data = row.data as Settings;
   const mode = (data.mode as string) === "cost" ? "normal" : data.mode;
-  await db.update(settingsTable).set({ data: { ...data, mode, ...parsed.data }, updatedAt: new Date() }).where(eq(settingsTable.userId, userId));
+  await db.update(settingsTable).set({ data: { ...data, mode, ...parsed.data, tightBudget: parsed.data.weekStyle === "save" }, updatedAt: new Date() }).where(eq(settingsTable.userId, userId));
   revalidatePath("/");
   return {};
 }
@@ -162,6 +165,7 @@ export async function saveSettings(input: Partial<Settings>, startWith?: "ours" 
   const data: Settings = { ...DEFAULT_SETTINGS, ...current, ...parsed, cookDays, dinnersPerWeek: cookDays.length };
   // "Every dollar counts" in Settings is Cost Cutting; it works with either goal. (Old data stored it as a mode.)
   if ((data.mode as string) === "cost") data.mode = "normal";
+  data.tightBudget = data.weekStyle === "save";
   const db = await getDb();
   const now = new Date();
   await db

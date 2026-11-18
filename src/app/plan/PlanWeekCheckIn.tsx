@@ -8,7 +8,7 @@ import { planUpcomingWeek } from "@/app/actions/plans";
 import { saveFoodRules, saveMoneySettings } from "@/app/actions/settings";
 import { BudgetStep, FoodRulesStep, type MoneySettings } from "@/app/setup/SetupWizard";
 import { rulesSummary, type FoodRule } from "@/lib/diet";
-import { COST_CUTTING, MODES, type Mode } from "@/lib/settings";
+import { COST_CUTTING, MODES, WEEK_STYLES, type Mode } from "@/lib/settings";
 
 type Night = "cook" | "busy" | "out";
 type Defaults = { cookDays: number[]; busyDays: number[]; budget: number; tryNew: boolean; adults: number; kids: number; desserts: number };
@@ -323,7 +323,7 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
               {days.some((d) => nights[d.weekday] === "out") && <li>🍕 Nights off: {days.filter((d) => nights[d.weekday] === "out").map((d) => DAY[d.weekday].slice(0, 3)).join(", ")}</li>}
               {changedTables.map((d) => <li key={d.date}>👥 {DAY[d.weekday]}: {people(tables[d.weekday])}</li>)}
               <li>🥗 Food rules: {summary || "none"}</li>
-              <li>🎯 {MODES[mode].label} mode{cost ? ` with ${COST_CUTTING.label}` : ""}</li>
+              <li>🎯 {MODES[mode].label} mode · {WEEK_STYLES[money.weekStyle]?.icon} {WEEK_STYLES[money.weekStyle]?.label ?? "Normal"}{cost ? ` (${COST_CUTTING.label})` : ""}</li>
               <li>💵 Budget: ${budgetOk ? budgetNum : defaults.budget}</li>
               {useUp.trim() && <li>🥫 Use up: {useUp.trim()}</li>}
               {craving.trim() && <li>😋 In the mood for: {craving.trim()}</li>}

@@ -144,7 +144,8 @@ export async function planWeek(input: {
       kids: settings.kids,
       baby: settings.hasBaby ? { ageMonths: settings.babyAgeMonths } : null,
     },
-    priorities: settings.motivation.map((m) => MOTIVATIONS[m]),
+    // "Eat healthier" week: that priority goes first.
+    priorities: (settings.weekStyle === "healthy" ? ["eat_healthier" as const, ...settings.motivation.filter((m) => m !== "eat_healthier")] : settings.motivation).map((m) => MOTIVATIONS[m]),
     // Numbers only: no names go with health needs.
     healthNeeds: (() => { const n = householdHealth(settings); return { keto: n.keto.length, diabetesCarbsPerMeal: n.diabetes.map((d) => d.carbsPerMeal), lowSodiumMgPerMeal: n.lowSodium.map((x) => x.perMeal) }; })(),
     athletes: settings.athletes.filter((a) => a.sport !== "weightloss" && a.sport !== "active").map((a) => ({ type: a.sport, phase: a.phase, teen: a.youth, proteinGramsPerDay: a.protein, caloriesPerDay: a.calories })),
@@ -397,7 +398,8 @@ function slotsFor(dates: string[], settings: Settings, sales: SaleItem[]): Slot[
         prep: settings.prepDay != null,
         health: hasNeeds(householdHealth(settings)) ? householdHealth(settings) : undefined,
         family: settings.adults + settings.kids >= 2,
-        cheap: settings.tightBudget ? 1.6 : settings.budgetMode === "hard" ? 0.4 : 0,
+        // "Treat yourselves": no nudge toward the cheapest dinners (the budget itself still holds).
+        cheap: settings.tightBudget ? 1.6 : settings.weekStyle === "treat" ? 0 : settings.budgetMode === "hard" ? 0.4 : 0,
         busy: settings.busyDays.includes(weekday(date)),
         daysAfterShopping: index,
         lunchNext: settings.lunchDays.includes(weekday(tomorrow)) || (holidayTomorrow && settings.holidayEveryoneHome),

@@ -7,7 +7,7 @@ import { lookupStores, markSectionSeen, saveSettings } from "@/app/actions/setti
 import { addRecipePack } from "@/app/actions/recipes";
 import { SAFE_FOOD_IDEAS, WONT_EAT_IDEAS, type PickyEater } from "@/lib/picky";
 import { EQUIPMENT } from "@/lib/prep";
-import { DAY_NAMES, MOTIVATIONS, type Motivation, type Settings } from "@/lib/settings";
+import { DAY_NAMES, MOTIVATIONS, WEEK_STYLES, type Motivation, type Settings, type WeekStyle } from "@/lib/settings";
 import { FOOD_RULES, FOOD_RULE_GROUPS, parseDislikes, type FoodRule } from "@/lib/diet";
 import type { StoreLocation } from "@/lib/kroger";
 
@@ -448,10 +448,18 @@ function ChipPicker({ label, ideas, value, onChange, tone }: { label: string; id
 
 /** "Every dollar counts": cheapest wins, plus the ways to stretch a tight budget. */
 /** The money fields, shared by Settings' Budget section and the weekly check-in's last screen. */
-export type MoneySettings = Pick<Settings, "weeklyBudget" | "budgetMode" | "tightBudget" | "cookOnceEatTwice" | "snap" | "preferPremiumOnSale">;
+export type MoneySettings = Pick<Settings, "weeklyBudget" | "budgetMode" | "tightBudget" | "weekStyle" | "cookOnceEatTwice" | "snap" | "preferPremiumOnSale">;
 type SetMoney = <K extends keyof MoneySettings>(k: K, v: MoneySettings[K]) => void;
 
 export function BudgetStep({ s, set, amountNote }: { s: MoneySettings; set: SetMoney; amountNote?: string }) {
+  // "What kind of week?": Save money is Cost Cutting; brands follow the pick (healthy leaves them as they are).
+  const pickStyle = (k: WeekStyle) => {
+    set("weekStyle", k);
+    set("tightBudget", k === "save");
+    if (k === "save") { set("preferPremiumOnSale", false); set("cookOnceEatTwice", true); }
+    if (k === "normal") set("preferPremiumOnSale", false);
+    if (k === "treat") set("preferPremiumOnSale", true);
+  };
   return (
     <div className="space-y-5">
       <div>
@@ -465,24 +473,38 @@ export function BudgetStep({ s, set, amountNote }: { s: MoneySettings; set: SetM
       <Choice
         label="How strict?"
         value={s.budgetMode}
-        onChange={(v) => set("budgetMode", v)}
+        onChange={(v) => { set("budgetMode", v); if (v === "hard") pickStyle("save"); }}
         options={[
           { value: "target", label: "Target", hint: "Aim for it. Going over a little is fine for a good week." },
           { value: "hard", label: "Hard limit", hint: "Ladle's estimate stays under it, even if that drops a good dinner. Store prices can still change at checkout." },
         ]}
       />
-      <TightBudget s={s} set={set} />
+      <fieldset>
+        <legend className="label">What kind of week?</legend>
+        <div role="radiogroup" aria-label="What kind of week?" className="grid grid-cols-2 gap-2">
+          {(Object.keys(WEEK_STYLES) as WeekStyle[]).map((k) => {
+            const on = s.weekStyle === k;
+            return (
+              <button key={k} type="button" role="radio" aria-checked={on} onClick={() => pickStyle(k)}
+                className={`flex flex-col items-start gap-0.5 rounded-2xl border-2 p-3 text-left transition-colors ${on ? "border-olive bg-olive text-cream" : "border-line bg-card hover:border-olive/50"}`}>
+                <span className="text-2xl" aria-hidden="true">{WEEK_STYLES[k].icon}</span>
+                <span className="font-bold leading-tight">{WEEK_STYLES[k].label}</span>
+                <span className={`text-sm leading-snug ${on ? "text-cream/90" : "text-muted"}`}>{WEEK_STYLES[k].blurb}</span>
+              </button>
+            );
+          })}
+        </div>
+        {s.budgetMode === "hard" && s.weekStyle !== "save" && <p className="mt-1 text-sm text-muted">Hard limit picks Save money, but you can choose another. Ladle still keeps the estimate under your limit.</p>}
+      </fieldset>
+      <TightBudget s={s} set={set} onCostCutting={(on) => pickStyle(on ? "save" : "normal")} />
     </div>
   );
 }
 
-function TightBudget({ s, set }: { s: MoneySettings; set: SetMoney }) {
+function TightBudget({ s, set, onCostCutting }: { s: MoneySettings; set: SetMoney; onCostCutting: (on: boolean) => void }) {
   const [pending, start] = useTransition();
   const [added, setAdded] = useState<number | null>(null);
-  const toggle = (on: boolean) => {
-    set("tightBudget", on);
-    if (on) { set("budgetMode", "hard"); set("preferPremiumOnSale", false); set("cookOnceEatTwice", true); }
-  };
+  const toggle = onCostCutting;
   const on = s.tightBudget;
   return (
     <div className={`overflow-hidden rounded-3xl border-2 ${on ? "border-olive" : "border-ochre/60"}`}>

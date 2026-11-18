@@ -20,6 +20,14 @@ export const MODES = {
 } as const;
 export type Mode = keyof typeof MODES;
 /** Cost Cutting is an on/off (settings.tightBudget), not a goal: it works with Normal or Workout. */
+/** "What kind of week?" on the budget screen. "save" is Cost Cutting (tightBudget). */
+export const WEEK_STYLES = {
+  save: { label: "Save money", icon: "💵", blurb: "Cost Cutting: cheapest dinners, any brand" },
+  normal: { label: "Normal", icon: "🍲", blurb: "Your usual mix, best value brands" },
+  healthy: { label: "Eat healthier", icon: "🥦", blurb: "Healthier dinners come first" },
+  treat: { label: "Treat yourselves", icon: "🥩", blurb: "Premium brands on sale, no penny-pinching" },
+} as const;
+export type WeekStyle = keyof typeof WEEK_STYLES;
 export const COST_CUTTING = { label: "Cost Cutting", icon: "💵", blurb: "The cheapest dinners and products win; brands don't matter. Works with either goal." };
 
 export const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -44,6 +52,7 @@ export type Settings = {
   weeklyBudget: number;
   budgetMode: "target" | "hard";
   tightBudget: boolean; // "Every dollar counts": cheapest dinners and products win, brands and extras don't matter
+  weekStyle: WeekStyle; // "What kind of week?": save (= tightBudget), normal, healthy (eat healthier first) or treat (premium brands, no cheap nudge)
   cookOnceEatTwice: boolean; // cook a double batch, eat it again the next planned night (less cost and waste)
   snap: boolean; // pays with SNAP/EBT: keep the cart EBT-friendly
   // Q4 Meals
@@ -109,6 +118,7 @@ export const DEFAULT_SETTINGS: Settings = {
   weeklyBudget: 150,
   budgetMode: "target",
   tightBudget: false,
+  weekStyle: "normal",
   cookOnceEatTwice: false,
   snap: false,
   dinnersPerWeek: 5,
