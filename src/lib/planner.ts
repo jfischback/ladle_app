@@ -84,7 +84,7 @@ Rules:
 - When a reason mentions a sale, name the item and the discount, e.g. "Chicken thighs are 35% off".
 - Each pick gets a one-line reason a tired parent can read in two seconds.
 - Give two or three alternatives for each cooking night, from the same recipe list, not already used that week and following the same rules.
-- mode is the family's goal right now: "normal", "cost" (Cost Cutting: the cheapest dinners win) or "workout" (lean toward high-protein dinners for everyone). Food rules always apply, whatever the mode.
+- mode is the family's goal right now: "normal" or "workout" (lean toward high-protein dinners for everyone). Cost Cutting is everyDollarCounts and can be on with either goal. Food rules always apply, whatever the mode.
 - thisWeek comes from the family's check-in for this week. useUp: ingredients they want to use up, so prefer dinners that use them (say so in the reason, e.g. "Uses up the chicken"). craving: something they're in the mood for; if a recipe fits it, plan it on a suitable night (reason e.g. "You were craving tacos").
 - newRecipes are new dinners from food creators the family follows. Use at most newRecipesPerWeek of them (their keys start with "n"), and only on a night that suits them. Prefer ones that use sale items. Their reason must start with "New from <cookName>" and say why, e.g. "New from Pinch of Yum: ground beef is 30% off". Never use newRecipes as alternatives.`;
 
@@ -152,7 +152,7 @@ export async function planWeek(input: {
     weeklyBudget: settings.weeklyBudget,
     staplesCost: Math.round(input.staplesCost ?? 0),
     budgetMode: settings.budgetMode,
-    everyDollarCounts: settings.tightBudget || settings.mode === "cost",
+    everyDollarCounts: settings.tightBudget,
     mode: settings.mode,
     mealPrepDay: settings.prepDay != null ? dayName(addDays(input.weekStart, (settings.prepDay - weekday(input.weekStart) + 7) % 7)) : null,
     pickyEaters: settings.pickyEaters.map((p) => ({ wontEat: p.wontEat, safeFoods: p.safeFoods })), // no children's names
@@ -397,7 +397,7 @@ function slotsFor(dates: string[], settings: Settings, sales: SaleItem[]): Slot[
         prep: settings.prepDay != null,
         health: hasNeeds(householdHealth(settings)) ? householdHealth(settings) : undefined,
         family: settings.adults + settings.kids >= 2,
-        cheap: settings.tightBudget || settings.mode === "cost" ? 1.6 : settings.budgetMode === "hard" ? 0.4 : 0,
+        cheap: settings.tightBudget ? 1.6 : settings.budgetMode === "hard" ? 0.4 : 0,
         busy: settings.busyDays.includes(weekday(date)),
         daysAfterShopping: index,
         lunchNext: settings.lunchDays.includes(weekday(tomorrow)) || (holidayTomorrow && settings.holidayEveryoneHome),

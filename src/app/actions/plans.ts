@@ -225,7 +225,8 @@ export async function planUpcomingWeek(thisWeek = false, checkIn?: unknown): Pro
     extras: extraLines,
     summary: result.summary,
     plannerSource: result.source,
-    mode: settings.mode,
+    // The goal it was planned with, plus "+cost" when Cost Cutting was on (for "Cost Cutting saved you…").
+    mode: settings.tightBudget ? (settings.mode === "workout" ? "workout+cost" : "cost") : settings.mode,
     estimatedTotal: result.estimatedTotal,
     // The budget this week was planned against (the check-in can set one for just this week).
     budget: settings.weeklyBudget,

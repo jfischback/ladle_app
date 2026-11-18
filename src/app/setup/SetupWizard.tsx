@@ -480,7 +480,7 @@ function TightBudget({ s, set }: { s: Settings; set: <K extends keyof Settings>(
       <label className="flex cursor-pointer items-start gap-3">
         <input type="checkbox" className="mt-1 h-6 w-6 accent-olive" checked={s.tightBudget} onChange={(e) => toggle(e.target.checked)} />
         <span>
-          <span className="block text-lg font-bold">💵 Every dollar counts</span>
+          <span className="block text-lg font-bold">💵 Cost Cutting: every dollar counts</span>
           <span className="text-muted">For a fixed income, a student budget or a lean month. The cheapest dinners and the lowest price per ounce win every time; brands don&apos;t matter, and optional snacks drop off first if the week runs over.</span>
         </span>
       </label>

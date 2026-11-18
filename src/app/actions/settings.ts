@@ -76,7 +76,7 @@ const SettingsSchema = z.object({
   preferPremiumOnSale: z.boolean(),
 });
 
-/** Switch the mode (Normal, Cost Cutting, Workout). Cost Cutting is "every dollar counts". */
+/** Switch the goal (Normal or Workout). Cost Cutting is separate (setCostCutting) and stays as it is. */
 export async function setMode(mode: string): Promise<{ error?: string }> {
   const userId = await requireUserId();
   if (!(mode in MODES)) return { error: "Pick a mode." };
@@ -84,7 +84,21 @@ export async function setMode(mode: string): Promise<{ error?: string }> {
   const [row] = await db.select({ data: settingsTable.data }).from(settingsTable).where(eq(settingsTable.userId, userId));
   if (!row) return { error: "Finish setting up first." };
   const data = row.data as Settings;
-  await db.update(settingsTable).set({ data: { ...data, mode: mode as Mode, tightBudget: mode === "cost" }, updatedAt: new Date() }).where(eq(settingsTable.userId, userId));
+  const tightBudget = data.tightBudget || (data.mode as string) === "cost";
+  await db.update(settingsTable).set({ data: { ...data, mode: mode as Mode, tightBudget }, updatedAt: new Date() }).where(eq(settingsTable.userId, userId));
+  revalidatePath("/");
+  return {};
+}
+
+/** Cost Cutting on or off ("every dollar counts"), with whichever goal is on. */
+export async function setCostCutting(on: boolean): Promise<{ error?: string }> {
+  const userId = await requireUserId();
+  const db = await getDb();
+  const [row] = await db.select({ data: settingsTable.data }).from(settingsTable).where(eq(settingsTable.userId, userId));
+  if (!row) return { error: "Finish setting up first." };
+  const data = row.data as Settings;
+  const mode = (data.mode as string) === "cost" ? "normal" : data.mode;
+  await db.update(settingsTable).set({ data: { ...data, mode, tightBudget: on }, updatedAt: new Date() }).where(eq(settingsTable.userId, userId));
   revalidatePath("/");
   return {};
 }
@@ -124,9 +138,8 @@ export async function saveSettings(input: Partial<Settings>, startWith?: "ours" 
   // Keep settings the wizard doesn't show (e.g. prepReminders) instead of resetting them to defaults.
   const { data: current } = await getSettings(userId);
   const data: Settings = { ...DEFAULT_SETTINGS, ...current, ...parsed, cookDays, dinnersPerWeek: cookDays.length };
-  // "Every dollar counts" in Settings and Cost Cutting mode are the same thing.
-  if (data.tightBudget) data.mode = "cost";
-  else if (data.mode === "cost") data.mode = "normal";
+  // "Every dollar counts" in Settings is Cost Cutting; it works with either goal. (Old data stored it as a mode.)
+  if ((data.mode as string) === "cost") data.mode = "normal";
   const db = await getDb();
   const now = new Date();
   await db

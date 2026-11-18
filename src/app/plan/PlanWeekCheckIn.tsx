@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { planUpcomingWeek } from "@/app/actions/plans";
-import { saveFoodRules, setMode } from "@/app/actions/settings";
+import { saveFoodRules, setCostCutting, setMode } from "@/app/actions/settings";
 import { FoodRulesStep } from "@/app/setup/SetupWizard";
 import { rulesSummary, type FoodRule } from "@/lib/diet";
-import { MODES, type Mode } from "@/lib/settings";
+import { COST_CUTTING, MODES, type Mode } from "@/lib/settings";
 
 type Night = "cook" | "busy" | "out";
 type Defaults = { cookDays: number[]; busyDays: number[]; budget: number; tryNew: boolean; adults: number; kids: number; desserts: number };
@@ -17,25 +17,27 @@ type Rules = { rules: FoodRule[]; dislikes: string[]; allow: string[] };
 export type WeekChoice = { key: "now" | "next"; weekOf: string; title: string; range: string; days: { date: string; weekday: number }[]; status: "none" | "draft" | "approved";
   /** The plan this week already has (or just had): which nights it cooks and who's eating, to start from. */
   current?: { weekday: number; cook: boolean; eating: Table | null }[] };
-type StepKey = "week" | "nights" | "who" | "still" | "wishes" | "ready";
+type StepKey = "week" | "nights" | "who" | "rules" | "wishes" | "pricing" | "ready";
 
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const shortDay = (date: string) => `${MON[Number(date.slice(5, 7)) - 1]} ${Number(date.slice(8))}`;
 const DAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const TITLE: Record<StepKey, string> = { week: "Which week?", nights: "Which nights?", who: "Who's around", still: "Still right?", wishes: "This week's wishes", ready: "Ready?" };
-const NIGHTS: { key: Night; label: string; hint: string }[] = [
-  { key: "cook", label: "🍲 Cook", hint: "a regular dinner" },
-  { key: "busy", label: "⚡ Quick", hint: "a busy night: something quick" },
-  { key: "out", label: "🍕 Off", hint: "a night off: eating out or leftovers" },
+const TITLE: Record<StepKey, string> = { week: "Which week?", nights: "Which nights?", who: "Who's around", rules: "Food rules still right?", wishes: "This week's wishes", pricing: "Mode and budget", ready: "Ready?" };
+const NIGHTS: { key: Night; icon: string; label: string; hint: string }[] = [
+  { key: "cook", icon: "🍲", label: "Cook", hint: "A regular dinner" },
+  { key: "busy", icon: "⚡", label: "Quick", hint: "Busy night, fast dinner" },
+  { key: "out", icon: "🍕", label: "Off", hint: "Eating out or leftovers" },
 ];
 // Answers are kept while this tab is open, so a side trip (athlete mode, food creators) doesn't lose them.
 const KEEP = "ladle-checkin";
 
-/** The weekly check-in: which week, which nights, who's eating, what's still right, wishes. Then Ladle plans the week. */
-export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek = false, defaults, foodRules, mode: savedMode, alsoPlanned = [], athletes, health = 0, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; fresh?: boolean; firstWeek?: boolean; defaults: Defaults; foodRules: Rules; mode: Mode; alsoPlanned?: string[]; athletes: number; health?: number; creators: string[] }) {
+/** The weekly check-in: which week, which nights, who's eating, food rules, wishes, then mode and budget. Then Ladle plans the week. */
+export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek = false, defaults, foodRules, mode: savedMode, costCutting: savedCost = false, alsoPlanned = [], athletes, health = 0, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; fresh?: boolean; firstWeek?: boolean; defaults: Defaults; foodRules: Rules; mode: Mode; costCutting?: boolean; alsoPlanned?: string[]; athletes: number; health?: number; creators: string[] }) {
   const router = useRouter();
   const open = weeks.filter((w) => w.status !== "approved");
-  // The week question only shows when there's a real choice to make. "Still right?" is skipped on the very first
-  // plan: food rules, mode and budget were just answered in setup.
-  const steps: StepKey[] = [...(weeks.length > 1 ? (["week"] as const) : []), "nights", "who", ...(firstWeek ? [] : (["still"] as const)), "wishes", "ready"];
+  // The week question only shows when there's a real choice to make. The food rules check is skipped on the very
+  // first plan: they were just answered in setup. Mode and budget come last, right before planning.
+  const steps: StepKey[] = [...(weeks.length > 1 ? (["week"] as const) : []), "nights", "who", ...(firstWeek ? [] : (["rules"] as const)), "wishes", "pricing", "ready"];
   const [stepKey, setStepKey] = useState<StepKey>(steps[0]);
   const step = Math.max(0, steps.indexOf(stepKey));
   const [weekKey, setWeekKey] = useState<"now" | "next">(initialWeek);
@@ -60,11 +62,12 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
-  // "Still right?": food rules and mode are saved for every week, right from this screen.
+  // Food rules, the goal and Cost Cutting are saved for every week, right from these screens.
   const [rules, setRules] = useState<Rules>(foodRules);
   const [draft, setDraft] = useState<Rules>(foodRules);
   const [editingRules, setEditingRules] = useState(false);
-  const [mode, setModeNow] = useState<Mode>(savedMode);
+  const [mode, setModeNow] = useState<Mode>(MODES[savedMode] ? savedMode : "normal");
+  const [cost, setCostNow] = useState(savedCost);
   const [saving, startSaving] = useTransition();
   const [stillError, setStillError] = useState<string | null>(null);
 
@@ -133,10 +136,17 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
       if (r?.error) setStillError(r.error);
       else setModeNow(k);
     });
+  const toggleCost = () =>
+    startSaving(async () => {
+      setStillError(null);
+      const r = await setCostCutting(!cost);
+      if (r?.error) setStillError(r.error);
+      else setCostNow(!cost);
+    });
 
   const people = (t: Table) => `${t.adults} adult${t.adults === 1 ? "" : "s"}${t.kids ? `, ${t.kids} kid${t.kids === 1 ? "" : "s"}` : ""}`;
   const last = step === steps.length - 1;
-  const canNext = stepKey === "nights" ? cooking.length > 0 : stepKey === "still" ? !editingRules && !saving : true;
+  const canNext = stepKey === "nights" ? cooking.length > 0 : stepKey === "rules" ? !editingRules && !saving : stepKey === "pricing" ? !saving : true;
 
   return (
     <div className="space-y-4">
@@ -175,17 +185,23 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
 
         {stepKey === "nights" && (
           <>
-            <p className="text-muted">{week.current ? "These match the plan you have now. Tap a night to change it." : "These are your usual nights. Tap one to change it."}</p>
-            <ul className="space-y-2">
+            <p className="text-muted">{week.current ? "These match the plan you have now." : "These are your usual nights."} Tap to change any night.</p>
+            <ul className="grid grid-cols-3 gap-2 text-center text-sm" aria-label="What each choice means">
+              {NIGHTS.map((n) => <li key={n.key} className="rounded-xl bg-oat/70 px-1.5 py-1.5"><b><span aria-hidden="true">{n.icon}</span> {n.label}</b><span className="block text-muted">{n.hint}</span></li>)}
+            </ul>
+            <ul className="divide-y divide-line rounded-2xl border-2 border-line">
               {days.map((d) => (
-                <li key={d.date} className="flex items-center gap-2">
-                  <span className="w-14 shrink-0 font-bold leading-tight">{DAY[d.weekday].slice(0, 3)} <span className="font-normal text-muted">{Number(d.date.slice(8))}</span></span>
-                  <div role="radiogroup" aria-label={DAY[d.weekday]} className="grid flex-1 grid-cols-3 gap-1">
+                <li key={d.date} className="space-y-1.5 px-3 py-3 sm:flex sm:items-center sm:gap-3 sm:space-y-0">
+                  <p className="leading-tight sm:w-32 sm:shrink-0">
+                    <span className="text-lg font-bold">{DAY[d.weekday]}</span> <span className="text-muted">{shortDay(d.date)}</span>
+                  </p>
+                  <div role="radiogroup" aria-label={DAY[d.weekday]} className="grid flex-1 grid-cols-3 gap-2">
                     {NIGHTS.map((n) => {
                       const on = nights[d.weekday] === n.key;
                       return (
-                        <button key={n.key} type="button" role="radio" aria-checked={on} title={n.hint} onClick={() => setNights((x) => ({ ...x, [d.weekday]: n.key }))}
-                          className={`whitespace-nowrap rounded-full border-2 px-1 py-1 text-sm font-bold ${on ? "border-olive bg-olive text-cream" : "border-line bg-card text-ink hover:border-olive/50"}`}>
+                        <button key={n.key} type="button" role="radio" aria-checked={on} aria-label={`${n.label}: ${n.hint}`} onClick={() => setNights((x) => ({ ...x, [d.weekday]: n.key }))}
+                          className={`flex min-h-12 items-center justify-center gap-1.5 rounded-2xl border-2 text-base font-bold transition-all active:scale-95 ${on ? "border-olive bg-olive text-cream shadow-soft" : "border-line bg-card text-muted hover:border-olive/50"}`}>
+                          <span aria-hidden="true" className="text-lg leading-none">{n.icon}</span>
                           {n.label}
                         </button>
                       );
@@ -194,7 +210,7 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
                 </li>
               ))}
             </ul>
-            <p className="text-sm text-muted">⚡ Quick: a busy night, so a dinner that&apos;s fast to make. 🍕 Off: eating out or leftovers.</p>
+            <p className="font-semibold">{cooking.length} dinner{cooking.length === 1 ? "" : "s"} to plan{days.some((d) => nights[d.weekday] === "busy") ? `, ${days.filter((d) => nights[d.weekday] === "busy").length} quick` : ""}.</p>
             {!cooking.length && <p role="alert" className="font-bold text-terracotta-dark">Pick at least one night to cook.</p>}
           </>
         )}
@@ -236,9 +252,9 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
           </>
         )}
 
-        {stepKey === "still" && (
+        {stepKey === "rules" && (
           <>
-            <p className="text-muted">A quick look before the dinners are picked. Change anything that&apos;s different now.</p>
+            <p className="text-muted">A quick look before the dinners are picked. Change them if anything&apos;s different now.</p>
 
             <div className="rounded-2xl border-2 border-line p-3.5">
               <div className="flex items-start justify-between gap-3">
@@ -260,29 +276,6 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
               <p className="mt-2 text-sm text-muted">Saved for every week, not just this one. Ladle skips recipes whose ingredients break these. For allergies, still check every label yourself.</p>
             </div>
 
-            <fieldset className="rounded-2xl border-2 border-line p-3.5">
-              <legend className="sr-only">Mode</legend>
-              <p className="font-bold">🎯 Mode</p>
-              <div role="radiogroup" aria-label="Mode" className="mt-2 space-y-2">
-                {(Object.keys(MODES) as Mode[]).map((k) => (
-                  <button key={k} type="button" role="radio" aria-checked={k === mode} disabled={saving} onClick={() => k !== mode && pickMode(k)}
-                    className={`flex w-full items-start gap-3 rounded-2xl border-2 p-2.5 text-left ${k === mode ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive/50"}`}>
-                    <span className="text-xl" aria-hidden="true">{MODES[k].icon}</span>
-                    <span><span className="block font-bold">{MODES[k].label}</span><span className="block text-sm text-muted">{MODES[k].blurb}</span></span>
-                  </button>
-                ))}
-              </div>
-              <p className="mt-2 text-sm text-muted">One goal at a time. It stays on until you change it.</p>
-            </fieldset>
-
-            <div className="rounded-2xl border-2 border-line p-3.5">
-              <label htmlFor="ci-budget" className="font-bold">💵 Budget for this week</label>
-              <div className="relative mt-2 w-40">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted">$</span>
-                <input id="ci-budget" inputMode="decimal" className="field pl-7" value={budget} onChange={(e) => setBudget(e.target.value)} />
-              </div>
-              <p className="mt-2 text-sm text-muted">{budgetOk ? `Only for this plan. Your usual budget stays $${defaults.budget}.` : `That doesn't look like a budget, so we'll use your usual $${defaults.budget}.`}</p>
-            </div>
             {stillError && <p role="alert" className="font-bold text-terracotta-dark">{stillError}</p>}
             {editingRules && <p className="text-sm text-muted">Save or cancel the food rules to keep going.</p>}
           </>
@@ -321,6 +314,42 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
           </>
         )}
 
+        {stepKey === "pricing" && (
+          <>
+            <p className="text-muted">Last question: what to aim for and how much to spend.</p>
+
+            <fieldset className="rounded-2xl border-2 border-line p-3.5">
+              <legend className="sr-only">Goal</legend>
+              <p className="font-bold">🎯 Goal</p>
+              <div role="radiogroup" aria-label="Goal" className="mt-2 grid gap-2 sm:grid-cols-2">
+                {(Object.keys(MODES) as Mode[]).map((k) => (
+                  <button key={k} type="button" role="radio" aria-checked={k === mode} disabled={saving} onClick={() => k !== mode && pickMode(k)}
+                    className={`flex w-full items-start gap-3 rounded-2xl border-2 p-2.5 text-left ${k === mode ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive/50"}`}>
+                    <span className="text-xl" aria-hidden="true">{MODES[k].icon}</span>
+                    <span><span className="block font-bold">{MODES[k].label}</span><span className="block text-sm text-muted">{MODES[k].blurb}</span></span>
+                  </button>
+                ))}
+              </div>
+              <button type="button" role="switch" aria-checked={cost} disabled={saving} onClick={toggleCost}
+                className={`mt-2 flex w-full items-start gap-3 rounded-2xl border-2 p-2.5 text-left ${cost ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive/50"}`}>
+                <span aria-hidden="true" className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 text-sm font-bold ${cost ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>{cost ? "✓" : ""}</span>
+                <span><span className="block font-bold"><span aria-hidden="true">{COST_CUTTING.icon}</span> {COST_CUTTING.label}</span><span className="block text-sm text-muted">{COST_CUTTING.blurb}</span></span>
+              </button>
+              <p className="mt-2 text-sm text-muted">Saved for every week until you change it.</p>
+            </fieldset>
+
+            <div className="rounded-2xl border-2 border-line p-3.5">
+              <label htmlFor="ci-budget" className="font-bold">💵 Budget for this week</label>
+              <div className="relative mt-2 w-40">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted">$</span>
+                <input id="ci-budget" inputMode="decimal" className="field pl-7" value={budget} onChange={(e) => setBudget(e.target.value)} />
+              </div>
+              <p className="mt-2 text-sm text-muted">{budgetOk ? `Only for this plan. Your usual budget stays $${defaults.budget}.` : `That doesn't look like a budget, so we'll use your usual $${defaults.budget}.`}</p>
+            </div>
+            {stillError && <p role="alert" className="font-bold text-terracotta-dark">{stillError}</p>}
+          </>
+        )}
+
         {stepKey === "ready" && (
           <>
             <p className="text-muted">Here&apos;s what Ladle will plan around. Go back to change anything.</p>
@@ -330,7 +359,7 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
               {days.some((d) => nights[d.weekday] === "out") && <li>🍕 Nights off: {days.filter((d) => nights[d.weekday] === "out").map((d) => DAY[d.weekday].slice(0, 3)).join(", ")}</li>}
               {changedTables.map((d) => <li key={d.date}>👥 {DAY[d.weekday]}: {people(tables[d.weekday])}</li>)}
               <li>🥗 Food rules: {summary || "none"}</li>
-              <li>🎯 {MODES[mode].label} mode</li>
+              <li>🎯 {MODES[mode].label} mode{cost ? ` with ${COST_CUTTING.label}` : ""}</li>
               <li>💵 Budget: ${budgetOk ? budgetNum : defaults.budget}</li>
               {useUp.trim() && <li>🥫 Use up: {useUp.trim()}</li>}
               {craving.trim() && <li>😋 In the mood for: {craving.trim()}</li>}

@@ -15,7 +15,10 @@ export async function getSettings(userId: string): Promise<{ data: Settings; com
   const healthPeople = (saved.healthPeople ?? []).map((x) => normalizeHealthPerson(x));
   // Categories added later (pets) get their default rule.
   const extras = { ...DEFAULT_SETTINGS.extras, ...saved.extras };
-  return { data: { ...DEFAULT_SETTINGS, ...saved, extras, athletes, healthPeople, cookDays, dinnersPerWeek: cookDays.length }, complete: !!row?.completedAt };
+  // Cost Cutting used to be a mode of its own; now it's an on/off that works with either goal.
+  const legacyCost = (saved.mode as string | undefined) === "cost";
+  const costFix = legacyCost ? { mode: "normal" as const, tightBudget: true } : {};
+  return { data: { ...DEFAULT_SETTINGS, ...saved, ...costFix, extras, athletes, healthPeople, cookDays, dinnersPerWeek: cookDays.length }, complete: !!row?.completedAt };
 }
 
 export async function myRecipes(userId: string, meal = "dinner") {

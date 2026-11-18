@@ -88,8 +88,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   // Cost Cutting: what it saved this week and this month, against a typical week of the family's own dinners.
   const averageDinner = averageCost(recipes.filter((r) => r.meal === "dinner").map((r) => dinnerCost(r, settings, []).total));
   const month = todayStr.slice(0, 7);
-  const costWeeks = plans.filter((p) => p.mode === "cost" && p.status === "approved" && p.weekOf.slice(0, 7) === month);
-  const modeSaved = settings.mode === "cost" && plan?.mode === "cost"
+  const costPlan = (p?: { mode: string | null } | null) => !!p?.mode?.includes("cost");
+  const costWeeks = plans.filter((p) => costPlan(p) && p.status === "approved" && p.weekOf.slice(0, 7) === month);
+  const modeSaved = settings.tightBudget && plan && costPlan(plan)
     ? { week: weekSaving(plan.days, averageDinner), month: costWeeks.reduce((a, p) => a + weekSaving(p.days, averageDinner), 0) }
     : null;
 
@@ -196,7 +197,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <EmptyState weekOf={upcoming} recipeCount={recipes.length} needed={daysLeft >= 2 ? Math.min(settings.dinnersPerWeek, Math.max(1, weekDates(inProgress).filter((d) => d >= todayStr && settings.cookDays.includes(weekday(d))).length)) : settings.dinnersPerWeek} checksSales={cartReady} yours={yours} />
       )}
 
-      <ModeBanner mode={settings.mode} dietary={rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway)} saved={modeSaved} />
+      <ModeBanner mode={settings.mode} costCutting={settings.tightBudget} dietary={rulesSummary(settings.foodRules, settings.dislikes, settings.allowAnyway)} saved={modeSaved} />
       <AlertsPanel alerts={(await householdAlerts(userId, settings)).filter((a) => !(plan && nextStepAlerts.includes(a.key)))} level={settings.notifyLevel} pushKey={pushPublicKey()} />
 
       {prepTomorrow.map(({ d, r }) => (

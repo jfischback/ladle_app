@@ -137,7 +137,7 @@ export const plans = pgTable(
     groceryChecked: jsonb("grocery_checked").$type<Record<string, boolean>>(), // grocery list ticks, shared by everyone in the household
     summary: text("summary"),
     plannerSource: text("planner_source").notNull(), // claude | basic
-    mode: text("mode"), // the mode it was planned in (normal | cost | workout), for "Cost Cutting saved you…"
+    mode: text("mode"), // the goal it was planned in (normal | workout), with "+cost" or "cost" when Cost Cutting was on, for "Cost Cutting saved you…"
     estimatedTotal: real("estimated_total"),
     groceryList: jsonb("grocery_list").$type<GroceryList>(),
     actualSpend: real("actual_spend"),
