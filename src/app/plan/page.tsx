@@ -84,6 +84,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
           weeks={weeks}
           initialWeek={initial}
           fresh={!!replaced}
+          firstWeek={plans.length === 0 && !replaced}
           defaults={{
             cookDays: settings.cookDays,
             busyDays: settings.busyDays,

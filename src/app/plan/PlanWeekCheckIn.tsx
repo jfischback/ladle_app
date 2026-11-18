@@ -30,11 +30,12 @@ const NIGHTS: { key: Night; label: string; hint: string }[] = [
 const KEEP = "ladle-checkin";
 
 /** The weekly check-in: which week, which nights, who's eating, what's still right, wishes. Then Ladle plans the week. */
-export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, defaults, foodRules, mode: savedMode, alsoPlanned = [], athletes, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; fresh?: boolean; defaults: Defaults; foodRules: Rules; mode: Mode; alsoPlanned?: string[]; athletes: number; creators: string[] }) {
+export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek = false, defaults, foodRules, mode: savedMode, alsoPlanned = [], athletes, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; fresh?: boolean; firstWeek?: boolean; defaults: Defaults; foodRules: Rules; mode: Mode; alsoPlanned?: string[]; athletes: number; creators: string[] }) {
   const router = useRouter();
   const open = weeks.filter((w) => w.status !== "approved");
-  // The week question only shows when there's a real choice to make.
-  const steps: StepKey[] = [...(weeks.length > 1 ? (["week"] as const) : []), "nights", "who", "still", "wishes", "ready"];
+  // The week question only shows when there's a real choice to make. "Still right?" is skipped on the very first
+  // plan: food rules, mode and budget were just answered in setup.
+  const steps: StepKey[] = [...(weeks.length > 1 ? (["week"] as const) : []), "nights", "who", ...(firstWeek ? [] : (["still"] as const)), "wishes", "ready"];
   const [stepKey, setStepKey] = useState<StepKey>(steps[0]);
   const step = Math.max(0, steps.indexOf(stepKey));
   const [weekKey, setWeekKey] = useState<"now" | "next">(initialWeek);
