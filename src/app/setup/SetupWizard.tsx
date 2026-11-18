@@ -15,7 +15,7 @@ import type { StoreLocation } from "@/lib/kroger";
 // First time through, only the essentials (who's eating, food rules, store, budget), then the recipe box.
 // Everything else starts on sensible defaults and is on the "Getting started" list on Home.
 const FIRST_TIME = [1, 8, 2, 3, 4, 7];
-const ALL_SECTIONS = [0, 1, 8, 2, 3, 4, 5, 6];
+const ALL_SECTIONS = [0, 1, 8, 2, 3, 5, 6, 4]; // Budget last: the money questions come at the end
 
 export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, forName = null }: { initial: Settings; isEdit: boolean; krogerEnabled: boolean; startStep?: number | null; forName?: string | null }) {
   const [s, setS] = useState<Settings>(initial);
