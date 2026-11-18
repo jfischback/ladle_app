@@ -23,11 +23,29 @@ export async function getSettings(userId: string): Promise<{ data: Settings; com
 
 export async function myRecipes(userId: string, meal = "dinner") {
   const db = await getDb();
-  return db
+  const rows = await db
     .select()
     .from(recipes)
     .where(and(eq(recipes.ownerId, userId), eq(recipes.meal, meal), isNull(recipes.archivedAt), eq(recipes.trial, false)))
     .orderBy(recipes.name);
+  return oneOfEachStarter(rows);
+}
+
+/**
+ * The same starter recipe copied twice (the shared list once had doubles) shows once: the copy with a rating, else
+ * the first. Nothing is deleted, and a family's own recipes are never merged.
+ */
+export function oneOfEachStarter<T extends { name: string; starterId: string | null; rating: number | null }>(rows: T[]): T[] {
+  const keep = new Map<string, T>();
+  const out: T[] = [];
+  for (const r of rows) {
+    if (!r.starterId) { out.push(r); continue; }
+    const k = r.name.trim().toLowerCase();
+    const had = keep.get(k);
+    if (!had) { keep.set(k, r); out.push(r); }
+    else if (had.rating == null && r.rating != null) { out[out.indexOf(had)] = r; keep.set(k, r); }
+  }
+  return out;
 }
 
 /** Starter recipes the user hasn't added to their list yet. */
@@ -43,7 +61,15 @@ export async function browseStarters(userId: string) {
     .from(recipes)
     .where(and(isNull(recipes.ownerId), isNull(recipes.archivedAt)))
     .orderBy(recipes.protein, recipes.name);
-  return all.filter((r) => !added.has(r.id));
+  // A name already in the box (or listed twice) shows once.
+  const addedNames = new Set(all.filter((r) => added.has(r.id)).map((r) => r.name.trim().toLowerCase()));
+  const seen = new Set<string>();
+  return all.filter((r) => {
+    const k = r.name.trim().toLowerCase();
+    if (added.has(r.id) || addedNames.has(k) || seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
 }
 
 export async function getRecipe(userId: string, id: string) {

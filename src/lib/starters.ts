@@ -9,16 +9,23 @@ export async function copyStarters(userId: string, starterIds: string[]) {
   if (!starterIds.length) return;
   const db = await getDb();
   const already = await db
-    .select({ starterId: recipes.starterId })
+    .select({ starterId: recipes.starterId, name: recipes.name })
     .from(recipes)
-    .where(and(eq(recipes.ownerId, userId), inArray(recipes.starterId, starterIds)));
+    .where(eq(recipes.ownerId, userId)); // removed ones count too: they aren't added back
   const have = new Set(already.map((a) => a.starterId));
+  // Skip a recipe they already have by name too: the shared list once held some recipes twice.
+  const names = new Set(already.map((a) => a.name.trim().toLowerCase()));
   const starters = await db
     .select()
     .from(recipes)
     .where(and(inArray(recipes.id, starterIds), isNull(recipes.ownerId)));
   const rows = starters
-    .filter((s) => !have.has(s.id))
+    .filter((s) => {
+      const k = s.name.trim().toLowerCase();
+      if (have.has(s.id) || names.has(k)) return false;
+      names.add(k);
+      return true;
+    })
     .map((s) => ({
       meal: s.meal,
       name: s.name,

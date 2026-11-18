@@ -9,6 +9,7 @@ import { Stars } from "@/components/Stars";
 import type { Recipe } from "@/db/schema";
 import { formatMinutes } from "@/lib/format";
 import { FoodArt } from "@/components/FoodArt";
+import { groupRecipes } from "@/lib/recipe-groups";
 import { CooksTab } from "./CooksTab";
 import { FridgeButton } from "./FridgeButton";
 import { RecipePacks } from "./RecipePacks";
@@ -64,6 +65,8 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
   const ranked = haveMode ? rankByOnHand(list, parseOnHand(typedHave), pantryOnHand) : [];
   const matchOf = new Map<string, OnHandMatch>(ranked.map((x) => [x.r.id, x.m]));
   const shown = haveMode ? ranked.map((x) => x.r) : list;
+  // Dinners and starters are grouped by main protein (A to Z inside each). "Use what I have" keeps its best-match order.
+  const grouped = !haveMode && (tab === "mine" || tab === "browse") && shown.length > 6 ? groupRecipes(shown) : null;
   const linkWith = (patch: { f?: string | null; q?: string | null }) => {
     const p = new URLSearchParams();
     if (tab !== "mine") p.set("tab", tab);
@@ -176,6 +179,30 @@ export default async function RecipesPage({ searchParams }: { searchParams: Prom
               <p className="text-lg text-muted">Every recipe from our starter set is already in your box.</p>
             </>
           )}
+        </div>
+      ) : grouped ? (
+        <div className="space-y-6">
+          {grouped.length > 1 && (
+            <nav aria-label="Jump to" className="sticky top-16 z-10 -mx-1 flex gap-1.5 overflow-x-auto bg-cream/95 px-1 py-2 backdrop-blur">
+              {grouped.map((g) => (
+                <a key={g.key} href={`#g-${g.key}`} className="shrink-0 whitespace-nowrap rounded-full border-2 border-line bg-card px-3 py-1.5 text-sm font-bold hover:border-olive/50">
+                  <span aria-hidden="true">{g.icon}</span> {g.label} <span className="font-normal text-muted">{g.items.length}</span>
+                </a>
+              ))}
+            </nav>
+          )}
+          {grouped.map((g) => (
+            <section key={g.key} id={`g-${g.key}`} aria-labelledby={`h-${g.key}`} className="scroll-mt-32">
+              <h2 id={`h-${g.key}`} className="mb-2 text-2xl font-semibold"><span aria-hidden="true">{g.icon}</span> {g.label} <span className="text-lg font-normal text-muted">({g.items.length})</span></h2>
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {g.items.map((r) => (
+                  <li key={r.id}>
+                    <RecipeCard r={r} browse={tab === "browse"} problems={problemsOf(r)} match={matchOf.get(r.id)} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
         </div>
       ) : (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">

@@ -1,4 +1,4 @@
-import { eq, isNull } from "drizzle-orm";
+import { eq, isNull, sql } from "drizzle-orm";
 import type { DB } from "./index";
 import { recipes, type NewRecipe } from "./schema";
 import starter from "@/data/starter-recipes.json";
@@ -10,6 +10,14 @@ import starter from "@/data/starter-recipes.json";
  * Families' own copies are left alone, except that unedited copies get a reworded method.
  */
 export async function seedStarterSet(db: DB) {
+  // Several servers can start at once: one lock so only one of them adds missing starters (no doubles).
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(424242)`);
+    await seedStarterSetLocked(tx as unknown as DB);
+  });
+}
+
+async function seedStarterSetLocked(db: DB) {
   const existing = await db.select({ id: recipes.id, name: recipes.name, tags: recipes.tags, steps: recipes.steps }).from(recipes).where(isNull(recipes.ownerId));
   const have = new Set(existing.map((r) => r.name));
   const rows: NewRecipe[] = (starter as NewRecipe[])
