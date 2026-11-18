@@ -98,6 +98,7 @@ export default async function PlanPage({ searchParams }: { searchParams: Promise
           mode={settings.mode}
           alsoPlanned={[settings.breakfastDays.length ? `breakfast ${settings.breakfastDays.length} day${settings.breakfastDays.length === 1 ? "" : "s"}` : "", settings.lunchDays.length ? `lunch at home ${settings.lunchDays.length} day${settings.lunchDays.length === 1 ? "" : "s"}` : ""].filter(Boolean)}
           athletes={settings.athletes.length}
+          health={settings.healthPeople.length}
           creators={creators}
         />
       )}

@@ -4,6 +4,7 @@ import { getDb } from "@/db";
 import { cooks, extraItems, foundRecipes, pantryItems, plans, recipes, settings as settingsTable } from "@/db/schema";
 import { DEFAULT_SETTINGS, cookDaysFor, type Settings } from "./settings";
 import { normalizeAthlete } from "./athletes";
+import { normalizeHealthPerson } from "./health";
 
 export async function getSettings(userId: string): Promise<{ data: Settings; complete: boolean }> {
   const db = await getDb();
@@ -11,9 +12,10 @@ export async function getSettings(userId: string): Promise<{ data: Settings; com
   const saved = row?.data ?? {};
   const cookDays = cookDaysFor(saved);
   const athletes = (saved.athletes ?? []).map((x) => normalizeAthlete(x));
+  const healthPeople = (saved.healthPeople ?? []).map((x) => normalizeHealthPerson(x));
   // Categories added later (pets) get their default rule.
   const extras = { ...DEFAULT_SETTINGS.extras, ...saved.extras };
-  return { data: { ...DEFAULT_SETTINGS, ...saved, extras, athletes, cookDays, dinnersPerWeek: cookDays.length }, complete: !!row?.completedAt };
+  return { data: { ...DEFAULT_SETTINGS, ...saved, extras, athletes, healthPeople, cookDays, dinnersPerWeek: cookDays.length }, complete: !!row?.completedAt };
 }
 
 export async function myRecipes(userId: string, meal = "dinner") {

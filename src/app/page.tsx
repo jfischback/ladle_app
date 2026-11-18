@@ -24,7 +24,7 @@ import { krogerEnabled } from "@/lib/kroger";
 import { ruleProblems } from "@/lib/diet";
 import { storeBrand } from "@/lib/stores";
 import { pickyTips } from "@/lib/picky";
-import { healthNeeds, healthTips } from "@/lib/health";
+import { householdHealth, healthTips } from "@/lib/health";
 import { prepPlan } from "@/lib/prep";
 import { PrepCard } from "@/components/PrepCard";
 import { athleteWeeks } from "@/lib/athlete-week";
@@ -101,7 +101,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     { href: "/calendar", icon: "📅", title: "Calendar", tone: "plain" as const, sub: "Your month of meals" },
     { href: "/stores", icon: "📍", title: "Nearby stores", tone: "plain" as const, sub: "Where it's cheapest" },
     { href: "/recipes?tab=cooks", icon: "✨", title: "Food creators", tone: "ochre" as const, sub: creators.length ? `Following ${creators.length}` : "Recipes from your favorites" },
-    { href: "/athletes", icon: "💪", title: "Athlete mode", tone: "olive" as const, sub: settings.athletes.length ? `${settings.athletes.length} set up` : "Training, weight and health goals" },
+    { href: "/athletes", icon: "💪", title: "Athlete mode", tone: "olive" as const, sub: settings.athletes.length ? `${settings.athletes.length} set up` : "Training and weight goals" },
+    { href: "/health", icon: "🩺", title: "Health needs", tone: "olive" as const, sub: settings.healthPeople.length ? `${settings.healthPeople.length} set up` : "Diabetes, low-sodium, keto" },
     { href: "/party", icon: "🎉", title: "Plan a party", tone: "plain" as const, sub: "Birthdays, grads, holidays" },
     { href: "/household#care", icon: "🤝", title: "Plan for a parent", tone: "plain" as const, sub: "Caregiver mode" },
   ];
@@ -128,7 +129,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   // Meal prep day: one session that does the slow parts of the week's dinners.
   const prep = plan && settings.prepDay != null ? prepPlan(plan.days, new Map(recipes.map((r) => [r.id, r])), settings.prepDay, settings.prepMinutes) : null;
   // Picky eaters: a tip for each dinner with something they won't eat.
-  const needs = healthNeeds(settings.athletes);
+  const needs = householdHealth(settings);
   const pickyFor = (d: { recipeId: string | null; date: string; leftoverOf?: string | null }) => {
     const r = d.recipeId && !d.leftoverOf ? recipes.find((x) => x.id === d.recipeId) : null;
     if (!r) return [];

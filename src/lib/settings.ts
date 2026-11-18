@@ -1,5 +1,6 @@
 import type { FoodRule } from "./diet";
 import type { Athlete } from "./athletes";
+import type { HealthPerson } from "./health";
 import type { PickyEater } from "./picky";
 import type { Equipment } from "./prep";
 import type { NotifyLevel } from "./alerts";
@@ -72,6 +73,7 @@ export type Settings = {
   breakfastMeatDeal: boolean; // find the week's best breakfast-meat sale and use it in egg breakfasts
   extras: Record<ExtraCategory, ExtrasRule>; // snacks, sweets, drinks, baby and pets: how many to rotate, targets, never-buy words
   athletes: Athlete[]; // athlete mode: people with their own calorie and protein goals
+  healthPeople: HealthPerson[]; // health needs without training (diabetes, low sodium, keto)
   noRepeatWeeks: number;
   favorQuickWeeknights: boolean;
   newRecipesPerWeek: number; // 0-2 new dinners from followed cooks, picked by the planner
@@ -142,6 +144,7 @@ export const DEFAULT_SETTINGS: Settings = {
     pets: { rotateCount: 0, servingsTarget: null, neverWords: [] },
   },
   athletes: [],
+  healthPeople: [],
   noRepeatWeeks: 3,
   favorQuickWeeknights: true,
   newRecipesPerWeek: 1,

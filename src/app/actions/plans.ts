@@ -26,7 +26,7 @@ import { canCook } from "@/lib/prep";
 import { leftoverKind } from "@/lib/leftovers";
 import { dinnerServings, recipeMultipliers } from "@/lib/scaling";
 import { mergeDuplicates } from "@/lib/grocery-merge";
-import { healthGroceryNotes, healthNeeds } from "@/lib/health";
+import { healthGroceryNotes, householdHealth } from "@/lib/health";
 import { budgetNotes, cookOnceEatTwice, dinnerCost, enforceCap, fillCosts, rebalanceBatches } from "@/lib/budget";
 import type { PlanDay, SaleCheck, SaleItem, StapleLine } from "@/lib/types";
 import type { Settings } from "@/lib/settings";
@@ -349,7 +349,7 @@ export async function approvePlan(planId: string): Promise<ActionResult> {
     const halves = chosen.filter((r) => makeTimes.get(r.id) === 0.5).map((r) => r.name);
     const tableNotes = plan.days.filter((d) => d.eating && d.recipeId && !d.leftoverOf).map((d) => `${dayName(d.date)}'s ${d.recipeName} is sized for ${d.eating!.adults} adult${d.eating!.adults === 1 ? "" : "s"}${d.eating!.kids ? ` and ${d.eating!.kids} kid${d.eating!.kids === 1 ? "" : "s"}` : ""}.`);
     const halfNote = halves.length ? [`Half batches for your household (the amounts on this list are for half the recipe): ${halves.join(", ")}.`] : [];
-    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days), ...healthGroceryNotes(healthNeeds(settings.athletes)), ...portionNotes(athletes), ...halfNote, ...tableNotes], makeTimes);
+    groceryList = await buildGroceryList(chosen, settings, sales, [...leftoverNotes(plan.days), ...budgetNotes(plan.days), ...healthGroceryNotes(householdHealth(settings)), ...portionNotes(athletes), ...halfNote, ...tableNotes], makeTimes);
     // A holiday feast (Thanksgiving) gets its own section, sized for the guests.
     groceryList = withFeastSections(groceryList, plan.days, sales);
     // Weekly staples get their own section, with this week's sale prices where we found them.

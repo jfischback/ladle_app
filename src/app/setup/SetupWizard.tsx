@@ -13,8 +13,8 @@ import type { StoreLocation } from "@/lib/kroger";
 
 // First time through, only the essentials (who's eating, food rules, store, budget), then the recipe box.
 // Everything else starts on sensible defaults and is on the "Getting started" list on Home.
-const FIRST_TIME = [1, 2, 3, 4, 7];
-const ALL_SECTIONS = [0, 1, 2, 3, 4, 5, 6];
+const FIRST_TIME = [1, 8, 2, 3, 4, 7];
+const ALL_SECTIONS = [0, 1, 8, 2, 3, 4, 5, 6];
 
 export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, forName = null }: { initial: Settings; isEdit: boolean; krogerEnabled: boolean; startStep?: number | null; forName?: string | null }) {
   const [s, setS] = useState<Settings>(initial);
@@ -79,15 +79,16 @@ export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, 
         {isEdit && (
           // In Settings, jump straight to any question.
           <nav aria-label="Settings sections" className="mt-3 flex flex-wrap gap-1.5">
-            {QUESTION.slice(0, ALL_SECTIONS.length).map((q, i) => (
-              <button key={q} type="button" aria-current={i === step ? "step" : undefined} onClick={() => setStep(i)} className={`rounded-full px-3 py-1 text-sm font-bold transition-colors ${i === step ? "bg-terracotta text-cream" : "bg-oat text-olive-dark hover:bg-olive-soft"}`}>
+            {ALL_SECTIONS.map((i) => (
+              <button key={i} type="button" aria-current={i === step ? "step" : undefined} onClick={() => setStep(i)} className={`rounded-full px-3 py-1 text-sm font-bold transition-colors ${i === step ? "bg-terracotta text-cream" : "bg-oat text-olive-dark hover:bg-olive-soft"}`}>
                 <span aria-hidden="true">{ICON[i]}</span> {SHORT[i]}
               </button>
             ))}
             <a href="/staples" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🧺</span> Staples</a>
             <a href="/pantry" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🥫</span> Pantry</a>
             <a href="/extras" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🍿</span> Snacks &amp; more</a>
-            <a href="/athletes" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">💪</span> Athletes &amp; health</a>
+            <a href="/athletes" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">💪</span> Athletes</a>
+            <a href="/health" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🩺</span> Health needs</a>
             <a href="/household" className="rounded-full bg-oat px-3 py-1 text-sm font-bold text-olive-dark hover:bg-olive-soft"><span aria-hidden="true">🏡</span> Household</a>
           </nav>
         )}
@@ -116,12 +117,18 @@ export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, 
               </div>
             )}
             <PickySection s={s} set={set} />
-            <p className="rounded-2xl bg-olive-soft/70 p-3 text-sm">
-              <b>💪 Anyone training?</b> CrossFit, strongman, lifting, running or getting fit: {isEdit ? <a href="/athletes" className="font-bold text-olive-dark underline">set up athlete mode</a> : "after setup, turn on athlete mode from the Home page"} for bigger portions, more protein and the right snacks.
-            </p>
-            <LunchSection s={s} set={set} />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <p className="rounded-2xl bg-olive-soft/70 p-3 text-sm">
+                <b>💪 Anyone training?</b> CrossFit, strongman, lifting, running or getting fit: {isEdit ? <a href="/athletes" className="font-bold text-olive-dark underline">set up athlete mode</a> : "after setup, turn on athlete mode from the Home page"} for bigger portions, more protein and the right snacks.
+              </p>
+              <p className="rounded-2xl bg-ochre-soft p-3 text-sm">
+                <b>🩺 Diabetes or watching salt?</b> {isEdit ? <a href="/health" className="font-bold text-olive-dark underline">Add health needs</a> : "After setup, add health needs from the Home page"} and Ladle steers dinners around carbs or sodium, with tips on which side to cut.
+              </p>
+            </div>
           </div>
         )}
+
+        {step === 8 && <LunchSection s={s} set={set} />}
 
         {step === 2 && <FoodRulesStep rules={s.foodRules} dislikes={s.dislikes} allow={s.allowAnyway ?? []} onRules={(v) => set("foodRules", v)} onDislikes={(v) => set("dislikes", v)} onAllow={(v) => set("allowAnyway", v)} />}
 
@@ -240,9 +247,10 @@ const QUESTION = [
   "How do you cook?",
   "How do you buy?",
   "Last step: your recipe box",
+  "Lunch at home on weekdays?",
 ];
-const ICON = ["💛", "👨‍👩‍👧", "🥗", "🛒", "💰", "🍳", "🏷️", "📖"];
-const SHORT = ["Priorities", "Family", "Food rules", "Store", "Budget", "Cooking", "Buying", "Recipes"];
+const ICON = ["💛", "👨‍👩‍👧", "🥗", "🛒", "💰", "🍳", "🏷️", "📖", "🥪"];
+const SHORT = ["Priorities", "Family", "Food rules", "Store", "Budget", "Cooking", "Buying", "Recipes", "Lunch"];
 const MOTIVATION_ICON: Record<Motivation, string> = { save_money: "💰", eat_healthier: "🥦", try_new: "✨" };
 const HINT = [
   "Tap them in order, most important first. This changes how we pick dinners.",
@@ -253,6 +261,7 @@ const HINT = [
   "Pick the nights you want dinner planned. The others are nights off.",
   "Two quick rules for picking products.",
   "Most families start with ours and add favorites over time.",
+  "We'll plan last night's leftovers first, and a quick lunch when there aren't any.",
 ];
 
 function MotivationStep({ value, onChange }: { value: Motivation[]; onChange: (v: Motivation[]) => void }) {
@@ -648,10 +657,9 @@ function LunchSection({ s, set }: { s: Settings; set: <K extends keyof Settings>
   const noReheat = s.holidayNoReheat ?? [];
   const hasLittleOnes = s.kids > 0 || s.hasBaby;
   return (
-    <div className="space-y-4 border-t border-line pt-5">
+    <div className="space-y-5">
       <fieldset>
-        <legend className="text-lg font-semibold">Lunch at home on weekdays?</legend>
-        <p className="mb-2 text-sm text-muted">We&apos;ll plan last night&apos;s leftovers first, and a quick lunch when there aren&apos;t any.</p>
+        <legend className="label">Which weekdays?</legend>
         <div className="flex flex-wrap gap-1.5">
           {[1, 2, 3, 4, 5].map((d) => {
             const on = days.includes(d);

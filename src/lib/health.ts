@@ -1,4 +1,5 @@
 import type { Athlete } from "./athletes";
+import type { Settings } from "./settings";
 import type { Ingredient } from "./types";
 import { estimateNutrition, estimateSodium } from "./nutrition";
 
@@ -9,7 +10,27 @@ export type HealthNeeds = {
   lowSodium: { name: string; perMeal: number }[];
 };
 
-export function healthNeeds(people: Athlete[]): HealthNeeds {
+/** Someone with a health need who isn't training: no portions, protein or snacks of their own, just the need. */
+export type HealthCondition = "diabetes" | "lowsodium" | "keto";
+export type HealthPerson = { id: string; name: string; conditions: HealthCondition[]; carbsPerMeal: number; sodiumPerDay: number };
+export const HEALTH_CONDITIONS: HealthCondition[] = ["diabetes", "lowsodium", "keto"];
+
+// The same starting numbers athlete mode uses; the person's own care team's numbers replace them.
+export function newHealthPerson(name = ""): HealthPerson {
+  return { id: Math.random().toString(36).slice(2, 10), name, conditions: [], carbsPerMeal: 45, sodiumPerDay: 1500 };
+}
+
+export function normalizeHealthPerson(raw: Partial<HealthPerson>): HealthPerson {
+  const base = newHealthPerson(raw.name ?? "");
+  return { ...base, ...raw, conditions: (raw.conditions ?? []).filter((c): c is HealthCondition => HEALTH_CONDITIONS.includes(c as HealthCondition)) };
+}
+
+type WithNeeds = Pick<Athlete, "name" | "carbsPerMeal" | "sodiumPerDay"> & { conditions: readonly string[] };
+
+/** Everyone's health needs: people in athlete mode plus the health-only list. */
+export const householdHealth = (s: Pick<Settings, "athletes" | "healthPeople">): HealthNeeds => healthNeeds([...s.athletes, ...(s.healthPeople ?? [])]);
+
+export function healthNeeds(people: WithNeeds[]): HealthNeeds {
   return {
     keto: people.filter((p) => p.conditions.includes("keto")).map((p) => p.name || "Someone"),
     diabetes: people.filter((p) => p.conditions.includes("diabetes")).map((p) => ({ name: p.name || "Someone", carbsPerMeal: p.carbsPerMeal })),

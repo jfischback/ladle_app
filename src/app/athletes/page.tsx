@@ -16,7 +16,7 @@ export default async function AthletesPage() {
         <p className="eyebrow mt-3">Fitness, weight and health</p>
         <h1 className="text-4xl font-semibold">💪 Athlete mode &amp; health goals</h1>
         <p className="mt-1 text-lg text-muted">
-          Training, losing weight, managing blood sugar or blood pressure, or eating for two? Add the people with a goal. Ladle sizes their portions,
+          Training, losing weight or eating for two? Add the people with a goal. (Just diabetes or watching salt? <Link href="/health" className="font-bold underline">Health needs</Link> is simpler.) Ladle sizes their portions,
           nudges the family&apos;s dinners toward what they need, adds the right snacks, and gives simple tips like &ldquo;have half the rice tonight.&rdquo;
         </p>
       </div>

@@ -30,7 +30,7 @@ const NIGHTS: { key: Night; label: string; hint: string }[] = [
 const KEEP = "ladle-checkin";
 
 /** The weekly check-in: which week, which nights, who's eating, what's still right, wishes. Then Ladle plans the week. */
-export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek = false, defaults, foodRules, mode: savedMode, alsoPlanned = [], athletes, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; fresh?: boolean; firstWeek?: boolean; defaults: Defaults; foodRules: Rules; mode: Mode; alsoPlanned?: string[]; athletes: number; creators: string[] }) {
+export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek = false, defaults, foodRules, mode: savedMode, alsoPlanned = [], athletes, health = 0, creators }: { weeks: WeekChoice[]; initialWeek: "now" | "next"; fresh?: boolean; firstWeek?: boolean; defaults: Defaults; foodRules: Rules; mode: Mode; alsoPlanned?: string[]; athletes: number; health?: number; creators: string[] }) {
   const router = useRouter();
   const open = weeks.filter((w) => w.status !== "approved");
   // The week question only shows when there's a real choice to make. "Still right?" is skipped on the very first
@@ -220,12 +220,19 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
                 );
               })}
             </ul>
-            <div className="rounded-2xl bg-olive-soft/70 p-3 text-sm">
-              <b>💪 Anyone training this week?</b>{" "}
-              {athletes ? `${athletes} ${athletes === 1 ? "person is" : "people are"} in athlete mode: their portions and protein are already planned in.` : "Athlete mode sizes portions, protein and snacks for whoever's training."}{" "}
-              <Link href="/athletes" className="font-bold text-olive-dark underline">{athletes ? "Change athlete mode" : "Set up athlete mode"}</Link>
-              <span className="block text-muted">Your answers here are kept while you&apos;re gone.</span>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl bg-olive-soft/70 p-3 text-sm">
+                <b>💪 Anyone training this week?</b>{" "}
+                {athletes ? `${athletes} ${athletes === 1 ? "person is" : "people are"} in athlete mode: their portions and protein are already planned in.` : "Athlete mode sizes portions, protein and snacks for whoever's training."}{" "}
+                <Link href="/athletes" className="font-bold text-olive-dark underline">{athletes ? "Change athlete mode" : "Set up athlete mode"}</Link>
+              </div>
+              <div className="rounded-2xl bg-ochre-soft p-3 text-sm">
+                <b>🩺 Diabetes or watching salt?</b>{" "}
+                {health ? `${health} ${health === 1 ? "person's" : "people's"} health needs are already planned in.` : "Ladle steers dinners around carbs or sodium, with tips on which side to cut."}{" "}
+                <Link href="/health" className="font-bold text-olive-dark underline">{health ? "Change health needs" : "Add health needs"}</Link>
+              </div>
             </div>
+            <p className="text-sm text-muted">Your answers here are kept while you&apos;re gone.</p>
           </>
         )}
 

@@ -5,7 +5,7 @@ import { MOTIVATIONS, type Settings } from "./settings";
 import { estimateCost, estimateNutrition, estimateSodium } from "./nutrition";
 import { pickyScore, type PickyEater } from "./picky";
 import { canCook } from "./prep";
-import { hasNeeds, healthNeeds, healthScore, type HealthNeeds } from "./health";
+import { hasNeeds, householdHealth, healthScore, type HealthNeeds } from "./health";
 import type { PlanDay } from "./types";
 import { askClaude, claudeEnabled } from "./claude";
 import { addDays, dayName, weekDates, weekday } from "./week";
@@ -146,7 +146,7 @@ export async function planWeek(input: {
     },
     priorities: settings.motivation.map((m) => MOTIVATIONS[m]),
     // Numbers only: no names go with health needs.
-    healthNeeds: (() => { const n = healthNeeds(settings.athletes); return { keto: n.keto.length, diabetesCarbsPerMeal: n.diabetes.map((d) => d.carbsPerMeal), lowSodiumMgPerMeal: n.lowSodium.map((x) => x.perMeal) }; })(),
+    healthNeeds: (() => { const n = householdHealth(settings); return { keto: n.keto.length, diabetesCarbsPerMeal: n.diabetes.map((d) => d.carbsPerMeal), lowSodiumMgPerMeal: n.lowSodium.map((x) => x.perMeal) }; })(),
     athletes: settings.athletes.filter((a) => a.sport !== "weightloss" && a.sport !== "active").map((a) => ({ type: a.sport, phase: a.phase, teen: a.youth, proteinGramsPerDay: a.protein, caloriesPerDay: a.calories })),
     dinnersPerWeek: settings.dinnersPerWeek,
     weeklyBudget: settings.weeklyBudget,
@@ -395,7 +395,7 @@ function slotsFor(dates: string[], settings: Settings, sales: SaleItem[]): Slot[
         index, date, saleProteins, athletes: settings.athletes.length > 0 || settings.mode === "workout",
         picky: settings.pickyEaters,
         prep: settings.prepDay != null,
-        health: hasNeeds(healthNeeds(settings.athletes)) ? healthNeeds(settings.athletes) : undefined,
+        health: hasNeeds(householdHealth(settings)) ? householdHealth(settings) : undefined,
         family: settings.adults + settings.kids >= 2,
         cheap: settings.tightBudget || settings.mode === "cost" ? 1.6 : settings.budgetMode === "hard" ? 0.4 : 0,
         busy: settings.busyDays.includes(weekday(date)),
