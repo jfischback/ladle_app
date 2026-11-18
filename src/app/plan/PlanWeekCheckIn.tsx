@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { GoalCard } from "@/components/GoalCard";
 import { planUpcomingWeek } from "@/app/actions/plans";
 import { saveFoodRules, setCostCutting, setMode } from "@/app/actions/settings";
 import { FoodRulesStep } from "@/app/setup/SetupWizard";
@@ -19,10 +20,11 @@ export type WeekChoice = { key: "now" | "next"; weekOf: string; title: string; r
   current?: { weekday: number; cook: boolean; eating: Table | null }[] };
 type StepKey = "week" | "nights" | "who" | "rules" | "wishes" | "pricing" | "ready";
 
+const GOAL_HINT: Record<Mode, string> = { normal: "Favorites, sales and new things", workout: "More protein for everyone" };
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const shortDay = (date: string) => `${MON[Number(date.slice(5, 7)) - 1]} ${Number(date.slice(8))}`;
 const DAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const TITLE: Record<StepKey, string> = { week: "Which week?", nights: "Which nights?", who: "Who's around", rules: "Food rules still right?", wishes: "This week's wishes", pricing: "Mode and budget", ready: "Ready?" };
+const TITLE: Record<StepKey, string> = { week: "Which week?", nights: "Which nights?", who: "Who's around", rules: "Food rules still right?", wishes: "This week's wishes", pricing: "Goal and budget", ready: "Ready?" };
 const NIGHTS: { key: Night; icon: string; label: string; hint: string }[] = [
   { key: "cook", icon: "🍲", label: "Cook", hint: "A regular dinner" },
   { key: "busy", icon: "⚡", label: "Quick", hint: "Busy night, fast dinner" },
@@ -81,7 +83,7 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
       if (kept && kept.weeksKey === weeksKey) {
         if (open.some((w) => w.key === kept.weekKey)) setWeekKey(kept.weekKey);
         if (steps.includes(kept.stepKey)) setStepKey(kept.stepKey);
-        setNights(kept.nights); setTables(kept.tables); setBudget(kept.budget); setUseUp(kept.useUp); setCraving(kept.craving); setTryNew(kept.tryNew); setDesserts(kept.desserts);
+        setNights(kept.nights); setTables(kept.tables); if (typeof kept.budget === "string" && kept.budget.trim()) setBudget(kept.budget); setUseUp(kept.useUp); setCraving(kept.craving); setTryNew(kept.tryNew); setDesserts(kept.desserts);
       }
     } catch {}
     restored.current = true;
@@ -236,17 +238,13 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
                 );
               })}
             </ul>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl bg-olive-soft/70 p-3 text-sm">
-                <b>💪 Anyone training this week?</b>{" "}
-                {athletes ? `${athletes} ${athletes === 1 ? "person is" : "people are"} in athlete mode: their portions and protein are already planned in.` : "Athlete mode sizes portions, protein and snacks for whoever's training."}{" "}
-                <Link href="/athletes" className="font-bold text-olive-dark underline">{athletes ? "Change athlete mode" : "Set up athlete mode"}</Link>
-              </div>
-              <div className="rounded-2xl bg-ochre-soft p-3 text-sm">
-                <b>🩺 Diabetes or watching salt?</b>{" "}
-                {health ? `${health} ${health === 1 ? "person's" : "people's"} health needs are already planned in.` : "Ladle steers dinners around carbs or sodium, with tips on which side to cut."}{" "}
-                <Link href="/health" className="font-bold text-olive-dark underline">{health ? "Change health needs" : "Add health needs"}</Link>
-              </div>
+            <div className="space-y-3">
+              <GoalCard icon="💪" title="Anyone training this week?"
+                text={athletes ? `${athletes} ${athletes === 1 ? "person is" : "people are"} in athlete mode: portions and protein are planned in.` : "Bigger portions, more protein and the right snacks for whoever's working out."}
+                href="/athletes" button={athletes ? "Change" : "Set up athlete mode"} />
+              <GoalCard icon="🩺" tone="ochre" title="Diabetes or watching salt?"
+                text={health ? `${health} ${health === 1 ? "person's" : "people's"} health needs are planned in.` : "Dinners steered around carbs or sodium, with tips on which side to cut."}
+                href="/health" button={health ? "Change" : "Add health needs"} />
             </div>
             <p className="text-sm text-muted">Your answers here are kept while you&apos;re gone.</p>
           </>
@@ -316,36 +314,47 @@ export function PlanWeekCheckIn({ weeks, initialWeek, fresh = false, firstWeek =
 
         {stepKey === "pricing" && (
           <>
-            <p className="text-muted">Last question: what to aim for and how much to spend.</p>
+            <p className="text-muted">Three quick answers, then Ladle plans the week.</p>
 
-            <fieldset className="rounded-2xl border-2 border-line p-3.5">
-              <legend className="sr-only">Goal</legend>
-              <p className="font-bold">🎯 Goal</p>
-              <div role="radiogroup" aria-label="Goal" className="mt-2 grid gap-2 sm:grid-cols-2">
+            <fieldset>
+              <legend className="text-lg font-bold">1. What&apos;s the goal?</legend>
+              <div role="radiogroup" aria-label="Goal" className="mt-2 grid grid-cols-2 gap-2">
                 {(Object.keys(MODES) as Mode[]).map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={k === mode} disabled={saving} onClick={() => k !== mode && pickMode(k)}
-                    className={`flex w-full items-start gap-3 rounded-2xl border-2 p-2.5 text-left ${k === mode ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive/50"}`}>
-                    <span className="text-xl" aria-hidden="true">{MODES[k].icon}</span>
-                    <span><span className="block font-bold">{MODES[k].label}</span><span className="block text-sm text-muted">{MODES[k].blurb}</span></span>
+                    className={`flex flex-col items-center gap-0.5 rounded-2xl border-2 p-3 text-center ${k === mode ? "border-olive bg-olive text-cream" : "border-line bg-card hover:border-olive/50"}`}>
+                    <span className="text-2xl" aria-hidden="true">{MODES[k].icon}</span>
+                    <span className="text-lg font-bold">{MODES[k].label}</span>
+                    <span className={`text-sm ${k === mode ? "text-cream/90" : "text-muted"}`}>{GOAL_HINT[k]}</span>
                   </button>
                 ))}
               </div>
-              <button type="button" role="switch" aria-checked={cost} disabled={saving} onClick={toggleCost}
-                className={`mt-2 flex w-full items-start gap-3 rounded-2xl border-2 p-2.5 text-left ${cost ? "border-olive bg-olive-soft" : "border-line bg-card hover:border-olive/50"}`}>
-                <span aria-hidden="true" className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 text-sm font-bold ${cost ? "border-olive bg-olive text-cream" : "border-line bg-card"}`}>{cost ? "✓" : ""}</span>
-                <span><span className="block font-bold"><span aria-hidden="true">{COST_CUTTING.icon}</span> {COST_CUTTING.label}</span><span className="block text-sm text-muted">{COST_CUTTING.blurb}</span></span>
-              </button>
-              <p className="mt-2 text-sm text-muted">Saved for every week until you change it.</p>
             </fieldset>
 
-            <div className="rounded-2xl border-2 border-line p-3.5">
-              <label htmlFor="ci-budget" className="font-bold">💵 Budget for this week</label>
-              <div className="relative mt-2 w-40">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted">$</span>
-                <input id="ci-budget" inputMode="decimal" className="field pl-7" value={budget} onChange={(e) => setBudget(e.target.value)} />
+            <fieldset>
+              <legend className="text-lg font-bold">2. Buy the cheapest brands?</legend>
+              <div role="radiogroup" aria-label="Buy the cheapest brands" className="mt-2 grid grid-cols-2 gap-2">
+                {[true, false].map((v) => (
+                  <button key={String(v)} type="button" role="radio" aria-checked={cost === v} disabled={saving} onClick={() => cost !== v && toggleCost()}
+                    className={`flex flex-col items-center gap-0.5 rounded-2xl border-2 p-3 text-center ${cost === v ? "border-olive bg-olive text-cream" : "border-line bg-card hover:border-olive/50"}`}>
+                    <span className="text-2xl" aria-hidden="true">{v ? "💵" : "🏷️"}</span>
+                    <span className="text-lg font-bold">{v ? "Yes, save money" : "No"}</span>
+                    <span className={`text-sm ${cost === v ? "text-cream/90" : "text-muted"}`}>{v ? "Cheapest dinners and products win" : "Your usual picks and brands"}</span>
+                  </button>
+                ))}
               </div>
-              <p className="mt-2 text-sm text-muted">{budgetOk ? `Only for this plan. Your usual budget stays $${defaults.budget}.` : `That doesn't look like a budget, so we'll use your usual $${defaults.budget}.`}</p>
+              <p className="mt-1 text-sm text-muted">This is Cost Cutting. It works with either goal.</p>
+            </fieldset>
+
+            <div>
+              <label htmlFor="ci-budget" className="text-lg font-bold">3. Spend up to how much this week?</label>
+              <div className="relative mt-2 w-40">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-muted">$</span>
+                <input id="ci-budget" inputMode="decimal" className="field pl-7 text-lg" value={budget} onChange={(e) => setBudget(e.target.value)} />
+              </div>
+              {!budgetOk && <p className="mt-1 text-sm text-terracotta-dark">That doesn&apos;t look like a budget, so we&apos;ll use your usual ${defaults.budget}.</p>}
             </div>
+
+            <p className="rounded-2xl bg-oat/70 p-3 text-sm">The goal and cheapest brands stay on for future weeks until you change them. The budget is just for this week; your usual is ${defaults.budget}.</p>
             {stillError && <p role="alert" className="font-bold text-terracotta-dark">{stillError}</p>}
           </>
         )}

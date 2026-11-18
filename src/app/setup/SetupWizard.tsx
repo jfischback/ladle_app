@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
+import { GoalCard } from "@/components/GoalCard";
 import { lookupStores, markSectionSeen, saveSettings } from "@/app/actions/settings";
 import { addRecipePack } from "@/app/actions/recipes";
 import { SAFE_FOOD_IDEAS, WONT_EAT_IDEAS, type PickyEater } from "@/lib/picky";
@@ -117,13 +118,11 @@ export function SetupWizard({ initial, isEdit, krogerEnabled, startStep = null, 
               </div>
             )}
             <PickySection s={s} set={set} />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <p className="rounded-2xl bg-olive-soft/70 p-3 text-sm">
-                <b>💪 Anyone training?</b> CrossFit, strongman, lifting, running or getting fit: {isEdit ? <a href="/athletes" className="font-bold text-olive-dark underline">set up athlete mode</a> : "after setup, turn on athlete mode from the Home page"} for bigger portions, more protein and the right snacks.
-              </p>
-              <p className="rounded-2xl bg-ochre-soft p-3 text-sm">
-                <b>🩺 Diabetes or watching salt?</b> {isEdit ? <a href="/health" className="font-bold text-olive-dark underline">Add health needs</a> : "After setup, add health needs from the Home page"} and Ladle steers dinners around carbs or sodium, with tips on which side to cut.
-              </p>
+            <div className="space-y-3">
+              <GoalCard icon="💪" title="Anyone training?" text="Bigger portions, more protein and the right snacks for whoever's working out."
+                href={isEdit ? "/athletes" : undefined} button="Set up athlete mode" note="On Home after setup" />
+              <GoalCard icon="🩺" tone="ochre" title="Diabetes or watching salt?" text="Dinners steered around carbs or sodium, with tips on which side to cut."
+                href={isEdit ? "/health" : undefined} button="Add health needs" note="On Home after setup" />
             </div>
           </div>
         )}
