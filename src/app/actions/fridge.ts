@@ -18,6 +18,6 @@ export async function fridgePhoto(form: FormData): Promise<{ items?: string[]; e
     return { items };
   } catch (e) {
     const msg = (e as Error).message ?? "";
-    return { error: /^(Reading photos|Please use|That doesn't look)/.test(msg) ? msg : "We couldn't read that photo just now. Try again, or type what you have." };
+    return { error: /^(Ladle's AI has reached|Reading photos|Please use|That doesn't look)/.test(msg) ? msg : "We couldn't read that photo just now. Try again, or type what you have." };
   }
 }
