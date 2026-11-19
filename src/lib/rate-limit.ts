@@ -3,14 +3,15 @@ import { headers } from "next/headers";
 import { lt, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { rateLimits } from "@/db/schema";
+import { today } from "./week";
 
 /**
  * Count one use of `key` in the current window. Returns false when it's over `limit`.
  * Kept in the database, so it holds across Vercel's many servers.
  */
-export async function allow(key: string, limit: number, windowSeconds: number): Promise<boolean> {
+export async function allow(key: string, limit: number, windowSeconds: number, windowStart?: Date): Promise<boolean> {
   const db = await getDb();
-  const start = new Date(Math.floor(Date.now() / (windowSeconds * 1000)) * windowSeconds * 1000);
+  const start = windowStart ?? new Date(Math.floor(Date.now() / (windowSeconds * 1000)) * windowSeconds * 1000);
   const [row] = await db
     .insert(rateLimits)
     .values({ key, windowStart: start, count: 1 })
@@ -51,3 +52,20 @@ export const TOO_MANY = "That's a lot of tries in a short time. Please wait a fe
 
 /** Shorthand: `if (!(await under("plan", userId))) return { error: TOO_MANY }`. */
 export const under = (what: keyof typeof LIMITS, who: string) => allow(`${what}:${who}`, LIMITS[what][0], LIMITS[what][1]);
+
+/**
+ * Hard ceiling on Claude calls for the whole app, all users together, per day (midnight to midnight, app timezone).
+ * Set CLAUDE_DAILY_CAP in Vercel to change it; 0 turns the AI off. Defaults to 100.
+ */
+export function dailyAiCap(): number {
+  const n = Number(process.env.CLAUDE_DAILY_CAP);
+  return process.env.CLAUDE_DAILY_CAP?.trim() && Number.isFinite(n) && n >= 0 ? Math.floor(n) : 100;
+}
+
+export const AI_DAILY_LIMIT = "Ladle's AI has reached its daily limit. Try again tomorrow, or type it in for now.";
+
+/** Count one Claude call against the daily ceiling. False when the ceiling is reached. */
+export async function underDailyAiCap(): Promise<boolean> {
+  const day = today();
+  return allow(`claude-daily:${day}`, dailyAiCap(), 86400, new Date(`${day}T00:00:00Z`));
+}

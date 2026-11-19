@@ -2,6 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import type { z } from "zod";
+import { AI_DAILY_LIMIT, underDailyAiCap } from "./rate-limit";
 
 const MODEL = process.env.CLAUDE_MODEL ?? "claude-opus-5-5";
 
@@ -27,6 +28,8 @@ export async function askClaude<S extends z.ZodType>(opts: {
   schema: S;
   effort?: "low" | "medium" | "high";
 }): Promise<z.infer<S>> {
+  // Every Claude call in the app comes through here, so the daily ceiling covers all of them.
+  if (!(await underDailyAiCap())) throw new Error(AI_DAILY_LIMIT);
   const response = await getClient().beta.messages.parse({
     model: MODEL,
     max_tokens: 16000,

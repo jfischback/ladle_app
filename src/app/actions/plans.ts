@@ -568,7 +568,7 @@ export async function readReceiptTotal(planId: string, form: FormData): Promise<
   } catch (e) {
     // Our own messages are written for people; anything else (the AI or the database) isn't.
     const msg = (e as Error).message ?? "";
-    return { error: /^(Reading receipts|Please use)/.test(msg) ? msg : "We couldn't read that receipt just now. Try again, or type the total." };
+    return { error: /^(Ladle's AI has reached|Reading receipts|Please use)/.test(msg) ? msg : "We couldn't read that receipt just now. Try again, or type the total." };
   }
 }
 
